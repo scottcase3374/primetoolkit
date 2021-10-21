@@ -1,12 +1,12 @@
 package com.starcases.newprime;
 
-import java.util.Collection;
 import java.util.Comparator;
+import java.util.Iterator;
+import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.stream.Stream;
+import java.util.concurrent.ConcurrentSkipListSet;
 import org.apache.commons.math3.primes.Primes;
 import com.google.common.collect.Sets;
 import lombok.EqualsAndHashCode;
@@ -28,18 +28,20 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 	//
 	// Shared functions
 	//
-	private static Comparator<PrimeRef> pfComparator = new Comparator<PrimeRef>() {
-		@Override
-		public int compare(PrimeRef o1, PrimeRef o2) {		
-			return o1.compareTo(o2);
-		}};
-		
+	private static Comparator<PrimeRef> pfComparator = (PrimeRef o1, PrimeRef o2) -> o1.compareTo(o2); 
+	
+	private static Comparator<NavigableSet<PrimeRef>> ssComparator = 
+			(NavigableSet<PrimeRef> ss1, NavigableSet<PrimeRef> ss2) 
+				-> {
+						Iterator<Long> s2 = ss2.stream().map(PrimeRef::getPrime).iterator();						
+						return ss1.stream().map(PrimeRef::getPrime).map(l -> l - s2.next()).filter(x -> x == 0).findFirst().orElse(0L).intValue();					
+					};
 	//
 	// Shared Data
 	//
 	
 	// Primes encountered
-	private static SortedSet<PrimeRef> allPrimes = new TreeSet<>(pfComparator);
+	private static NavigableSet<PrimeRef> allPrimes = new ConcurrentSkipListSet<>(pfComparator);
 	
 	// Current max prime - seed with 0.
 	private static long curMaxPrime = 0L;
@@ -52,7 +54,7 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 	long prime;
 	
 	// Represents the sets of base primes that sum to this prime.
-	@EqualsAndHashCode.Exclude Set<Collection<PrimeRef>> primeBases = new TreeSet<>();
+	@EqualsAndHashCode.Exclude Set<NavigableSet<PrimeRef>> primeBases = new ConcurrentSkipListSet<NavigableSet<PrimeRef>>(ssComparator);
 	
 	// 
 	// Instance data maint
@@ -67,12 +69,12 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 	private PrimeRef(long prime)
 	{
 		this.prime = prime;
-		SortedSet<PrimeRef> pfc = new TreeSet<>(pfComparator);
+		NavigableSet<PrimeRef> pfc = new ConcurrentSkipListSet<>(pfComparator);
 		pfc.add(this);
 		addPrimeBase(pfc);
 	}
 	
-	private PrimeRef(long prime, Collection<PrimeRef> bases)
+	private PrimeRef(long prime, NavigableSet<PrimeRef> bases)
 	{
 		this.prime = prime;
 		addPrimeBase(bases);
@@ -82,7 +84,7 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 	 * Include a set of primes in the set of prime bases for the current prime.
 	 * @param primeBase
 	 */
-	public void addPrimeBase(Collection<PrimeRef> primeBase)
+	public void addPrimeBase(NavigableSet<PrimeRef> primeBase)
 	{
 		primeBases.add(primeBase);
 	}
@@ -121,7 +123,11 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 		PrimeRef t = new PrimeRef(prime);
 		
 		SortedSet<PrimeRef> tmp = allPrimes.subSet(t,t);
+		if (tmp.isEmpty())
+			return Optional.empty();
+		
 		return Optional.ofNullable(tmp.first());
+		
 		//return allPrimes.parallelStream().filter(p -> p.getPrime() == prime ).findFirst();
 	}
 	
@@ -184,13 +190,14 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 			return bootStrap;
 		}
 		
-		Collection<PrimeRef> candidatePrimes = new TreeSet<>();
+		NavigableSet<PrimeRef> candidatePrimes = new ConcurrentSkipListSet<>(pfComparator);
 		
 		// This guava powerset implementation is limited to 30 items.  Replace with something that targets the general
 		// criteria I expect to work.
 		//
 		// Represents all the initial possible sets to evaluate.  
 		powerSet(allPrimes)
+		.parallelStream()
 		.filter(potentialPS -> potentialPS.size() > 1)
 		.filter(potentialPS -> potentialPS.stream().map(PrimeRef::getPrime).allMatch( pl -> pl <=  curMaxPrime))
 		.filter(potentialPS -> viableSum(potentialPS.stream().map(PrimeRef::getPrime).reduce(0L, (p1, p2) -> p1 + p2)))
@@ -200,8 +207,9 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 									.stream()
 									.map(PrimeRef::getPrime)
 									.reduce(0L, (p1, p2) -> p1 + p2);
-							
-							PrimeRef nextPrimeRef = findPrimeRef(tmpCandidate).orElse(new PrimeRef(tmpCandidate, potentialPS));
+							NavigableSet<PrimeRef> ss = new ConcurrentSkipListSet<>(pfComparator);
+							ss.addAll(potentialPS);
+							PrimeRef nextPrimeRef = findPrimeRef(tmpCandidate).orElse(new PrimeRef(tmpCandidate, ss));
 							
 												
 							candidatePrimes.add(nextPrimeRef);
@@ -210,7 +218,7 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 		Optional<PrimeRef> nextPrimeRef = candidatePrimes.stream().min(pfComparator);
 		nextPrimeRef.ifPresent(PrimeRef::addPrime);
 		nextPrimeRef.ifPresent(p -> curMaxPrime = p.getPrime());
-		//logState("final candidate", nextPrimeRef.get());
+		logState("final candidate", nextPrimeRef.get());
 		return nextPrimeRef.get();
 	}
 	
@@ -219,10 +227,9 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 	 * @param p
 	 * @return
 	 */
-	private static Stream<Set<PrimeRef>> powerSet(Collection<PrimeRef> p)
+	private static Set<Set<PrimeRef>> powerSet(NavigableSet<PrimeRef> p)
 	{
-		
-		return Sets.powerSet(Sets.newLinkedHashSet(p)).stream();
+		return Sets.powerSet(p);
 	}
 	
 	/*
@@ -236,12 +243,13 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 					.collect(Collectors.joining(",", "[", "]")));
 		log.info(s);
 	}
-	
+	*/
 	private static void logState(String msg, PrimeRef p)
 	{
-		Set<Set<PrimeRef>> bases = p.getPrimeBases();
+		//Set<Set<PrimeRef>> bases = p.getPrimeBases();
 		
-		String s = String.format("%s:    primeRef [%d]  baseVals[%s], baseSum[%s], curMaxP[%d]", 
+		String s = String.format("%s:    primeRef [%d]", msg, p.getPrime());
+	/*	String s = String.format("%s:    primeRef [%d]  baseVals[%s], baseSum[%s], curMaxP[%d]", 
 				msg,
 				p.getPrime(),
 				
@@ -261,7 +269,8 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 						)
 					.collect(Collectors.joining(",")),
 				curMaxPrime);
+				*/
 		log.info(s);
 	}
-*/
+
 }
