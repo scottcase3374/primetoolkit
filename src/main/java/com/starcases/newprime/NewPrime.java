@@ -2,6 +2,7 @@ package com.starcases.newprime;
 
 
 import java.net.URL;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,6 +24,8 @@ import lombok.extern.java.Log;
 @Log
 public class NewPrime 
 {
+	private static Comparator<Node> node_comparator = new NaturalComparator();
+	
 	public static void main(String [] args)
 	{
 		// Setup up props for what UI systems are in use.
@@ -69,10 +72,10 @@ public class NewPrime
 		}
 		
 		log.info("bases");		
-		degrees.stream().sorted(new NaturalComparator()).forEach(n -> log.info(String.format("Node %s : in-primes: [%s] out-primes[%s]", 
+		degrees.stream().sorted(node_comparator).forEach(n -> log.info(String.format("Node %s : in-primes: [%s] out-primes[%s]", 
 						n.getId(), 
-						n.enteringEdges().map(e -> e.getNode0().getId()).distinct().collect(Collectors.joining(",")),
-						n.leavingEdges().map(e -> e.getNode0().getId()).distinct().collect(Collectors.joining(",")))));
+						n.enteringEdges().map(e -> e.getNode0().getId()).collect(Collectors.joining(",")),
+						n.leavingEdges().map(e -> e.getNode0().getId()).collect(Collectors.joining(",")))));
 		
 		// Setup / start viewing resulting graph
 		Viewer viewer = graph.display(true);

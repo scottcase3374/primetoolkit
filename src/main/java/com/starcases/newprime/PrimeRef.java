@@ -1,16 +1,14 @@
 package com.starcases.newprime;
 
+import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
-
+import java.util.stream.Stream;
 import org.apache.commons.math3.primes.Primes;
-
 import com.google.common.collect.Sets;
-
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,24 +26,33 @@ import lombok.extern.java.Log;
 public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 {
 	//
+	// Shared functions
+	//
+	private static Comparator<PrimeRef> pfComparator = new Comparator<PrimeRef>() {
+		@Override
+		public int compare(PrimeRef o1, PrimeRef o2) {		
+			return o1.compareTo(o2);
+		}};
+		
+	//
 	// Shared Data
 	//
 	
 	// Primes encountered
-	private static Set<PrimeRef> allPrimes = new TreeSet<>();
+	private static SortedSet<PrimeRef> allPrimes = new TreeSet<>(pfComparator);
 	
 	// Current max prime - seed with 0.
-	private static Long curMaxPrime = 0L;
+	private static long curMaxPrime = 0L;
 	
 	//
 	// Instance data
 	//
 	
 	// This instance of a prime
-	Long prime;
+	long prime;
 	
 	// Represents the sets of base primes that sum to this prime.
-	@EqualsAndHashCode.Exclude Set<Set<PrimeRef>> primeBases = new HashSet<>();
+	@EqualsAndHashCode.Exclude Set<Collection<PrimeRef>> primeBases = new TreeSet<>();
 	
 	// 
 	// Instance data maint
@@ -57,25 +64,25 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 	 * 
 	 * @param prime
 	 */
-	private PrimeRef(Long prime)
+	private PrimeRef(long prime)
 	{
 		this.prime = prime;
-		Set<PrimeRef> pfc = new HashSet<>();
+		SortedSet<PrimeRef> pfc = new TreeSet<>(pfComparator);
 		pfc.add(this);
-		primeBases.add(pfc);
+		addPrimeBase(pfc);
 	}
 	
-	private PrimeRef(Long prime, Set<PrimeRef> bases)
+	private PrimeRef(long prime, Collection<PrimeRef> bases)
 	{
 		this.prime = prime;
-		this.primeBases.add(bases);
+		addPrimeBase(bases);
 	}
 	
 	/**
 	 * Include a set of primes in the set of prime bases for the current prime.
 	 * @param primeBase
 	 */
-	public void addPrimeBase(Set<PrimeRef> primeBase)
+	public void addPrimeBase(Collection<PrimeRef> primeBase)
 	{
 		primeBases.add(primeBase);
 	}
@@ -87,7 +94,7 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 	@Override
 	public int compareTo(PrimeRef o) 
 	{	
-		return this.getPrime().compareTo(o.getPrime());
+		return (int)(this.getPrime() - o.getPrime());
 	}		
 	
 	//
@@ -100,7 +107,7 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 	 */
 	private static void addPrime(PrimeRef aPrime)
 	{
-		logState("Add to all Primes", aPrime);
+		//logState("Add to all Primes", aPrime);
 		allPrimes.add(aPrime);
 	}	
 	
@@ -109,9 +116,13 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 	 * @param prime
 	 * @return
 	 */
-	public static Optional<PrimeRef> findPrimeRef(Long prime)
+	public static Optional<PrimeRef> findPrimeRef(long prime)
 	{
-		return allPrimes.stream().filter(p -> p.getPrime().equals(prime)).findFirst();
+		PrimeRef t = new PrimeRef(prime);
+		
+		SortedSet<PrimeRef> tmp = allPrimes.subSet(t,t);
+		return Optional.ofNullable(tmp.first());
+		//return allPrimes.parallelStream().filter(p -> p.getPrime() == prime ).findFirst();
 	}
 	
 	/**
@@ -122,7 +133,7 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 	 * @param val
 	 * @return true for sum that is viable prime; false otherwise
 	 */
-	private static boolean viableSum(Long val)
+	private static boolean viableSum(long val)
 	{
 		boolean defRet = true;
 		
@@ -130,7 +141,7 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 		{
 			// This was bootstrap logic while getting the general framework working.
 			// This block should be removed and allow the remaining blocks to determine next prime.
-			if (!Primes.isPrime(val.intValue()))
+			if (!Primes.isPrime((int)val))
 			{
 				defRet =  false;				
 			}
@@ -156,11 +167,7 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 		return defRet;
 	}
 	
-	private static Comparator<PrimeRef> pfComparator = new Comparator<PrimeRef>() {
-		@Override
-		public int compare(PrimeRef o1, PrimeRef o2) {		
-			return o1.getPrime().compareTo(o2.getPrime());
-		}};
+
 	
 	/**
 	 * Construct the sets representing the next possible prime and weed down to valid sets.
@@ -177,21 +184,18 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 			return bootStrap;
 		}
 		
-		// This powerset implementation is limited to 30 items.  Replace with something that targets the general
+		Collection<PrimeRef> candidatePrimes = new TreeSet<>();
+		
+		// This guava powerset implementation is limited to 30 items.  Replace with something that targets the general
 		// criteria I expect to work.
 		//
 		// Represents all the initial possible sets to evaluate.  
-		Set<Set<PrimeRef>> primePowSetRefs = powerSet(allPrimes);
-		
-		Set<PrimeRef> candidatePrimes = new HashSet<>();
-		
-		primePowSetRefs
-		.stream()
+		powerSet(allPrimes)
 		.filter(potentialPS -> potentialPS.size() > 1)
 		.filter(potentialPS -> potentialPS.stream().map(PrimeRef::getPrime).allMatch( pl -> pl <=  curMaxPrime))
 		.filter(potentialPS -> viableSum(potentialPS.stream().map(PrimeRef::getPrime).reduce(0L, (p1, p2) -> p1 + p2)))
 		.forEach(potentialPS -> {
-							Long tmpCandidate = 
+							long tmpCandidate = 
 									potentialPS
 									.stream()
 									.map(PrimeRef::getPrime)
@@ -206,7 +210,7 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 		Optional<PrimeRef> nextPrimeRef = candidatePrimes.stream().min(pfComparator);
 		nextPrimeRef.ifPresent(PrimeRef::addPrime);
 		nextPrimeRef.ifPresent(p -> curMaxPrime = p.getPrime());
-		logState("final candidate", nextPrimeRef.get());
+		//logState("final candidate", nextPrimeRef.get());
 		return nextPrimeRef.get();
 	}
 	
@@ -215,11 +219,13 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 	 * @param p
 	 * @return
 	 */
-	private static Set<Set<PrimeRef>> powerSet(Set<PrimeRef> p)
+	private static Stream<Set<PrimeRef>> powerSet(Collection<PrimeRef> p)
 	{
-		return Sets.powerSet(p);
+		
+		return Sets.powerSet(Sets.newLinkedHashSet(p)).stream();
 	}
 	
+	/*
 	private static void logStatePFSet(String msg, Set<PrimeRef> pfSet)
 	{
 		String s = String.format("msg: [%s] curMaxPrime[%d] sets[%s]", msg, curMaxPrime,
@@ -257,4 +263,5 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 				curMaxPrime);
 		log.info(s);
 	}
+*/
 }

@@ -66,7 +66,7 @@ public class PrimeGenerator extends SourceBase implements Generator {
 		String color = getColor();
 		 
 		// Prime node
-		String primeNode = Long.toString(primeRef.getPrime());		
+		String primeNode = Long.toString(primeRef.getPrime());
 		sendNodeAdded(sourceId, primeNode);
 		
 		Sprite s = sman.addSprite(primeNode);
