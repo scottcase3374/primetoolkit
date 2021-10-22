@@ -12,14 +12,14 @@ import org.graphstream.ui.spriteManager.SpriteManager;
  * see how well it works for something like my pet prime# 
  * research projects.
  */
-public class PrimeGenerator extends SourceBase implements Generator {
+public class PrimeNodeGenerator extends SourceBase implements Generator {
 
 	int edgeId = 1;
 	SpriteManager sman;
 	Graph graph;
 	int level = 0;
 	PrimeRef ref = null;
-	public PrimeGenerator(Graph graph)
+	public PrimeNodeGenerator(Graph graph)
 	{
 		this.addSink(graph);
 		sman = new SpriteManager(graph);
@@ -93,6 +93,7 @@ public class PrimeGenerator extends SourceBase implements Generator {
 											Edge e = graph.getEdge(Integer.toString(edgeId++));
 											e.setAttribute("ui.style", 
 													"fill-color: " + color + ";");
+											e.setAttribute("ui.shape", "cubic-curve;");
 										}));
 		level++;
 	}

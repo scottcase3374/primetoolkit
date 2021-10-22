@@ -28,7 +28,7 @@ import lombok.extern.java.Log;
 @Setter
 @Log
 @EqualsAndHashCode
-public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
+public class PrimeRef implements Comparable<PrimeRef>
 {
 	//
 	// Shared functions
@@ -46,9 +46,9 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 	//
 	
 	// Primes encountered
-	private static NavigableSet<PrimeRef> allPrimes = new ConcurrentSkipListSet<>(pfComparator);
+	private static NavigableSet<PrimeRef> outputPrimes = new ConcurrentSkipListSet<>(pfComparator);
 	
-	private static NavigableSet<PrimeRef> derivedPrimes = new ConcurrentSkipListSet<>(pfComparator);
+	private static NavigableSet<PrimeRef> newPrimes = new ConcurrentSkipListSet<>(pfComparator);
 	private static AtomicInteger numAllPrimes = new AtomicInteger(0);
 	
 	private static PrimeRef pf0 = new PrimeRef(0L);
@@ -59,8 +59,8 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 	static 
 	{
 		// Bootstrap
-		derivedPrimes.add(pf1);
-		derivedPrimes.add(pf2);
+		newPrimes.add(pf1);
+		newPrimes.add(pf2);
 	}
 	//
 	// Instance data
@@ -126,8 +126,8 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 	private static PrimeRef addPrime(PrimeRef aPrime)
 	{
 		numAllPrimes.getAndIncrement();
-		allPrimes.add(aPrime);
-		derivedPrimes.remove(aPrime);
+		outputPrimes.add(aPrime);
+		newPrimes.remove(aPrime);
 		lastMaxPrime = aPrime;	
 		return lastMaxPrime;
 	}	
@@ -140,7 +140,7 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 	public static PrimeRef findOrCreatePrimeRef(long targetPrimeVal, NavigableSet<PrimeRef> onCreateBases)
 	{
 		PrimeRef primeRef = null;
-		Iterator<PrimeRef> it = derivedPrimes.iterator();
+		Iterator<PrimeRef> it = newPrimes.iterator();
 		
 		while (it.hasNext())
 		{
@@ -148,7 +148,7 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 			long primeVal = primeRef.getPrime();
 			if (primeVal == targetPrimeVal)
 			{
-				derivedPrimes.remove(primeRef);
+				newPrimes.remove(primeRef);
 				return primeRef;
 			}
 			else if (primeVal > targetPrimeVal) // with ordered set ; this implies not found
@@ -208,14 +208,14 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 	 */
 	public static PrimeRef nextPrimeRef()
 	{		
-		PrimeRef aPrime = derivedPrimes.higher(lastMaxPrime);
+		PrimeRef aPrime = newPrimes.higher(lastMaxPrime);
 		if (aPrime != null)
 		{		
 			logState("final candidate-1 -> ", aPrime);
 			return addPrime(aPrime);
 		}
 				
-		if (allPrimes.size() > 30)
+		if (outputPrimes.size() > 30)
 			return null;
 				
 		// This guava powerset implementation is limited to 30 items.  Replace with something that targets the general
@@ -223,7 +223,7 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 		//
 		// Represents all the initial possible sets to evaluate.
 		long curMaxPrime = lastMaxPrime.getPrime();		
-		Optional<PrimeRef> primeRef = powerSet(allPrimes)
+		Optional<PrimeRef> primeRef = powerSet(outputPrimes)
 		.parallelStream()
 		.filter(potentialSet -> potentialSet.stream().map(PrimeRef::getPrime).allMatch( prime -> prime <=  curMaxPrime))
 		.filter(potentialSet -> viableSum(potentialSet.stream()
@@ -238,13 +238,13 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 							NavigableSet<PrimeRef> setOfPrimes = new ConcurrentSkipListSet<>(pfComparator);
 							setOfPrimes.addAll(potentialSet);
 							PrimeRef tmpPrimeRef = findOrCreatePrimeRef(sumOfPrimes, setOfPrimes);				
-							derivedPrimes.add(tmpPrimeRef);
+							newPrimes.add(tmpPrimeRef);
 							return tmpPrimeRef;
 						})
 		.min(pfComparator);	
 		
-		logSet("all prime set: ", allPrimes);
-		logSet("derived prime set: ", derivedPrimes);
+		logSet("all prime set: ", outputPrimes);
+		logSet("derived prime set: ", newPrimes);
 		
 		if (primeRef.isPresent())
 		{
