@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import org.graphstream.algorithm.Toolkit;
 import org.graphstream.graph.*;
 import org.graphstream.graph.implementations.MultiGraph;
-import org.graphstream.ui.view.View;
 import org.graphstream.ui.view.Viewer;
 
 import lombok.extern.java.Log;
@@ -24,7 +23,7 @@ import lombok.extern.java.Log;
 @Log
 public class NewPrime 
 {
-	private static Comparator<Node> node_comparator = new NaturalComparator();
+	private static Comparator<Node> nodeComparator = (Node o1, Node o2) -> Integer.decode(o1.getId()).compareTo(Integer.decode(o2.getId()));
 	
 	public static void main(String [] args)
 	{
@@ -55,30 +54,25 @@ public class NewPrime
 		PrimeGenerator pg = new PrimeGenerator(graph);
 		pg.begin();
 		
-		// Current guava can't process more than 30 items to Powerset call.
-		for (int i = 0; i < 30; i++)
-		{
-			pg.nextEvents();
-		}			
+		while (pg.nextEvents());		
 		
 		pg.end();
 			
-		// Dump a list of nodes showing degree in/out
-		log.info("Degrees in / out");
 		List<Node> degrees = Toolkit.degreeMap(graph);
-		for (Node deg : degrees)
-		{
-			log.info(String.format(" Node %s In degrees %d, Out degrees %s", deg.getId(), deg.getInDegree(), deg.getOutDegree()));
-		}
-		
+		//degrees.stream().forEach(n -> n.);
 		log.info("bases");		
-		degrees.stream().sorted(node_comparator).forEach(n -> log.info(String.format("Node %s : in-primes: [%s] out-primes[%s]", 
+		degrees.stream().sorted(nodeComparator).forEach(n -> log.info(String.format("Prime %s: created-from:[%s] creates-primes:[%s]", 
 						n.getId(), 
-						n.enteringEdges().map(e -> e.getNode0().getId()).collect(Collectors.joining(",")),
-						n.leavingEdges().map(e -> e.getNode0().getId()).collect(Collectors.joining(",")))));
+						n.enteringEdges().map(e -> e.getSourceNode().getId()).collect(Collectors.joining(",")),
+						n.leavingEdges().map(e -> e.getTargetNode().getId()).collect(Collectors.joining(",")))));
+		
+		degrees.stream().sorted(nodeComparator).forEach(n -> { 
+																	n.setAttribute("x", Integer.decode(n.getId()+3));
+																	n.setAttribute("y",  n.getDegree());
+															});
 		
 		// Setup / start viewing resulting graph
-		Viewer viewer = graph.display(true);
-		View view = viewer.getDefaultView();
+		Viewer viewer = graph.display(false);
+		viewer.getDefaultView();
 	}
 }

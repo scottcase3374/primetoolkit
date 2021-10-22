@@ -18,7 +18,7 @@ public class PrimeGenerator extends SourceBase implements Generator {
 	SpriteManager sman;
 	Graph graph;
 	int level = 0;
-	
+	PrimeRef ref = null;
 	public PrimeGenerator(Graph graph)
 	{
 		this.addSink(graph);
@@ -31,8 +31,13 @@ public class PrimeGenerator extends SourceBase implements Generator {
 
 	public boolean nextEvents() 
 	{
-		addNode();
-		return true;
+		ref = PrimeRef.nextPrimeRef();
+		if (ref != null)
+		{
+			addNode();
+			return true;
+		}
+		return false;
 	}
 
 	public void end() 
@@ -50,7 +55,7 @@ public class PrimeGenerator extends SourceBase implements Generator {
 	{
 		int r = 255 - level * 8;
 		int g = 80 + level * 4;
-		int b = 10 + level * 8;
+		int b = 2 + level * 8;
 		return  String.format("rgb(%d,%d,%d)", r,g,b);
 	}
 	
@@ -61,21 +66,19 @@ public class PrimeGenerator extends SourceBase implements Generator {
 	 */
 	protected void addNode() 
 	{
-		PrimeRef primeRef = PrimeRef.nextPrimeRef();
-	
 		String color = getColor();
 		 
 		// Prime node
-		String primeNode = Long.toString(primeRef.getPrime());
+		String primeNode = Long.toString(ref.getPrime());
 		sendNodeAdded(sourceId, primeNode);
-		
+	
 		Sprite s = sman.addSprite(primeNode);
 		s.attachToNode(primeNode);
 		s.setAttribute("ui.style","fill-color: " + color + ";");
 		s.setAttribute("ui.label", primeNode);
 		
 		// Link from prime node to prime bases
-		primeRef.primeBases.stream()
+		ref.primeBases.stream()
 			.forEach(
 					base ->  
 							 base

@@ -5,8 +5,10 @@ import java.util.Iterator;
 import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+
 import org.apache.commons.math3.primes.Primes;
 import com.google.common.collect.Sets;
 import lombok.EqualsAndHashCode;
@@ -18,6 +20,9 @@ import lombok.extern.java.Log;
 * General algorithm uses powerset of processed primes as source of potential base sets for next prime. 
 * The general idea being that any future prime should be representable through the sum of a subset of the
 * previous primes.
+* 
+* As as second phase of this; after seeing how many primes are found in a single pass but only 1 retained;
+* looking to retain/return those primes without additional processing.
 **/
 @Getter
 @Setter
@@ -43,9 +48,20 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 	// Primes encountered
 	private static NavigableSet<PrimeRef> allPrimes = new ConcurrentSkipListSet<>(pfComparator);
 	
-	// Current max prime - seed with 0.
-	private static long curMaxPrime = 0L;
+	private static NavigableSet<PrimeRef> derivedPrimes = new ConcurrentSkipListSet<>(pfComparator);
+	private static AtomicInteger numAllPrimes = new AtomicInteger(0);
 	
+	private static PrimeRef pf0 = new PrimeRef(0L);
+	private static PrimeRef pf1 = new PrimeRef(1L);
+	private static PrimeRef pf2 = new PrimeRef(2L);
+	private static PrimeRef lastMaxPrime = pf0;
+	
+	static 
+	{
+		// Bootstrap
+		derivedPrimes.add(pf1);
+		derivedPrimes.add(pf2);
+	}
 	//
 	// Instance data
 	//
@@ -54,7 +70,7 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 	long prime;
 	
 	// Represents the sets of base primes that sum to this prime.
-	@EqualsAndHashCode.Exclude Set<NavigableSet<PrimeRef>> primeBases = new ConcurrentSkipListSet<NavigableSet<PrimeRef>>(ssComparator);
+	@EqualsAndHashCode.Exclude Set<NavigableSet<PrimeRef>> primeBases = new ConcurrentSkipListSet<>(ssComparator);
 	
 	// 
 	// Instance data maint
@@ -72,7 +88,7 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 		NavigableSet<PrimeRef> pfc = new ConcurrentSkipListSet<>(pfComparator);
 		pfc.add(this);
 		addPrimeBase(pfc);
-	}
+	} 
 	
 	private PrimeRef(long prime, NavigableSet<PrimeRef> bases)
 	{
@@ -107,28 +123,41 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 	 * Add new prime to shared set of all primes
 	 * @param aPrime
 	 */
-	private static void addPrime(PrimeRef aPrime)
+	private static PrimeRef addPrime(PrimeRef aPrime)
 	{
-		//logState("Add to all Primes", aPrime);
+		numAllPrimes.getAndIncrement();
 		allPrimes.add(aPrime);
+		derivedPrimes.remove(aPrime);
+		lastMaxPrime = aPrime;	
+		return lastMaxPrime;
 	}	
 	
 	/**
-	 * Lookup existing prime from set of all known primes
+	 * Lookup existing prime from set of all known primes or create new reference
 	 * @param prime
 	 * @return
 	 */
-	public static Optional<PrimeRef> findPrimeRef(long prime)
+	public static PrimeRef findOrCreatePrimeRef(long targetPrimeVal, NavigableSet<PrimeRef> onCreateBases)
 	{
-		PrimeRef t = new PrimeRef(prime);
+		PrimeRef primeRef = null;
+		Iterator<PrimeRef> it = derivedPrimes.iterator();
 		
-		SortedSet<PrimeRef> tmp = allPrimes.subSet(t,t);
-		if (tmp.isEmpty())
-			return Optional.empty();
-		
-		return Optional.ofNullable(tmp.first());
-		
-		//return allPrimes.parallelStream().filter(p -> p.getPrime() == prime ).findFirst();
+		while (it.hasNext())
+		{
+			primeRef = it.next();
+			long primeVal = primeRef.getPrime();
+			if (primeVal == targetPrimeVal)
+			{
+				derivedPrimes.remove(primeRef);
+				return primeRef;
+			}
+			else if (primeVal > targetPrimeVal) // with ordered set ; this implies not found
+			{
+				break;
+			}
+		}						
+					
+		return new PrimeRef(targetPrimeVal, onCreateBases);
 	}
 	
 	/**
@@ -136,90 +165,94 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 	 * 
 	 * Weed out sets which cannot represent the next prime.  Should avoid calling for bootstrap sets [], [,1], [1]
 	 * 
-	 * @param val
+	 * @param sumOfPrimeSet
 	 * @return true for sum that is viable prime; false otherwise
 	 */
-	private static boolean viableSum(long val)
+	private static boolean viableSum(long sumOfPrimeSet, long lastMaxPrime)
 	{
-		boolean defRet = true;
+		boolean isPrimeSum = true;
 		
 		while (true)
 		{
 			// This was bootstrap logic while getting the general framework working.
 			// This block should be removed and allow the remaining blocks to determine next prime.
-			if (!Primes.isPrime((int)val))
+			if (!Primes.isPrime((int)sumOfPrimeSet))
 			{
-				defRet =  false;				
+				isPrimeSum =  false;				
 			}
 			
 			// Part of "non-cheating" prime checks.
 			// only want sets summing to greater than the current
 			// max prime.
-			if (val <= curMaxPrime)
+			if (sumOfPrimeSet <= lastMaxPrime)
 			{
-				defRet = false;
+				isPrimeSum = false;
 			}
 			
 			// Part of "non-cheating" prime checks.
 			// Not a prime if is even. 
-			if ((val & 1l) == 0)
+			if ((sumOfPrimeSet & 1l) == 0)
 			{
-				defRet = false;
+				isPrimeSum = false;
 			}
 			
 			break;
 		}
 		
-		return defRet;
+		return isPrimeSum;
 	}
-	
-
 	
 	/**
 	 * Construct the sets representing the next possible prime and weed down to valid sets.
 	 * @return
 	 */
 	public static PrimeRef nextPrimeRef()
-	{
-		// Bootstrap logic 
-		if (allPrimes.size() < 2)
-		{
-			PrimeRef bootStrap = findPrimeRef(++curMaxPrime).orElseGet(() -> new PrimeRef(curMaxPrime));
-			addPrime(bootStrap);
-			curMaxPrime = bootStrap.getPrime();
-			return bootStrap;
+	{		
+		PrimeRef aPrime = derivedPrimes.higher(lastMaxPrime);
+		if (aPrime != null)
+		{		
+			logState("final candidate-1 -> ", aPrime);
+			return addPrime(aPrime);
 		}
-		
-		NavigableSet<PrimeRef> candidatePrimes = new ConcurrentSkipListSet<>(pfComparator);
-		
+				
+		if (allPrimes.size() > 30)
+			return null;
+				
 		// This guava powerset implementation is limited to 30 items.  Replace with something that targets the general
 		// criteria I expect to work.
 		//
-		// Represents all the initial possible sets to evaluate.  
-		powerSet(allPrimes)
+		// Represents all the initial possible sets to evaluate.
+		long curMaxPrime = lastMaxPrime.getPrime();		
+		Optional<PrimeRef> primeRef = powerSet(allPrimes)
 		.parallelStream()
-		.filter(potentialPS -> potentialPS.size() > 1)
-		.filter(potentialPS -> potentialPS.stream().map(PrimeRef::getPrime).allMatch( pl -> pl <=  curMaxPrime))
-		.filter(potentialPS -> viableSum(potentialPS.stream().map(PrimeRef::getPrime).reduce(0L, (p1, p2) -> p1 + p2)))
-		.forEach(potentialPS -> {
-							long tmpCandidate = 
-									potentialPS
+		.filter(potentialSet -> potentialSet.stream().map(PrimeRef::getPrime).allMatch( prime -> prime <=  curMaxPrime))
+		.filter(potentialSet -> viableSum(potentialSet.stream()
+														.map(PrimeRef::getPrime)
+														.reduce(0L, (prime1, prime2) -> prime1 + prime2), curMaxPrime))
+		.map(potentialSet -> {
+							long sumOfPrimes = 
+									potentialSet
 									.stream()
 									.map(PrimeRef::getPrime)
-									.reduce(0L, (p1, p2) -> p1 + p2);
-							NavigableSet<PrimeRef> ss = new ConcurrentSkipListSet<>(pfComparator);
-							ss.addAll(potentialPS);
-							PrimeRef nextPrimeRef = findPrimeRef(tmpCandidate).orElse(new PrimeRef(tmpCandidate, ss));
-							
-												
-							candidatePrimes.add(nextPrimeRef);
-						});	
+									.reduce(0L, (prime1, prime2) -> prime1 + prime2);
+							NavigableSet<PrimeRef> setOfPrimes = new ConcurrentSkipListSet<>(pfComparator);
+							setOfPrimes.addAll(potentialSet);
+							PrimeRef tmpPrimeRef = findOrCreatePrimeRef(sumOfPrimes, setOfPrimes);				
+							derivedPrimes.add(tmpPrimeRef);
+							return tmpPrimeRef;
+						})
+		.min(pfComparator);	
 		
-		Optional<PrimeRef> nextPrimeRef = candidatePrimes.stream().min(pfComparator);
-		nextPrimeRef.ifPresent(PrimeRef::addPrime);
-		nextPrimeRef.ifPresent(p -> curMaxPrime = p.getPrime());
-		logState("final candidate", nextPrimeRef.get());
-		return nextPrimeRef.get();
+		logSet("all prime set: ", allPrimes);
+		logSet("derived prime set: ", derivedPrimes);
+		
+		if (primeRef.isPresent())
+		{
+			PrimeRef nextPrime = primeRef.get();					
+			logState("final candidate-2 ->", nextPrime);
+			return addPrime(nextPrime);
+		}
+		return null;
 	}
 	
 	/**
@@ -231,46 +264,18 @@ public class PrimeRef implements PrimeIntfc, Comparable<PrimeRef>
 	{
 		return Sets.powerSet(p);
 	}
-	
-	/*
-	private static void logStatePFSet(String msg, Set<PrimeRef> pfSet)
-	{
-		String s = String.format("msg: [%s] curMaxPrime[%d] sets[%s]", msg, curMaxPrime,
-				pfSet
-					.stream()
-					.map(PrimeRef::getPrime)
-					.map(ap -> ap.toString())
-					.collect(Collectors.joining(",", "[", "]")));
-		log.info(s);
-	}
-	*/
-	private static void logState(String msg, PrimeRef p)
-	{
-		//Set<Set<PrimeRef>> bases = p.getPrimeBases();
-		
-		String s = String.format("%s:    primeRef [%d]", msg, p.getPrime());
-	/*	String s = String.format("%s:    primeRef [%d]  baseVals[%s], baseSum[%s], curMaxP[%d]", 
-				msg,
-				p.getPrime(),
-				
-				bases.stream()
-						.map(sp -> sp.stream()
-								.map(PrimeRef::getPrime)
-								.map(ap -> ap.toString())
-								.collect(Collectors.joining(",", "[", "]"))
-						)
-						.collect(Collectors.joining(",")),
-				
-				bases.stream()
-					.map(sp -> sp.stream()
-								.map(PrimeRef::getPrime)
-								.reduce(0L, (l1, l2) -> l1 + l2)
-								.toString()
-						)
-					.collect(Collectors.joining(",")),
-				curMaxPrime);
-				*/
-		log.info(s);
-	}
 
+	private static void logSet(String msg, Set<PrimeRef> p)
+	{	
+		String setStr = p.stream().map(PrimeRef::getPrime).map(l -> l.toString()).collect(Collectors.joining(","));
+		
+		String s = String.format("%s:    primes [%s]", msg, setStr);
+		log.info(s);
+	}
+	
+	private static void logState(String msg, PrimeRef p)
+	{	
+		String s = String.format("%s:    primeRef [%d]", msg, p.getPrime());
+		log.info(s);
+	}
 }
