@@ -1,4 +1,4 @@
-package com.starcases.newprime;
+package com.starcases.prime;
 
 import java.net.URL;
 import java.util.Comparator;
@@ -9,6 +9,8 @@ import org.graphstream.algorithm.Toolkit;
 import org.graphstream.graph.*;
 import org.graphstream.graph.implementations.MultiGraph;
 import org.graphstream.ui.view.Viewer;
+
+import com.starcases.prime.graph.impl.PrimeNodeGenerator;
 
 import lombok.extern.java.Log;
 
@@ -39,9 +41,12 @@ public class PrimeGrapher
 	private void setNodeLocations()
 	{
 		List<Node> degrees = Toolkit.degreeMap(primeGraph);	
-		degrees.stream().sorted(nodeComparator).forEach(n -> { 
-			n.setAttribute("xyz", Integer.decode(n.getId()+3), n.getDegree(), 230 -Integer.decode(n.getId()));
-		});
+		degrees.stream().sorted(nodeComparator).forEach(n ->  
+			n.setAttribute("xyz", 80 - Math.sin(11 * Integer.decode(n.getId()))*127,								   
+								  (n.getOutDegree()* 11 + Math.sin(Integer.decode(n.getId()))) + 
+								    	(n.getInDegree() * 11 + Math.cos(Integer.decode(n.getId()))) 
+								 ,0)
+		);
 	}
 	
 

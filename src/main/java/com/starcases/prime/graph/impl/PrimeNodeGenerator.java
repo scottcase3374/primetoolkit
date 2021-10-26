@@ -1,4 +1,4 @@
-package com.starcases.newprime;
+package com.starcases.prime.graph.impl;
 
 import org.graphstream.algorithm.generator.Generator;
 import org.graphstream.graph.Edge;
@@ -6,6 +6,10 @@ import org.graphstream.graph.Graph;
 import org.graphstream.stream.SourceBase;
 import org.graphstream.ui.spriteManager.Sprite;
 import org.graphstream.ui.spriteManager.SpriteManager;
+
+import com.starcases.prime.PrimeSourceFactory;
+import com.starcases.prime.intfc.PrimeRefIntfc;
+import com.starcases.prime.intfc.PrimeSourceIntfc;
 
 /**
  * This is just an experiment with the GraphStream lib to 
@@ -18,9 +22,12 @@ public class PrimeNodeGenerator extends SourceBase implements Generator {
 	SpriteManager sman;
 	Graph graph;
 	int level = 0;
-	PrimeRef ref = null;
+	PrimeRefIntfc<Long> primeRef = null;
+	
+	PrimeSourceIntfc<Long> ps = PrimeSourceFactory.primeSource();
+	
 	public PrimeNodeGenerator(Graph graph)
-	{
+	{	
 		this.addSink(graph);
 		sman = new SpriteManager(graph);
 		this.graph = graph;
@@ -31,8 +38,8 @@ public class PrimeNodeGenerator extends SourceBase implements Generator {
 
 	public boolean nextEvents() 
 	{
-		ref = PrimeRef.nextPrimeRef();
-		if (ref != null)
+		primeRef = ps.nextPrimeRef();
+		if (primeRef != null)
 		{
 			addNode();
 			return true;
@@ -60,7 +67,7 @@ public class PrimeNodeGenerator extends SourceBase implements Generator {
 	}
 	
 	/**
-	 * get a prime ref and add to graph.  
+	 * get a primeRef and add to graph.  
 	 * set some attributes for data/visuals.
 	 * Create edges from prime node to primes from the base sets representing the prime.
 	 */
@@ -69,7 +76,7 @@ public class PrimeNodeGenerator extends SourceBase implements Generator {
 		String color = getColor();
 		 
 		// Prime node
-		String primeNode = Long.toString(ref.getPrime());
+		String primeNode = primeRef.getPrime().toString();
 		sendNodeAdded(sourceId, primeNode);
 	
 		Sprite s = sman.addSprite(primeNode);
@@ -78,7 +85,7 @@ public class PrimeNodeGenerator extends SourceBase implements Generator {
 		s.setAttribute("ui.label", primeNode);
 		
 		// Link from prime node to prime bases
-		ref.primeBases.stream()
+		primeRef.getPrimeBase().stream()
 			.forEach(
 					base ->  
 							 base
@@ -93,7 +100,7 @@ public class PrimeNodeGenerator extends SourceBase implements Generator {
 											Edge e = graph.getEdge(Integer.toString(edgeId++));
 											e.setAttribute("ui.style", 
 													"fill-color: " + color + ";");
-											e.setAttribute("ui.shape", "cubic-curve;");
+											e.setAttribute("ui.style", "shape: cubic-curve;");
 										}));
 		level++;
 	}
