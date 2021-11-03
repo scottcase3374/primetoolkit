@@ -1,10 +1,20 @@
 package com.starcases.prime.intfc;
 
-import java.util.NavigableSet;
+import java.math.BigInteger;
+import java.util.BitSet;
+import java.util.stream.Stream;
 
-public interface PrimeRefIntfc<E> extends Comparable<PrimeRefIntfc<E>>
+public interface PrimeRefIntfc
 {
-	NavigableSet<NavigableSet<PrimeRefIntfc<E>>> getPrimeBase();
-	E getPrime();
+	Stream<BitSet> getPrimeBaseIdxs();
 	
+	void addPrimeBase(BitSet primeBase);
+	
+	BigInteger getPrime();
+	
+	/**
+	 * 
+	 * @return int representing the bit within bits for this item
+	 */
+	int getPrimeRefIdx();
 }

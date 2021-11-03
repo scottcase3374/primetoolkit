@@ -22,9 +22,9 @@ public class PrimeNodeGenerator extends SourceBase implements Generator {
 	SpriteManager sman;
 	Graph graph;
 	int level = 0;
-	PrimeRefIntfc<Long> primeRef = null;
+	PrimeRefIntfc primeRef = null;
 	
-	PrimeSourceIntfc<Long> ps = PrimeSourceFactory.primeSource();
+	PrimeSourceIntfc ps = PrimeSourceFactory.primeSource();
 	
 	public PrimeNodeGenerator(Graph graph)
 	{	
@@ -85,16 +85,16 @@ public class PrimeNodeGenerator extends SourceBase implements Generator {
 		s.setAttribute("ui.label", primeNode);
 		
 		// Link from prime node to prime bases
-		primeRef.getPrimeBase().stream()
+		primeRef.getPrimeBaseIdxs()
 			.forEach(
 					base ->  
 							 base
 							.stream()
 							.forEach(
-									p -> { 
+									p -> {
 											sendEdgeAdded(	sourceId, 
 														Integer.toString(edgeId), 														
-														Long.toString(p.getPrime()),
+														ps.getPrime(p).toString(),
 														primeNode,  
 														true);
 											Edge e = graph.getEdge(Integer.toString(edgeId++));

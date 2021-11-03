@@ -1,30 +1,32 @@
 package com.starcases.prime.impl;
 
-import java.util.NavigableSet;
-import java.util.concurrent.ConcurrentSkipListSet;
-import com.starcases.prime.intfc.PrimeComparatorIntfc;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.Objects;
+import java.util.stream.Stream;
 import com.starcases.prime.intfc.PrimeRefIntfc;
+import com.starcases.prime.intfc.PrimeSourceIntfc;
 
 /**
-* General algorithm uses powerset of processed primes as source of potential base sets for next prime. 
-* The general idea being that any future prime should be representable through the sum of a subset of the
-* previous primes.
+* The general algorithm idea is that the next prime is derived from 
+* the sum of some subset of previous primes.  
 * 
-* As as second phase of this; after seeing how many primes are found in a single pass but only 1 retained;
-* looking to retain/return those primes without additional processing.
 **/
 
-public class PrimeRef<E extends Number & Comparable<E>> implements PrimeRefIntfc<E>
+public class PrimeRef implements PrimeRefIntfc
 {
 	//
 	// Instance data
 	//
 	
 	// This instance of a prime
-	E prime;
+	int primeIdx; // index to bitsets or collections for this val
 	
-	// Represents sets of base primes that sum to this prime.
-	NavigableSet<NavigableSet<PrimeRefIntfc<E>>> primeBases; 
+	// Represents sets of base primes that sum to this prime. (index to primes)
+	ArrayList<BitSet> primeBaseIdxs = new ArrayList<>(); 
+	
+	static PrimeSourceIntfc primeSrc;
 	
 	/**
 	 * Handle simple prime where the base is simply itself - i.e. 1, 2 
@@ -32,74 +34,68 @@ public class PrimeRef<E extends Number & Comparable<E>> implements PrimeRefIntfc
 	 * 
 	 * @param prime
 	 */
-	PrimeRef(E prime, PrimeComparatorIntfc<E> comparators)
+	PrimeRef(int primeIdx, BitSet primeBaseIdxs)
 	{
-		this.prime = prime;
-		primeBases = new ConcurrentSkipListSet<>(comparators.getPrimeSetComparator());
-		NavigableSet<PrimeRefIntfc<E>> pfc = new ConcurrentSkipListSet<>(comparators.getPrimeFactorComparator());
-		pfc.add(this);		
-		addPrimeBase(pfc);
+		this.primeIdx = primeIdx;
+		
+		addPrimeBase(primeBaseIdxs);
 	} 
 	
-	PrimeRef(E prime, NavigableSet<PrimeRefIntfc<E>> base, PrimeComparatorIntfc<E> comparators)
+	PrimeRef(int primeIdx)
 	{
-		this.prime = prime;
-		primeBases = new ConcurrentSkipListSet<>(comparators.getPrimeSetComparator());
-		addPrimeBase(base);
+		this.primeIdx = primeIdx;
+				
+		addPrimeBase(BitSet.valueOf(new byte[] {(byte)primeIdx}));
 	}
 
-	public E getPrime()
+	public static void setPrimeSource(PrimeSourceIntfc primeSrcIntfc)
 	{
-		return prime;
+		primeSrc = primeSrcIntfc;
 	}
+	
+	public PrimeRefIntfc getPrimeRef()
+	{
+		return this;
+	}
+	
+	public int getPrimeRefIdx()
+	{
+		return this.primeIdx;
+	}
+	
+	@Override
+	public BigInteger getPrime() {
+		return primeSrc.getPrime(primeIdx);
+	}
+	
+	@Override
+	public Stream<BitSet> getPrimeBaseIdxs() {
+		return primeBaseIdxs.stream();
+	}	
 	
 	/**
 	 * Include a set of primes in the set of prime bases for the current prime.
 	 * @param primeBase
 	 */
-	void addPrimeBase(NavigableSet<PrimeRefIntfc<E>> primeBase)
+	public void addPrimeBase(BitSet primeBase)
 	{
-		this.primeBases.add(primeBase);
+		this.primeBaseIdxs.add(primeBase);
 	}
-	
-	public NavigableSet<NavigableSet<PrimeRefIntfc<E>>> getPrimeBase()
-	{
-		return primeBases;
-	}
-	
-	/**
-	 * Override implements Comparable<PrimeRefIntfc>
-	 * Natural order based on the Longs used to represent the primes.
-	 */
+
 	@Override
-	public int compareTo(PrimeRefIntfc<E> o) 
-	{	
-		int ret;
-		
-		if (this == o)
-			ret = 0;
-		else if (o == null)
-			ret = 1;
-		else 
-			ret = (int) (this.getPrime().compareTo(o.getPrime()));
-		return ret;
-	}		
-	
-	public boolean equals(Object o)
-	{
-		if (o == this)
-			return true;
-		else if (o == null)
-			return false;
-		else if (!(o instanceof PrimeRef))
-			return false;
-		if (hashCode() == o.hashCode())
-			return true;
-		return false;		
+	public int hashCode() {
+		return Objects.hash(primeIdx);
 	}
-	
-	public int hashCode()
-	{
-		return (int)prime;
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		PrimeRef other = (PrimeRef) obj;
+		return primeIdx == other.primeIdx;
 	}
 }

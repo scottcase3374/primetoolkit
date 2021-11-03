@@ -1,6 +1,10 @@
 package com.starcases.prime.intfc;
 
-public interface PrimeSourceIntfc<E>
+import java.math.BigInteger;
+
+public interface PrimeSourceIntfc
 {
-	PrimeRefIntfc<E> nextPrimeRef();
+	PrimeRefIntfc nextPrimeRef();
+	PrimeRefIntfc getPrimeRef(int primeIdx);
+	BigInteger getPrime(int primeIdx);
 }
