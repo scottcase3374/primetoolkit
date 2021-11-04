@@ -24,13 +24,16 @@ public class PrimeNodeGenerator extends SourceBase implements Generator {
 	int level = 0;
 	PrimeRefIntfc primeRef = null;
 	
-	PrimeSourceIntfc ps = PrimeSourceFactory.primeSource();
+	PrimeSourceIntfc ps;
 	
-	public PrimeNodeGenerator(Graph graph)
-	{	
+	public PrimeNodeGenerator(Graph graph, int targetRows)
+	{
+		ps = PrimeSourceFactory.primeSource(targetRows);
+		
 		this.addSink(graph);
 		sman = new SpriteManager(graph);
 		this.graph = graph;
+		
 	}
 	
 	public void begin() 
@@ -60,6 +63,7 @@ public class PrimeNodeGenerator extends SourceBase implements Generator {
 	 */
 	protected String getColor()
 	{
+		level = 2;
 		int r = 255 - level * 8;
 		int g = 80 + level * 4;
 		int b = 2 + level * 8;

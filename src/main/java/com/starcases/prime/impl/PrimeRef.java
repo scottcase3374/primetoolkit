@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
@@ -82,6 +83,22 @@ public class PrimeRef implements PrimeRefIntfc
 		this.primeBaseIdxs.add(primeBase);
 	}
 
+	public String getIndexes()
+	{
+		return primeBaseIdxs.stream().map(i -> i.toString()).collect(Collectors.joining(",","[", "]"));
+	}
+
+	public String getIdxPrimes()
+	{
+		return getPrimeBaseIdxs()
+				.map(
+						b -> 
+							b.stream())
+							.map(i -> i.boxed())
+							.map(ii -> ii.map(iii -> primeSrc.getPrime(iii).toString()).collect(Collectors.joining(",","[", "]")))
+							.collect(Collectors.joining(",","[", "]"));
+	}
+	
 	@Override
 	public int hashCode() {
 		return Objects.hash(primeIdx);

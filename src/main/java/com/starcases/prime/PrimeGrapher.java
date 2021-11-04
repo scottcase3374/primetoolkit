@@ -30,10 +30,20 @@ public class PrimeGrapher
 	
 	public static void main(String [] args)
 	{
+		int targetRows = 1500;
+		if (args != null && args[0] != null)
+		{
+			try
+			{
+				targetRows = Integer.parseInt(args[0]);
+			}
+			catch(Exception e)
+			{}
+		}
 		PrimeGrapher primeGrapher = new PrimeGrapher();		
 		boolean debug = true;
-		primeGrapher.populateData(debug);
-		primeGrapher.logGraphStructure();
+		primeGrapher.populateData(targetRows, debug);
+		//primeGrapher.logGraphStructure();
 		primeGrapher.setNodeLocations();
 		primeGrapher.viewDefault();
 	}
@@ -42,11 +52,15 @@ public class PrimeGrapher
 	{
 		List<Node> degrees = Toolkit.degreeMap(primeGraph);	
 		degrees.stream().sorted(nodeComparator).forEach(n ->  
-			n.setAttribute("xyz", 80 - Math.sin(11 * Integer.decode(n.getId()))*127,								   
+			/*n.setAttribute("xyz", 80 - Math.sin(11 * Integer.decode(n.getId()))*127,								   
 								  (n.getOutDegree()* 11 + Math.sin(Integer.decode(n.getId()))) + 
 								    	(n.getInDegree() * 11 + Math.cos(Integer.decode(n.getId()))) 
-								 ,0)
-		);
+								 ,0)*/
+		n.setAttribute("xyz", 								   
+				30 + 400 * (Math.log10(Integer.decode(n.getId())) + n.getInDegree()) * Math.signum(Math.cos(n.getInDegree()*11)),  
+				80 + 31 * n.getOutDegree() * Math.sin(n.getOutDegree()), 				     
+				80 + 109 * Math.cos(Integer.decode(n.getId()) ))
+	 	); // Integer.decode(n.getId()
 	}
 	
 
@@ -60,7 +74,7 @@ public class PrimeGrapher
 						n.leavingEdges().map(e -> e.getTargetNode().getId()).collect(Collectors.joining(",")))));		
 	}
 	
-	private void populateData(boolean debug)
+	private void populateData(int targetRows, boolean debug)
 	{
 		var level = log.getLevel();
 		if (debug)
@@ -69,7 +83,7 @@ public class PrimeGrapher
 			log.setLevel(level.SEVERE);
 		
 		// Start setting up the actual graph/data generations
-		PrimeNodeGenerator primeNodeGenerator = new PrimeNodeGenerator(this.primeGraph);
+		PrimeNodeGenerator primeNodeGenerator = new PrimeNodeGenerator(this.primeGraph, targetRows);
 		primeNodeGenerator.begin();
 		
 		while (primeNodeGenerator.nextEvents());		

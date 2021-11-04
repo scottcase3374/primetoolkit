@@ -7,8 +7,8 @@ public class PrimeSourceFactory
 {
 	private PrimeSourceFactory() {}
 	
-	public static PrimeSourceIntfc primeSource()
+	public static PrimeSourceIntfc primeSource(int targetRows)
 	{
-		return new PrimeSource();
+		return new PrimeSource(targetRows);
 	}
 }

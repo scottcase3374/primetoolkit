@@ -15,17 +15,23 @@ import lombok.extern.java.Log;
 @Log
 public class PrimeSource implements PrimeSourceIntfc
 {
+	private final int initCapacity = 100000;
+	
 	// for output
 	private int lastReturnedIdx = -1; 
 	
 	private AtomicInteger nextIdx = new AtomicInteger(-1);
 	
 	// Primes output and primes generated
-	private ArrayList<BigInteger> primes = new ArrayList<>();	
-	private ArrayList<PrimeRefIntfc> primeRefs = new ArrayList<>();
+	private ArrayList<BigInteger> primes = new ArrayList<>(initCapacity);	
+	private ArrayList<PrimeRefIntfc> primeRefs = new ArrayList<>(initCapacity);
 	
-	public PrimeSource()
+	private int targetRows;
+	
+	public PrimeSource(int targetRows)
 	{
+		this.targetRows = targetRows;
+		
 		PrimeRef.setPrimeSource(this);
 		
 		BitSet tmpBitSet = new BitSet();
@@ -40,10 +46,20 @@ public class PrimeSource implements PrimeSourceIntfc
 	
 	void init()
 	{	
-		BitSet potentialBases = new BitSet();	
+		BitSet potentialBases = new BitSet(32);
+		
+		// Help Identify when required range of primes for bases is too small to allow
+		// construction of the next prime.
+		int last;
+		
+		// Metric info 
+		int maxBaseSize = 0;
+		BigInteger sumWithMaxBase = BigInteger.ZERO;
 		
 		do 
-		{		
+		{
+			last = nextIdx.get();
+			
 			Consumer<Boolean> insertNextMinimalPrime = (Boolean b) -> b.hashCode(); // No-op
 			/**
 			 * Given a sequential list of primes, map the index within the list
@@ -61,11 +77,15 @@ public class PrimeSource implements PrimeSourceIntfc
 			 *  of them. So the bit-value of the range 0 to 2^n is mappable to each combination
 			 *  of the primes (where bit-id represents the index of the actual prime in a list). 
 			 *  
-			 *  Given that each new prime is based on the last set of primes - I'm 
+			 *  Given that each new prime is based on the last set of primes - many primes
+			 *  are constructable from the previous prime and a few smaller primes.
 			 */
-			final int numBitsForPrimeCount = primeRefs.size();			 			
+			
+			
+			// Represents a X-bit search space of indexes for primes to add for next prime.
+			final int numBitsForPrimeCount = Math.min(primeRefs.size(), 16); 			 			
 			final BigInteger maxSuperSetRow = BigInteger.ONE.shiftLeft(numBitsForPrimeCount);
-			final BigInteger breakPointRow = BigInteger.ONE.shiftLeft(numBitsForPrimeCount-1);
+			final BigInteger breakPointRow = BigInteger.ZERO; 
 			
 			BigInteger superSetRow = maxSuperSetRow;
 			BigInteger minSum = BigInteger.ZERO;
@@ -73,8 +93,10 @@ public class PrimeSource implements PrimeSourceIntfc
 			{	
 				superSetRow = superSetRow.subtract(BigInteger.ONE);	
 				
-				BigInteger sum = BigInteger.ZERO;
+				BigInteger sum = getPrime(nextIdx.get()); // start at current prime
 				potentialBases.clear();
+				
+				// Represent a "small set of small primes" - primes from 1 bit-length to some 'small' # of bits 
 				for (int bitId = numBitsForPrimeCount-1; bitId >= 0  ; bitId--)
 				{
 					if (superSetRow.testBit(bitId))
@@ -88,21 +110,46 @@ public class PrimeSource implements PrimeSourceIntfc
 					minSum = sum.add(BigInteger.ONE);
 				
 				final int cachedCurIdx = nextIdx.get();
+				potentialBases.set(cachedCurIdx);
 				final BigInteger curPri = getPrime(cachedCurIdx); 
 				if (viablePrime(sum, curPri, minSum ))
 				{					
 					final BigInteger cachedSum = sum;
-					final BitSet cachedBases = potentialBases.get(0,  numBitsForPrimeCount);
+					potentialBases.set(nextIdx.get());
+					final BitSet cachedBases = potentialBases.get(0,  primeRefs.size());
 										
 					insertNextMinimalPrime = (Boolean) -> addPrimeRef(cachedSum, cachedBases, cachedCurIdx, true);
 					minSum = sum;
+					
+					// Metric info
+					maxBaseSize = Math.max(maxBaseSize, potentialBases.cardinality());
+					if (maxBaseSize == potentialBases.cardinality())
+						sumWithMaxBase = sum;
 				}
 			}
 			
 			insertNextMinimalPrime.accept(true);
 			insertNextMinimalPrime = (Boolean b) -> b.hashCode(); // No-op
 			
-		} while (nextIdx.get() < 31 );
+			if (nextIdx.get() % 1000 == 0)
+				System.out.print("K");
+			
+			// identify when we didn't find a new prime which implies we didn't allow a large enough
+			// set of "small primes" to use as the base.
+			if (last == nextIdx.get())
+				break;
+			
+		} while (nextIdx.get() < targetRows);
+		
+		log.info(String.format("last new-prime[%d] newIdx[%d] base-indexes %s new-base-primes %s  max-base-size[%d] sum-with-max-base-size[%d]", 
+				getPrime(nextIdx.get()), 
+				nextIdx.get(),  
+				getPrimeRef(nextIdx.get()).getIndexes(), 
+				getPrimeRef(nextIdx.get()).getIdxPrimes(),
+				maxBaseSize,
+				sumWithMaxBase
+				)
+				);		
 	}
 	
 	/**
@@ -133,7 +180,7 @@ public class PrimeSource implements PrimeSourceIntfc
 			PrimeRefIntfc ret = new PrimeRef(idx, base);
 			primeRefs.add(idx, ret);			
 			
-			log.info(String.format("addPrimeRef <new prime added> new-prime[%d] newIdx[%d] canAddBase[%b] base-indexes %s new-base-primes %s ", newPrime, nextIdx.get(), canAddBase, getIndexes(base), getPrimes(base)));
+			//log.info(String.format("addPrimeRef <new prime added> new-prime[%d] newIdx[%d] canAddBase[%b] base-indexes %s new-base-primes %s ", newPrime, nextIdx.get(), canAddBase, getIndexes(base), getPrimes(base)));
 		}		
 	}	
 	
@@ -206,15 +253,14 @@ public class PrimeSource implements PrimeSourceIntfc
 		int primesSize = primes.size();
 		do
 		{
-			int prevIdx = lastReturnedIdx;
 			int idxFound = ++lastReturnedIdx;
 			
-			if (idxFound > 30 || idxFound > primesSize)
+			if (idxFound >= primesSize)
 				break;
 			
 			PrimeRefIntfc existingPrime = getPrimeRef(idxFound);
 			
-			log.info(String.format("Prime [%d] PrimeIdx [%d]  prevMaxPrimeIdx[%d]", existingPrime.getPrime(), idxFound, prevIdx));
+			//log.info(String.format("Prime [%d] PrimeIdx [%d]  prevMaxPrimeIdx[%d]", existingPrime.getPrime(), idxFound, prevIdx));
 			return existingPrime;
 		} 
 		while(false);

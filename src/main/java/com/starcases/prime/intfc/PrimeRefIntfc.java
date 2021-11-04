@@ -17,4 +17,8 @@ public interface PrimeRefIntfc
 	 * @return int representing the bit within bits for this item
 	 */
 	int getPrimeRefIdx();
+	
+	
+	String getIndexes();
+	String getIdxPrimes();
 }
