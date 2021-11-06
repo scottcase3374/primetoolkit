@@ -11,7 +11,6 @@ import org.graphstream.graph.implementations.MultiGraph;
 import org.graphstream.ui.view.Viewer;
 
 import com.starcases.prime.graph.impl.PrimeNodeGenerator;
-import com.starcases.prime.impl.PrimeSource;
 
 import lombok.extern.java.Log;
 
@@ -29,28 +28,6 @@ public class PrimeGrapher
 
 	private Graph primeGraph;
 	
-	public static void main(String [] args)
-	{
-		int maxCount = 1500;
-		if (args != null && args[0] != null)
-		{
-			try
-			{
-				maxCount = Integer.parseInt(args[0]);
-			}
-			catch(Exception e)
-			{}
-		}
-		PrimeSource ps = new PrimeSource(maxCount);
-		
-		//PrimeGrapher primeGrapher = new PrimeGrapher();		
-		//boolean debug = true;
-		//primeGrapher.populateData(targetRows, debug);
-		//primeGrapher.logGraphStructure();
-		//primeGrapher.setNodeLocations();
-		//primeGrapher.viewDefault();
-	}
-
 	private void setNodeLocations()
 	{
 		List<Node> degrees = Toolkit.degreeMap(primeGraph);	
@@ -65,8 +42,6 @@ public class PrimeGrapher
 				80 + 109 * Math.cos(Integer.decode(n.getId()) ))
 	 	); // Integer.decode(n.getId()
 	}
-	
-
 	
 	private void logGraphStructure()
 	{
