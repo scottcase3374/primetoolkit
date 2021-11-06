@@ -11,6 +11,7 @@ import org.graphstream.graph.implementations.MultiGraph;
 import org.graphstream.ui.view.Viewer;
 
 import com.starcases.prime.graph.impl.PrimeNodeGenerator;
+import com.starcases.prime.impl.PrimeSource;
 
 import lombok.extern.java.Log;
 
@@ -40,12 +41,14 @@ public class PrimeGrapher
 			catch(Exception e)
 			{}
 		}
-		PrimeGrapher primeGrapher = new PrimeGrapher();		
-		boolean debug = true;
-		primeGrapher.populateData(targetRows, debug);
+		PrimeSource ps = new PrimeSource(targetRows);
+		
+		//PrimeGrapher primeGrapher = new PrimeGrapher();		
+		//boolean debug = true;
+		//primeGrapher.populateData(targetRows, debug);
 		//primeGrapher.logGraphStructure();
-		primeGrapher.setNodeLocations();
-		primeGrapher.viewDefault();
+		//primeGrapher.setNodeLocations();
+		//primeGrapher.viewDefault();
 	}
 
 	private void setNodeLocations()

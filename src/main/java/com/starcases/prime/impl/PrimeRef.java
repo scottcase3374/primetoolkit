@@ -3,9 +3,12 @@ package com.starcases.prime.impl;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
@@ -25,7 +28,7 @@ public class PrimeRef implements PrimeRefIntfc
 	int primeIdx; // index to bitsets or collections for this val
 	
 	// Represents sets of base primes that sum to this prime. (index to primes)
-	ArrayList<BitSet> primeBaseIdxs = new ArrayList<>(); 
+	ArrayList<List<Integer>> primeBaseIdxs = new ArrayList<>(); 
 	
 	static PrimeSourceIntfc primeSrc;
 	
@@ -71,7 +74,7 @@ public class PrimeRef implements PrimeRefIntfc
 	
 	@Override
 	public Stream<BitSet> getPrimeBaseIdxs() {
-		return primeBaseIdxs.stream();
+		return primeBaseIdxs.stream().map(l -> {BitSet b = new BitSet(); l.forEach(b::set); return b;});
 	}	
 	
 	/**
@@ -80,23 +83,21 @@ public class PrimeRef implements PrimeRefIntfc
 	 */
 	public void addPrimeBase(BitSet primeBase)
 	{
-		this.primeBaseIdxs.add(primeBase);
+		this.primeBaseIdxs.add(primeBase.stream().boxed().collect(Collectors.toList()));
 	}
 
 	public String getIndexes()
 	{
-		return primeBaseIdxs.stream().map(i -> i.toString()).collect(Collectors.joining(",","[", "]"));
+		return primeBaseIdxs.stream().map(Object::toString).collect(Collectors.joining(",","[", "]"));
 	}
 
 	public String getIdxPrimes()
 	{
 		return getPrimeBaseIdxs()
-				.map(
-						b -> 
-							b.stream())
-							.map(i -> i.boxed())
-							.map(ii -> ii.map(iii -> primeSrc.getPrime(iii).toString()).collect(Collectors.joining(",","[", "]")))
-							.collect(Collectors.joining(",","[", "]"));
+				.map(BitSet::stream)
+				.map(IntStream::boxed)
+				.map(ii -> ii.map(iii -> primeSrc.getPrime(iii).toString()).collect(Collectors.joining(",","[", "]")))
+				.collect(Collectors.joining(",","[", "]"));
 	}
 	
 	@Override

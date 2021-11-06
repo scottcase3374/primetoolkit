@@ -4,7 +4,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import com.starcases.prime.intfc.PrimeRefIntfc;
@@ -23,121 +22,100 @@ public class PrimeSource implements PrimeSourceIntfc
 	private ArrayList<BigInteger> primes;	
 	private ArrayList<PrimeRefIntfc> primeRefs;
 	
-	private int maxCount;
+	private int targetPrimeCount;
 	
 	public PrimeSource(int maxCount)
 	{
 		primes = new ArrayList<>(maxCount);
 		primeRefs = new ArrayList<>(maxCount);
-		this.maxCount = maxCount;
+		this.targetPrimeCount = maxCount;
 		
 		PrimeRef.setPrimeSource(this);
 		
 		BitSet tmpBitSet = new BitSet();
 		tmpBitSet.set(0);
 		addPrimeRef(BigInteger.valueOf(1L), tmpBitSet.get(0, 1));
+		
 		tmpBitSet.clear();
 		tmpBitSet.set(1);
 		addPrimeRef(BigInteger.valueOf(2L), tmpBitSet.get(0, 2));
+		
+		tmpBitSet.clear();
+		tmpBitSet.set(0,1, true);
+		addPrimeRef(BigInteger.valueOf(3L), tmpBitSet.get(0, 2));
 		
 		init();
 	}
 	
 	void init()
 	{	
-		BitSet sumBases = new BitSet(32);
+		BitSet sumBaseIdxs = new BitSet(32);
+		BigInteger sumCeiling; 
 		
-		// Help Identify when required range of primes for bases is too small to allow
-		// construction of the next prime.
-		int curPrimeIdx;
+		final BitSet primeIndexMaxPermutation = new BitSet();
+		BitSet primeIndexPermutation = new BitSet();
 		
 		// Metric info 
 		int maxBaseSize = 0;
 		BigInteger sumWithMaxBase = BigInteger.ZERO;
 		
+		// each iteration increases the #bits by 1; i.e. a new prime is determined per iteration
 		do 
 		{
-			curPrimeIdx = nextIdx.get();
-			
-			Consumer<Boolean> insertNextMinimalPrime = (Boolean b) -> b.hashCode(); // No-op
-			/**
-			 * Given a sequential list of primes, map the index within the list
-			 * directly to a bit-number. The next prime will be the sum of a
-			 * subset of the existing primes. The overall domain isn't a full
-			 * powerset since the next prime wouldn't contain a 'null' type item or
-			 * subsets that can't represent the next prime due to summing to a
-			 * smaller value than the last max prime.
-			 * 
-			 * The 'superset' is a 'virtual' representation of the sets described above.
-			 * It is virtual in the sense that the BigInteger is used more for representing
-			 * combinations of bit-indexes of primes. 
-			 * 
-			 *  Given n primes, an integer of 2^n is the maximum number of combinations
-			 *  of them. So the bit-value of the range 0 to 2^n is mappable to each combination
-			 *  of the primes (where bit-id represents the index of the actual prime in a list). 
-			 *  
-			 *  Given that each new prime is based on the last set of primes - many primes
-			 *  are constructable from the previous prime and a few smaller primes.
-			 */
+			final int curPrimeIdx = nextIdx.get();
+			final BigInteger curPrime = getPrime(curPrimeIdx);
 			
 			// Represents a X-bit search space of indexes for primes to add for next prime.
-			final int numBitsForPrimeCount = Math.min(primeRefs.size(), 20); 			 			
-			final BigInteger allIndexBitsTrue = BigInteger.ONE.shiftLeft(numBitsForPrimeCount);
+			final int numBitsForPrimeCount = primeRefs.size()-1;
+			primeIndexMaxPermutation.clear(numBitsForPrimeCount-1);
+			primeIndexMaxPermutation.set(numBitsForPrimeCount); // keep 'shifting' max bit left
 			
-			BigInteger sumCeiling = BigInteger.ZERO;
-			final BigInteger curPrime = getPrime(nextIdx.get());
+			// no reason to perform work when no indexes 
+			// selected so start with 1 index selected.
+			primeIndexPermutation.clear();
+			primeIndexPermutation.set(0); 
 			
-			BigInteger primeIndexPerBit = BigInteger.ZERO;
-			// Exit/complete the while loop after handling the next prime.
-			while (primeIndexPerBit.compareTo(allIndexBitsTrue) < 0) 
-			{	
-				// Generate next permutation of the bit indexes
-				primeIndexPerBit = primeIndexPerBit.add(BigInteger.ONE);
-				
-				BigInteger sum = curPrime; // start at current prime
-				sumBases.clear();
-				
-				sumCeiling = sum.shiftLeft(1);
-				
-				// Represent a "small set of small primes" - primes from 1 bit-length 
-				// to some 'small' # of bits. Full execution of
-				for (int bitId = 0; bitId < numBitsForPrimeCount; bitId++)
-				{
-					if (primeIndexPerBit.testBit(bitId))
-					{						
-						sumBases.set(bitId);
-						sum = sum.add(getPrime(bitId));
-					}
-				}
-				
-				if (viablePrime(sum, curPrime, sumCeiling))
-				{
-					final BigInteger cachedSum = sum;					
-					sumBases.set(nextIdx.get()); // sum of primes from these indexes should match 'sum'
-					final BitSet cachedBases = sumBases.get(0,  primeRefs.size());
-										
-					insertNextMinimalPrime = (Boolean) -> addPrimeRef(cachedSum, cachedBases, nextIdx.get(), true);
-					sumCeiling = sum;
+			sumCeiling = calcSumCeiling(curPrime);
+			while (!primeIndexPermutation.equals(primeIndexMaxPermutation)) 
+			{					
+				BigInteger permutationSum = primeIndexPermutation
+						.stream()						
+						.mapToObj(this::getPrime)
+						.collect(Collectors.reducing(curPrime, (a,b) -> a.add(b)));
 					
-					// Metric info
-					maxBaseSize = Math.max(maxBaseSize, sumBases.cardinality());
-					if (maxBaseSize == sumBases.cardinality())
-						sumWithMaxBase = sum;
+				if (permutationSum.compareTo(sumCeiling) > 0)
+				{
+					// limit useless work - if we exceed a known prime then we are
+					// done with this iteration.
+					break;
 				}
+				
+				if (viablePrime(permutationSum, curPrime))
+				{
+					final BigInteger cachedSum = permutationSum;										
+					sumBaseIdxs = primeIndexPermutation.get(0, numBitsForPrimeCount);
+					sumBaseIdxs.set(curPrimeIdx); // sum of primes from these indexes should match 'sum'
+					final BitSet cachedBases = sumBaseIdxs;
+										
+					addPrimeRef(cachedSum, cachedBases, curPrimeIdx, true);
+						
+					// Metric info
+					maxBaseSize = Math.max(maxBaseSize, sumBaseIdxs.cardinality());
+					if (maxBaseSize == sumBaseIdxs.cardinality())
+						sumWithMaxBase = permutationSum;
+					
+					break;
+				}
+				else
+					incrementPermutation(primeIndexPermutation);
 			}
 			
-			insertNextMinimalPrime.accept(true);
-			insertNextMinimalPrime = (Boolean b) -> b.hashCode(); // No-op
-			
-			if (nextIdx.get() % 5 == 0)
+			if (nextIdx.get() % 100000 == 0)
+				log.info("100k");
+			else if (nextIdx.get() % 1000 == 0)
 				System.out.print("K");
-			
-			// identify when we didn't find a new prime which implies we didn't allow a large enough
-			// set of "small primes" to use as the base.
-			if (curPrimeIdx == nextIdx.get())
-				break;
-			
-		} while (nextIdx.get() < maxCount);
+		} 
+		while (nextIdx.get() < targetPrimeCount);
 		
 		log.info(String.format("last new-prime[%d] newIdx[%d] base-indexes %s new-base-primes %s  max-base-size[%d] sum-with-max-base-size[%d]", 
 				getPrime(nextIdx.get()), 
@@ -147,6 +125,26 @@ public class PrimeSource implements PrimeSourceIntfc
 				maxBaseSize,
 				sumWithMaxBase
 				));		
+	}
+	
+	BigInteger calcSumCeiling(BigInteger primeSum)
+	{
+		return primeSum.shiftLeft(1).subtract(BigInteger.ONE);
+	}
+	
+	void incrementPermutation(BitSet primePermutation)
+	{
+		int bit = 0;
+		// Generate next permutation of the bit indexes
+		do	// performs add and carry if needed
+		{
+			primePermutation.flip(bit);
+			
+			if (primePermutation.get(bit)) // true means no carry
+				break;
+			
+			bit++;	
+		}while(true);					
 	}
 	
 	/**
@@ -178,7 +176,7 @@ public class PrimeSource implements PrimeSourceIntfc
 			primeRefs.add(idx, ret);			
 			
 			//log.info(String.format("addPrimeRef <new prime added> new-prime[%d] newIdx[%d] canAddBase[%b] base-indexes %s new-base-primes %s ", newPrime, nextIdx.get(), canAddBase, getIndexes(base), getPrimes(base)));
-		}		
+		}
 	}	
 	
 	public BigInteger getPrime(int primeIdx)
@@ -198,7 +196,7 @@ public class PrimeSource implements PrimeSourceIntfc
 	 * @param sumOfPrimeSet
 	 * @return true for sum that is viable prime; false otherwise
 	 */
-	boolean viablePrime(BigInteger primeSum, BigInteger lastMaxPrime, BigInteger sumCeiling)
+	boolean viablePrime(BigInteger primeSum, BigInteger lastMaxPrime)
 	{
 		boolean isPrimeSum = false;
 			
@@ -219,10 +217,7 @@ public class PrimeSource implements PrimeSourceIntfc
 			// This block should be removed and allow the remaining blocks to determine next prime.
 			if (!primeSum.isProbablePrime(1000))				
 				break;
-		
-			if (primeSum.compareTo(sumCeiling) > 0)
-				break;
-			
+				
 			isPrimeSum =  true;			
 		} 
 		while (false);
