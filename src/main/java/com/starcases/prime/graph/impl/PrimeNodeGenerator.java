@@ -16,8 +16,8 @@ import com.starcases.prime.intfc.PrimeSourceIntfc;
  * see how well it works for something like my pet prime# 
  * research projects.
  */
-public class PrimeNodeGenerator extends SourceBase implements Generator {
-
+public class PrimeNodeGenerator extends SourceBase implements Generator 
+{
 	int edgeId = 1;
 	SpriteManager sman;
 	Graph graph;
@@ -33,7 +33,6 @@ public class PrimeNodeGenerator extends SourceBase implements Generator {
 		this.addSink(graph);
 		sman = new SpriteManager(graph);
 		this.graph = graph;
-		
 	}
 	
 	public void begin() 
@@ -41,11 +40,18 @@ public class PrimeNodeGenerator extends SourceBase implements Generator {
 
 	public boolean nextEvents() 
 	{
-		primeRef = ps.nextPrimeRef();
-		if (primeRef != null)
+		try
 		{
-			addNode();
-			return true;
+			primeRef = ps.getPrimeRef(level);
+			if (primeRef != null)
+			{
+				addNode();
+				return true;
+			}
+		}
+		catch(IndexOutOfBoundsException e)
+		{
+			// do nothing - final return handles it.
 		}
 		return false;
 	}

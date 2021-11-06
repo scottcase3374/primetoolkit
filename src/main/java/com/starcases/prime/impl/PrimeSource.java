@@ -14,9 +14,6 @@ import lombok.extern.java.Log;
 @Log
 public class PrimeSource implements PrimeSourceIntfc
 {
-	// for output
-	private int lastReturnedIdx = -1; 
-	
 	private AtomicInteger nextIdx = new AtomicInteger(-1);
 	
 	private ArrayList<BigInteger> primes;	
@@ -47,7 +44,7 @@ public class PrimeSource implements PrimeSourceIntfc
 		init();
 	}
 	
-	void init()
+	private void init()
 	{	
 		BitSet sumBaseIdxs = new BitSet(32);
 		BigInteger sumCeiling; 
@@ -127,12 +124,12 @@ public class PrimeSource implements PrimeSourceIntfc
 				));		
 	}
 	
-	BigInteger calcSumCeiling(BigInteger primeSum)
+	private BigInteger calcSumCeiling(BigInteger primeSum)
 	{
 		return primeSum.shiftLeft(1).subtract(BigInteger.ONE);
 	}
 	
-	void incrementPermutation(BitSet primePermutation)
+	private void incrementPermutation(BitSet primePermutation)
 	{
 		int bit = 0;
 		// Generate next permutation of the bit indexes
@@ -144,7 +141,7 @@ public class PrimeSource implements PrimeSourceIntfc
 				break;
 			
 			bit++;	
-		}while(true);					
+		} while(true);					
 	}
 	
 	/**
@@ -152,7 +149,7 @@ public class PrimeSource implements PrimeSourceIntfc
 	 * Base will be same as aPrime and using same index. 
 	 * @param aPrime
 	 */
-	void addPrimeRef(BigInteger nextPrime, BitSet baseIdx)
+	private void addPrimeRef(BigInteger nextPrime, BitSet baseIdx)
 	{
 		addPrimeRef(nextPrime, baseIdx, 0, false);
 	}
@@ -161,7 +158,7 @@ public class PrimeSource implements PrimeSourceIntfc
 	 * Add new prime to shared set of all primes
 	 * @param aPrime
 	 */
-	void addPrimeRef(BigInteger newPrime, BitSet base, int curPrimeIdx, boolean canAddBase)
+	private void addPrimeRef(BigInteger newPrime, BitSet base, int curPrimeIdx, boolean canAddBase)
 	{
 		if (canAddBase && newPrime.equals(getPrime(curPrimeIdx)))
 		{			
@@ -196,7 +193,7 @@ public class PrimeSource implements PrimeSourceIntfc
 	 * @param sumOfPrimeSet
 	 * @return true for sum that is viable prime; false otherwise
 	 */
-	boolean viablePrime(BigInteger primeSum, BigInteger lastMaxPrime)
+	private boolean viablePrime(BigInteger primeSum, BigInteger lastMaxPrime)
 	{
 		boolean isPrimeSum = false;
 			
@@ -225,38 +222,13 @@ public class PrimeSource implements PrimeSourceIntfc
 		return isPrimeSum;
 	}
 	
-	String getIndexes(BitSet bs)
+	private String getIndexes(BitSet bs)
 	{
 		return bs.stream().boxed().map(i -> i.toString()).collect(Collectors.joining(",","[", "]"));
 	}
 
-	String getPrimes(BitSet bs)
+	private String getPrimes(BitSet bs)
 	{
 		return bs.stream().boxed().map(i -> this.getPrime(i).toString()).collect(Collectors.joining(",","[", "]"));
 	}
-
-	
-	/**
-	 * 
-	 * @return
-	 */
-	public PrimeRefIntfc nextPrimeRef()
-	{	
-		int primesSize = primes.size();
-		do
-		{
-			int idxFound = ++lastReturnedIdx;
-			
-			if (idxFound >= primesSize)
-				break;
-			
-			PrimeRefIntfc existingPrime = getPrimeRef(idxFound);
-			
-			//log.info(String.format("Prime [%d] PrimeIdx [%d]  prevMaxPrimeIdx[%d]", existingPrime.getPrime(), idxFound, prevIdx));
-			return existingPrime;
-		} 
-		while(false);
-				
-		return null;
-	}	
 }

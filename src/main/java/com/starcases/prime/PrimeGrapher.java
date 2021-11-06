@@ -31,17 +31,17 @@ public class PrimeGrapher
 	
 	public static void main(String [] args)
 	{
-		int targetRows = 1500;
+		int maxCount = 1500;
 		if (args != null && args[0] != null)
 		{
 			try
 			{
-				targetRows = Integer.parseInt(args[0]);
+				maxCount = Integer.parseInt(args[0]);
 			}
 			catch(Exception e)
 			{}
 		}
-		PrimeSource ps = new PrimeSource(targetRows);
+		PrimeSource ps = new PrimeSource(maxCount);
 		
 		//PrimeGrapher primeGrapher = new PrimeGrapher();		
 		//boolean debug = true;

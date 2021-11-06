@@ -25,12 +25,12 @@ public class PrimeRef implements PrimeRefIntfc
 	//
 	
 	// This instance of a prime
-	int primeIdx; // index to bitsets or collections for this val
+	private int primeIdx; // index to bitsets or collections for this val
 	
 	// Represents sets of base primes that sum to this prime. (index to primes)
-	ArrayList<List<Integer>> primeBaseIdxs = new ArrayList<>(); 
+	private ArrayList<List<Integer>> primeBaseIdxs = new ArrayList<>(); 
 	
-	static PrimeSourceIntfc primeSrc;
+	private static PrimeSourceIntfc primeSrc;
 	
 	/**
 	 * Handle simple prime where the base is simply itself - i.e. 1, 2 
@@ -45,7 +45,7 @@ public class PrimeRef implements PrimeRefIntfc
 		addPrimeBase(primeBaseIdxs);
 	} 
 	
-	PrimeRef(int primeIdx)
+	private PrimeRef(int primeIdx)
 	{
 		this.primeIdx = primeIdx;
 				

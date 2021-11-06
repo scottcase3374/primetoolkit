@@ -6,19 +6,30 @@ import java.util.stream.Stream;
 
 public interface PrimeRefIntfc
 {
-	Stream<BitSet> getPrimeBaseIdxs();
-	
-	void addPrimeBase(BitSet primeBase);
-	
 	BigInteger getPrime();
+	
+	Stream<BitSet> getPrimeBaseIdxs();
 	
 	/**
 	 * 
-	 * @return int representing the bit within bits for this item
+	 * @return int representing representing index in 
+	 * overall list of primes.
 	 */
 	int getPrimeRefIdx();
 	
+	/**
+	 * Utility method - not useful in initial context but
+	 * desirable for research into alternative bases of a 
+	 * prime.
+	 * 
+	 * @param primeBase
+	 */
+	void addPrimeBase(BitSet primeBase);
 	
+	/**
+	 * Strings formatted for easy display
+	 * @return
+	 */
 	String getIndexes();
 	String getIdxPrimes();
 }
