@@ -38,7 +38,7 @@ public class PrimeSource implements PrimeSourceIntfc
 		addPrimeRef(BigInteger.valueOf(2L), tmpBitSet.get(0, 2));
 		
 		tmpBitSet.clear();
-		tmpBitSet.set(0,1, true);
+		tmpBitSet.set(0,2, true);
 		addPrimeRef(BigInteger.valueOf(3L), tmpBitSet.get(0, 2));
 		
 		init();

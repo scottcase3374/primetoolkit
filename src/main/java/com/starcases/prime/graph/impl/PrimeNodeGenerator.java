@@ -7,15 +7,17 @@ import org.graphstream.stream.SourceBase;
 import org.graphstream.ui.spriteManager.Sprite;
 import org.graphstream.ui.spriteManager.SpriteManager;
 
-import com.starcases.prime.PrimeSourceFactory;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
+
+import lombok.extern.java.Log;
 
 /**
  * This is just an experiment with the GraphStream lib to 
  * see how well it works for something like my pet prime# 
  * research projects.
  */
+@Log
 public class PrimeNodeGenerator extends SourceBase implements Generator 
 {
 	int edgeId = 1;
@@ -26,9 +28,9 @@ public class PrimeNodeGenerator extends SourceBase implements Generator
 	
 	PrimeSourceIntfc ps;
 	
-	public PrimeNodeGenerator(Graph graph, int targetRows)
+	public PrimeNodeGenerator(PrimeSourceIntfc ps, Graph graph, int targetRows)
 	{
-		ps = PrimeSourceFactory.primeSource(targetRows);
+		this.ps = ps;
 		
 		this.addSink(graph);
 		sman = new SpriteManager(graph);
@@ -45,6 +47,7 @@ public class PrimeNodeGenerator extends SourceBase implements Generator
 			primeRef = ps.getPrimeRef(level);
 			if (primeRef != null)
 			{
+				//log.info("nextEvents() produced prime " + primeRef.getPrime() + " for level " + level);
 				addNode();
 				return true;
 			}
@@ -69,7 +72,7 @@ public class PrimeNodeGenerator extends SourceBase implements Generator
 	 */
 	protected String getColor()
 	{
-		level = 2;
+		int level = 2;
 		int r = 255 - level * 8;
 		int g = 80 + level * 4;
 		int b = 2 + level * 8;
