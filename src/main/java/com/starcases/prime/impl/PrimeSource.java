@@ -46,7 +46,6 @@ public class PrimeSource implements PrimeSourceIntfc
 	
 	private void init()
 	{	
-		BitSet sumBaseIdxs = new BitSet(32);
 		BigInteger sumCeiling; 
 		
 		final BitSet primeIndexMaxPermutation = new BitSet();
@@ -90,7 +89,7 @@ public class PrimeSource implements PrimeSourceIntfc
 				if (viablePrime(permutationSum, curPrime))
 				{
 					final BigInteger cachedSum = permutationSum;										
-					sumBaseIdxs = primeIndexPermutation.get(0, numBitsForPrimeCount);
+					BitSet sumBaseIdxs = primeIndexPermutation.get(0, numBitsForPrimeCount);
 					sumBaseIdxs.set(curPrimeIdx); // sum of primes from these indexes should match 'sum'
 					final BitSet cachedBases = sumBaseIdxs;
 										
@@ -212,7 +211,7 @@ public class PrimeSource implements PrimeSourceIntfc
 			
 			// This was bootstrap logic while getting the general framework working.
 			// This block should be removed and allow the remaining blocks to determine next prime.
-			if (!primeSum.isProbablePrime(1000))				
+			if (!primeSum.isProbablePrime(100))				
 				break;
 				
 			isPrimeSum =  true;			

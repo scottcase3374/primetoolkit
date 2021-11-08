@@ -44,13 +44,6 @@ public class PrimeRef implements PrimeRefIntfc
 		
 		addPrimeBase(primeBaseIdxs);
 	} 
-	
-	private PrimeRef(int primeIdx)
-	{
-		this.primeIdx = primeIdx;
-				
-		addPrimeBase(BitSet.valueOf(new byte[] {(byte)primeIdx}));
-	}
 
 	public static void setPrimeSource(PrimeSourceIntfc primeSrcIntfc)
 	{

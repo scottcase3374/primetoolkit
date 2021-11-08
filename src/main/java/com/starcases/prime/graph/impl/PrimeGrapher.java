@@ -1,10 +1,11 @@
 package com.starcases.prime.graph.impl;
 
-import java.math.BigInteger;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.graphstream.algorithm.Toolkit;
@@ -37,7 +38,7 @@ public class PrimeGrapher
 	{
 		this.ps = ps;
 		init();
-		this.populateData(maxCount, false);
+		this.populateData(maxCount);
 	}
 	
 	private void init()
@@ -87,31 +88,45 @@ public class PrimeGrapher
 		{}
 	}
 	
-	public void logReduced()
+	final BiFunction<Integer, ArrayList<Integer>, Consumer<Integer>> reducer = (m, a)-> idx -> 
 	{
-			int i = 0;
-			while(true) 
-			{ 
-				PrimeRefIntfc pr;
+		if (idx < m)
+		{
+			while (m > a.size())
+				a.add(0);
+			
+			a.set(idx, a.get(idx)+1);
+		}
+		else 
+		{ 
+			this.primeReduction(idx, this.reducer.apply(m, a)); 
+		}
+	};
+	
+	 
+	public void logReduced(int maxReduce)
+	{
+		int i = 0;
+		while(true) 
+		{ 
+			PrimeRefIntfc pr;				
+			try
+			{
 				ArrayList<Integer> ret = new ArrayList<>();
-				ret.add(0);
-				ret.add(1);
-				
-				try
-				{
-					pr = ps.getPrimeRef(i);
-					primeReduction(i++, ret);
-								
-					log.info(String.format("Prime %d base-%d count:[%d]  base-%d count:[%d]", pr.getPrime(), 1, ret.get(0), 2, ret.get(1)));
-				}
-				catch(Exception e)
-				{
-					break;
-				}				
-			}	
+				pr = ps.getPrimeRef(i);
+				primeReduction(i++, reducer.apply(maxReduce, ret));
+				int [] tmpI = {0};			
+				log.info(String.format("Prime [%d] %s", pr.getPrime(), 
+						ret.stream().map(idx -> String.format("base-%d-count:[%d]", ps.getPrime(tmpI[0]++), idx)).collect(Collectors.joining(", "))));
+			}
+			catch(Exception e)
+			{
+				break;
+			}				
+		}	
 	}
 	
-	private void primeReduction(Integer idx, ArrayList<Integer> ret)
+	private void primeReduction(Integer idx, Consumer<Integer> reducer)
 	{	
 		ps.getPrimeRef(idx)
 		.getPrimeBaseIdxs()
@@ -120,36 +135,18 @@ public class PrimeGrapher
 					bs
 					.stream()
 					.boxed()
-					.forEach(i -> { 
-									if (i < 2) 
-										ret.set(i, ret.get(i)+1);
-									else 
-									{ 
-										primeReduction(i, ret); 
-									}
-								 }
-								));
-					
+					.forEach(reducer));
 	}
 	
-	
-	
-	private void populateData(int targetRows, boolean debug)
+	private void populateData(int maxCount)
 	{
-		var level = log.getLevel();
-		if (debug)
-			log.setLevel(level.FINE);
-		else
-			log.setLevel(level.SEVERE);
-		
 		// Start setting up the actual graph/data generations
-		PrimeNodeGenerator primeNodeGenerator = new PrimeNodeGenerator(ps, primeGraph, targetRows);
+		PrimeNodeGenerator primeNodeGenerator = new PrimeNodeGenerator(ps, primeGraph, maxCount);
 		primeNodeGenerator.begin();
 		
 		while (primeNodeGenerator.nextEvents());		
 		
-		primeNodeGenerator.end();
-		log.setLevel(level);
+		primeNodeGenerator.end();		
 	}
 
 	private void setupDefaultVisualPropertiesAndCSS()
