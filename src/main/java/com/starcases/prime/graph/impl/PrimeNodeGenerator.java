@@ -28,7 +28,7 @@ public class PrimeNodeGenerator extends SourceBase implements Generator
 	
 	PrimeSourceIntfc ps;
 	
-	public PrimeNodeGenerator(PrimeSourceIntfc ps, Graph graph, int targetRows)
+	public PrimeNodeGenerator(PrimeSourceIntfc ps, Graph graph)
 	{
 		this.ps = ps;
 		

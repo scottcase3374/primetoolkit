@@ -8,14 +8,14 @@ public class PrimeSourceFactory
 {
 	private PrimeSourceFactory() {}
 	
-	public static PrimeSourceIntfc primeSource(int maxCount)
+	public static PrimeSourceIntfc primeSource(int maxCount, int confidenceLevel)
 	{
-		return new PrimeSource(maxCount);
+		return new PrimeSource(maxCount, confidenceLevel);
 	}
 	
-	public static PrimeGrapher primeGrapher(int maxCount)
+	public static PrimeGrapher primeGrapher(int maxCount, int confidenceLevel)
 	{
 		
-		return new PrimeGrapher(primeSource(maxCount), maxCount);
+		return new PrimeGrapher(primeSource(maxCount, confidenceLevel), maxCount);
 	}
 }

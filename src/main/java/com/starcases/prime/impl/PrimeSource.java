@@ -14,12 +14,19 @@ import lombok.extern.java.Log;
 @Log
 public class PrimeSource implements PrimeSourceIntfc
 {
+	private int confidenceLevel = 100;
 	private AtomicInteger nextIdx = new AtomicInteger(-1);
 	
 	private ArrayList<BigInteger> primes;	
 	private ArrayList<PrimeRefIntfc> primeRefs;
 	
 	private int targetPrimeCount;
+	
+	public PrimeSource(int maxCount, int confidenceLevel)
+	{
+		this(maxCount);
+		this.confidenceLevel = confidenceLevel;	
+	}
 	
 	public PrimeSource(int maxCount)
 	{
@@ -40,11 +47,9 @@ public class PrimeSource implements PrimeSourceIntfc
 		tmpBitSet.clear();
 		tmpBitSet.set(0,2, true);
 		addPrimeRef(BigInteger.valueOf(3L), tmpBitSet.get(0, 2));
-		
-		init();
 	}
 	
-	private void init()
+	public void init()
 	{	
 		BigInteger sumCeiling; 
 		
@@ -211,7 +216,7 @@ public class PrimeSource implements PrimeSourceIntfc
 			
 			// This was bootstrap logic while getting the general framework working.
 			// This block should be removed and allow the remaining blocks to determine next prime.
-			if (!primeSum.isProbablePrime(100))				
+			if (!primeSum.isProbablePrime(confidenceLevel))				
 				break;
 				
 			isPrimeSum =  true;			

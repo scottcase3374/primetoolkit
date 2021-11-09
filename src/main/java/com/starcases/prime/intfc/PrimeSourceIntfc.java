@@ -6,4 +6,5 @@ public interface PrimeSourceIntfc
 {
 	PrimeRefIntfc getPrimeRef(int primeIdx);
 	BigInteger getPrime(int primeIdx);
+	void init();
 }

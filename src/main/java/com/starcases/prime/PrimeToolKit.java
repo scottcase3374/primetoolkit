@@ -15,6 +15,9 @@ public class PrimeToolKit
 	@Option(names = {"--max-reduce"}, description = "Max indicies [0-max) to use for reduction.")
 	int maxReduce = 2;
 	
+	@Option(names = {"--confidence-level"}, description = "Drives confidence level of primality check.")
+	int confidenceLevel = 100;
+	
 	public PrimeToolKit()
 	{}
 	
@@ -32,28 +35,31 @@ public class PrimeToolKit
 		System.exit(exitCode);
 	}
 
-	@Command
+	@Command(name = "logNodeStructure")
 	private void logNodeStructure()
 	{
-		PrimeGrapher primeGrapher = PrimeSourceFactory.primeGrapher(maxCount);	
+		PrimeGrapher primeGrapher = PrimeSourceFactory.primeGrapher(maxCount, confidenceLevel);	
 		primeGrapher.logNodeStructure();
 	}
 
-	@Command void logGraphStructure()
+	@Command(name = "logGraphStructure") 
+	void logGraphStructure()
 	{
-		PrimeGrapher primeGrapher = PrimeSourceFactory.primeGrapher(maxCount);	
+		PrimeGrapher primeGrapher = PrimeSourceFactory.primeGrapher(maxCount, confidenceLevel);	
 		primeGrapher.logGraphStructure();		
 	}
 	
-	@Command void logReduced()
+	@Command(name = "logReduced") 
+	void logReduced()
 	{
-		PrimeGrapher primeGrapher = PrimeSourceFactory.primeGrapher(maxCount);	
+		PrimeGrapher primeGrapher = PrimeSourceFactory.primeGrapher(maxCount, confidenceLevel);	
 		primeGrapher.logReduced(maxReduce);		
 	}
 	
-	@Command void graph()
+	@Command(name = "defaultGraph") 
+	void graph()
 	{
-		PrimeGrapher primeGrapher = PrimeSourceFactory.primeGrapher(maxCount);	
+		PrimeGrapher primeGrapher = PrimeSourceFactory.primeGrapher(maxCount, confidenceLevel);	
 		primeGrapher.setNodeLocations();
 		primeGrapher.viewDefault();		
 	}

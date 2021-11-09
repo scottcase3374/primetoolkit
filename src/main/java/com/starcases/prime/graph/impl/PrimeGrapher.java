@@ -37,6 +37,7 @@ public class PrimeGrapher
 	public PrimeGrapher(PrimeSourceIntfc ps, int maxCount)
 	{
 		this.ps = ps;
+		this.ps.init();
 		init();
 		this.populateData(maxCount);
 	}
@@ -67,9 +68,11 @@ public class PrimeGrapher
 	public void logGraphStructure()
 	{
 		List<Node> degrees = Toolkit.degreeMap(primeGraph);	
-		degrees.stream().sorted(nodeComparator).forEach(n -> log.info(String.format("Prime %s: created-from:[%s] creates-primes:[%s]", 
+		degrees.stream().sorted(nodeComparator).forEach(n -> System.out.println(String.format("Prime %s: created-from:[count(%d), %s] creates-primes:[count(%d), %s]", 
 						n.getId(), 
+						n.enteringEdges().count(),
 						n.enteringEdges().map(e -> e.getSourceNode().getId()).collect(Collectors.joining(",")),
+						n.leavingEdges().count(),
 						n.leavingEdges().map(e -> e.getTargetNode().getId()).collect(Collectors.joining(",")))));		
 	}
 	
@@ -81,7 +84,7 @@ public class PrimeGrapher
 			while(true) 
 			{ 
 				PrimeRefIntfc ref = ps.getPrimeRef(i++);
-				log.info(String.format("Prime %d bases %s", ref.getPrime(), ref.getIdxPrimes()));
+				System.out.println(String.format("Prime %d bases %s", ref.getPrime(), ref.getIdxPrimes()));
 			}
 		}
 		catch(Exception e)
@@ -116,7 +119,7 @@ public class PrimeGrapher
 				pr = ps.getPrimeRef(i);
 				primeReduction(i++, reducer.apply(maxReduce, ret));
 				int [] tmpI = {0};			
-				log.info(String.format("Prime [%d] %s", pr.getPrime(), 
+				System.out.println(String.format("Prime [%d] %s", pr.getPrime(), 
 						ret.stream().map(idx -> String.format("base-%d-count:[%d]", ps.getPrime(tmpI[0]++), idx)).collect(Collectors.joining(", "))));
 			}
 			catch(Exception e)
@@ -141,7 +144,7 @@ public class PrimeGrapher
 	private void populateData(int maxCount)
 	{
 		// Start setting up the actual graph/data generations
-		PrimeNodeGenerator primeNodeGenerator = new PrimeNodeGenerator(ps, primeGraph, maxCount);
+		PrimeNodeGenerator primeNodeGenerator = new PrimeNodeGenerator(ps, primeGraph);
 		primeNodeGenerator.begin();
 		
 		while (primeNodeGenerator.nextEvents());		
