@@ -32,6 +32,8 @@ public class PrimeToolKit
 		int exitCode = new CommandLine(ptk)
 				.setExecutionStrategy(ptk::executionStrategy)
 				.execute(args);
+	
+		
 		System.exit(exitCode);
 	}
 
@@ -60,7 +62,7 @@ public class PrimeToolKit
 	void graph()
 	{
 		PrimeGrapher primeGrapher = PrimeSourceFactory.primeGrapher(maxCount, confidenceLevel);	
-		primeGrapher.setNodeLocations();
+		//primeGrapher.setNodeLocations();
 		primeGrapher.viewDefault();		
 	}
 }

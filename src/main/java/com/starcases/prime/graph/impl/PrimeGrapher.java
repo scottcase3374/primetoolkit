@@ -1,17 +1,31 @@
 package com.starcases.prime.graph.impl;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import org.graphstream.algorithm.Toolkit;
-import org.graphstream.graph.*;
-import org.graphstream.graph.implementations.MultiGraph;
-import org.graphstream.ui.view.Viewer;
+import org.gephi.appearance.api.AppearanceController;
+import org.gephi.appearance.api.AppearanceModel;
+import org.gephi.appearance.api.Function;
+import org.gephi.appearance.plugin.RankingLabelSizeTransformer;
+import org.gephi.appearance.plugin.RankingNodeSizeTransformer;
+import org.gephi.graph.api.Column;
+import org.gephi.graph.api.DirectedGraph;
+import org.gephi.graph.api.GraphController;
+import org.gephi.graph.api.GraphModel;
+import org.gephi.graph.api.GraphView;
+import org.gephi.graph.api.Node;
+import org.gephi.layout.plugin.AutoLayout;
+import org.gephi.layout.plugin.force.StepDisplacement;
+import org.gephi.layout.plugin.force.yifanHu.YifanHuLayout;
+import org.gephi.layout.plugin.forceAtlas.ForceAtlasLayout;
+import org.gephi.project.api.ProjectController;
+import org.gephi.project.api.Workspace;
+import org.gephi.statistics.plugin.GraphDistance;
+import org.openide.util.Lookup;
 
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
@@ -29,51 +43,75 @@ import picocli.CommandLine.Command;
 @Log
 public class PrimeGrapher 
 {
-	private static Comparator<Node> nodeComparator = (Node o1, Node o2) -> Integer.decode(o1.getId()).compareTo(Integer.decode(o2.getId()));
+	private static Comparator<Node> nodeComparator = (Node o1, Node o2) -> (Integer.decode((String)o1.getId())).compareTo( Integer.decode((String)o2.getId()));
 
-	private Graph primeGraph;
+	private ProjectController pc;
+
+	private Workspace workspace; 
 	private PrimeSourceIntfc ps;
+	private GraphModel primeModel;
+	private DirectedGraph primeGraph; 
+	private AppearanceController appearanceController; 
+    private AppearanceModel appearanceModel; 
 	
 	public PrimeGrapher(PrimeSourceIntfc ps, int maxCount)
 	{
 		this.ps = ps;
 		this.ps.init();
-		init();
-		this.populateData(maxCount);
-	}
+		
+		pc = org.openide.util.Lookup.getDefault().lookup(ProjectController.class);
+		pc.newProject();
+		workspace = pc.getCurrentWorkspace();
+		primeModel = org.openide.util.Lookup.getDefault().lookup(GraphController.class).getGraphModel(workspace);
 	
-	private void init()
-	{
-		setUIProperties();
-		this.primeGraph = genEmptyGraphStructure();
-		setupDefaultVisualPropertiesAndCSS();
+		primeGraph = primeModel.getDirectedGraph();
+		this.populateData(maxCount);
+		
 	}
 	
 	public void setNodeLocations()
 	{
-		List<Node> degrees = Toolkit.degreeMap(primeGraph);	
-		degrees.stream().sorted(nodeComparator).forEach(n ->  
-			/*n.setAttribute("xyz", 80 - Math.sin(11 * Integer.decode(n.getId()))*127,								   
-								  (n.getOutDegree()* 11 + Math.sin(Integer.decode(n.getId()))) + 
-								    	(n.getInDegree() * 11 + Math.cos(Integer.decode(n.getId()))) 
-								 ,0)*/
-		n.setAttribute("xyz", 								   
-				30 + 400 * (Math.log10(Integer.decode(n.getId())) + n.getInDegree()) * Math.signum(Math.cos(n.getInDegree()*11)),  
-				80 + 31 * n.getOutDegree() * Math.sin(n.getOutDegree()), 				     
-				80 + 109 * Math.cos(Integer.decode(n.getId()) ))
-	 	); // Integer.decode(n.getId()
-	}
+		log.info("setNodeLocations() - start");
+		primeGraph
+		.getNodes()				
+		.toCollection()
+		.stream()
+		.sorted(nodeComparator)
+		.forEach(n -> 
+						{
+							float inDegree = primeModel.getDirectedGraph().getInDegree(n);
+							float outDegree = primeModel.getDirectedGraph().getOutDegree(n);
+							Integer id = Integer.decode((String)n.getId());
+							
+							float x = 80 - (float)Math.sin(11 * id *127);
+							float y = (inDegree * 11 + (float)Math.sin(id)) + (outDegree * 11 + (float)Math.cos(id)) ;
+							float z = 0;
+							n.setX(x);
+							n.setY(y);
+							n.setZ(z);
+							log.info(String.format("Prime %s  x[%f] y[%f] z[%f]  in-degree[%f] out-degree[%f]", n.getLabel(), x,y,z, inDegree, outDegree ));
+						
+						});		
+		log.info("setNodeLocations() - exit");
+}
+	
 	
 	@Command
 	public void logGraphStructure()
 	{
-		List<Node> degrees = Toolkit.degreeMap(primeGraph);	
-		degrees.stream().sorted(nodeComparator).forEach(n -> System.out.println(String.format("Prime %s: created-from:[count(%d), %s] creates-primes:[count(%d), %s]", 
-						n.getId(), 
-						n.enteringEdges().count(),
-						n.enteringEdges().map(e -> e.getSourceNode().getId()).collect(Collectors.joining(",")),
-						n.leavingEdges().count(),
-						n.leavingEdges().map(e -> e.getTargetNode().getId()).collect(Collectors.joining(",")))));		
+		System.out.println("log structure");
+			primeGraph
+				.getNodes()				
+				.toCollection()
+				.stream()
+				.sorted(nodeComparator)
+				.forEach(n -> 
+							System.out.println(String.format("Prime %s: created-from:[count(%d), %s] creates-primes:[count(%d), %s]", 
+						n.getLabel(), 
+						primeModel.getDirectedGraph().getInDegree(n),
+						primeModel.getDirectedGraph().getPredecessors(n).toCollection().stream().map(nn -> nn.getLabel()).collect(Collectors.joining(",")),
+						primeModel.getDirectedGraph().getOutDegree(n),
+						primeModel.getDirectedGraph().getSuccessors(n).toCollection().stream().map(nn -> nn.getLabel()).collect(Collectors.joining(",")))));		
 	}
 	
 	public void logNodeStructure()
@@ -144,50 +182,60 @@ public class PrimeGrapher
 	private void populateData(int maxCount)
 	{
 		// Start setting up the actual graph/data generations
-		PrimeNodeGenerator primeNodeGenerator = new PrimeNodeGenerator(ps, primeGraph);
+		PrimeNodeGenerator primeNodeGenerator = new PrimeNodeGenerator(ps, primeModel, primeGraph);
 		primeNodeGenerator.begin();
 		
 		while (primeNodeGenerator.nextEvents());		
 		
 		primeNodeGenerator.end();		
 	}
-
-	private void setupDefaultVisualPropertiesAndCSS()
-	{
-		// Setup CSS - overriding in most of the code at the moment.
-		URL res = primeGraph.getClass().getClassLoader().getResource("default.css");
-		try
-		{
-			String stylesheet = "url(" + res.toURI() + ")";
-			primeGraph.setAttribute("ui.stylesheet", stylesheet);
-		}
-		catch(Exception e)
-		{
-			log.severe("Can't load default.css:" + e.toString()); 
-		}
-		
-		// Setup up some items to improve visual output quality
-		primeGraph.setAttribute("ui.quality");
-		primeGraph.setAttribute("ui.antialias");		
-	}
-
+	
 	public void viewDefault()
 	{
-		// Setup / start viewing resulting graph
-		Viewer viewer = primeGraph.display(false);
-		viewer.getDefaultView();		
-	}
+        GraphDistance distance = new GraphDistance();
+        distance.setDirected(true);
+        distance.execute(primeModel);
+        
+		log.info("Enter viewDefault()");
+		AutoLayout autoLayout = new AutoLayout(1, TimeUnit.MINUTES);
+        autoLayout.setGraphModel(primeModel);
+        YifanHuLayout firstLayout = new YifanHuLayout(null, new StepDisplacement(1f));
+        ForceAtlasLayout secondLayout = new ForceAtlasLayout(null);
+        AutoLayout.DynamicProperty adjustBySizeProperty = AutoLayout.createDynamicProperty("forceAtlas.adjustSizes.name", Boolean.TRUE, 0.1f);//True after 10% of layout time
+        AutoLayout.DynamicProperty repulsionProperty = AutoLayout.createDynamicProperty("forceAtlas.repulsionStrength.name", 500., 0f);//500 for the complete period
+        autoLayout.addLayout(firstLayout, 0.5f);
+        autoLayout.addLayout(secondLayout, 0.5f, new AutoLayout.DynamicProperty[]{adjustBySizeProperty, repulsionProperty});
+        autoLayout.execute();
+    	appearanceController = Lookup.getDefault().lookup(AppearanceController.class);
+        appearanceModel = appearanceController.getModel();
+       
+        //Rank size by centrality
+       // Column centralityColumn = primeModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
+      //  Function centralityRanking = appearanceModel.getNodeFunction(primeGraph, centralityColumn, RankingNodeSizeTransformer.class);
+      //  RankingNodeSizeTransformer centralityTransformer = (RankingNodeSizeTransformer) centralityRanking.getTransformer();
+      //  centralityTransformer.setMinSize(3);
+      //  centralityTransformer.setMaxSize(10);
+      //  appearanceController.transform(centralityRanking);
 
-	private Graph genEmptyGraphStructure()
-	{
-		// Allow multiple edges between nodes with "MultiGraph"
-		return new MultiGraph("Primes");
-	}
-	
-	private void setUIProperties()
-	{
-		// Setup up props for what UI systems are in use.
-		System.setProperty("sun.java2d.opengl", "True");
-		System.setProperty("org.graphstream.ui", "swing");	
+        //Rank label size - set a multiplier size
+//        Function centralityRanking2 = appearanceModel.getNodeFunction(primeGraph, centralityColumn, RankingLabelSizeTransformer.class);
+ //       RankingLabelSizeTransformer labelSizeTransformer = (RankingLabelSizeTransformer) centralityRanking2.getTransformer();
+   //     labelSizeTransformer.setMinSize(1);
+     //   labelSizeTransformer.setMaxSize(3);
+   //     appearanceController.transform(centralityRanking2);
+        
+        GraphView gv = primeGraph.getView();
+        primeModel.setVisibleView(gv);
+        
+        try
+		{
+			do
+			{
+				System.out.println("press key to exit");
+			} while (System.in.read() != -1);
+		}
+		catch(Exception e)
+		{}	        
+        log.info("Exit viewDefault()");
 	}
 }

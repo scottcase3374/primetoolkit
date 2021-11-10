@@ -11,12 +11,13 @@
 	<name>PrimeToolKit</name>
 	<description>Demo project for Spring Boot</description>
 	<properties>
-		<java.version>11</java.version>
+		<java.version>8</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<compiler-plugin.version>3.8.1</compiler-plugin.version>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
+		<netbeans.version>RELEASE125</netbeans.version>
 	</properties>
 
 	<dependencies>
@@ -26,27 +27,202 @@
 			<version>1.18.22</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.graphstream</groupId>
-			<artifactId>gs-core</artifactId>
-			<version>2.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.graphstream</groupId>
-			<artifactId>gs-algo</artifactId>
-			<version>2.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.graphstream</groupId>
-			<artifactId>gs-ui-swing</artifactId>
-			<version>2.0</version>
-		</dependency>
+
 		<dependency>
 			<groupId>info.picocli</groupId>
 			<artifactId>picocli</artifactId>
 			<version>4.6.2</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.netbeans.api</groupId>
+			<artifactId>org-netbeans-api-annotations-common</artifactId>
+			<version>${netbeans.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.netbeans.modules</groupId>
+			<artifactId>org-netbeans-modules-masterfs</artifactId>
+			<version>${netbeans.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.netbeans.api</groupId>
+			<artifactId>org-netbeans-modules-options-api</artifactId>
+			<version>${netbeans.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.netbeans.api</groupId>
+			<artifactId>org-openide-util-lookup</artifactId>
+			<version>${netbeans.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.netbeans.api</groupId>
+			<artifactId>org-openide-awt</artifactId>
+			<version>${netbeans.version}</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.netbeans.api</groupId>
+			<artifactId>org-openide-dialogs</artifactId>
+			<version>${netbeans.version}</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.netbeans.api</groupId>
+			<artifactId>org-openide-explorer</artifactId>
+			<version>${netbeans.version}</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.netbeans.api</groupId>
+			<artifactId>org-openide-filesystems</artifactId>
+			<version>${netbeans.version}</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.netbeans.api</groupId>
+			<artifactId>org-openide-io</artifactId>
+			<version>${netbeans.version}</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.netbeans.api</groupId>
+			<artifactId>org-openide-modules</artifactId>
+			<version>${netbeans.version}</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.netbeans.api</groupId>
+			<artifactId>org-openide-nodes</artifactId>
+			<version>${netbeans.version}</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.netbeans.api</groupId>
+			<artifactId>org-openide-util</artifactId>
+			<version>${netbeans.version}</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.netbeans.api</groupId>
+			<artifactId>org-openide-util-ui</artifactId>
+			<version>${netbeans.version}</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.netbeans.api</groupId>
+			<artifactId>org-openide-windows</artifactId>
+			<version>${netbeans.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.netbeans.api</groupId>
+			<artifactId>org-netbeans-api-progress</artifactId>
+			<version>${netbeans.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.netbeans.api</groupId>
+			<artifactId>org-netbeans-api-progress-nb</artifactId>
+			<version>${netbeans.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.netbeans.api</groupId>
+			<artifactId>org-netbeans-swing-outline</artifactId>
+			<version>${netbeans.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.netbeans.api</groupId>
+			<artifactId>org-netbeans-swing-tabcontrol</artifactId>
+			<version>${netbeans.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.gephi</groupId>
+			<artifactId>gephi-toolkit</artifactId>
+			<version>0.9.2</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.netbeans.api</groupId>
+					<artifactId>org-openide-util-lookup</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.netbeans.modules</groupId>
+					<artifactId>org-netbeans-core-startup-base</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.netbeans.modules</groupId>
+					<artifactId>org-netbeans-modules-masterfs</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.netbeans.modules</groupId>
+					<artifactId>org-netbeans-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.netbeans.api</groupId>
+					<artifactId>org-netbeans-api-progress</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.netbeans.api</groupId>
+					<artifactId>org-netbeans-api-progress-nb</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.netbeans.api</groupId>
+					<artifactId>org-netbeans-swing-outline</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.netbeans.api</groupId>
+					<artifactId>org-netbeans-swing-tabcontrol</artifactId>
+				</exclusion>
+
+			</exclusions>
+		</dependency>
+
 	</dependencies>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.netbeans.modules</groupId>
+				<artifactId>org-netbeans-core</artifactId>
+				<version>${netbeans.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.netbeans.cluster</groupId>
+				<artifactId>platform</artifactId>
+				<version>${netbeans.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.netbeans.modules</groupId>
+				<artifactId>org-netbeans-core-startup-base</artifactId>
+				<version>${netbeans.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+
+			<dependency>
+				<groupId>org.gephi</groupId>
+				<artifactId>gephi-parent</artifactId>
+				<version>0.9.2</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	<build>
 		<plugins>
 			<plugin>

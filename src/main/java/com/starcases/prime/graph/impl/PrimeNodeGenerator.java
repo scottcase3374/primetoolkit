@@ -1,11 +1,9 @@
 package com.starcases.prime.graph.impl;
 
-import org.graphstream.algorithm.generator.Generator;
-import org.graphstream.graph.Edge;
-import org.graphstream.graph.Graph;
-import org.graphstream.stream.SourceBase;
-import org.graphstream.ui.spriteManager.Sprite;
-import org.graphstream.ui.spriteManager.SpriteManager;
+import org.gephi.graph.api.DirectedGraph;
+import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.GraphModel;
+import org.gephi.graph.api.Node;
 
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
@@ -18,27 +16,34 @@ import lombok.extern.java.Log;
  * research projects.
  */
 @Log
-public class PrimeNodeGenerator extends SourceBase implements Generator 
+public class PrimeNodeGenerator //extends SourceBase implements Generator 
 {
-	int edgeId = 1;
-	SpriteManager sman;
-	Graph graph;
+	GraphModel graphModel;
 	int level = 0;
 	PrimeRefIntfc primeRef = null;
-	
 	PrimeSourceIntfc ps;
+	DirectedGraph graph;
 	
-	public PrimeNodeGenerator(PrimeSourceIntfc ps, Graph graph)
+	public PrimeNodeGenerator(PrimeSourceIntfc ps, GraphModel graphModel, DirectedGraph graph)
 	{
 		this.ps = ps;
-		
-		this.addSink(graph);
-		sman = new SpriteManager(graph);
+		this.graphModel = graphModel;
 		this.graph = graph;
 	}
 	
 	public void begin() 
-	{}
+	{	
+		for (level = 0; level < 2; level++)
+		{
+			PrimeRefIntfc ref = ps.getPrimeRef(level);
+			Node targetNode = graphModel.factory().newNode(ref.getPrime().toString());
+			targetNode.setLabel(ref.getPrime().toString());
+			Edge e = graphModel.factory().newEdge(targetNode, targetNode , true);
+			graph.addNode(targetNode);
+			graph.addEdge(e);
+		}
+		
+	}
 
 	public boolean nextEvents() 
 	{
@@ -55,6 +60,7 @@ public class PrimeNodeGenerator extends SourceBase implements Generator
 		catch(IndexOutOfBoundsException e)
 		{
 			// do nothing - final return handles it.
+			log.info("dataset exhaused");
 		}
 		return false;
 	}
@@ -65,37 +71,16 @@ public class PrimeNodeGenerator extends SourceBase implements Generator
 	}
 
 	/**
-	 * Could experiment with some additional criteria to generate some more 
-	 * dynamic values for colors of nodes, edges, etc.
-	 * 
-	 * @return String in form of "rgb(r#,g#,b#)"
-	 */
-	protected String getColor()
-	{
-		int level = 2;
-		int r = 255 - level * 8;
-		int g = 80 + level * 4;
-		int b = 2 + level * 8;
-		return  String.format("rgb(%d,%d,%d)", r,g,b);
-	}
-	
-	/**
 	 * get a primeRef and add to graph.  
 	 * set some attributes for data/visuals.
 	 * Create edges from prime node to primes from the base sets representing the prime.
 	 */
 	protected void addNode() 
 	{
-		String color = getColor();
-		 
 		// Prime node
-		String primeNode = primeRef.getPrime().toString();
-		sendNodeAdded(sourceId, primeNode);
-	
-		Sprite s = sman.addSprite(primeNode);
-		s.attachToNode(primeNode);
-		s.setAttribute("ui.style","fill-color: " + color + ";");
-		s.setAttribute("ui.label", primeNode);
+		String primeNodeLabel = primeRef.getPrime().toString();
+		Node targetNode = graphModel.factory().newNode(primeNodeLabel);
+		targetNode.setLabel(primeNodeLabel);
 		
 		// Link from prime node to prime bases
 		primeRef.getPrimeBaseIdxs()
@@ -105,15 +90,10 @@ public class PrimeNodeGenerator extends SourceBase implements Generator
 							.stream()
 							.forEach(
 									p -> {
-											sendEdgeAdded(	sourceId, 
-														Integer.toString(edgeId), 														
-														ps.getPrime(p).toString(),
-														primeNode,  
-														true);
-											Edge e = graph.getEdge(Integer.toString(edgeId++));
-											e.setAttribute("ui.style", 
-													"fill-color: " + color + ";");
-											e.setAttribute("ui.style", "shape: cubic-curve;");
+											Node sourceNode = graphModel.getNodeTable().getGraph().getNode(ps.getPrimeRef(p).getPrime().toString());
+											graph.addNode(targetNode);
+											Edge e = graphModel.factory().newEdge(sourceNode, targetNode , true);
+											graph.addEdge(e);
 										}));
 		level++;
 	}
