@@ -2,31 +2,18 @@ package com.starcases.prime.graph.impl;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import org.gephi.appearance.api.AppearanceController;
-import org.gephi.appearance.api.AppearanceModel;
-import org.gephi.appearance.api.Function;
-import org.gephi.appearance.plugin.RankingLabelSizeTransformer;
-import org.gephi.appearance.plugin.RankingNodeSizeTransformer;
-import org.gephi.graph.api.Column;
-import org.gephi.graph.api.DirectedGraph;
-import org.gephi.graph.api.GraphController;
-import org.gephi.graph.api.GraphModel;
-import org.gephi.graph.api.GraphView;
-import org.gephi.graph.api.Node;
-import org.gephi.layout.plugin.AutoLayout;
-import org.gephi.layout.plugin.force.StepDisplacement;
-import org.gephi.layout.plugin.force.yifanHu.YifanHuLayout;
-import org.gephi.layout.plugin.forceAtlas.ForceAtlasLayout;
-import org.gephi.project.api.ProjectController;
-import org.gephi.project.api.Workspace;
-import org.gephi.statistics.plugin.GraphDistance;
-import org.openide.util.Lookup;
+import javax.swing.WindowConstants;
 
+import org.jgrapht.Graph;
+import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.builder.GraphBuilder;
+
+import com.starcases.prime.graph.visualize.VisualizeGraph;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
@@ -43,75 +30,62 @@ import picocli.CommandLine.Command;
 @Log
 public class PrimeGrapher 
 {
-	private static Comparator<Node> nodeComparator = (Node o1, Node o2) -> (Integer.decode((String)o1.getId())).compareTo( Integer.decode((String)o2.getId()));
+	private static Comparator<String> nodeComparator = (String o1, String o2) -> Integer.decode(o1).compareTo(Integer.decode(o2));
 
-	private ProjectController pc;
-
-	private Workspace workspace; 
 	private PrimeSourceIntfc ps;
-	private GraphModel primeModel;
-	private DirectedGraph primeGraph; 
-	private AppearanceController appearanceController; 
-    private AppearanceModel appearanceModel; 
 	
-	public PrimeGrapher(PrimeSourceIntfc ps, int maxCount)
+	private GraphBuilder<String, DefaultEdge, DefaultDirectedGraph<String, DefaultEdge>> primeGraph = new GraphBuilder<>(new DefaultDirectedGraph<>(DefaultEdge.class));
+	
+	private Graph<String,DefaultEdge> graph;
+
+	public PrimeGrapher(PrimeSourceIntfc ps)
 	{
 		this.ps = ps;
 		this.ps.init();
-		
-		pc = org.openide.util.Lookup.getDefault().lookup(ProjectController.class);
-		pc.newProject();
-		workspace = pc.getCurrentWorkspace();
-		primeModel = org.openide.util.Lookup.getDefault().lookup(GraphController.class).getGraphModel(workspace);
-	
-		primeGraph = primeModel.getDirectedGraph();
-		this.populateData(maxCount);
-		
+		this.populateData();
+		this.graph = primeGraph.build();
 	}
 	
 	public void setNodeLocations()
 	{
 		log.info("setNodeLocations() - start");
-		primeGraph
-		.getNodes()				
-		.toCollection()
+		graph
+		.vertexSet()
 		.stream()
 		.sorted(nodeComparator)
 		.forEach(n -> 
 						{
-							float inDegree = primeModel.getDirectedGraph().getInDegree(n);
-							float outDegree = primeModel.getDirectedGraph().getOutDegree(n);
-							Integer id = Integer.decode((String)n.getId());
+							float inDegree = graph.inDegreeOf(n);
+							float outDegree = graph.outDegreeOf(n);
+							Integer id = Integer.decode(n);
 							
 							float x = 80 - (float)Math.sin(11 * id *127);
 							float y = (inDegree * 11 + (float)Math.sin(id)) + (outDegree * 11 + (float)Math.cos(id)) ;
 							float z = 0;
-							n.setX(x);
-							n.setY(y);
-							n.setZ(z);
-							log.info(String.format("Prime %s  x[%f] y[%f] z[%f]  in-degree[%f] out-degree[%f]", n.getLabel(), x,y,z, inDegree, outDegree ));
+						//	n.setX(x);
+						//	n.setY(y);
+						//	n.setZ(z);
+							log.info(String.format("Prime %s  x[%f] y[%f] z[%f]  in-degree[%f] out-degree[%f]", n, x,y,z, inDegree, outDegree ));
 						
 						});		
 		log.info("setNodeLocations() - exit");
 }
 	
-	
 	@Command
 	public void logGraphStructure()
 	{
 		System.out.println("log structure");
-			primeGraph
-				.getNodes()				
-				.toCollection()
+			graph
+				.vertexSet()				
 				.stream()
 				.sorted(nodeComparator)
 				.forEach(n -> 
 							System.out.println(String.format("Prime %s: created-from:[count(%d), %s] creates-primes:[count(%d), %s]", 
-						n.getLabel(), 
-						primeModel.getDirectedGraph().getInDegree(n),
-						primeModel.getDirectedGraph().getPredecessors(n).toCollection().stream().map(nn -> nn.getLabel()).collect(Collectors.joining(",")),
-						primeModel.getDirectedGraph().getOutDegree(n),
-						primeModel.getDirectedGraph().getSuccessors(n).toCollection().stream().map(nn -> nn.getLabel()).collect(Collectors.joining(",")))));		
+						n, 
+						graph.inDegreeOf(n),
+						graph.incomingEdgesOf(n).stream().map(e -> graph.getEdgeSource(e)).collect(Collectors.joining(",")),
+						graph.outDegreeOf(n),
+						graph.outgoingEdgesOf(n).stream().map(e -> graph.getEdgeTarget(e)).collect(Collectors.joining(",")))));		
 	}
 	
 	public void logNodeStructure()
@@ -126,7 +100,9 @@ public class PrimeGrapher
 			}
 		}
 		catch(Exception e)
-		{}
+		{
+			log.severe("Exception:" + e);
+		}
 	}
 	
 	final BiFunction<Integer, ArrayList<Integer>, Consumer<Integer>> reducer = (m, a)-> idx -> 
@@ -179,63 +155,45 @@ public class PrimeGrapher
 					.forEach(reducer));
 	}
 	
-	private void populateData(int maxCount)
+	private void populateData()
 	{
 		// Start setting up the actual graph/data generations
-		PrimeNodeGenerator primeNodeGenerator = new PrimeNodeGenerator(ps, primeModel, primeGraph);
+		PrimeNodeGenerator primeNodeGenerator = new PrimeNodeGenerator(ps, primeGraph);
 		primeNodeGenerator.begin();
 		
 		while (primeNodeGenerator.nextEvents());		
-		
-		primeNodeGenerator.end();		
 	}
+	
+	/*
+	 DOTExporter<URI, DefaultEdge> exporter =
+            new DOTExporter<>(v -> v.getHost().replace('.', '_'));
+        exporter.setVertexAttributeProvider((v) -> {
+            Map<String, Attribute> map = new LinkedHashMap<>();
+            map.put("label", DefaultAttribute.createAttribute(v.toString()));
+            return map;
+        });
+        Writer writer = new StringWriter();
+        exporter.exportGraph(hrefGraph, writer);
+        System.out.println(writer.toString());
+	 */
+	
 	
 	public void viewDefault()
 	{
-        GraphDistance distance = new GraphDistance();
-        distance.setDirected(true);
-        distance.execute(primeModel);
-        
-		log.info("Enter viewDefault()");
-		AutoLayout autoLayout = new AutoLayout(1, TimeUnit.MINUTES);
-        autoLayout.setGraphModel(primeModel);
-        YifanHuLayout firstLayout = new YifanHuLayout(null, new StepDisplacement(1f));
-        ForceAtlasLayout secondLayout = new ForceAtlasLayout(null);
-        AutoLayout.DynamicProperty adjustBySizeProperty = AutoLayout.createDynamicProperty("forceAtlas.adjustSizes.name", Boolean.TRUE, 0.1f);//True after 10% of layout time
-        AutoLayout.DynamicProperty repulsionProperty = AutoLayout.createDynamicProperty("forceAtlas.repulsionStrength.name", 500., 0f);//500 for the complete period
-        autoLayout.addLayout(firstLayout, 0.5f);
-        autoLayout.addLayout(secondLayout, 0.5f, new AutoLayout.DynamicProperty[]{adjustBySizeProperty, repulsionProperty});
-        autoLayout.execute();
-    	appearanceController = Lookup.getDefault().lookup(AppearanceController.class);
-        appearanceModel = appearanceController.getModel();
-       
-        //Rank size by centrality
-       // Column centralityColumn = primeModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
-      //  Function centralityRanking = appearanceModel.getNodeFunction(primeGraph, centralityColumn, RankingNodeSizeTransformer.class);
-      //  RankingNodeSizeTransformer centralityTransformer = (RankingNodeSizeTransformer) centralityRanking.getTransformer();
-      //  centralityTransformer.setMinSize(3);
-      //  centralityTransformer.setMaxSize(10);
-      //  appearanceController.transform(centralityRanking);
-
-        //Rank label size - set a multiplier size
-//        Function centralityRanking2 = appearanceModel.getNodeFunction(primeGraph, centralityColumn, RankingLabelSizeTransformer.class);
- //       RankingLabelSizeTransformer labelSizeTransformer = (RankingLabelSizeTransformer) centralityRanking2.getTransformer();
-   //     labelSizeTransformer.setMinSize(1);
-     //   labelSizeTransformer.setMaxSize(3);
-   //     appearanceController.transform(centralityRanking2);
-        
-        GraphView gv = primeGraph.getView();
-        primeModel.setVisibleView(gv);
-        
         try
 		{
+			VisualizeGraph frame = new VisualizeGraph(this.graph);
+			frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+			frame.setSize(400, 320);
+			frame.setVisible(true);	
 			do
 			{
-				System.out.println("press key to exit");
+				// will exit when window closes
 			} while (System.in.read() != -1);
 		}
 		catch(Exception e)
-		{}	        
-        log.info("Exit viewDefault()");
+		{
+			log.severe("Exception:" + e);
+		}	        
 	}
 }

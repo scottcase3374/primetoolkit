@@ -16,6 +16,6 @@ public class PrimeSourceFactory
 	public static PrimeGrapher primeGrapher(int maxCount, int confidenceLevel)
 	{
 		
-		return new PrimeGrapher(primeSource(maxCount, confidenceLevel), maxCount);
+		return new PrimeGrapher(primeSource(maxCount, confidenceLevel));
 	}
 }

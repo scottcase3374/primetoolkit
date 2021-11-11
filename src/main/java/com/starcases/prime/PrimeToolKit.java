@@ -19,7 +19,9 @@ public class PrimeToolKit
 	int confidenceLevel = 100;
 	
 	public PrimeToolKit()
-	{}
+	{
+		// Nothing to do here
+	}
 	
 	private int executionStrategy(ParseResult parseResult)
 	{
@@ -33,7 +35,6 @@ public class PrimeToolKit
 				.setExecutionStrategy(ptk::executionStrategy)
 				.execute(args);
 	
-		
 		System.exit(exitCode);
 	}
 

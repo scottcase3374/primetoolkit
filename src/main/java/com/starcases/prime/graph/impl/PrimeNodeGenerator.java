@@ -1,9 +1,8 @@
 package com.starcases.prime.graph.impl;
 
-import org.gephi.graph.api.DirectedGraph;
-import org.gephi.graph.api.Edge;
-import org.gephi.graph.api.GraphModel;
-import org.gephi.graph.api.Node;
+import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.builder.GraphBuilder;
 
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
@@ -16,18 +15,17 @@ import lombok.extern.java.Log;
  * research projects.
  */
 @Log
-public class PrimeNodeGenerator //extends SourceBase implements Generator 
+public class PrimeNodeGenerator
 {
-	GraphModel graphModel;
+	
 	int level = 0;
 	PrimeRefIntfc primeRef = null;
 	PrimeSourceIntfc ps;
-	DirectedGraph graph;
+	GraphBuilder<String, DefaultEdge, DefaultDirectedGraph<String, DefaultEdge>> graph;
 	
-	public PrimeNodeGenerator(PrimeSourceIntfc ps, GraphModel graphModel, DirectedGraph graph)
+	public PrimeNodeGenerator(PrimeSourceIntfc ps, GraphBuilder<String, DefaultEdge, DefaultDirectedGraph<String, DefaultEdge>> graph)
 	{
 		this.ps = ps;
-		this.graphModel = graphModel;
 		this.graph = graph;
 	}
 	
@@ -35,14 +33,11 @@ public class PrimeNodeGenerator //extends SourceBase implements Generator
 	{	
 		for (level = 0; level < 2; level++)
 		{
-			PrimeRefIntfc ref = ps.getPrimeRef(level);
-			Node targetNode = graphModel.factory().newNode(ref.getPrime().toString());
-			targetNode.setLabel(ref.getPrime().toString());
-			Edge e = graphModel.factory().newEdge(targetNode, targetNode , true);
-			graph.addNode(targetNode);
-			graph.addEdge(e);
+			PrimeRefIntfc targetNode = ps.getPrimeRef(level);
+			graph.addVertex(targetNode.getPrime().toString());
+			String targetNodeId = targetNode.getPrime().toString();
+			graph.addEdge(targetNodeId, targetNodeId);
 		}
-		
 	}
 
 	public boolean nextEvents() 
@@ -65,23 +60,12 @@ public class PrimeNodeGenerator //extends SourceBase implements Generator
 		return false;
 	}
 
-	public void end() 
-	{
-		// Nothing to do
-	}
-
 	/**
 	 * get a primeRef and add to graph.  
-	 * set some attributes for data/visuals.
 	 * Create edges from prime node to primes from the base sets representing the prime.
 	 */
 	protected void addNode() 
-	{
-		// Prime node
-		String primeNodeLabel = primeRef.getPrime().toString();
-		Node targetNode = graphModel.factory().newNode(primeNodeLabel);
-		targetNode.setLabel(primeNodeLabel);
-		
+	{	
 		// Link from prime node to prime bases
 		primeRef.getPrimeBaseIdxs()
 			.forEach(
@@ -89,11 +73,11 @@ public class PrimeNodeGenerator //extends SourceBase implements Generator
 							 base
 							.stream()
 							.forEach(
-									p -> {
-											Node sourceNode = graphModel.getNodeTable().getGraph().getNode(ps.getPrimeRef(p).getPrime().toString());
-											graph.addNode(targetNode);
-											Edge e = graphModel.factory().newEdge(sourceNode, targetNode , true);
-											graph.addEdge(e);
+									p -> {											
+											String targetNodeId = primeRef.getPrime().toString();
+											graph.addVertex(targetNodeId);
+											String sourceNodeId = ps.getPrimeRef(p).getPrime().toString();
+											graph.addEdge(sourceNodeId, targetNodeId);
 										}));
 		level++;
 	}
