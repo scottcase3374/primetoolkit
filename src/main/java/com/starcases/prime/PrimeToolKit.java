@@ -1,7 +1,11 @@
 package com.starcases.prime;
 
+import java.io.PrintWriter;
 
+import com.starcases.prime.graph.impl.Export;
 import com.starcases.prime.graph.impl.PrimeGrapher;
+import com.starcases.prime.intfc.PrimeSourceIntfc;
+
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -17,7 +21,7 @@ public class PrimeToolKit
 	
 	@Option(names = {"--confidence-level"}, description = "Drives confidence level of primality check.")
 	int confidenceLevel = 100;
-	
+		
 	public PrimeToolKit()
 	{
 		// Nothing to do here
@@ -59,11 +63,37 @@ public class PrimeToolKit
 		primeGrapher.logReduced(maxReduce);		
 	}
 	
+	@Command(name = "logTree")
+	void logTree()
+	{
+		PrimeGrapher primeGrapher = PrimeSourceFactory.primeGrapher(maxCount, confidenceLevel);
+		primeGrapher.logTree(maxReduce);
+	}
+	
 	@Command(name = "defaultGraph") 
 	void graph()
 	{
 		PrimeGrapher primeGrapher = PrimeSourceFactory.primeGrapher(maxCount, confidenceLevel);	
 		//primeGrapher.setNodeLocations();
 		primeGrapher.viewDefault();		
+	}
+	
+	@Command(name = "export")
+	void export()
+	{
+		try
+		{
+			try (PrintWriter pw = new PrintWriter("/home/scott/graph.gml"))
+			{
+				PrimeSourceIntfc ps = PrimeSourceFactory.primeSource(maxCount, confidenceLevel);
+				Export e = new Export(ps, pw);
+				e.export();
+				pw.flush();
+			}			
+		}
+		catch(Exception e)
+		{
+			System.out.println("Exception "+ e);
+		}
 	}
 }

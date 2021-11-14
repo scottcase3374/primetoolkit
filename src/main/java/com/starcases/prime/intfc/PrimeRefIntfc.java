@@ -2,13 +2,12 @@ package com.starcases.prime.intfc;
 
 import java.math.BigInteger;
 import java.util.BitSet;
-import java.util.stream.Stream;
 
 public interface PrimeRefIntfc
 {
 	BigInteger getPrime();
 	
-	Stream<BitSet> getPrimeBaseIdxs();
+	BitSet getPrimeBaseIdxs();
 	
 	/**
 	 * 

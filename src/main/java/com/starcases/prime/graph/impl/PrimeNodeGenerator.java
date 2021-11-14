@@ -10,8 +10,10 @@ import com.starcases.prime.intfc.PrimeSourceIntfc;
 import lombok.extern.java.Log;
 
 /**
- * This is just an experiment with the GraphStream lib to 
- * see how well it works for something like my pet prime# 
+ * This is just an experiment with the GraphStream lib originally 
+ * and converted to jgrapht at the moment.
+ *  
+ * Goal: see how well it works for something like my pet prime# 
  * research projects.
  */
 @Log
@@ -66,11 +68,8 @@ public class PrimeNodeGenerator
 	 */
 	protected void addNode() 
 	{	
-		// Link from prime node to prime bases
+		// Link from prime node to prime bases (i.e. unique set of smaller primes that sums to this prime).
 		primeRef.getPrimeBaseIdxs()
-			.forEach(
-					base ->  
-							 base
 							.stream()
 							.forEach(
 									p -> {											
@@ -78,7 +77,7 @@ public class PrimeNodeGenerator
 											graph.addVertex(targetNodeId);
 											String sourceNodeId = ps.getPrimeRef(p).getPrime().toString();
 											graph.addEdge(sourceNodeId, targetNodeId);
-										}));
+										});
 		level++;
 	}
 }

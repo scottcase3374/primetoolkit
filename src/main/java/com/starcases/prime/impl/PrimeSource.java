@@ -2,7 +2,10 @@ package com.starcases.prime.impl;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -17,8 +20,8 @@ public class PrimeSource implements PrimeSourceIntfc
 	private int confidenceLevel = 100;
 	private AtomicInteger nextIdx = new AtomicInteger(-1);
 	
-	private ArrayList<BigInteger> primes;	
-	private ArrayList<PrimeRefIntfc> primeRefs;
+	private List<BigInteger> primes;	
+	private List<PrimeRefIntfc> primeRefs;
 	
 	private int targetPrimeCount;
 	
@@ -47,6 +50,52 @@ public class PrimeSource implements PrimeSourceIntfc
 		tmpBitSet.clear();
 		tmpBitSet.set(0,2, true);
 		addPrimeRef(BigInteger.valueOf(3L), tmpBitSet.get(0, 2));
+	}
+	
+	public int getPrimeIdx(BigInteger val)
+	{
+		return this.primes.indexOf(val);
+	}
+	
+	public long getNextLowPrime(BigInteger val, int startIdx, int maxOffset)
+	{
+		int ret = Collections.binarySearch(primes, val);
+		if (Math.abs(startIdx - ret) >= maxOffset)
+			return Long.MIN_VALUE;
+		return ret > 0 ? ret-1 : (-ret)-1;  
+	}
+	
+	public long getNextHighPrime(BigInteger val, int startIdx, int maxOffset)
+	{
+		int ret = Collections.binarySearch(primes, val);
+		if (Math.abs(startIdx - ret) >= maxOffset)
+			return Long.MIN_VALUE;
+		return ret > 0 ? ret+1 : (-ret)+1;  
+	}	
+	
+	/**
+	 * return value matches java binarySearch() return foundidx-1 for any result > 0; otherwise returns -val
+	 * @param val
+	 * @return
+	 */
+	public int getNextLowPrime(BigInteger val)
+	{
+		int ret = Collections.binarySearch(primes, val);
+		
+		return ret > 0 ? ret-1 : (-ret)-1;  
+	}
+
+	public int getNextHighPrime(BigInteger val)
+	{
+		int ret = Collections.binarySearch(primes, val);
+		
+		return ret > 0 ? ret+1 : (-ret)+1;  
+	}
+
+	
+	public int getMaxIdx()
+	{
+		return primeRefs.size()-1;
 	}
 	
 	public void init()

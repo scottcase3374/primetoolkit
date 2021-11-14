@@ -3,7 +3,6 @@ package com.starcases.prime.impl;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -16,7 +15,7 @@ import com.starcases.prime.intfc.PrimeSourceIntfc;
 * 
 **/
 
-public class PrimeRef implements PrimeRefIntfc
+public class PrimeRefBitSetIndexes implements PrimeRefIntfc
 {
 	//
 	// Instance data
@@ -26,7 +25,7 @@ public class PrimeRef implements PrimeRefIntfc
 	private int primeIdx; // index to bitsets or collections for this val
 	
 	// Represents sets of base primes that sum to this prime. (index to primes)
-	private ArrayList<List<Integer>> primeBaseIdxs = new ArrayList<>(); 
+	private ArrayList<BitSet> primeBaseIdxs = new ArrayList<>(); 
 	
 	private static PrimeSourceIntfc primeSrc;
 	
@@ -36,7 +35,7 @@ public class PrimeRef implements PrimeRefIntfc
 	 * 
 	 * @param prime
 	 */
-	PrimeRef(int primeIdx, BitSet primeBaseIdxs)
+	PrimeRefBitSetIndexes(int primeIdx, BitSet primeBaseIdxs)
 	{
 		this.primeIdx = primeIdx;
 		
@@ -53,6 +52,7 @@ public class PrimeRef implements PrimeRefIntfc
 		return this;
 	}
 	
+	@Override
 	public int getPrimeRefIdx()
 	{
 		return this.primeIdx;
@@ -65,23 +65,26 @@ public class PrimeRef implements PrimeRefIntfc
 	
 	@Override
 	public BitSet getPrimeBaseIdxs() {
-		return primeBaseIdxs.stream().map(l -> {BitSet b = new BitSet(); l.forEach(b::set); return b;}).findFirst().orElse(null);
+		return primeBaseIdxs.stream().findFirst().orElse(null);
 	}	
 	
 	/**
 	 * Include a set of primes in the set of prime bases for the current prime.
 	 * @param primeBase
 	 */
+	@Override
 	public void addPrimeBase(BitSet primeBase)
 	{
-		this.primeBaseIdxs.add(primeBase.stream().boxed().collect(Collectors.toList()));
+		this.primeBaseIdxs.add(primeBase);
 	}
 
+	@Override
 	public String getIndexes()
 	{
-		return this.getPrimeBaseIdxs().stream().boxed().map(i -> Integer.toString(i)).collect(Collectors.joining(",","[", "]"));
+		return getPrimeBaseIdxs().stream().boxed().map(i -> Integer.toString(i)).collect(Collectors.joining(",","[", "]"));
 	}
 
+	@Override
 	public String getIdxPrimes()
 	{
 		return getPrimeBaseIdxs()
@@ -104,7 +107,7 @@ public class PrimeRef implements PrimeRefIntfc
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		PrimeRef other = (PrimeRef) obj;
+		PrimeRefBitSetIndexes other = (PrimeRefBitSetIndexes) obj;
 		return primeIdx == other.primeIdx;
 	}
 }
