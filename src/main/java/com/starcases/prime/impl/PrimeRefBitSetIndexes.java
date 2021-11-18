@@ -17,12 +17,11 @@ import com.starcases.prime.intfc.PrimeSourceIntfc;
 
 public class PrimeRefBitSetIndexes implements PrimeRefIntfc
 {
-	//
-	// Instance data
-	//
-	
-	// This instance of a prime
-	private int primeIdx; // index to bitsets or collections for this val
+	/*
+	 *  Index for this instance of a prime.
+	 *  index to bitsets or collections for this val
+	 */
+	private int primeIdx;
 	
 	// Represents sets of base primes that sum to this prime. (index to primes)
 	private ArrayList<BitSet> primeBaseIdxs = new ArrayList<>(); 
@@ -59,12 +58,14 @@ public class PrimeRefBitSetIndexes implements PrimeRefIntfc
 	}
 	
 	@Override
-	public BigInteger getPrime() {
+	public BigInteger getPrime() 
+	{
 		return primeSrc.getPrime(primeIdx);
 	}
 	
 	@Override
-	public BitSet getPrimeBaseIdxs() {
+	public BitSet getPrimeBaseIdxs() 
+	{
 		return primeBaseIdxs.stream().findFirst().orElse(null);
 	}	
 	
@@ -95,12 +96,14 @@ public class PrimeRefBitSetIndexes implements PrimeRefIntfc
 	}
 	
 	@Override
-	public int hashCode() {
+	public int hashCode() 
+	{
 		return Objects.hash(primeIdx);
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(Object obj) 
+	{
 		if (this == obj)
 			return true;
 		if (obj == null)

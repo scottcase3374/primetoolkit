@@ -2,7 +2,6 @@ package com.starcases.prime.impl;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.List;
@@ -22,8 +21,11 @@ public class PrimeSource implements PrimeSourceIntfc
 	
 	private List<BigInteger> primes;	
 	private List<PrimeRefIntfc> primeRefs;
+	private List<BigInteger> distanceToNext;
 	
 	private int targetPrimeCount;
+	
+	private int activeBaseId = 0;
 	
 	public PrimeSource(int maxCount, int confidenceLevel)
 	{
@@ -35,6 +37,7 @@ public class PrimeSource implements PrimeSourceIntfc
 	{
 		primes = new ArrayList<>(maxCount);
 		primeRefs = new ArrayList<>(maxCount);
+		distanceToNext = new ArrayList<>(maxCount);
 		this.targetPrimeCount = maxCount;
 		
 		PrimeRef.setPrimeSource(this);
@@ -47,14 +50,29 @@ public class PrimeSource implements PrimeSourceIntfc
 		tmpBitSet.set(1);
 		addPrimeRef(BigInteger.valueOf(2L), tmpBitSet.get(0, 2));
 		
-		tmpBitSet.clear();
-		tmpBitSet.set(0,2, true);
-		addPrimeRef(BigInteger.valueOf(3L), tmpBitSet.get(0, 2));
+		//tmpBitSet.clear();
+		//tmpBitSet.set(0,2, true);
+		//addPrimeRef(BigInteger.valueOf(3L), tmpBitSet.get(0, 2));
 	}
 	
 	public int getPrimeIdx(BigInteger val)
 	{
 		return this.primes.indexOf(val);
+	}
+	
+	public BigInteger getDistToNextPrime(int curIdx)
+	{
+		return this.distanceToNext.get(curIdx);
+	}
+	
+	public int getActiveBaseId()
+	{
+		return activeBaseId;
+	}
+	
+	public void setActiveBaseId(int activeBaseId)
+	{
+		this.activeBaseId = activeBaseId;	
 	}
 	
 	public long getNextLowPrime(BigInteger val, int startIdx, int maxOffset)
@@ -92,7 +110,6 @@ public class PrimeSource implements PrimeSourceIntfc
 		return ret > 0 ? ret+1 : (-ret)+1;  
 	}
 
-	
 	public int getMaxIdx()
 	{
 		return primeRefs.size()-1;
@@ -146,9 +163,10 @@ public class PrimeSource implements PrimeSourceIntfc
 					BitSet sumBaseIdxs = primeIndexPermutation.get(0, numBitsForPrimeCount);
 					sumBaseIdxs.set(curPrimeIdx); // sum of primes from these indexes should match 'sum'
 					final BitSet cachedBases = sumBaseIdxs;
-										
-					addPrimeRef(cachedSum, cachedBases, curPrimeIdx, true);
 						
+					//log.info("cur prime:" + curPrime + " nextPrime:" + cachedSum);
+					addPrimeRef(cachedSum, cachedBases, curPrimeIdx, true);
+										
 					// Metric info
 					maxBaseSize = Math.max(maxBaseSize, sumBaseIdxs.cardinality());
 					if (maxBaseSize == sumBaseIdxs.cardinality())
@@ -204,7 +222,7 @@ public class PrimeSource implements PrimeSourceIntfc
 	 */
 	private void addPrimeRef(BigInteger nextPrime, BitSet baseIdx)
 	{
-		addPrimeRef(nextPrime, baseIdx, 0, false);
+		addPrimeRef(nextPrime, baseIdx, nextIdx.get()+1, false);
 	}
 		
 	/**
@@ -219,13 +237,16 @@ public class PrimeSource implements PrimeSourceIntfc
 			log.info(String.format("addPrimeRef <added base> new-prime[%d] new-base-indexes %s new-base-primes %s   cur-Prime[%d]", newPrime, getIndexes(base),getPrimes(base), getPrime(curPrimeIdx)));
 		}
 		else
-		{				
-			int idx = nextIdx.incrementAndGet();						
+		{					
+			int idx = nextIdx.incrementAndGet();
+						
 			primes.add(idx, newPrime);
 			PrimeRefIntfc ret = new PrimeRef(idx, base);
-			primeRefs.add(idx, ret);			
+			primeRefs.add(idx, ret);	
 			
-			//log.info(String.format("addPrimeRef <new prime added> new-prime[%d] newIdx[%d] canAddBase[%b] base-indexes %s new-base-primes %s ", newPrime, nextIdx.get(), canAddBase, getIndexes(base), getPrimes(base)));
+			distanceToNext.add(null);
+			BigInteger dist = curPrimeIdx > 0 ? newPrime.subtract(this.getPrime(curPrimeIdx)) : BigInteger.ONE;
+			distanceToNext.set(curPrimeIdx, dist);			
 		}
 	}	
 	

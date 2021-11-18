@@ -22,6 +22,9 @@ public class PrimeToolKit
 	@Option(names = {"--confidence-level"}, description = "Drives confidence level of primality check.")
 	int confidenceLevel = 100;
 		
+	@Option(names = {"--active-base-id"}, description = "ID (0 to n) of the active base set (out of multiple possible bases)")
+	int activeBaseId = 0;
+	
 	public PrimeToolKit()
 	{
 		// Nothing to do here
@@ -63,11 +66,11 @@ public class PrimeToolKit
 		primeGrapher.logReduced(maxReduce);		
 	}
 	
-	@Command(name = "logTree")
-	void logTree()
+	@Command(name = "log3Base")
+	void log3Base()
 	{
 		PrimeGrapher primeGrapher = PrimeSourceFactory.primeGrapher(maxCount, confidenceLevel);
-		primeGrapher.logTree(maxReduce);
+		primeGrapher.log3Base(activeBaseId);
 	}
 	
 	@Command(name = "defaultGraph") 

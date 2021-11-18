@@ -19,7 +19,6 @@ import lombok.extern.java.Log;
 @Log
 public class PrimeNodeGenerator
 {
-	
 	int level = 0;
 	PrimeRefIntfc primeRef = null;
 	PrimeSourceIntfc ps;
@@ -33,6 +32,7 @@ public class PrimeNodeGenerator
 	
 	public void begin() 
 	{	
+		// bootstrap
 		for (level = 0; level < 2; level++)
 		{
 			PrimeRefIntfc targetNode = ps.getPrimeRef(level);
@@ -49,7 +49,6 @@ public class PrimeNodeGenerator
 			primeRef = ps.getPrimeRef(level);
 			if (primeRef != null)
 			{
-				//log.info("nextEvents() produced prime " + primeRef.getPrime() + " for level " + level);
 				addNode();
 				return true;
 			}

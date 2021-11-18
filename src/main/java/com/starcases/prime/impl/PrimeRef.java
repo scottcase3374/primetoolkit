@@ -18,12 +18,11 @@ import com.starcases.prime.intfc.PrimeSourceIntfc;
 
 public class PrimeRef implements PrimeRefIntfc
 {
-	//
-	// Instance data
-	//
-	
-	// This instance of a prime
-	private int primeIdx; // index to bitsets or collections for this val
+	/*
+	 *  Index for this instance of a prime.
+	 *  index to bitsets or collections for this val
+	 */
+	private int primeIdx;
 	
 	// Represents sets of base primes that sum to this prime. (index to primes)
 	private ArrayList<List<Integer>> primeBaseIdxs = new ArrayList<>(); 
@@ -65,7 +64,9 @@ public class PrimeRef implements PrimeRefIntfc
 	
 	@Override
 	public BitSet getPrimeBaseIdxs() {
-		return primeBaseIdxs.stream().map(l -> {BitSet b = new BitSet(); l.forEach(b::set); return b;}).findFirst().orElse(null);
+		BitSet b = new BitSet();
+		primeBaseIdxs.get(PrimeRef.primeSrc.getActiveBaseId()).stream().forEach(b::set);
+		return b;
 	}	
 	
 	/**
@@ -79,7 +80,11 @@ public class PrimeRef implements PrimeRefIntfc
 
 	public String getIndexes()
 	{
-		return this.getPrimeBaseIdxs().stream().boxed().map(i -> Integer.toString(i)).collect(Collectors.joining(",","[", "]"));
+		return this.getPrimeBaseIdxs()
+						.stream()
+						.boxed()
+						.map(i -> Integer.toString(i)).
+						collect(Collectors.joining(",","[", "]"));
 	}
 
 	public String getIdxPrimes()

@@ -8,6 +8,10 @@ public interface PrimeSourceIntfc
 	BigInteger getPrime(int primeIdx);
 	int getPrimeIdx(BigInteger val);
 	int getNextLowPrime(BigInteger val);
+	BigInteger getDistToNextPrime(int curIdx);
+	int getActiveBaseId();
+	void setActiveBaseId(int activeBaseId);
+	
 	int getMaxIdx();
 	void init();
 }
