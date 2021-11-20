@@ -3,9 +3,9 @@ package com.starcases.prime;
 import java.io.PrintWriter;
 
 import com.starcases.prime.base.BaseReduce3Triple;
+import com.starcases.prime.base.BaseReduceNPrime;
 import com.starcases.prime.graph.impl.Export;
 import com.starcases.prime.graph.impl.LogGraphStructure;
-import com.starcases.prime.graph.impl.BaseReduceNPrime;
 import com.starcases.prime.graph.impl.LogNodeStructure;
 import com.starcases.prime.graph.impl.ViewDefault;
 import com.starcases.prime.intfc.PrimeSourceIntfc;

@@ -1,10 +1,12 @@
-package com.starcases.prime.graph.impl;
+package com.starcases.prime.base;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
+import com.starcases.prime.graph.impl.PrimeGrapher;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import lombok.extern.java.Log;
