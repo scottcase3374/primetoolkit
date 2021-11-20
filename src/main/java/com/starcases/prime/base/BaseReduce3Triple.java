@@ -1,11 +1,12 @@
-package com.starcases.prime.graph.impl;
+package com.starcases.prime.base;
 
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Comparator;
 import java.util.stream.Collectors;
-import com.starcases.prime.intfc.LogGraphIntfc;
+
+import com.starcases.prime.graph.impl.PrimeGrapher;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import lombok.extern.java.Log;

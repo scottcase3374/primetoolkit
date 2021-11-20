@@ -20,11 +20,11 @@ import picocli.CommandLine.Command;
 //       7 <-  5 + 2
 //       11 <- 7+3+1; 5+3+2+1
 @Log
-public class LogReduce extends PrimeGrapher implements LogGraphIntfc
+public class BaseReduceNPrime extends PrimeGrapher implements LogGraphIntfc
 {
 	static Comparator<String> nodeComparator = (String o1, String o2) -> Integer.decode(o1).compareTo(Integer.decode(o2));
 	
-	public LogReduce(PrimeSourceIntfc ps)
+	public BaseReduceNPrime(PrimeSourceIntfc ps)
 	{
 		super(ps,log);
 	}
