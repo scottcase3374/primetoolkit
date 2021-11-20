@@ -1,4 +1,4 @@
-package com.starcases.prime.graph.impl;
+package com.starcases.prime.graph.export;
 
 import java.io.PrintWriter;
 import java.math.BigInteger;
@@ -17,14 +17,14 @@ interface ElementIntfc
 	void output();
 }
 
-public class Export 
+public class ExportGML 
 {
 	Stack<ElementIntfc> stack = new Stack<>();
 	
 	PrimeSourceIntfc ps;
 	PrintWriter pr;
 	
-	public Export(PrimeSourceIntfc ps, PrintWriter pr)
+	public ExportGML(PrimeSourceIntfc ps, PrintWriter pr)
 	{
 		this.ps = ps;
 		this.pr = pr;

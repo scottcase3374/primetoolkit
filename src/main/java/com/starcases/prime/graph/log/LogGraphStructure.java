@@ -1,4 +1,4 @@
-package com.starcases.prime.graph.impl;
+package com.starcases.prime.graph.log;
 
 import java.util.stream.Collectors;
 
@@ -7,6 +7,7 @@ import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.builder.GraphBuilder;
 
+import com.starcases.prime.graph.impl.PrimeGrapher;
 import com.starcases.prime.intfc.LogGraphIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import lombok.extern.java.Log;

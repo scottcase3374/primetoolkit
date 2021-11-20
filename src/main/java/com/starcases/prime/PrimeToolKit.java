@@ -4,10 +4,10 @@ import java.io.PrintWriter;
 
 import com.starcases.prime.base.BaseReduce3Triple;
 import com.starcases.prime.base.BaseReduceNPrime;
-import com.starcases.prime.graph.impl.Export;
-import com.starcases.prime.graph.impl.LogGraphStructure;
-import com.starcases.prime.graph.impl.LogNodeStructure;
-import com.starcases.prime.graph.impl.ViewDefault;
+import com.starcases.prime.graph.export.ExportGML;
+import com.starcases.prime.graph.log.LogGraphStructure;
+import com.starcases.prime.graph.log.LogNodeStructure;
+import com.starcases.prime.graph.visualize.ViewDefault;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
 import picocli.CommandLine;
@@ -97,7 +97,7 @@ public class PrimeToolKit
 			try (PrintWriter pw = new PrintWriter("/home/scott/graph.gml"))
 			{
 				PrimeSourceIntfc ps = PrimeSourceFactory.primeSource(maxCount, confidenceLevel);
-				Export e = new Export(ps, pw);
+				ExportGML e = new ExportGML(ps, pw);
 				e.export();
 				pw.flush();
 			}			

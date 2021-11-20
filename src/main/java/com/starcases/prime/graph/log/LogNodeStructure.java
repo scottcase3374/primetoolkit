@@ -1,5 +1,6 @@
-package com.starcases.prime.graph.impl;
+package com.starcases.prime.graph.log;
 
+import com.starcases.prime.graph.impl.PrimeGrapher;
 import com.starcases.prime.intfc.LogGraphIntfc;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;

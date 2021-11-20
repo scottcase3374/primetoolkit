@@ -9,7 +9,6 @@ import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.builder.GraphBuilder;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
-import picocli.CommandLine.Command;
 
 // 
 // start 1
@@ -20,7 +19,7 @@ import picocli.CommandLine.Command;
 //       11 <- 7+3+1; 5+3+2+1
 public abstract class PrimeGrapher 
 {
-	static Comparator<String> nodeComparator = (String o1, String o2) -> Integer.decode(o1).compareTo(Integer.decode(o2));
+	static protected Comparator<String> nodeComparator = (String o1, String o2) -> Integer.decode(o1).compareTo(Integer.decode(o2));
 
 	protected PrimeSourceIntfc ps;
 	

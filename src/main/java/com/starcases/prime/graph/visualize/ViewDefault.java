@@ -1,7 +1,8 @@
-package com.starcases.prime.graph.impl;
+package com.starcases.prime.graph.visualize;
 
 import javax.swing.WindowConstants;
-import com.starcases.prime.graph.visualize.VisualizeGraph;
+
+import com.starcases.prime.graph.impl.PrimeGrapher;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import lombok.extern.java.Log;
 import picocli.CommandLine.Command;
