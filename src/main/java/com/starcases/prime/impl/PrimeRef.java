@@ -57,6 +57,16 @@ public class PrimeRef implements PrimeRefIntfc
 		return this.primeIdx;
 	}
 	
+	public PrimeRefIntfc getNextPrimeRef()
+	{
+		return primeSrc.getPrimeRef(primeIdx +1);
+	}
+	
+	public PrimeRefIntfc getPrevPrimeRef()
+	{
+		return primeSrc.getPrimeRef(primeIdx -1);
+	}
+	
 	@Override
 	public BigInteger getPrime() {
 		return primeSrc.getPrime(primeIdx);

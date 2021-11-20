@@ -92,18 +92,20 @@ public class PrimeSource implements PrimeSourceIntfc
 	 * @param val
 	 * @return
 	 */
-	public int getNextLowPrime(BigInteger val)
+	public int getNextLowPrimeIdx(BigInteger val)
 	{
 		int ret = Collections.binarySearch(primes, val);
-		
-		return ret > 0 ? ret-1 : (-ret)-1;  
+		// ret >=0 if found
+		// (- (insertion point) -1) ; insertion point > key or == list.size() for key greater than all.
+		return ret > 0 ? ret-1 : (-ret)-2;  
 	}
 
-	public int getNextHighPrime(BigInteger val)
+	public int getNextHighPrimeIdx(BigInteger val)
 	{
 		int ret = Collections.binarySearch(primes, val);
-		
-		return ret > 0 ? ret+1 : (-ret)+1;  
+		// ret >=0 if found
+		// (- (insertion point) -1) ; insertion point > key or == list.size() for key greater than all.		
+		return ret > 0 ? ret+1 : (-ret)-1;  
 	}
 
 	public int getMaxIdx()

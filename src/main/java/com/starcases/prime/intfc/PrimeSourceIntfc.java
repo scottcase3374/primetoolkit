@@ -7,7 +7,10 @@ public interface PrimeSourceIntfc
 	PrimeRefIntfc getPrimeRef(int primeIdx);
 	BigInteger getPrime(int primeIdx);
 	int getPrimeIdx(BigInteger val);
-	int getNextLowPrime(BigInteger val);
+	
+	int getNextLowPrimeIdx(BigInteger val);
+	int getNextHighPrimeIdx(BigInteger val);
+	
 	BigInteger getDistToNextPrime(int curIdx);
 	int getActiveBaseId();
 	void setActiveBaseId(int activeBaseId);

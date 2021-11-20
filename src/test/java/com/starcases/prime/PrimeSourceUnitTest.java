@@ -37,21 +37,25 @@ class PrimeSourceUnitTest
 	}
 
 	// @ Test
-	void testGetDistToNextPrime() {
-		
+	void testGetDistToNextPrime() 
+	{	
 		Assertions.assertEquals(2, ps.getDistToNextPrime(2));
 	}
 
-	// @ Test
-	void testGetNextLowPrimeBigIntegerIntInt() {
-		fail("Not yet implemented");
+	@Test
+	void testGetNextLowPrimeBigIntegerIntInt() 
+	{
+		Assertions.assertEquals(3, ps.getNextLowPrimeIdx(BigInteger.valueOf(6L))); // Prime 5 @ idx 3 for BigInteger 6
+		Assertions.assertEquals(5, ps.getNextLowPrimeIdx(BigInteger.valueOf(13L)));   // Prime 11 @ idx 5 for BigInteger 13
 	}
 
-	// @ Test
-	void testGetNextHighPrimeBigIntegerIntInt() {
-		fail("Not yet implemented");
+	@Test
+	void testGetNextHighPrimeBigIntegerIntInt() 
+	{
+		Assertions.assertEquals(4, ps.getNextHighPrimeIdx(BigInteger.valueOf(6L)));    // Prime 7 @ idx 4 for BigInteger 6
+		Assertions.assertEquals(7, ps.getNextHighPrimeIdx(BigInteger.valueOf(13L)));   // Prime 17 @ idx 7 for BigInteger 13	}
 	}
-
+	
 	// @ Test
 	void testGetNextLowPrimeBigInteger() {
 		fail("Not yet implemented");

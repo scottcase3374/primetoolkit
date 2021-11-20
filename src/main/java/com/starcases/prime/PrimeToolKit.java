@@ -5,7 +5,7 @@ import java.io.PrintWriter;
 import com.starcases.prime.graph.impl.Export;
 import com.starcases.prime.graph.impl.LogGraphStructure;
 import com.starcases.prime.graph.impl.LogReduce;
-import com.starcases.prime.graph.impl.LogReduce3;
+import com.starcases.prime.graph.impl.BaseReduce3Triple;
 import com.starcases.prime.graph.impl.LogNodeStructure;
 import com.starcases.prime.graph.impl.ViewDefault;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
@@ -77,7 +77,7 @@ public class PrimeToolKit
 	void log3Base()
 	{
 		PrimeSourceIntfc ps = PrimeSourceFactory.primeSource(maxCount, confidenceLevel);
-		LogReduce3 ld3 = new LogReduce3(ps);
+		BaseReduce3Triple ld3 = new BaseReduce3Triple(ps);
 		ld3.log3Base(activeBaseId);
 	}
 	

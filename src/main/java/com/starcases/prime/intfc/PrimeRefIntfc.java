@@ -16,6 +16,9 @@ public interface PrimeRefIntfc
 	 */
 	int getPrimeRefIdx();
 	
+	PrimeRefIntfc getNextPrimeRef();
+	PrimeRefIntfc getPrevPrimeRef();
+	
 	/**
 	 * Utility method - not useful in initial context but
 	 * desirable for research into alternative bases of a 

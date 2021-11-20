@@ -113,4 +113,16 @@ public class PrimeRefBitSetIndexes implements PrimeRefIntfc
 		PrimeRefBitSetIndexes other = (PrimeRefBitSetIndexes) obj;
 		return primeIdx == other.primeIdx;
 	}
+
+	@Override
+	public PrimeRefIntfc getNextPrimeRef() 
+	{
+		return primeSrc.getPrimeRef(primeIdx+1);
+	}
+
+	@Override
+	public PrimeRefIntfc getPrevPrimeRef() 
+	{
+		return primeSrc.getPrimeRef(primeIdx-1);
+	}
 }
