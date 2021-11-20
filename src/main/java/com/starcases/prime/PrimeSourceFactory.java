@@ -21,7 +21,7 @@ public class PrimeSourceFactory
 		return new PrimeSource(maxCount, confidenceLevel);
 	}
 	
-	public static PrimeGrapher primeGrapher(int maxCount, int confidenceLevel)
+	/*public static PrimeGrapher primeGrapher(int maxCount, int confidenceLevel)
 	{
 		
 		return new PrimeGrapher(primeSource(maxCount, confidenceLevel));
@@ -31,5 +31,5 @@ public class PrimeSourceFactory
 	{
 		
 		return new PrimeGrapher(primeSource(maxCount, confidenceLevel, activeBaseId));
-	}
+	}*/
 }

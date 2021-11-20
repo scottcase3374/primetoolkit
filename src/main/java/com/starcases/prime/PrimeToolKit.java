@@ -3,7 +3,11 @@ package com.starcases.prime;
 import java.io.PrintWriter;
 
 import com.starcases.prime.graph.impl.Export;
-import com.starcases.prime.graph.impl.PrimeGrapher;
+import com.starcases.prime.graph.impl.LogGraphStructure;
+import com.starcases.prime.graph.impl.LogReduce;
+import com.starcases.prime.graph.impl.LogReduce3;
+import com.starcases.prime.graph.impl.LogNodeStructure;
+import com.starcases.prime.graph.impl.ViewDefault;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
 import picocli.CommandLine;
@@ -48,37 +52,41 @@ public class PrimeToolKit
 	@Command(name = "logNodeStructure")
 	private void logNodeStructure()
 	{
-		PrimeGrapher primeGrapher = PrimeSourceFactory.primeGrapher(maxCount, confidenceLevel);	
-		primeGrapher.logNodeStructure();
+		PrimeSourceIntfc ps = PrimeSourceFactory.primeSource(maxCount, confidenceLevel);
+		LogNodeStructure lns = new LogNodeStructure(ps);
+		lns.log();
 	}
 
 	@Command(name = "logGraphStructure") 
 	void logGraphStructure()
 	{
-		PrimeGrapher primeGrapher = PrimeSourceFactory.primeGrapher(maxCount, confidenceLevel);	
-		primeGrapher.logGraphStructure();		
+		PrimeSourceIntfc ps = PrimeSourceFactory.primeSource(maxCount, confidenceLevel);
+		LogGraphStructure lgs = new LogGraphStructure(ps);	
+		lgs.log();		
 	}
 	
 	@Command(name = "logReduced") 
 	void logReduced()
 	{
-		PrimeGrapher primeGrapher = PrimeSourceFactory.primeGrapher(maxCount, confidenceLevel);	
-		primeGrapher.logReduced(maxReduce);		
+		PrimeSourceIntfc ps = PrimeSourceFactory.primeSource(maxCount, confidenceLevel);
+		LogReduce ld = new LogReduce(ps);
+		ld.log(maxReduce);		
 	}
 	
 	@Command(name = "log3Base")
 	void log3Base()
 	{
-		PrimeGrapher primeGrapher = PrimeSourceFactory.primeGrapher(maxCount, confidenceLevel);
-		primeGrapher.log3Base(activeBaseId);
+		PrimeSourceIntfc ps = PrimeSourceFactory.primeSource(maxCount, confidenceLevel);
+		LogReduce3 ld3 = new LogReduce3(ps);
+		ld3.log3Base(activeBaseId);
 	}
 	
 	@Command(name = "defaultGraph") 
 	void graph()
 	{
-		PrimeGrapher primeGrapher = PrimeSourceFactory.primeGrapher(maxCount, confidenceLevel);	
-		//primeGrapher.setNodeLocations();
-		primeGrapher.viewDefault();		
+		PrimeSourceIntfc ps = PrimeSourceFactory.primeSource(maxCount, confidenceLevel);
+		ViewDefault vd = new ViewDefault(ps);
+		vd.viewDefault();
 	}
 	
 	@Command(name = "export")
