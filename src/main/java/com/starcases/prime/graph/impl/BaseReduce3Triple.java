@@ -11,7 +11,7 @@ import com.starcases.prime.intfc.PrimeSourceIntfc;
 import lombok.extern.java.Log;
 
 @Log
-public class BaseReduce3Triple extends PrimeGrapher implements LogGraphIntfc
+public class BaseReduce3Triple extends PrimeGrapher 
 {
 	static Comparator<String> nodeComparator = (String o1, String o2) -> Integer.decode(o1).compareTo(Integer.decode(o2));
 
@@ -152,11 +152,6 @@ public class BaseReduce3Triple extends PrimeGrapher implements LogGraphIntfc
 		return initHWM(prime, vals);
 	}
 	
-	@Override
-	public void log()
-	{
-		//TODO
-	}
 	/**
 	 * top-level function; iterate over entire dataset to reduce every item
 	 * @param maxReduce
