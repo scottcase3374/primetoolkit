@@ -5,7 +5,6 @@ import javax.swing.WindowConstants;
 import com.starcases.prime.graph.impl.PrimeGrapher;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import lombok.extern.java.Log;
-import picocli.CommandLine.Command;
 
 // 
 // start 1

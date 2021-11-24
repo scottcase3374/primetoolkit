@@ -16,7 +16,7 @@ public class VisualizeGraph extends JFrame
 {
 	private static final long serialVersionUID = 1L;
 	private transient JGraphXAdapter<String, DefaultEdge> jgxAdapter;
-    private transient java.awt.Dimension DEFAULT_SIZE = new Dimension(900,900);
+    private final transient java.awt.Dimension DEFAULT_SIZE = new Dimension(900,900);
     
     public VisualizeGraph(Graph<String,DefaultEdge> graph)
     {

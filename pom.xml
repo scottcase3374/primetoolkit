@@ -27,6 +27,7 @@
 		<junit.jupiter.version>5.3.1</junit.jupiter.version>
 		<mockito.version>2.23.0</mockito.version>
 		<maven.surefire.version>2.19.1</maven.surefire.version>
+		<commons.collections4.versino>4.4</commons.collections4.versino>
 	</properties>
 
 	<dependencies>
@@ -42,7 +43,11 @@
 			<artifactId>picocli</artifactId>
 			<version>${picocli.version}</version>
 		</dependency>
-
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+			<version>${commons.collections4.versino}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.jgrapht</groupId>
 			<artifactId>jgrapht-core</artifactId>
@@ -90,7 +95,6 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
-
 		</dependencies>
 	</dependencyManagement>
 	<build>

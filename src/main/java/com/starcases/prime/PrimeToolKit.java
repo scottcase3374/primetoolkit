@@ -5,6 +5,8 @@ import java.io.PrintWriter;
 import com.starcases.prime.base.BaseReduce3Triple;
 import com.starcases.prime.base.BaseReduceNPrime;
 import com.starcases.prime.graph.export.ExportGML;
+import com.starcases.prime.graph.log.LogBases3Triple;
+import com.starcases.prime.graph.log.LogBasesNPrime;
 import com.starcases.prime.graph.log.LogGraphStructure;
 import com.starcases.prime.graph.log.LogNodeStructure;
 import com.starcases.prime.graph.visualize.ViewDefault;
@@ -29,6 +31,9 @@ public class PrimeToolKit
 	@Option(names = {"--active-base-id"}, description = "ID (0 to n) of the active base set (out of multiple possible bases)")
 	int activeBaseId = 0;
 	
+	@Option(names = {"--test-iterations"} , description = "Run for number of iterations and report time")
+	int testIterations = 0;
+	
 	public PrimeToolKit()
 	{
 		// Nothing to do here
@@ -48,7 +53,7 @@ public class PrimeToolKit
 	
 		System.exit(exitCode);
 	}
-
+ 
 	@Command(name = "logNodeStructure")
 	private void logNodeStructure()
 	{
@@ -70,7 +75,9 @@ public class PrimeToolKit
 	{
 		PrimeSourceIntfc ps = PrimeSourceFactory.primeSource(maxCount, confidenceLevel);
 		BaseReduceNPrime ld = new BaseReduceNPrime(ps);
-		ld.log(maxReduce);		
+		ld.genBases(maxReduce);
+		LogBasesNPrime lbnp = new LogBasesNPrime(ps);
+		lbnp.log();
 	}
 	
 	@Command(name = "log3Base")
@@ -78,7 +85,9 @@ public class PrimeToolKit
 	{
 		PrimeSourceIntfc ps = PrimeSourceFactory.primeSource(maxCount, confidenceLevel);
 		BaseReduce3Triple ld3 = new BaseReduce3Triple(ps);
-		ld3.log3Base(activeBaseId);
+		ld3.genBases(activeBaseId);
+		LogBases3Triple lb3t = new LogBases3Triple(ps);
+		lb3t.log();
 	}
 	
 	@Command(name = "defaultGraph") 

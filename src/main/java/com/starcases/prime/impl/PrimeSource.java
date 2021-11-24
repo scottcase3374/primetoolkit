@@ -1,10 +1,14 @@
 package com.starcases.prime.impl;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -16,6 +20,9 @@ import lombok.extern.java.Log;
 @Log
 public class PrimeSource implements PrimeSourceIntfc
 {
+	static final MathContext mcFloor = new MathContext(7, RoundingMode.FLOOR);
+	static final MathContext mcCeil = new MathContext(7, RoundingMode.CEILING);
+	
 	private int confidenceLevel = 100;
 	private AtomicInteger nextIdx = new AtomicInteger(-1);
 	
@@ -85,7 +92,7 @@ public class PrimeSource implements PrimeSourceIntfc
 		if (Math.abs(startIdx - ret) >= maxOffset)
 			return Long.MIN_VALUE;
 		return ret > 0 ? ret+1 : (-ret)+1;  
-	}	
+	}		
 	
 	/**
 	 * return value matches java binarySearch() return foundidx-1 for any result > 0; otherwise returns -val
@@ -108,6 +115,24 @@ public class PrimeSource implements PrimeSourceIntfc
 		return ret > 0 ? ret+1 : (-ret)-1;  
 	}
 
+	public int getNextLowPrimeIdx(BigDecimal val)
+	{
+		int ret = Collections.binarySearch(primes, val.round(mcCeil).toBigInteger());
+		// ret >=0 if found
+		// (- (insertion point) -1) ; insertion point > key or == list.size() for key greater than all.
+		return ret > 0 ? ret-1 : (-ret)-2;  
+	}
+
+	public int getNextHighPrimeIdx(BigDecimal val)
+	{
+		int ret = Collections.binarySearch(primes, val.round(mcFloor).toBigInteger());
+		// ret >=0 if found
+		// (- (insertion point) -1) ; insertion point > key or == list.size() for key greater than all.		
+		return ret > 0 ? ret+1 : (-ret)-1;  
+	}
+	
+	
+	
 	public int getMaxIdx()
 	{
 		return primeRefs.size()-1;
@@ -145,7 +170,7 @@ public class PrimeSource implements PrimeSourceIntfc
 			{					
 				BigInteger permutationSum = primeIndexPermutation
 						.stream()						
-						.mapToObj(this::getPrime)
+						.mapToObj(this::getPrime)						
 						.collect(Collectors.reducing(curPrime, (a,b) -> a.add(b)));
 					
 				if (permutationSum.compareTo(sumCeiling) > 0)
@@ -183,14 +208,19 @@ public class PrimeSource implements PrimeSourceIntfc
 		} 
 		while (nextIdx.get() < targetPrimeCount);
 		
+		final int mBaseSize = maxBaseSize;
+		final BigInteger tmpSumWithMaxBase = sumWithMaxBase;
+		// Debugging code
+		var p = getPrimeRef(nextIdx.get()); 
+
 		log.info(String.format("last new-prime[%d] newIdx[%d] base-indexes %s new-base-primes %s  max-base-size[%d] sum-with-max-base-size[%d]", 
-				getPrime(nextIdx.get()), 
-				nextIdx.get(),  
-				getPrimeRef(nextIdx.get()).getIndexes(), 
-				getPrimeRef(nextIdx.get()).getIdxPrimes(),
-				maxBaseSize,
-				sumWithMaxBase
-				));		
+							getPrime(nextIdx.get()), 
+							nextIdx.get(),  
+							p.getIndexes(), 
+							p.getIdxPrimes(),
+							mBaseSize,
+							tmpSumWithMaxBase
+							));					
 	}
 	
 	private BigInteger calcSumCeiling(BigInteger primeSum)
@@ -231,8 +261,9 @@ public class PrimeSource implements PrimeSourceIntfc
 	{
 		if (canAddBase && newPrime.equals(getPrime(curPrimeIdx)))
 		{			
-			getPrimeRef(curPrimeIdx).addPrimeBase(base);
-			log.info(String.format("addPrimeRef <added base> new-prime[%d] new-base-indexes %s new-base-primes %s   cur-Prime[%d]", newPrime, getIndexes(base),getPrimes(base), getPrime(curPrimeIdx)));
+			var p = getPrimeRef(curPrimeIdx); 						
+			p.addPrimeBase(base);
+			log.info(String.format("addPrimeRef <added base> new-prime[%d] new-base-indexes %s new-base-primes %s   cur-Prime[%d]", newPrime, getIndexes(base),getPrimes(base), getPrime(curPrimeIdx)));					
 		}
 		else
 		{					
@@ -248,16 +279,32 @@ public class PrimeSource implements PrimeSourceIntfc
 		}
 	}	
 	
+	@Override
 	public BigInteger getPrime(int primeIdx)
 	{
+		if (primeIdx > getMaxIdx())
+			throw new IndexOutOfBoundsException();
+		
 		return primes.get(primeIdx);
 	}
 	
+	@Override
 	public PrimeRefIntfc getPrimeRef(int primeIdx)
 	{
-		return primeRefs.get(primeIdx);		
+		if (primeIdx > getMaxIdx())
+			throw new IndexOutOfBoundsException();
+
+		return  primeRefs.get(primeIdx);		
 	}
-		
+	
+	@Override
+	public Optional<PrimeRefIntfc> getPrime(BigInteger val)
+	{
+		int idx = getPrimeIdx(val);
+		if (idx < 0 || idx > this.getMaxIdx())
+			return Optional.empty();
+		return Optional.of(getPrimeRef(idx));
+	}
 	/**
 	 * 
 	 * Weed out sums which cannot represent the next prime.								

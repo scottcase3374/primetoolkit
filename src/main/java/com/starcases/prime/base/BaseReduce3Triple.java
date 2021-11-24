@@ -1,9 +1,16 @@
 package com.starcases.prime.base;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
+import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import com.starcases.prime.graph.impl.PrimeGrapher;
@@ -14,11 +21,13 @@ import lombok.extern.java.Log;
 @Log
 public class BaseReduce3Triple extends PrimeGrapher 
 {
-	static Comparator<String> nodeComparator = (String o1, String o2) -> Integer.decode(o1).compareTo(Integer.decode(o2));
-
-	static final int top = 0;
-	static final int mid = 1;
-	static final int bot = 2;
+	static final Comparator<String> nodeComparator = (String o1, String o2) -> Integer.decode(o1).compareTo(Integer.decode(o2));
+	static final MathContext mcFloor = new MathContext(1, RoundingMode.FLOOR);
+	static final MathContext mcCeil = new MathContext(1, RoundingMode.CEILING);
+	
+	static final int TOP = 0;
+	static final int MID = 1;
+	static final int BOT = 2;
 	
 	public BaseReduce3Triple(PrimeSourceIntfc ps)
 	{
@@ -29,7 +38,7 @@ public class BaseReduce3Triple extends PrimeGrapher
 	 *  given prime-idx, bitset
 	 *  
 	 *  find new bitset where bitset.size()-1 is reduced to the sum of
-	 *  3 pre-existing primes. For example.
+	 *  3 pre-existing primes. For example (not required responses but valid).
 	 *     P     B
 	 *	   R     A
 	 *  I  I     S
@@ -67,40 +76,65 @@ public class BaseReduce3Triple extends PrimeGrapher
 	 * 28 107-> 
 	 * 29 109-> 31,37,41 *	
 	 */
-	void reducePrime(PrimeRefIntfc prime)
-	{
-		System.out.println("reduce prime - processing " + prime.getPrime() + "  idx " + prime.getPrimeRefIdx());
-				
-		PrimeRefIntfc [] vals = new PrimeRefIntfc[3];
+	private void reducePrime(PrimeRefIntfc prime)
+	{	
+		List<PrimeRefIntfc> vals = new ArrayList<>();
 		
 		initValues(prime, vals);
-		
-		int sign;
-		do
-		{
-			System.out.println(" processing " + prime.getPrime() + " set:" + Arrays.asList(vals).stream().map(p -> p.getPrime().toString()).collect(Collectors.joining(",")));
-			
-			sign = getAllTotal(vals).subtract(prime.getPrime()).signum(); 
-			if (sign == 1)
-			{
-				vals[mid] = vals[mid].getPrevPrimeRef();
-			}
-			else if (sign == -1)
-			{
-				vals[bot] = vals[bot].getNextPrimeRef();
-			}
+		initHWM(prime, vals);
+		initLWM(vals);
 
-			System.out.println(Arrays
-					.asList(vals)
-					.stream()
-					.map(p -> p.getPrime().toString()).collect(Collectors.joining(",", "[", "]")));	
-		} while(sign != 0);
+		boolean stopNow = false;
+		while (!stopNow)  // Not the prettiest code; look for a nicer refactoring.
+		{
+			final BigInteger diff = prime.getPrime().subtract(getAllSum(vals));
+			final int sign = diff.signum();
+			
+			if (sign == -1) // prime < total , diff should be negative
+			{				
+				if (!(stopNow = ensureConstraints(prime, vals, f -> add(BOT, diff, vals))))				
+					if (!(stopNow = ensureConstraints(prime, vals, f -> add(MID, diff, vals))))
+						if (!(stopNow = ensureConstraints(prime, vals, f -> add(TOP, diff, vals))))
+							if (!(stopNow = ensureConstraints(prime, vals, f -> { vals.set(MID, vals.get(MID).getPrevPrimeRef());   add(BOT, diff, vals); })))
+								if (!(stopNow = ensureConstraints(prime, vals, f -> { vals.set(TOP, vals.get(TOP).getPrevPrimeRef());   add(MID, diff, vals); })))								
+									stopNow = ensureConstraints(prime, vals, f -> { vals.set(TOP, vals.get(TOP).getPrevPrimeRef());   add(BOT, diff, vals); });
+			} 
+			else if (sign == 1) // prime > total, diff should be positive
+			{				
+				if (!(stopNow = ensureLowConstraints(prime, vals, f -> add(TOP, diff, vals))))				
+					if (!(stopNow = ensureLowConstraints(prime, vals, f -> add(MID, diff, vals))))
+						if (!(stopNow = ensureLowConstraints(prime, vals, f -> add(BOT, diff, vals))))
+							stopNow = ensureConstraints(prime, vals, f -> {   vals.set(TOP, vals.get(TOP).getPrevPrimeRef());
+																					vals.set(BOT, vals.get(BOT).getNextPrimeRef());
+																					add(MID, diff, vals); });
+			}
+			else
+			{			
+				break;
+			}
+			
+			if (prime.getPrime().compareTo(getAllTotal(vals)) != 0)
+				stopNow = false;
+			System.out.println(String.format("sign %d reduce prime - processing [%d] idx [%d] diff[%d] set: %s", sign, prime.getPrime(), prime.getPrimeRefIdx(), diff, getValSet(vals)));
+		}
 		
 		addPrimeBases(prime, vals);
-		System.out.println(String.format("Prime %d set %s", prime.getPrime(),   Arrays.asList(vals).stream().map(p -> p.getPrime().toString()).collect(Collectors.joining(",", "[", "]"))));	
+		System.out.println(String.format("Prime %d set %s  is-equal=%b", prime.getPrime(), getValSet(vals), getAllSum(vals).compareTo(prime.getPrime()) == 0));	
 	}
-
-	void addPrimeBases(PrimeRefIntfc prime, PrimeRefIntfc [] vals)
+	
+	private PrimeRefIntfc add(int idx, BigInteger diff, List<PrimeRefIntfc> vals)
+	{
+		Optional<PrimeRefIntfc> tmp = ps.getPrime(vals.get(idx).getPrime().add(diff));
+		tmp.ifPresent(p -> vals.set(idx, p));
+		return vals.get(idx);
+	}
+	
+	private String getValSet(List<PrimeRefIntfc> vals)
+	{
+		return vals.stream().map(p -> p.getPrime().toString()).collect(Collectors.joining(",", "[","]"));
+	}
+	
+	private void addPrimeBases(PrimeRefIntfc prime, List<PrimeRefIntfc> vals)
 	{
 		BitSet bs = new BitSet();
 		for (PrimeRefIntfc p : vals)
@@ -110,54 +144,108 @@ public class BaseReduce3Triple extends PrimeGrapher
 		prime.addPrimeBase(bs);
 	}
 	
-	BigInteger getAllTotal(PrimeRefIntfc [] vals)
+	private BigInteger getAllTotal(List<PrimeRefIntfc> vals)
 	{
-		return Arrays.asList(vals).stream().map(PrimeRefIntfc::getPrime).reduce(BigInteger.ZERO, (a,b) -> a.add(b));
-	}
-	
-	BigInteger getTop2Total(PrimeRefIntfc [] vals)
-	{
-		return vals[top].getPrime().add(vals[mid].getPrime());  
-	}
-	
-	BigInteger getLWM(PrimeRefIntfc prime, PrimeRefIntfc [] vals)
-	{
-		return vals[bot].getPrime();
+		return vals.stream().map(PrimeRefIntfc::getPrime).reduce(BigInteger.ZERO, (a,b) -> a.add(b));
 	}
 	
 	/**
 	 * Init High Water Mark - maximal potential for: Top + Mid < Target
 	 * @return
 	 */
-	BigInteger initHWM(PrimeRefIntfc prime, PrimeRefIntfc [] vals)
+	private BigInteger initHWM(PrimeRefIntfc prime, List<PrimeRefIntfc> vals)
 	{
-		BigInteger hwm = getTop2Total(vals);
-		while (hwm.subtract(prime.getPrime()).signum() == 1) 
+		BigInteger hwm;
+		while ((hwm = getAllSum(vals)).subtract(prime.getPrime()).signum() == 1) 
 		{
-			hwm = vals[top].getPrime().add(vals[mid].getPrime());
-			vals[top] = vals[top].getPrevPrimeRef();
-			vals[mid] = vals[top].getPrevPrimeRef();
-		};	
+			vals.set(TOP, vals.get(TOP).getPrevPrimeRef());
+			vals.set(MID, vals.get(MID).getPrevPrimeRef());
+		}	
 		return hwm;
 	}
 	
-	BigInteger initValues(PrimeRefIntfc prime, PrimeRefIntfc [] vals)
+	private void initLWM(List<PrimeRefIntfc>  vals)
 	{
-		BigInteger half = prime.getPrime().divide(BigInteger.TWO);
-		vals[top] = ps.getPrimeRef(ps.getNextHighPrimeIdx(half)); 
-		vals[mid] = ps.getPrimeRef(ps.getNextLowPrimeIdx(half)); 
-		vals[bot] = ps.getPrimeRef(0);
+		BigDecimal num3 = BigDecimal.valueOf(3L);
+		BigDecimal topTwoThird = (new BigDecimal(vals.get(TOP).getPrime())).divide(num3, RoundingMode.HALF_DOWN);
+		vals.set(BOT, ps.getPrimeRef(ps.getNextLowPrimeIdx(topTwoThird)));
 		
-		System.out.println("half of prime:" + half + " set:" + Arrays.asList(vals).stream().map(p -> p.getPrime().toString()).collect(Collectors.joining(",")));
+		vals.set(MID,  ps.getPrimeRef(ps.getNextLowPrimeIdx(vals.get(TOP).getPrime().subtract(vals.get(BOT).getPrime()))));
+	}
+	
+	private void initValues(PrimeRefIntfc prime, List<PrimeRefIntfc> vals)
+	{
+		BigDecimal two = BigDecimal.valueOf(2L);
+		BigDecimal half = (new BigDecimal(prime.getPrime())).divide(two);
+		vals.add(ps.getPrimeRef(ps.getNextHighPrimeIdx(half))); 
+		vals.add(ps.getPrimeRef(ps.getNextLowPrimeIdx(half))); 
+		vals.add(ps.getPrimeRef(0));	
+	}
+	
+	private BigInteger getAllSum(List<PrimeRefIntfc> vals)
+	{
+		return vals.stream().map(PrimeRefIntfc::getPrime).reduce(BigInteger.ZERO, BigInteger::add);
+	}
+	
+	private boolean ensureConstraints(PrimeRefIntfc prime, List<PrimeRefIntfc> vals, Consumer<List<PrimeRefIntfc>> consumer)
+	{
+		PrimeRefIntfc [] saved = new PrimeRefIntfc[vals.size()];
 		
-		return initHWM(prime, vals);
+		vals.toArray(saved);
+		consumer.accept(vals);
+		
+		boolean ret = true;
+		if (vals.stream().distinct().count() != 3)
+		{
+			ret = false;  // not distinct
+		}
+		
+		if (ret && getAllSum(vals).compareTo(prime.getPrime()) == 1)
+		{
+			ret = false;  // sum exceeds rpime
+		}
+		
+		if (!ret)  // revert change if needed
+		{
+			vals.clear();
+			vals.addAll(Arrays.asList(saved));
+		}
+		
+		return ret;
+	}
+	
+	private boolean ensureLowConstraints(PrimeRefIntfc prime, List<PrimeRefIntfc> vals, Consumer<List<PrimeRefIntfc>> consumer)
+	{
+		PrimeRefIntfc [] saved = new PrimeRefIntfc[vals.size()];
+		
+		vals.toArray(saved);
+		consumer.accept(vals);
+		
+		boolean ret = true;
+		if (vals.stream().distinct().count() != 3)
+		{
+			ret = false; // not distinct
+		}
+		
+		if (ret && getAllSum(vals).compareTo(prime.getPrime()) == -1)
+		{
+			ret = false; // sum below prime
+		}
+		
+		if (!ret)  // revert change if needed
+		{
+			vals.clear();
+			vals.addAll(Arrays.asList(saved));
+		}
+		
+		return ret;
 	}
 	
 	/**
 	 * top-level function; iterate over entire dataset to reduce every item
 	 * @param maxReduce
 	 */
-	public void log3Base(int activeBaseId)
+	public void genBases(int activeBaseId)
 	{
 		System.out.println("log3base entry");
 		// Bootstrap
@@ -183,24 +271,5 @@ public class BaseReduce3Triple extends PrimeGrapher
 			bNew.set(0);
 			ps.getPrimeRef(curPrimeIdx).addPrimeBase(bNew);
 		}
-		
-		// Get desired data
-		ps.setActiveBaseId(activeBaseId);
-		for (int i = 0; i < ps.getMaxIdx(); i++)
-		{ 				
-			PrimeRefIntfc pr = ps.getPrimeRef(i);
-			try 
-			{
-				System.out.println(String.format("Prime [%d] idx[%d] bases %s base-indexes %s",
-						pr.getPrime(), 
-						i,
-						pr.getIdxPrimes(),
-						pr.getIndexes()));
-			}
-			catch(Exception e)
-			{
-				System.out.println(String.format("Can't show bases for: %d", pr.getPrime()));
-			}		
-		}	
 	}	
 }

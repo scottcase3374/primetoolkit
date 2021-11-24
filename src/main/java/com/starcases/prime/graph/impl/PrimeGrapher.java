@@ -19,7 +19,7 @@ import com.starcases.prime.intfc.PrimeSourceIntfc;
 //       11 <- 7+3+1; 5+3+2+1
 public abstract class PrimeGrapher 
 {
-	static protected Comparator<String> nodeComparator = (String o1, String o2) -> Integer.decode(o1).compareTo(Integer.decode(o2));
+	protected static Comparator<String> nodeComparator = (String o1, String o2) -> Integer.decode(o1).compareTo(Integer.decode(o2));
 
 	protected PrimeSourceIntfc ps;
 	
@@ -28,7 +28,7 @@ public abstract class PrimeGrapher
 	
 	private Logger log;
 	
-	public PrimeGrapher(PrimeSourceIntfc ps, Logger log)
+	protected PrimeGrapher(PrimeSourceIntfc ps, Logger log)
 	{
 		this.log = log;
 		this.ps = ps;

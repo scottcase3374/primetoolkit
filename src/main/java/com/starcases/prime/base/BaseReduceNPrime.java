@@ -66,7 +66,7 @@ public class BaseReduceNPrime extends PrimeGrapher
 	 * top-level function; iterate over entire dataset to reduce every item
 	 * @param maxReduce
 	 */
-	public void log(int maxReduce)
+	public void genBases(int maxReduce)
 	{
 		for (int i = 0; i< ps.getMaxIdx(); i++)
 		{ 

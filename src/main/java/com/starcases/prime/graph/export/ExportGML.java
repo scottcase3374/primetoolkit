@@ -2,7 +2,8 @@ package com.starcases.prime.graph.export;
 
 import java.io.PrintWriter;
 import java.math.BigInteger;
-import java.util.Stack;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
@@ -19,7 +20,7 @@ interface ElementIntfc
 
 public class ExportGML 
 {
-	Stack<ElementIntfc> stack = new Stack<>();
+	Deque<ElementIntfc> stack = new ArrayDeque<>();
 	
 	PrimeSourceIntfc ps;
 	PrintWriter pr;
@@ -39,7 +40,7 @@ public class ExportGML
 			for (int i=0; i < ps.getMaxIdx(); i++)
 				expNode(ps.getPrimeRef(i));
 			
-			stack.stream().forEach(e -> e.output());
+			stack.stream().forEach(ElementIntfc::output);
 			
 			pr.println("]");
 		}
