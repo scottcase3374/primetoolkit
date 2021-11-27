@@ -1,7 +1,5 @@
 package com.starcases.prime.graph.log;
 
-import com.starcases.prime.graph.impl.PrimeGrapher;
-import com.starcases.prime.intfc.LogGraphIntfc;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import lombok.extern.java.Log;
@@ -15,7 +13,7 @@ import picocli.CommandLine.Command;
 //       7 <-  5 + 2
 //       11 <- 7+3+1; 5+3+2+1
 @Log
-public class LogBasesNPrime extends PrimeGrapher implements LogGraphIntfc
+public class LogBasesNPrime extends AbstractLogBase
 {
 	public LogBasesNPrime(PrimeSourceIntfc ps)
 	{
@@ -26,6 +24,7 @@ public class LogBasesNPrime extends PrimeGrapher implements LogGraphIntfc
 	@Command
 	public void log()
 	{
+		log.entering("LogBaseNPrime", "log()");
 		for (int i = 0; i< ps.getMaxIdx(); i++)
 		{ 				
 			try

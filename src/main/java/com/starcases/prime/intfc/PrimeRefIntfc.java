@@ -8,6 +8,7 @@ public interface PrimeRefIntfc
 	BigInteger getPrime();
 	
 	BitSet getPrimeBaseIdxs();
+	BitSet getPrimeBaseIdxs(BaseTypes baseType);
 	
 	/**
 	 * 
@@ -27,7 +28,7 @@ public interface PrimeRefIntfc
 	 * @param primeBase
 	 */
 	void addPrimeBase(BitSet primeBase);
-	
+	void addPrimeBase(BitSet primeBase, BaseTypes baseType);
 	/**
 	 * Strings formatted for easy display
 	 * @return

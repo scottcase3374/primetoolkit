@@ -18,8 +18,8 @@ public interface PrimeSourceIntfc
 	int getNextHighPrimeIdx(BigDecimal val);
 	
 	BigInteger getDistToNextPrime(int curIdx);
-	int getActiveBaseId();
-	void setActiveBaseId(int activeBaseId);
+	BaseTypes getActiveBaseId();
+	void setActiveBaseId(BaseTypes activeBaseId);
 	
 	int getMaxIdx();
 	void init();

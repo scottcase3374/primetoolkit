@@ -53,7 +53,7 @@ public class PrimeNodeGenerator
 				return true;
 			}
 		}
-		catch(IndexOutOfBoundsException e)
+		catch(IndexOutOfBoundsException | NullPointerException e)
 		{
 			// do nothing - final return handles it.
 			log.info("dataset exhaused");

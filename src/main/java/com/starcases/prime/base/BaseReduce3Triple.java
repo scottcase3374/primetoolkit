@@ -13,13 +13,14 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import com.starcases.prime.graph.impl.PrimeGrapher;
+import com.starcases.prime.intfc.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
+import com.starcases.prime.impl.AbstractPrimeBase;
 import lombok.extern.java.Log;
 
 @Log
-public class BaseReduce3Triple extends PrimeGrapher 
+public class BaseReduce3Triple extends AbstractPrimeBase
 {
 	static final Comparator<String> nodeComparator = (String o1, String o2) -> Integer.decode(o1).compareTo(Integer.decode(o2));
 	static final MathContext mcFloor = new MathContext(1, RoundingMode.FLOOR);
@@ -29,9 +30,13 @@ public class BaseReduce3Triple extends PrimeGrapher
 	static final int MID = 1;
 	static final int BOT = 2;
 	
+	BaseTypes activeBaseId;
+	
 	public BaseReduce3Triple(PrimeSourceIntfc ps)
 	{
 		super(ps, log);
+		activeBaseId = BaseTypes.THREETRIPLE;
+		ps.setActiveBaseId(activeBaseId);
 	}
 	
 	/*
@@ -115,11 +120,15 @@ public class BaseReduce3Triple extends PrimeGrapher
 			
 			if (prime.getPrime().compareTo(getAllTotal(vals)) != 0)
 				stopNow = false;
-			System.out.println(String.format("sign %d reduce prime - processing [%d] idx [%d] diff[%d] set: %s", sign, prime.getPrime(), prime.getPrimeRefIdx(), diff, getValSet(vals)));
+
+			if (doLog)
+				log.info(String.format("sign %d reduce prime - processing [%d] idx [%d] diff[%d] set: %s", sign, prime.getPrime(), prime.getPrimeRefIdx(), diff, getValSet(vals)));
 		}
 		
 		addPrimeBases(prime, vals);
-		System.out.println(String.format("Prime %d set %s  is-equal=%b", prime.getPrime(), getValSet(vals), getAllSum(vals).compareTo(prime.getPrime()) == 0));	
+		
+		if (doLog)
+			log.info(String.format("Prime %d set %s  is-equal=%b", prime.getPrime(), getValSet(vals), getAllSum(vals).compareTo(prime.getPrime()) == 0));	
 	}
 	
 	private PrimeRefIntfc add(int idx, BigInteger diff, List<PrimeRefIntfc> vals)
@@ -141,7 +150,7 @@ public class BaseReduce3Triple extends PrimeGrapher
 		{
 			bs.set(p.getPrimeRefIdx());
 		}
-		prime.addPrimeBase(bs);
+		prime.addPrimeBase(bs, BaseTypes.THREETRIPLE);
 	}
 	
 	private BigInteger getAllTotal(List<PrimeRefIntfc> vals)
@@ -245,9 +254,11 @@ public class BaseReduce3Triple extends PrimeGrapher
 	 * top-level function; iterate over entire dataset to reduce every item
 	 * @param maxReduce
 	 */
-	public void genBases(int activeBaseId)
+	public void genBases()
 	{
-		System.out.println("log3base entry");
+		if (doLog)
+			log.entering("BaseReduce3Triple", "genBases()");
+		
 		// Bootstrap
 		final int minPrimeIdx = ps.getPrimeIdx(BigInteger.valueOf(11L));
 		// Process
@@ -269,7 +280,7 @@ public class BaseReduce3Triple extends PrimeGrapher
 		{
 			BitSet bNew = new BitSet();
 			bNew.set(0);
-			ps.getPrimeRef(curPrimeIdx).addPrimeBase(bNew);
+			ps.getPrimeRef(curPrimeIdx).addPrimeBase(bNew, BaseTypes.THREETRIPLE);
 		}
 	}	
 }

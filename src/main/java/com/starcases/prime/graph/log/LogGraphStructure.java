@@ -27,7 +27,7 @@ public class LogGraphStructure extends PrimeGrapher implements LogGraphIntfc
 	@Command
 	public void log()
 	{
-		System.out.println("log structure");
+		log.entering("LogGraphStructure", "log()");
 			graph
 				.vertexSet()				
 				.stream()

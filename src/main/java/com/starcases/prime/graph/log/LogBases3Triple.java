@@ -1,7 +1,6 @@
 package com.starcases.prime.graph.log;
 
-import com.starcases.prime.graph.impl.PrimeGrapher;
-import com.starcases.prime.intfc.LogGraphIntfc;
+import com.starcases.prime.intfc.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import lombok.extern.java.Log;
@@ -15,7 +14,7 @@ import picocli.CommandLine.Command;
 //       7 <-  5 + 2
 //       11 <- 7+3+1; 5+3+2+1
 @Log
-public class LogBases3Triple extends PrimeGrapher implements LogGraphIntfc
+public class LogBases3Triple  extends AbstractLogBase
 {
 	public LogBases3Triple(PrimeSourceIntfc ps)
 	{
@@ -27,7 +26,7 @@ public class LogBases3Triple extends PrimeGrapher implements LogGraphIntfc
 	public void log()
 	{
 		// Get desired data
-		ps.setActiveBaseId(1);
+		ps.setActiveBaseId(BaseTypes.THREETRIPLE);
 		for (int i = 0; i < ps.getMaxIdx(); i++)
 		{ 				
 			PrimeRefIntfc pr = ps.getPrimeRef(i);
@@ -41,7 +40,7 @@ public class LogBases3Triple extends PrimeGrapher implements LogGraphIntfc
 			}
 			catch(Exception e)
 			{
-				System.out.println(String.format("Can't show bases for: %d", pr.getPrime()));
+				log.severe(String.format("Can't show bases for: %d exception: %s", pr.getPrime(), e.toString()));
 			}		
 		}	
 	}

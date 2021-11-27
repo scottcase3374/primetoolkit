@@ -26,7 +26,7 @@ public abstract class PrimeGrapher
 	protected GraphBuilder<String, DefaultEdge, DefaultDirectedGraph<String, DefaultEdge>> primeGraph = new GraphBuilder<>(new DefaultDirectedGraph<>(DefaultEdge.class));
 	protected Graph<String,DefaultEdge> graph;
 	
-	private Logger log;
+	protected Logger log;
 	
 	protected PrimeGrapher(PrimeSourceIntfc ps, Logger log)
 	{

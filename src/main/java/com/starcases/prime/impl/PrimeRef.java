@@ -1,12 +1,14 @@
 package com.starcases.prime.impl;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import com.starcases.prime.intfc.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
@@ -25,7 +27,7 @@ public class PrimeRef implements PrimeRefIntfc
 	private int primeIdx;
 	
 	// Represents sets of base primes that sum to this prime. (index to primes)
-	private ArrayList<List<Integer>> primeBaseIdxs = new ArrayList<>(); 
+	private Map<BaseTypes,List<Integer>> primeBaseIdxs = new HashMap<>(); 
 	
 	private static PrimeSourceIntfc primeSrc;
 	
@@ -79,15 +81,29 @@ public class PrimeRef implements PrimeRefIntfc
 		return b;
 	}	
 	
+	@Override
+	public BitSet getPrimeBaseIdxs(BaseTypes baseType) {
+		BitSet b = new BitSet();
+		primeBaseIdxs.get(baseType).stream().forEach(b::set);
+		return b;
+	}	
+	
 	/**
 	 * Include a set of primes in the set of prime bases for the current prime.
 	 * @param primeBase
 	 */
+	@Override
 	public void addPrimeBase(BitSet primeBase)
 	{
-		this.primeBaseIdxs.add(primeBase.stream().boxed().collect(Collectors.toList()));
+		this.primeBaseIdxs.merge(primeSrc.getActiveBaseId(), primeBase.stream().boxed().collect(Collectors.toList()), (a,b) -> b );
 	}
 
+	@Override
+	public void addPrimeBase(BitSet primeBase, BaseTypes baseType)
+	{
+		this.primeBaseIdxs.merge(baseType, primeBase.stream().boxed().collect(Collectors.toList()), (a,b) -> b );
+	}	
+	
 	public String getIndexes()
 	{
 		return this.getPrimeBaseIdxs()

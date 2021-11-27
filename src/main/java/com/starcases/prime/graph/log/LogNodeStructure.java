@@ -1,7 +1,5 @@
 package com.starcases.prime.graph.log;
 
-import com.starcases.prime.graph.impl.PrimeGrapher;
-import com.starcases.prime.intfc.LogGraphIntfc;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import lombok.extern.java.Log;
@@ -14,7 +12,7 @@ import lombok.extern.java.Log;
 //       7 <-  5 + 2
 //       11 <- 7+3+1; 5+3+2+1
 @Log
-public class LogNodeStructure extends PrimeGrapher implements LogGraphIntfc
+public class LogNodeStructure extends AbstractLogBase
 {
 	public LogNodeStructure(PrimeSourceIntfc ps)
 	{

@@ -11,7 +11,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
+import java.util.concurrent.atomic.AtomicBoolean;
+import com.starcases.prime.intfc.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
@@ -32,8 +33,9 @@ public class PrimeSource implements PrimeSourceIntfc
 	
 	private int targetPrimeCount;
 	
-	private int activeBaseId = 0;
-	
+	private BaseTypes activeBaseId = BaseTypes.DEFAULT;
+	private AtomicBoolean doInit = new AtomicBoolean(false);
+	 
 	public PrimeSource(int maxCount, int confidenceLevel)
 	{
 		this(maxCount);
@@ -68,12 +70,12 @@ public class PrimeSource implements PrimeSourceIntfc
 		return this.distanceToNext.get(curIdx);
 	}
 	
-	public int getActiveBaseId()
+	public BaseTypes getActiveBaseId()
 	{
 		return activeBaseId;
 	}
 	
-	public void setActiveBaseId(int activeBaseId)
+	public void setActiveBaseId(BaseTypes activeBaseId)
 	{
 		this.activeBaseId = activeBaseId;	
 	}
@@ -140,6 +142,15 @@ public class PrimeSource implements PrimeSourceIntfc
 	
 	public void init()
 	{	
+		if (doInit.compareAndExchangeAcquire(false, true))
+		{
+			return;
+		}
+		else
+		{
+			log.entering("PrimeSource", "init()");
+		}
+		
 		BigInteger sumCeiling; 
 		
 		final BitSet primeIndexMaxPermutation = new BitSet();
@@ -187,7 +198,6 @@ public class PrimeSource implements PrimeSourceIntfc
 					sumBaseIdxs.set(curPrimeIdx); // sum of primes from these indexes should match 'sum'
 					final BitSet cachedBases = sumBaseIdxs;
 						
-					//log.info("cur prime:" + curPrime + " nextPrime:" + cachedSum);
 					addPrimeRef(cachedSum, cachedBases, curPrimeIdx, true);
 										
 					// Metric info

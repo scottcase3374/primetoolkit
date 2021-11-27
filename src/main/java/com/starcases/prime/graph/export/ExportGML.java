@@ -4,7 +4,7 @@ import java.io.PrintWriter;
 import java.math.BigInteger;
 import java.util.ArrayDeque;
 import java.util.Deque;
-
+import lombok.extern.java.Log;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
@@ -18,6 +18,7 @@ interface ElementIntfc
 	void output();
 }
 
+@Log
 public class ExportGML 
 {
 	Deque<ElementIntfc> stack = new ArrayDeque<>();
@@ -46,7 +47,7 @@ public class ExportGML
 		}
 		catch(Exception e)
 		{
-			System.out.println("exception in graph: " + e);
+			log.severe("exception in graph: " + e);
 		}
 	}
 	
