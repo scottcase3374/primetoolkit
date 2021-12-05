@@ -1,20 +1,20 @@
 package com.starcases.prime.graph.impl;
 
-import org.jgrapht.graph.DefaultDirectedGraph;
-import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.builder.GraphBuilder;
 
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.Graph;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
-
 import lombok.extern.java.Log;
 
 /**
  * This is just an experiment with the GraphStream lib originally 
  * and converted to jgrapht at the moment.
  *  
- * Goal: see how well it works for something like my pet prime# 
- * research projects.
+ * Goal: see how well it works for something like this prime# 
+ * research project.
+ * 
+ * 
  */
 @Log
 public class PrimeNodeGenerator
@@ -22,9 +22,9 @@ public class PrimeNodeGenerator
 	int level = 0;
 	PrimeRefIntfc primeRef = null;
 	PrimeSourceIntfc ps;
-	GraphBuilder<String, DefaultEdge, DefaultDirectedGraph<String, DefaultEdge>> graph;
+	Graph<PrimeRefIntfc, DefaultEdge> graph;
 	
-	public PrimeNodeGenerator(PrimeSourceIntfc ps, GraphBuilder<String, DefaultEdge, DefaultDirectedGraph<String, DefaultEdge>> graph)
+	public PrimeNodeGenerator(PrimeSourceIntfc ps, Graph<PrimeRefIntfc, DefaultEdge> graph)
 	{
 		this.ps = ps;
 		this.graph = graph;
@@ -36,9 +36,9 @@ public class PrimeNodeGenerator
 		for (level = 0; level < 2; level++)
 		{
 			PrimeRefIntfc targetNode = ps.getPrimeRef(level);
-			graph.addVertex(targetNode.getPrime().toString());
-			String targetNodeId = targetNode.getPrime().toString();
-			graph.addEdge(targetNodeId, targetNodeId);
+
+			graph.addVertex(targetNode);
+			graph.addEdge(targetNode, targetNode);
 		}
 	}
 
@@ -71,12 +71,20 @@ public class PrimeNodeGenerator
 		primeRef.getPrimeBaseIdxs()
 							.stream()
 							.forEach(
-									p -> {											
-											String targetNodeId = primeRef.getPrime().toString();
-											graph.addVertex(targetNodeId);
-											String sourceNodeId = ps.getPrimeRef(p).getPrime().toString();
-											graph.addEdge(sourceNodeId, targetNodeId);
+									baseIdx -> {	
+											addVertext(primeRef);
+											addBaseEdge(primeRef, baseIdx);
 										});
 		level++;
+	}
+
+	protected void addVertext(PrimeRefIntfc primeRef)
+	{
+		graph.addVertex(primeRef);		
+	}
+	
+	protected void addBaseEdge(PrimeRefIntfc primeRef, int baseIdx)
+	{
+		graph.addEdge( ps.getPrimeRef(baseIdx), primeRef);
 	}
 }

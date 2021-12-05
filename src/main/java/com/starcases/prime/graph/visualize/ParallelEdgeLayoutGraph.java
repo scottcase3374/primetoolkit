@@ -1,0 +1,32 @@
+package com.starcases.prime.graph.visualize;
+
+import javax.swing.JFrame;
+
+import org.jgrapht.Graph;
+import org.jgrapht.ext.JGraphXAdapter;
+import org.jgrapht.graph.DefaultEdge;
+import com.mxgraph.layout.mxParallelEdgeLayout;
+import com.mxgraph.swing.mxGraphComponent;
+
+public class ParallelEdgeLayoutGraph extends JFrame
+{
+	private static final long serialVersionUID = 1L;
+	private transient JGraphXAdapter<String, DefaultEdge> jgxAdapter;
+  
+    
+    public ParallelEdgeLayoutGraph(Graph<String,DefaultEdge> graph)
+    {
+        // create a visualization using JGraph, via an adapter
+        jgxAdapter = new JGraphXAdapter<>(graph);
+
+        mxGraphComponent component = new mxGraphComponent(jgxAdapter);
+        component.setConnectable(false);
+        component.getGraph().setAllowDanglingEdges(false);
+        getContentPane().add(component);
+      
+        //parallel edge layout - not useful at moment
+        mxParallelEdgeLayout layout = new mxParallelEdgeLayout(jgxAdapter, 120);
+        
+        layout.execute(jgxAdapter.getDefaultParent());
+    }
+}

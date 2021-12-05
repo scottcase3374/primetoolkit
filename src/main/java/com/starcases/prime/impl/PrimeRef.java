@@ -95,13 +95,13 @@ public class PrimeRef implements PrimeRefIntfc
 	@Override
 	public void addPrimeBase(BitSet primeBase)
 	{
-		this.primeBaseIdxs.merge(primeSrc.getActiveBaseId(), primeBase.stream().boxed().collect(Collectors.toList()), (a,b) -> b );
+		this.primeBaseIdxs.merge(primeSrc.getActiveBaseId(), primeBase.stream().boxed().toList(), (a,b) -> b );
 	}
 
 	@Override
 	public void addPrimeBase(BitSet primeBase, BaseTypes baseType)
 	{
-		this.primeBaseIdxs.merge(baseType, primeBase.stream().boxed().collect(Collectors.toList()), (a,b) -> b );
+		this.primeBaseIdxs.merge(baseType, primeBase.stream().boxed().toList(), (a,b) -> b );
 	}	
 	
 	public String getIndexes()
@@ -120,6 +120,11 @@ public class PrimeRef implements PrimeRefIntfc
 				.boxed()
 				.map(i -> primeSrc.getPrime(i).toString())
 				.collect(Collectors.joining(",","[", "]"));
+	}
+	
+	public String toString()
+	{
+		return this.getPrime().toString();
 	}
 	
 	@Override

@@ -27,6 +27,7 @@ public class LogBases3Triple  extends AbstractLogBase
 	{
 		// Get desired data
 		ps.setActiveBaseId(BaseTypes.THREETRIPLE);
+	
 		for (int i = 0; i < ps.getMaxIdx(); i++)
 		{ 				
 			PrimeRefIntfc pr = ps.getPrimeRef(i);

@@ -10,6 +10,7 @@ import com.starcases.prime.graph.log.LogBases3Triple;
 import com.starcases.prime.graph.log.LogBasesNPrime;
 import com.starcases.prime.graph.log.LogGraphStructure;
 import com.starcases.prime.graph.log.LogNodeStructure;
+import com.starcases.prime.graph.visualize.MetaDataTable;
 import com.starcases.prime.graph.visualize.ViewDefault;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import lombok.extern.java.Log;
@@ -42,6 +43,7 @@ public class Init implements Runnable
 	public void run() 
 	{
 		ps = PrimeSourceFactory.primeSource(initOpts.maxCount, initOpts.confidenceLevel);	
+		ps.init();
 		if (baseOpts != null)	
 		{
 			if (baseOpts.bases != null)
@@ -153,7 +155,10 @@ public class Init implements Runnable
 	
 	void graph(PrimeSourceIntfc ps)
 	{
-		ViewDefault vd = new ViewDefault(ps);
+		MetaDataTable metaDataView = new MetaDataTable();
+		metaDataView.setSize(400, 320);
+		metaDataView.setVisible(true);
+		ViewDefault vd = new ViewDefault(ps, metaDataView);
 		vd.viewDefault();
 	}
 	

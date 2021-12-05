@@ -2,34 +2,37 @@ package com.starcases.prime.graph.visualize;
 
 import javax.swing.WindowConstants;
 
+import org.jgrapht.event.GraphListener;
+
 import com.starcases.prime.graph.impl.PrimeGrapher;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import lombok.extern.java.Log;
 
-// 
-// start 1
-//       2
-//       3 <-  2 + 1
-//       5 <-  3 + 2
-//       7 <-  5 + 2
-//       11 <- 7+3+1; 5+3+2+1
 @Log
 public class ViewDefault extends PrimeGrapher
 {	
-	public ViewDefault(PrimeSourceIntfc ps)
+	
+	public ViewDefault(PrimeSourceIntfc ps, GraphListener...graphs)
 	{
-		super(ps, log);
+		super(ps, log, graphs);
 	}
 	
 	public void viewDefault()
 	{
         try
 		{
-			VisualizeGraph frame = new VisualizeGraph(this.graph);
-			frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-			frame.setSize(400, 320);
-			frame.setVisible(true);	
-			frame.getRootPane().grabFocus();
+			CircularLayoutPrimesGraph defaultGraph = new CircularLayoutPrimesGraph(this.graph);
+			defaultGraph.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+			defaultGraph.setSize(400, 320);
+			defaultGraph.setVisible(true);	
+			defaultGraph.getRootPane().grabFocus();
+			
+			CompactTreeLayoutPrimesGraph compactTreeGraph = new CompactTreeLayoutPrimesGraph(this.graph);
+			compactTreeGraph.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+			compactTreeGraph.setSize(400, 320);
+			compactTreeGraph.setVisible(true);	
+			compactTreeGraph.getRootPane().grabFocus();			
+			
 			do
 			{
 				// will exit when window closes

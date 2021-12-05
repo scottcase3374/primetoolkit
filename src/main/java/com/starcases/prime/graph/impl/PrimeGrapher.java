@@ -6,9 +6,13 @@ import java.util.Comparator;
 import java.util.logging.Logger;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.event.GraphListener;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.builder.GraphBuilder;
+import org.jgrapht.graph.DefaultListenableGraph;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
+import com.starcases.prime.intfc.PrimeRefIntfc;
+
 
 // 
 // start 1
@@ -19,22 +23,32 @@ import com.starcases.prime.intfc.PrimeSourceIntfc;
 //       11 <- 7+3+1; 5+3+2+1
 public abstract class PrimeGrapher 
 {
-	protected static Comparator<String> nodeComparator = (String o1, String o2) -> Integer.decode(o1).compareTo(Integer.decode(o2));
+	protected static Comparator<PrimeRefIntfc> nodeComparator = (PrimeRefIntfc o1, PrimeRefIntfc o2) -> o1.getPrime().compareTo(o2.getPrime());
 
 	protected PrimeSourceIntfc ps;
 	
-	protected GraphBuilder<String, DefaultEdge, DefaultDirectedGraph<String, DefaultEdge>> primeGraph = new GraphBuilder<>(new DefaultDirectedGraph<>(DefaultEdge.class));
-	protected Graph<String,DefaultEdge> graph;
+	protected GraphBuilder<PrimeRefIntfc, DefaultEdge, DefaultDirectedGraph<PrimeRefIntfc, DefaultEdge>> primeGraphBuilder = new GraphBuilder<>(new DefaultDirectedGraph<>(DefaultEdge.class));
+	protected Graph<PrimeRefIntfc,DefaultEdge> graph;
 	
 	protected Logger log;
 	
-	protected PrimeGrapher(PrimeSourceIntfc ps, Logger log)
+	/**
+	 * 
+	 * @param ps
+	 * @param log
+	 * @param graphs
+	 */
+	protected PrimeGrapher(PrimeSourceIntfc ps, Logger log, GraphListener...graphs)
 	{
 		this.log = log;
 		this.ps = ps;
 		this.ps.init();
+		
+		DefaultListenableGraph lgraph = new DefaultListenableGraph(primeGraphBuilder.build(), true);
+		Arrays.asList(graphs).stream().forEach(g-> lgraph.addGraphListener(g));
+		this.graph = lgraph;
+		
 		this.populateData();
-		this.graph = primeGraph.build();
 	}
 	
 	BigInteger getTotalSum(BigInteger [] sum3, Integer [] indexes)
@@ -49,7 +63,7 @@ public abstract class PrimeGrapher
 	void populateData()
 	{
 		// Start setting up the actual graph/data generations
-		PrimeNodeGenerator primeNodeGenerator = new PrimeNodeGenerator(ps, primeGraph);
+		PrimeNodeGenerator primeNodeGenerator = new PrimeNodeGenerator(ps, graph);
 		primeNodeGenerator.begin();
 		
 		while (primeNodeGenerator.nextEvents());		

@@ -11,9 +11,6 @@ public abstract class AbstractPrimeBase implements PrimeBaseIntfc
 	protected PrimeSourceIntfc ps;
 	protected boolean doLog;
 	
-	private AbstractPrimeBase()
-	{}
-	
 	protected AbstractPrimeBase(PrimeSourceIntfc ps, Logger log)
 	{
 		this.log = log;
