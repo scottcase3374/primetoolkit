@@ -19,13 +19,13 @@ public class ParallelEdgeLayoutGraph extends JFrame
         // create a visualization using JGraph, via an adapter
         jgxAdapter = new JGraphXAdapter<>(graph);
 
-        mxGraphComponent component = new mxGraphComponent(jgxAdapter);
+        var component = new mxGraphComponent(jgxAdapter);
         component.setConnectable(false);
         component.getGraph().setAllowDanglingEdges(false);
         getContentPane().add(component);
       
         //parallel edge layout - not useful at moment
-        mxParallelEdgeLayout layout = new mxParallelEdgeLayout(jgxAdapter, 120);
+        var layout = new mxParallelEdgeLayout(jgxAdapter, 120);
         
         layout.execute(jgxAdapter.getDefaultParent());
     }

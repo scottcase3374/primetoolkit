@@ -6,7 +6,7 @@ import java.util.Optional;
 
 public interface PrimeSourceIntfc
 {
-	PrimeRefIntfc getPrimeRef(int primeIdx);
+	Optional<PrimeRefIntfc> getPrimeRef(int primeIdx);
 	BigInteger getPrime(int primeIdx);
 	int getPrimeIdx(BigInteger val);
 	Optional<PrimeRefIntfc> getPrime(BigInteger val);

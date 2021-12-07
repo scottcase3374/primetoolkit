@@ -18,12 +18,12 @@ public class CompactTreeLayoutPrimesGraph extends JFrame
         // create a visualization using JGraph, via an adapter
         jgxAdapter = new JGraphXAdapter<>(graph);
 
-        mxGraphComponent component = new mxGraphComponent(jgxAdapter);
+        var component = new mxGraphComponent(jgxAdapter);
         component.setConnectable(false);
         component.getGraph().setAllowDanglingEdges(false);
         getContentPane().add(component);
         
-        mxCompactTreeLayout layout = new mxCompactTreeLayout(jgxAdapter, false, false);
+        var layout = new mxCompactTreeLayout(jgxAdapter, false, false);
         layout.setEdgeRouting(true);
         layout.setLevelDistance(140);
         layout.setNodeDistance(140);

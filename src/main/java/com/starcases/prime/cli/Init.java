@@ -12,6 +12,7 @@ import com.starcases.prime.graph.log.LogGraphStructure;
 import com.starcases.prime.graph.log.LogNodeStructure;
 import com.starcases.prime.graph.visualize.MetaDataTable;
 import com.starcases.prime.graph.visualize.ViewDefault;
+import com.starcases.prime.intfc.BaseTypes;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import lombok.extern.java.Log;
 import picocli.CommandLine.ArgGroup;
@@ -44,14 +45,17 @@ public class Init implements Runnable
 	{
 		ps = PrimeSourceFactory.primeSource(initOpts.maxCount, initOpts.confidenceLevel);	
 		ps.init();
+		var baseType = BaseTypes.DEFAULT;
+		
 		if (baseOpts != null)	
 		{
 			if (baseOpts.bases != null)
 			{
-				switch(baseOpts.bases)
+				baseType = baseOpts.bases;
+				switch(baseType)
 				{
 				case NPRIME:
-					optBaseNPrime(ps, baseOpts);
+					optBaseNPrime(ps, baseOpts);					
 					break;
 					
 				case THREETRIPLE:
@@ -63,6 +67,7 @@ public class Init implements Runnable
 				}
 			}			
 		}
+		
 		if (logOpts != null && logOpts.logOper != null)
 		{
 			switch (logOpts.logOper)
@@ -72,7 +77,7 @@ public class Init implements Runnable
 				break;
 				
 			case GRAPHSTRUCT:
-				this.logGraphStructure(ps);
+				this.logGraphStructure(ps, baseType);
 				break;
 				
 			case NPRIME:
@@ -90,7 +95,7 @@ public class Init implements Runnable
 			switch(graphOpts.graphType)
 			{
 			case DEFAULT:
-				graph(ps);
+				graph(ps, baseType);
 				break;
 			}
 		}
@@ -108,9 +113,9 @@ public class Init implements Runnable
 	
 	void optBaseNPrime(PrimeSourceIntfc ps, BaseOpts baseOpts)
 	{
-		BaseReduceNPrime base = new BaseReduceNPrime(ps);
+		var base = new BaseReduceNPrime(ps);
 		base.setMaxReduce(baseOpts.maxReduce);
-		if (baseOpts != null && baseOpts.logGenerate)
+		if (baseOpts.logGenerate)
 		{
 			base.setLogBaseGeneration(baseOpts.logGenerate);
 		}
@@ -120,7 +125,7 @@ public class Init implements Runnable
 	
 	void optBaseThreetriple(PrimeSourceIntfc ps)
 	{
-		BaseReduce3Triple base = new BaseReduce3Triple(ps);
+		var base = new BaseReduce3Triple(ps);
 		if (baseOpts != null && baseOpts.logGenerate)
 		{
 			base.setLogBaseGeneration(baseOpts.logGenerate);
@@ -131,34 +136,34 @@ public class Init implements Runnable
 	
 	private void logNodeStructure(PrimeSourceIntfc ps)
 	{		
-		LogNodeStructure lns = new LogNodeStructure(ps);
+		var lns = new LogNodeStructure(ps);
 		lns.log();
 	}
  
-	void logGraphStructure(PrimeSourceIntfc ps)
+	void logGraphStructure(PrimeSourceIntfc ps, BaseTypes baseType)
 	{
-		LogGraphStructure lgs = new LogGraphStructure(ps);	
+		var lgs = new LogGraphStructure(ps, baseType );	
 		lgs.log();		
 	}
 		 
 	void logNPrime(PrimeSourceIntfc ps)
 	{
-		LogBasesNPrime lbnp = new LogBasesNPrime(ps);
+		var lbnp = new LogBasesNPrime(ps);
 		lbnp.log();
 	}
 		
 	void logTripleBase(PrimeSourceIntfc ps)
 	{
-		LogBases3Triple lb3t = new LogBases3Triple(ps);
+		var lb3t = new LogBases3Triple(ps);
 		lb3t.log();
 	}
 	
-	void graph(PrimeSourceIntfc ps)
+	void graph(PrimeSourceIntfc ps, BaseTypes baseType)
 	{
-		MetaDataTable metaDataView = new MetaDataTable();
+		var metaDataView = new MetaDataTable();
 		metaDataView.setSize(400, 320);
 		metaDataView.setVisible(true);
-		ViewDefault vd = new ViewDefault(ps, metaDataView);
+		var vd = new ViewDefault(ps,  baseType, metaDataView);
 		vd.viewDefault();
 	}
 	
@@ -166,9 +171,9 @@ public class Init implements Runnable
 	{
 		try
 		{
-			try (PrintWriter pw = new PrintWriter("/home/scott/graph.gml"))
+			try (var pw = new PrintWriter("/home/scott/graph.gml"))
 			{
-				ExportGML e = new ExportGML(ps, pw);
+				var e = new ExportGML(ps, pw);
 				e.export();
 				pw.flush();
 			}			

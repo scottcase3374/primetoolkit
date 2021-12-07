@@ -1,16 +1,8 @@
 package com.starcases.prime.graph.log;
 
-import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import lombok.extern.java.Log;
 
-// 
-// start 1
-//       2
-//       3 <-  2 + 1
-//       5 <-  3 + 2
-//       7 <-  5 + 2
-//       11 <- 7+3+1; 5+3+2+1
 @Log
 public class LogNodeStructure extends AbstractLogBase
 {
@@ -24,9 +16,9 @@ public class LogNodeStructure extends AbstractLogBase
 	{
 		try
 		{
-			for (int i = 0; i < ps.getMaxIdx(); i++)
+			for (var i = 0; i < ps.getMaxIdx(); i++)
 			{ 
-				PrimeRefIntfc ref = ps.getPrimeRef(i);
+				var ref = ps.getPrimeRef(i).get();
 				System.out.println(String.format("Prime %d bases %s  <dist[%d], nextPrime[%d]>", 
 						ref.getPrime(), 
 						ref.getIdxPrimes(), 

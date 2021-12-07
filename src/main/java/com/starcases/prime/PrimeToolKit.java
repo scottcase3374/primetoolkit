@@ -18,10 +18,10 @@ public class PrimeToolKit
 
 	public static void main(String [] args)
 	{
-		PrimeToolKit ptk = new PrimeToolKit();
-		CommandLine cl = new CommandLine(ptk);
+		var ptk = new PrimeToolKit();
+		var cl = new CommandLine(ptk);
 		cl.registerConverter(java.util.logging.Level.class, Level::parse);
-		int exitCode = cl.execute(args);
+		var exitCode = cl.execute(args);
 	
 		System.exit(exitCode);
 	}	

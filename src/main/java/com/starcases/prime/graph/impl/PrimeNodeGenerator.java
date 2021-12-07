@@ -4,8 +4,11 @@ package com.starcases.prime.graph.impl;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.Graph;
 import com.starcases.prime.intfc.PrimeRefIntfc;
+import com.starcases.prime.intfc.BaseTypes;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import lombok.extern.java.Log;
+
+import java.util.NoSuchElementException;
 
 /**
  * This is just an experiment with the GraphStream lib originally 
@@ -23,11 +26,13 @@ public class PrimeNodeGenerator
 	PrimeRefIntfc primeRef = null;
 	PrimeSourceIntfc ps;
 	Graph<PrimeRefIntfc, DefaultEdge> graph;
+	BaseTypes baseType;
 	
-	public PrimeNodeGenerator(PrimeSourceIntfc ps, Graph<PrimeRefIntfc, DefaultEdge> graph)
+	public PrimeNodeGenerator(PrimeSourceIntfc ps, Graph<PrimeRefIntfc, DefaultEdge> graph, BaseTypes baseType)
 	{
 		this.ps = ps;
 		this.graph = graph;
+		this.baseType = baseType;
 	}
 	
 	public void begin() 
@@ -35,7 +40,7 @@ public class PrimeNodeGenerator
 		// bootstrap
 		for (level = 0; level < 2; level++)
 		{
-			PrimeRefIntfc targetNode = ps.getPrimeRef(level);
+			var targetNode = ps.getPrimeRef(level).get();
 
 			graph.addVertex(targetNode);
 			graph.addEdge(targetNode, targetNode);
@@ -46,14 +51,11 @@ public class PrimeNodeGenerator
 	{
 		try
 		{
-			primeRef = ps.getPrimeRef(level);
-			if (primeRef != null)
-			{
-				addNode();
-				return true;
-			}
+			primeRef = ps.getPrimeRef(level).orElseThrow(); 			
+			addNode();
+			return true;
 		}
-		catch(IndexOutOfBoundsException | NullPointerException e)
+		catch(NoSuchElementException | IndexOutOfBoundsException | NullPointerException e)
 		{
 			// do nothing - final return handles it.
 			log.info("dataset exhaused");
@@ -68,7 +70,7 @@ public class PrimeNodeGenerator
 	protected void addNode() 
 	{	
 		// Link from prime node to prime bases (i.e. unique set of smaller primes that sums to this prime).
-		primeRef.getPrimeBaseIdxs()
+		primeRef.getPrimeBaseIdxs(baseType)
 							.stream()
 							.forEach(
 									baseIdx -> {	
@@ -85,6 +87,6 @@ public class PrimeNodeGenerator
 	
 	protected void addBaseEdge(PrimeRefIntfc primeRef, int baseIdx)
 	{
-		graph.addEdge( ps.getPrimeRef(baseIdx), primeRef);
+		graph.addEdge( ps.getPrimeRef(baseIdx).get(), primeRef);
 	}
 }

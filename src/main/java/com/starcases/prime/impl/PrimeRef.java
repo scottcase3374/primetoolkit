@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.starcases.prime.intfc.BaseTypes;
@@ -18,7 +19,7 @@ import com.starcases.prime.intfc.PrimeSourceIntfc;
 * 
 **/
 
-public class PrimeRef implements PrimeRefIntfc
+public class PrimeRef extends AbstractPrimeRef implements PrimeRefIntfc
 {
 	/*
 	 *  Index for this instance of a prime.
@@ -49,24 +50,46 @@ public class PrimeRef implements PrimeRefIntfc
 		primeSrc = primeSrcIntfc;
 	}
 	
-	public PrimeRefIntfc getPrimeRef()
-	{
-		return this;
-	}
-	
 	public int getPrimeRefIdx()
 	{
 		return this.primeIdx;
 	}
 	
-	public PrimeRefIntfc getNextPrimeRef()
+	public Optional<PrimeRefIntfc> getNextPrimeRef()
 	{
 		return primeSrc.getPrimeRef(primeIdx +1);
 	}
 	
-	public PrimeRefIntfc getPrevPrimeRef()
+	public Optional<PrimeRefIntfc> getPrevPrimeRef()
 	{
+		if (primeIdx == 0)
+			return Optional.empty();
+		
 		return primeSrc.getPrimeRef(primeIdx -1);
+	}
+
+	@Override
+	public BigInteger getMinPrimeBase()
+	{
+		return primeBaseIdxs.get(PrimeRef.primeSrc.getActiveBaseId()).stream().map(i -> primeSrc.getPrime(i)).min(bigIntComp).get();
+	}
+	
+	@Override
+	public BigInteger getMaxPrimeBase()
+	{
+		return primeBaseIdxs.get(PrimeRef.primeSrc.getActiveBaseId()).stream().map(i -> primeSrc.getPrime(i)).max(bigIntComp).get();
+	}
+
+	@Override
+	public BigInteger getMinPrimeBase(BaseTypes baseType)
+	{
+		return primeBaseIdxs.get(baseType).stream().map(i -> primeSrc.getPrime(i)).min(bigIntComp).get();
+	}
+
+	@Override
+	public BigInteger getMaxPrimeBase(BaseTypes baseType)
+	{
+		return primeBaseIdxs.get(baseType).stream().map(i -> primeSrc.getPrime(i)).max(bigIntComp).get();
 	}
 	
 	@Override
@@ -74,16 +97,26 @@ public class PrimeRef implements PrimeRefIntfc
 		return primeSrc.getPrime(primeIdx);
 	}
 	
+	/**
+	 * Returns the number of bases used to sum to the
+	 * current prime.
+	 */
+	@Override
+	public int getBaseSize()
+	{
+		 return primeBaseIdxs.get(BaseTypes.DEFAULT).size();
+	}
+	
 	@Override
 	public BitSet getPrimeBaseIdxs() {
-		BitSet b = new BitSet();
+		var b = new BitSet();
 		primeBaseIdxs.get(PrimeRef.primeSrc.getActiveBaseId()).stream().forEach(b::set);
 		return b;
 	}	
 	
 	@Override
 	public BitSet getPrimeBaseIdxs(BaseTypes baseType) {
-		BitSet b = new BitSet();
+		var b = new BitSet();
 		primeBaseIdxs.get(baseType).stream().forEach(b::set);
 		return b;
 	}	
@@ -104,6 +137,7 @@ public class PrimeRef implements PrimeRefIntfc
 		this.primeBaseIdxs.merge(baseType, primeBase.stream().boxed().toList(), (a,b) -> b );
 	}	
 	
+	@Override
 	public String getIndexes()
 	{
 		return this.getPrimeBaseIdxs()
@@ -113,6 +147,7 @@ public class PrimeRef implements PrimeRefIntfc
 						collect(Collectors.joining(",","[", "]"));
 	}
 
+	@Override
 	public String getIdxPrimes()
 	{
 		return getPrimeBaseIdxs()
@@ -120,6 +155,26 @@ public class PrimeRef implements PrimeRefIntfc
 				.boxed()
 				.map(i -> primeSrc.getPrime(i).toString())
 				.collect(Collectors.joining(",","[", "]"));
+	}
+	
+	@Override
+	public String getIndexes(BaseTypes baseType)
+	{
+		return this.getPrimeBaseIdxs(baseType)
+				.stream()
+				.boxed()
+				.map(i -> Integer.toString(i)).
+				collect(Collectors.joining(",","[", "]"));
+	}
+	
+	@Override
+	public String getIdxPrimes(BaseTypes baseType)
+	{
+		return getPrimeBaseIdxs(baseType)
+				.stream()
+				.boxed()
+				.map(i -> primeSrc.getPrime(i).toString())
+				.collect(Collectors.joining(",","[", "]"));	
 	}
 	
 	public String toString()

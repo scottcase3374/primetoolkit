@@ -11,7 +11,7 @@ public class PrimeSourceFactory
 
 	public static PrimeSourceIntfc primeSource(int maxCount, int confidenceLevel, BaseTypes activeBaseId)
 	{
-		PrimeSource ps = new PrimeSource(maxCount, confidenceLevel);
+		var ps = new PrimeSource(maxCount, confidenceLevel);
 		ps.setActiveBaseId(activeBaseId);
 		return ps;
 	}

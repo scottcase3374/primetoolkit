@@ -6,28 +6,29 @@ import org.jgrapht.event.GraphListener;
 
 import com.starcases.prime.graph.impl.PrimeGrapher;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
+import com.starcases.prime.intfc.BaseTypes;
 import lombok.extern.java.Log;
 
 @Log
 public class ViewDefault extends PrimeGrapher
 {	
 	
-	public ViewDefault(PrimeSourceIntfc ps, GraphListener...graphs)
+	public ViewDefault(PrimeSourceIntfc ps, BaseTypes baseType, GraphListener...graphs)
 	{
-		super(ps, log, graphs);
+		super(ps, log, baseType, graphs);
 	}
 	
 	public void viewDefault()
 	{
         try
 		{
-			CircularLayoutPrimesGraph defaultGraph = new CircularLayoutPrimesGraph(this.graph);
+			var defaultGraph = new CircularLayoutPrimesGraph(this.graph);
 			defaultGraph.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 			defaultGraph.setSize(400, 320);
 			defaultGraph.setVisible(true);	
 			defaultGraph.getRootPane().grabFocus();
 			
-			CompactTreeLayoutPrimesGraph compactTreeGraph = new CompactTreeLayoutPrimesGraph(this.graph);
+			var compactTreeGraph = new CompactTreeLayoutPrimesGraph(this.graph);
 			compactTreeGraph.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 			compactTreeGraph.setSize(400, 320);
 			compactTreeGraph.setVisible(true);	

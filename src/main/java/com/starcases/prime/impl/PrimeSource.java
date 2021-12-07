@@ -51,7 +51,7 @@ public class PrimeSource implements PrimeSourceIntfc
 		
 		PrimeRef.setPrimeSource(this);
 		
-		BitSet tmpBitSet = new BitSet();
+		var tmpBitSet = new BitSet();
 		tmpBitSet.set(0);
 		addPrimeRef(BigInteger.valueOf(1L), tmpBitSet.get(0, 1));
 		
@@ -82,7 +82,7 @@ public class PrimeSource implements PrimeSourceIntfc
 	
 	public long getNextLowPrime(BigInteger val, int startIdx, int maxOffset)
 	{
-		int ret = Collections.binarySearch(primes, val);
+		var ret = Collections.binarySearch(primes, val);
 		if (Math.abs(startIdx - ret) >= maxOffset)
 			return Long.MIN_VALUE;
 		return ret > 0 ? ret-1 : (-ret)-1;  
@@ -90,7 +90,7 @@ public class PrimeSource implements PrimeSourceIntfc
 	
 	public long getNextHighPrime(BigInteger val, int startIdx, int maxOffset)
 	{
-		int ret = Collections.binarySearch(primes, val);
+		var ret = Collections.binarySearch(primes, val);
 		if (Math.abs(startIdx - ret) >= maxOffset)
 			return Long.MIN_VALUE;
 		return ret > 0 ? ret+1 : (-ret)+1;  
@@ -103,7 +103,7 @@ public class PrimeSource implements PrimeSourceIntfc
 	 */
 	public int getNextLowPrimeIdx(BigInteger val)
 	{
-		int ret = Collections.binarySearch(primes, val);
+		var ret = Collections.binarySearch(primes, val);
 		// ret >=0 if found
 		// (- (insertion point) -1) ; insertion point > key or == list.size() for key greater than all.
 		return ret > 0 ? ret-1 : (-ret)-2;  
@@ -111,7 +111,7 @@ public class PrimeSource implements PrimeSourceIntfc
 
 	public int getNextHighPrimeIdx(BigInteger val)
 	{
-		int ret = Collections.binarySearch(primes, val);
+		var ret = Collections.binarySearch(primes, val);
 		// ret >=0 if found
 		// (- (insertion point) -1) ; insertion point > key or == list.size() for key greater than all.		
 		return ret > 0 ? ret+1 : (-ret)-1;  
@@ -119,7 +119,7 @@ public class PrimeSource implements PrimeSourceIntfc
 
 	public int getNextLowPrimeIdx(BigDecimal val)
 	{
-		int ret = Collections.binarySearch(primes, val.round(mcCeil).toBigInteger());
+		var ret = Collections.binarySearch(primes, val.round(mcCeil).toBigInteger());
 		// ret >=0 if found
 		// (- (insertion point) -1) ; insertion point > key or == list.size() for key greater than all.
 		return ret > 0 ? ret-1 : (-ret)-2;  
@@ -127,7 +127,7 @@ public class PrimeSource implements PrimeSourceIntfc
 
 	public int getNextHighPrimeIdx(BigDecimal val)
 	{
-		int ret = Collections.binarySearch(primes, val.round(mcFloor).toBigInteger());
+		var ret = Collections.binarySearch(primes, val.round(mcFloor).toBigInteger());
 		// ret >=0 if found
 		// (- (insertion point) -1) ; insertion point > key or == list.size() for key greater than all.		
 		return ret > 0 ? ret+1 : (-ret)-1;  
@@ -153,21 +153,17 @@ public class PrimeSource implements PrimeSourceIntfc
 		
 		BigInteger sumCeiling; 
 		
-		final BitSet primeIndexMaxPermutation = new BitSet();
-		BitSet primeIndexPermutation = new BitSet();
-		
-		// Metric info 
-		int maxBaseSize = 0;
-		BigInteger sumWithMaxBase = BigInteger.ZERO;
+		final var primeIndexMaxPermutation = new BitSet();
+		var primeIndexPermutation = new BitSet();
 		
 		// each iteration increases the #bits by 1; i.e. a new prime is determined per iteration
 		do 
 		{
-			final int curPrimeIdx = nextIdx.get();
-			final BigInteger curPrime = getPrime(curPrimeIdx);
+			final var curPrimeIdx = nextIdx.get();
+			final var curPrime = getPrime(curPrimeIdx);
 			
 			// Represents a X-bit search space of indexes for primes to add for next prime.
-			final int numBitsForPrimeCount = primeRefs.size()-1;
+			final var numBitsForPrimeCount = primeRefs.size()-1;
 			primeIndexMaxPermutation.clear(numBitsForPrimeCount-1);
 			primeIndexMaxPermutation.set(numBitsForPrimeCount); // keep 'shifting' max bit left
 			
@@ -179,7 +175,7 @@ public class PrimeSource implements PrimeSourceIntfc
 			sumCeiling = calcSumCeiling(curPrime);
 			while (!primeIndexPermutation.equals(primeIndexMaxPermutation)) 
 			{					
-				BigInteger permutationSum = primeIndexPermutation
+				var permutationSum = primeIndexPermutation
 						.stream()						
 						.mapToObj(this::getPrime)						
 						.collect(Collectors.reducing(curPrime, (a,b) -> a.add(b)));
@@ -193,18 +189,11 @@ public class PrimeSource implements PrimeSourceIntfc
 				
 				if (viablePrime(permutationSum, curPrime))
 				{
-					final BigInteger cachedSum = permutationSum;										
-					BitSet sumBaseIdxs = primeIndexPermutation.get(0, numBitsForPrimeCount);
+					final var cachedSum = permutationSum;										
+					var sumBaseIdxs = primeIndexPermutation.get(0, numBitsForPrimeCount);
 					sumBaseIdxs.set(curPrimeIdx); // sum of primes from these indexes should match 'sum'
-					final BitSet cachedBases = sumBaseIdxs;
-						
+					final var cachedBases = sumBaseIdxs;
 					addPrimeRef(cachedSum, cachedBases, curPrimeIdx, true);
-										
-					// Metric info
-					maxBaseSize = Math.max(maxBaseSize, sumBaseIdxs.cardinality());
-					if (maxBaseSize == sumBaseIdxs.cardinality())
-						sumWithMaxBase = permutationSum;
-					
 					break;
 				}
 				else
@@ -216,21 +205,7 @@ public class PrimeSource implements PrimeSourceIntfc
 			else if (nextIdx.get() % 1000 == 0)
 				System.out.print("K");
 		} 
-		while (nextIdx.get() < targetPrimeCount);
-		
-		final int mBaseSize = maxBaseSize;
-		final BigInteger tmpSumWithMaxBase = sumWithMaxBase;
-		// Debugging code
-		var p = getPrimeRef(nextIdx.get()); 
-
-		log.info(String.format("last new-prime[%d] newIdx[%d] base-indexes %s new-base-primes %s  max-base-size[%d] sum-with-max-base-size[%d]", 
-							getPrime(nextIdx.get()), 
-							nextIdx.get(),  
-							p.getIndexes(), 
-							p.getIdxPrimes(),
-							mBaseSize,
-							tmpSumWithMaxBase
-							));					
+		while (nextIdx.get() < targetPrimeCount);				
 	}
 	
 	private BigInteger calcSumCeiling(BigInteger primeSum)
@@ -240,7 +215,7 @@ public class PrimeSource implements PrimeSourceIntfc
 	
 	private void incrementPermutation(BitSet primePermutation)
 	{
-		int bit = 0;
+		var bit = 0;
 		// Generate next permutation of the bit indexes
 		do	// performs add and carry if needed
 		{
@@ -272,19 +247,19 @@ public class PrimeSource implements PrimeSourceIntfc
 		if (canAddBase && newPrime.equals(getPrime(curPrimeIdx)))
 		{			
 			var p = getPrimeRef(curPrimeIdx); 						
-			p.addPrimeBase(base);
+			p.ifPresent(pr -> pr.addPrimeBase(base));
 			log.info(String.format("addPrimeRef <added base> new-prime[%d] new-base-indexes %s new-base-primes %s   cur-Prime[%d]", newPrime, getIndexes(base),getPrimes(base), getPrime(curPrimeIdx)));					
 		}
 		else
 		{					
-			int idx = nextIdx.incrementAndGet();
+			var idx = nextIdx.incrementAndGet();
 						
 			primes.add(idx, newPrime);
 			PrimeRefIntfc ret = new PrimeRef(idx, base);
 			primeRefs.add(idx, ret);	
 			
 			distanceToNext.add(null);
-			BigInteger dist = curPrimeIdx > 0 ? newPrime.subtract(this.getPrime(curPrimeIdx)) : BigInteger.ONE;
+			var dist = curPrimeIdx > 0 ? newPrime.subtract(this.getPrime(curPrimeIdx)) : BigInteger.ONE;
 			distanceToNext.set(curPrimeIdx, dist);			
 		}
 	}	
@@ -299,21 +274,21 @@ public class PrimeSource implements PrimeSourceIntfc
 	}
 	
 	@Override
-	public PrimeRefIntfc getPrimeRef(int primeIdx)
+	public Optional<PrimeRefIntfc> getPrimeRef(int primeIdx)
 	{
 		if (primeIdx > getMaxIdx())
-			throw new IndexOutOfBoundsException();
+			return Optional.empty();
 
-		return  primeRefs.get(primeIdx);		
+		return   Optional.of(primeRefs.get(primeIdx));		
 	}
 	
 	@Override
 	public Optional<PrimeRefIntfc> getPrime(BigInteger val)
 	{
-		int idx = getPrimeIdx(val);
+		var idx = getPrimeIdx(val);
 		if (idx < 0 || idx > this.getMaxIdx())
 			return Optional.empty();
-		return Optional.of(getPrimeRef(idx));
+		return getPrimeRef(idx);
 	}
 	/**
 	 * 
@@ -324,7 +299,7 @@ public class PrimeSource implements PrimeSourceIntfc
 	 */
 	private boolean viablePrime(BigInteger primeSum, BigInteger lastMaxPrime)
 	{
-		boolean isPrimeSum = false;
+		var isPrimeSum = false;
 			
 		do 
 		{			

@@ -5,6 +5,7 @@ import java.util.BitSet;
 import java.util.Comparator;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import com.starcases.prime.impl.AbstractPrimeBase;
@@ -13,13 +14,6 @@ import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import lombok.extern.java.Log;
 
-// 
-// start 1
-//       2
-//       3 <-  2 + 1
-//       5 <-  3 + 2
-//       7 <-  5 + 2
-//       11 <- 7+3+1; 5+3+2+1
 @Log
 public class BaseReduceNPrime extends AbstractPrimeBase
 {
@@ -65,6 +59,7 @@ public class BaseReduceNPrime extends AbstractPrimeBase
 	private void primeReduction(Integer idx, Consumer<Integer> reducer)
 	{	
 		ps.getPrimeRef(idx)
+		.get()
 		.getPrimeBaseIdxs()
 		.stream()
 		.boxed()
@@ -80,22 +75,28 @@ public class BaseReduceNPrime extends AbstractPrimeBase
 		if (doLog)
 		{
 			log.entering("BaseReduceNPrime", "genBases()");
-			log.info(String.format("genBases(): maxReduce[%d]", maxReduce));
+			
+			if (log.isLoggable(Level.INFO))
+			{
+				log.info(String.format("genBases(): maxReduce[%d]", maxReduce));
+			}
 		}
 		
-		for (int i = 0; i< ps.getMaxIdx(); i++)
+		for (var i = 0; i< ps.getMaxIdx(); i++)
 		{ 
 			PrimeRefIntfc pr;				
 			try
 			{
 				ArrayList<Integer> ret = new ArrayList<>();
-				pr = ps.getPrimeRef(i);
+				pr = ps.getPrimeRef(i).get();
 				primeReduction(i, reducer.apply(maxReduce, ret));
 				int [] tmpI = {0};			
-				if (doLog) 
+				if (doLog && log.isLoggable(Level.INFO)) 
+				{
 					log.info(String.format("Prime [%d] %s", pr.getPrime(), 
 						ret.stream().map(idx -> String.format("base-%d-count:[%d]", ps.getPrime(tmpI[0]++), idx)).collect(Collectors.joining(", "))));
-				BitSet bs = new BitSet();
+				}
+				var bs = new BitSet();
 				ret.stream().forEach(bs::set);
 				pr.addPrimeBase(bs, BaseTypes.NPRIME);
 			}

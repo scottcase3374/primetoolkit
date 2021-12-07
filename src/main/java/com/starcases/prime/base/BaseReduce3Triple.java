@@ -9,8 +9,8 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import com.starcases.prime.intfc.BaseTypes;
@@ -83,35 +83,41 @@ public class BaseReduce3Triple extends AbstractPrimeBase
 	 */
 	private void reducePrime(PrimeRefIntfc prime)
 	{	
-		List<PrimeRefIntfc> vals = new ArrayList<>();
+		var vals = new ArrayList<PrimeRefIntfc>();
 		
 		initValues(prime, vals);
 		initHWM(prime, vals);
 		initLWM(vals);
 
-		boolean stopNow = false;
+		var stopNow = false;
 		while (!stopNow)  // Not the prettiest code; look for a nicer refactoring.
 		{
-			final BigInteger diff = prime.getPrime().subtract(getAllSum(vals));
-			final int sign = diff.signum();
+			final var diff = prime.getPrime().subtract(getAllSum(vals));
+			final var sign = diff.signum();
 			
 			if (sign == -1) // prime < total , diff should be negative
 			{				
 				if (!(stopNow = ensureConstraints(prime, vals, f -> add(BOT, diff, vals))))				
 					if (!(stopNow = ensureConstraints(prime, vals, f -> add(MID, diff, vals))))
 						if (!(stopNow = ensureConstraints(prime, vals, f -> add(TOP, diff, vals))))
-							if (!(stopNow = ensureConstraints(prime, vals, f -> { vals.set(MID, vals.get(MID).getPrevPrimeRef());   add(BOT, diff, vals); })))
-								if (!(stopNow = ensureConstraints(prime, vals, f -> { vals.set(TOP, vals.get(TOP).getPrevPrimeRef());   add(MID, diff, vals); })))								
-									stopNow = ensureConstraints(prime, vals, f -> { vals.set(TOP, vals.get(TOP).getPrevPrimeRef());   add(BOT, diff, vals); });
+							if (!(stopNow = ensureConstraints(prime, vals, f -> { vals.set(MID, vals.get(MID).getPrevPrimeRef().get());   add(BOT, diff, vals); })))
+								if (!(stopNow = ensureConstraints(prime, vals, f -> { vals.set(TOP, vals.get(TOP).getPrevPrimeRef().get());   add(MID, diff, vals); })))								
+									stopNow = ensureConstraints(prime, vals, f -> { vals.set(TOP, vals.get(TOP).getPrevPrimeRef().get());   add(BOT, diff, vals); });
 			} 
 			else if (sign == 1) // prime > total, diff should be positive
 			{				
 				if (!(stopNow = ensureLowConstraints(prime, vals, f -> add(TOP, diff, vals))))				
 					if (!(stopNow = ensureLowConstraints(prime, vals, f -> add(MID, diff, vals))))
 						if (!(stopNow = ensureLowConstraints(prime, vals, f -> add(BOT, diff, vals))))
-							stopNow = ensureConstraints(prime, vals, f -> {   vals.set(TOP, vals.get(TOP).getPrevPrimeRef());
-																					vals.set(BOT, vals.get(BOT).getNextPrimeRef());
-																					add(MID, diff, vals); });
+							if (!(stopNow = ensureConstraints(prime, vals, f -> {   vals.set(TOP, vals.get(TOP).getPrevPrimeRef().get());
+																					vals.set(BOT, vals.get(BOT).getNextPrimeRef().get());
+																					add(MID, diff, vals); })))
+							{
+								stopNow = ensureConstraints(prime, vals, f -> {   vals.set(MID, vals.get(MID).getPrevPrimeRef().get().getPrevPrimeRef().get());
+								vals.set(BOT, vals.get(BOT).getNextPrimeRef().get());
+								 });
+							}
+
 			}
 			else
 			{			
@@ -121,19 +127,23 @@ public class BaseReduce3Triple extends AbstractPrimeBase
 			if (prime.getPrime().compareTo(getAllTotal(vals)) != 0)
 				stopNow = false;
 
-			if (doLog)
+			if (doLog && log.isLoggable(Level.INFO))
+			{
 				log.info(String.format("sign %d reduce prime - processing [%d] idx [%d] diff[%d] set: %s", sign, prime.getPrime(), prime.getPrimeRefIdx(), diff, getValSet(vals)));
+			}
 		}
 		
 		addPrimeBases(prime, vals);
 		
-		if (doLog)
-			log.info(String.format("Prime %d set %s  is-equal=%b", prime.getPrime(), getValSet(vals), getAllSum(vals).compareTo(prime.getPrime()) == 0));	
+		if (doLog && log.isLoggable(Level.INFO))
+		{
+			log.info(String.format("Prime %d set %s  is-equal=%b", prime.getPrime(), getValSet(vals), getAllSum(vals).compareTo(prime.getPrime()) == 0));
+		}
 	}
 	
 	private PrimeRefIntfc add(int idx, BigInteger diff, List<PrimeRefIntfc> vals)
 	{
-		Optional<PrimeRefIntfc> tmp = ps.getPrime(vals.get(idx).getPrime().add(diff));
+		var tmp = ps.getPrime(vals.get(idx).getPrime().add(diff));
 		tmp.ifPresent(p -> vals.set(idx, p));
 		return vals.get(idx);
 	}
@@ -145,8 +155,8 @@ public class BaseReduce3Triple extends AbstractPrimeBase
 	
 	private void addPrimeBases(PrimeRefIntfc prime, List<PrimeRefIntfc> vals)
 	{
-		BitSet bs = new BitSet();
-		for (PrimeRefIntfc p : vals)
+		var bs = new BitSet();
+		for (var p : vals)
 		{
 			bs.set(p.getPrimeRefIdx());
 		}
@@ -167,28 +177,28 @@ public class BaseReduce3Triple extends AbstractPrimeBase
 		BigInteger hwm;
 		while ((hwm = getAllSum(vals)).subtract(prime.getPrime()).signum() == 1) 
 		{
-			vals.set(TOP, vals.get(TOP).getPrevPrimeRef());
-			vals.set(MID, vals.get(MID).getPrevPrimeRef());
+			vals.get(TOP).getPrevPrimeRef().ifPresent( ppr -> vals.set(TOP,ppr));
+			vals.get(MID).getPrevPrimeRef().ifPresent( ppr -> vals.set(MID,ppr));
 		}	
 		return hwm;
 	}
 	
 	private void initLWM(List<PrimeRefIntfc>  vals)
 	{
-		BigDecimal num3 = BigDecimal.valueOf(3L);
-		BigDecimal topTwoThird = (new BigDecimal(vals.get(TOP).getPrime())).divide(num3, RoundingMode.HALF_DOWN);
-		vals.set(BOT, ps.getPrimeRef(ps.getNextLowPrimeIdx(topTwoThird)));
+		var num3 = BigDecimal.valueOf(3L);
+		var topTwoThird = (new BigDecimal(vals.get(TOP).getPrime())).divide(num3, RoundingMode.HALF_DOWN);
+		vals.set(BOT, ps.getPrimeRef(ps.getNextLowPrimeIdx(topTwoThird)).get());
 		
-		vals.set(MID,  ps.getPrimeRef(ps.getNextLowPrimeIdx(vals.get(TOP).getPrime().subtract(vals.get(BOT).getPrime()))));
+		vals.set(MID,  ps.getPrimeRef(ps.getNextLowPrimeIdx(vals.get(TOP).getPrime().subtract(vals.get(BOT).getPrime()))).get());
 	}
 	
 	private void initValues(PrimeRefIntfc prime, List<PrimeRefIntfc> vals)
 	{
-		BigDecimal two = BigDecimal.valueOf(2L);
-		BigDecimal half = (new BigDecimal(prime.getPrime())).divide(two);
-		vals.add(ps.getPrimeRef(ps.getNextHighPrimeIdx(half))); 
-		vals.add(ps.getPrimeRef(ps.getNextLowPrimeIdx(half))); 
-		vals.add(ps.getPrimeRef(0));	
+		var two = BigDecimal.valueOf(2L);
+		var half = (new BigDecimal(prime.getPrime())).divide(two);
+		vals.add(ps.getPrimeRef(ps.getNextHighPrimeIdx(half)).get()); 
+		vals.add(ps.getPrimeRef(ps.getNextLowPrimeIdx(half)).get()); 
+		vals.add(ps.getPrimeRef(0).get());	
 	}
 	
 	private BigInteger getAllSum(List<PrimeRefIntfc> vals)
@@ -198,12 +208,12 @@ public class BaseReduce3Triple extends AbstractPrimeBase
 	
 	private boolean ensureConstraints(PrimeRefIntfc prime, List<PrimeRefIntfc> vals, Consumer<List<PrimeRefIntfc>> consumer)
 	{
-		PrimeRefIntfc [] saved = new PrimeRefIntfc[vals.size()];
+		var saved = new PrimeRefIntfc[vals.size()];
 		
 		vals.toArray(saved);
 		consumer.accept(vals);
 		
-		boolean ret = true;
+		var ret = true;
 		if (vals.stream().distinct().count() != 3)
 		{
 			ret = false;  // not distinct
@@ -225,12 +235,12 @@ public class BaseReduce3Triple extends AbstractPrimeBase
 	
 	private boolean ensureLowConstraints(PrimeRefIntfc prime, List<PrimeRefIntfc> vals, Consumer<List<PrimeRefIntfc>> consumer)
 	{
-		PrimeRefIntfc [] saved = new PrimeRefIntfc[vals.size()];
+		var saved = new PrimeRefIntfc[vals.size()];
 		
 		vals.toArray(saved);
 		consumer.accept(vals);
 		
-		boolean ret = true;
+		var ret = true;
 		if (vals.stream().distinct().count() != 3)
 		{
 			ret = false; // not distinct
@@ -260,11 +270,11 @@ public class BaseReduce3Triple extends AbstractPrimeBase
 			log.entering("BaseReduce3Triple", "genBases()");
 		
 		// Bootstrap
-		final int minPrimeIdx = ps.getPrimeIdx(BigInteger.valueOf(11L));
+		final var minPrimeIdx = ps.getPrimeIdx(BigInteger.valueOf(11L));
 		// Process
-		for(int curPrimeIdx=minPrimeIdx; curPrimeIdx < ps.getMaxIdx(); curPrimeIdx++) 
+		for(var curPrimeIdx=minPrimeIdx; curPrimeIdx < ps.getMaxIdx(); curPrimeIdx++) 
 		{ 
-			PrimeRefIntfc curPrime = ps.getPrimeRef(curPrimeIdx);	
+			var curPrime = ps.getPrimeRef(curPrimeIdx).get();	
 			try
 			{
 				reducePrime(curPrime);
@@ -276,11 +286,11 @@ public class BaseReduce3Triple extends AbstractPrimeBase
 			}				
 		}
 
-		for (int curPrimeIdx = 0; curPrimeIdx < minPrimeIdx; curPrimeIdx++)
+		for (var curPrimeIdx = 0; curPrimeIdx < minPrimeIdx; curPrimeIdx++)
 		{
-			BitSet bNew = new BitSet();
+			var bNew = new BitSet();
 			bNew.set(0);
-			ps.getPrimeRef(curPrimeIdx).addPrimeBase(bNew, BaseTypes.THREETRIPLE);
+			ps.getPrimeRef(curPrimeIdx).get().addPrimeBase(bNew, BaseTypes.THREETRIPLE);
 		}
 	}	
 }

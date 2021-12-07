@@ -38,8 +38,8 @@ public class ExportGML
 		
 		try
 		{			
-			for (int i=0; i < ps.getMaxIdx(); i++)
-				expNode(ps.getPrimeRef(i));
+			for (var i=0; i < ps.getMaxIdx(); i++)
+				expNode(ps.getPrimeRef(i).orElseThrow());
 			
 			stack.stream().forEach(ElementIntfc::output);
 			

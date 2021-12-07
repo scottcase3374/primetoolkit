@@ -12,6 +12,7 @@ import org.jgrapht.graph.builder.GraphBuilder;
 import org.jgrapht.graph.DefaultListenableGraph;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import com.starcases.prime.intfc.PrimeRefIntfc;
+import com.starcases.prime.intfc.BaseTypes;
 
 
 // 
@@ -31,6 +32,7 @@ public abstract class PrimeGrapher
 	protected Graph<PrimeRefIntfc,DefaultEdge> graph;
 	
 	protected Logger log;
+	protected BaseTypes baseType;
 	
 	/**
 	 * 
@@ -38,14 +40,15 @@ public abstract class PrimeGrapher
 	 * @param log
 	 * @param graphs
 	 */
-	protected PrimeGrapher(PrimeSourceIntfc ps, Logger log, GraphListener...graphs)
+	protected PrimeGrapher(PrimeSourceIntfc ps, Logger log, BaseTypes baseType, GraphListener...graphs)
 	{
 		this.log = log;
 		this.ps = ps;
+		this.baseType = baseType;
 		this.ps.init();
 		
-		DefaultListenableGraph lgraph = new DefaultListenableGraph(primeGraphBuilder.build(), true);
-		Arrays.asList(graphs).stream().forEach(g-> lgraph.addGraphListener(g));
+		var lgraph = new DefaultListenableGraph(primeGraphBuilder.build(), true);
+		Arrays.asList(graphs).stream().forEach(lgraph::addGraphListener);
 		this.graph = lgraph;
 		
 		this.populateData();
@@ -53,7 +56,7 @@ public abstract class PrimeGrapher
 	
 	BigInteger getTotalSum(BigInteger [] sum3, Integer [] indexes)
 	{
-		for (int i = 0; i< sum3.length; i++)
+		for (var i = 0; i< sum3.length; i++)
 		{
 			sum3[i] = ps.getPrime(indexes[i]);
 		}		
@@ -63,7 +66,7 @@ public abstract class PrimeGrapher
 	void populateData()
 	{
 		// Start setting up the actual graph/data generations
-		PrimeNodeGenerator primeNodeGenerator = new PrimeNodeGenerator(ps, graph);
+		var primeNodeGenerator = new PrimeNodeGenerator(ps, graph, baseType);
 		primeNodeGenerator.begin();
 		
 		while (primeNodeGenerator.nextEvents());		

@@ -12,7 +12,7 @@ public class CircularLayoutPrimesGraph extends JFrame
 {
 	private static final long serialVersionUID = 1L;
 	private transient JGraphXAdapter<PrimeRefIntfc, DefaultEdge> jgxAdapter;
-    private final transient java.awt.Dimension DEFAULT_SIZE = new Dimension(900,900);
+    private static final Dimension DEFAULT_SIZE = new Dimension(900,900);
     
     public CircularLayoutPrimesGraph(Graph<PrimeRefIntfc,DefaultEdge> graph)
     {
@@ -25,8 +25,8 @@ public class CircularLayoutPrimesGraph extends JFrame
         getContentPane().add(component);
       
         // circle layout
-        int radius = 100;
-        mxCircleLayout layout = new mxCircleLayout(jgxAdapter);        
+        var radius = 100;
+        var layout = new mxCircleLayout(jgxAdapter);        
         layout.setX0((DEFAULT_SIZE.width / 2.0) - radius);
         layout.setY0((DEFAULT_SIZE.height / 2.0) - radius);
         layout.setRadius(radius);
