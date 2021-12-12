@@ -8,6 +8,13 @@ import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.mxgraph.layout.mxCompactTreeLayout;
 import com.mxgraph.swing.mxGraphComponent;
 
+/**
+ * Uses a tree oriented layout/display to show the primes and prime-base relationships.
+ * Inverts the tree to make some of the data more obvious - if using large number of primes,
+ * the graphs become so dense as to provide little use.
+ *  
+ *
+ */
 public class CompactTreeLayoutPrimesGraph extends JFrame 
 {
 	private static final long serialVersionUID = 1L;

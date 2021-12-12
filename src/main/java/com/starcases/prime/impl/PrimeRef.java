@@ -14,6 +14,8 @@ import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
 /**
+ * Default prime representation.
+ * 
 * The general algorithm idea is that the next prime is derived from 
 * the sum of some subset of previous primes.  
 * 

@@ -8,6 +8,11 @@ import org.jgrapht.graph.DefaultEdge;
 import com.mxgraph.layout.mxParallelEdgeLayout;
 import com.mxgraph.swing.mxGraphComponent;
 
+/**
+ * 
+ * Not doing much of anything right now with this.
+ *
+ */
 public class ParallelEdgeLayoutGraph extends JFrame
 {
 	private static final long serialVersionUID = 1L;

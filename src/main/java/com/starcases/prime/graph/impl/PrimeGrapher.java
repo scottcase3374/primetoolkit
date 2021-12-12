@@ -14,14 +14,10 @@ import com.starcases.prime.intfc.PrimeSourceIntfc;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.BaseTypes;
 
-
-// 
-// start 1
-//       2
-//       3 <-  2 + 1
-//       5 <-  3 + 2
-//       7 <-  5 + 2
-//       11 <- 7+3+1; 5+3+2+1
+/**
+ * Provide support for the graph oriented processing - base class.
+ *
+ */
 public abstract class PrimeGrapher 
 {
 	protected static Comparator<PrimeRefIntfc> nodeComparator = (PrimeRefIntfc o1, PrimeRefIntfc o2) -> o1.getPrime().compareTo(o2.getPrime());

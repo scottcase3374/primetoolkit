@@ -3,19 +3,17 @@ package com.starcases.prime;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigInteger;
+import java.math.BigDecimal;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.starcases.prime.impl.PrimeSource;
 
 @ExtendWith(MockitoExtension.class)
-@RunWith(JUnitPlatform.class)
 class PrimeSourceUnitTest 
 {
 	private PrimeSource ps;
@@ -35,10 +33,10 @@ class PrimeSourceUnitTest
 		Assertions.assertEquals(26, ps.getPrimeIdx(bi101));
 	}
 
-	// @ Test
+	@Test
 	void testGetDistToNextPrime() 
 	{	
-		Assertions.assertEquals(2, ps.getDistToNextPrime(2));
+		Assertions.assertEquals(BigInteger.valueOf(2L), ps.getDistToNextPrime(2));
 	}
 
 	@Test
@@ -75,6 +73,17 @@ class PrimeSourceUnitTest
 	// @ Test
 	void testGetPrimeRef() {
 		fail("Not yet implemented");
+	}
+	
+	@Test
+	void testGetNearPrimeRef()
+	{
+		Assertions.assertEquals(BigInteger.valueOf(7L), ps.getNearPrimeRef(new BigDecimal("6.5"))         .get().getPrime());    
+		Assertions.assertEquals(BigInteger.valueOf(5L), ps.getNearPrimeRef(new BigDecimal("6.5").negate()).get().getPrime());
+
+		Assertions.assertEquals(BigInteger.valueOf(11L), ps.getNearPrimeRef(new BigDecimal("10.5")         ).get().getPrime());    
+		Assertions.assertEquals(BigInteger.valueOf(7L),  ps.getNearPrimeRef(new BigDecimal("10.5").negate()).get().getPrime());
+
 	}
 
 }

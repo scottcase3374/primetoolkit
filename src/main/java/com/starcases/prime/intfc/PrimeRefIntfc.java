@@ -4,6 +4,11 @@ import java.math.BigInteger;
 import java.util.BitSet;
 import java.util.Optional;
 
+/**
+ * 
+ * Main interface for working with the primes and accessing the info on bases.
+ *
+ */
 public interface PrimeRefIntfc
 {
 	BigInteger getPrime();

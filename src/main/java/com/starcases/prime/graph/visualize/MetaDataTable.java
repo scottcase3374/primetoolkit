@@ -16,13 +16,10 @@ import javax.swing.WindowConstants;
 import javax.swing.JScrollPane;
 
 /**
- * Display 
- * 	prime/max-base-size
- * 	prime/max dist to prev prime
- *  avg base size
- *  avg dist to prev prime
- *  
- * @author scott
+ * Display some "meta-data" pulled/calc'ed/summarized from the graph data.
+ * 
+ * Uses the graph listener interface to receive events on vertex/edge changes
+ * and mostly uses those to calculate information that may be of interest.
  *
  */
 public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc, DefaultEdge> 

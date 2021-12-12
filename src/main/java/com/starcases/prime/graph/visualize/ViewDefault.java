@@ -9,6 +9,12 @@ import com.starcases.prime.intfc.PrimeSourceIntfc;
 import com.starcases.prime.intfc.BaseTypes;
 import lombok.extern.java.Log;
 
+/**
+ * Default graphing entry point - provides cicular layout and compact tree layout based on
+ * same underlying data.
+ * 
+ * supports inclusion of other visuals/displays (such as MetaData Table) via GraphListener.
+ */
 @Log
 public class ViewDefault extends PrimeGrapher
 {	

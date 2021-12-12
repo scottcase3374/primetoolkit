@@ -6,14 +6,15 @@ import com.starcases.prime.PrimeSourceFactory;
 import com.starcases.prime.base.BaseReduce3Triple;
 import com.starcases.prime.base.BaseReduceNPrime;
 import com.starcases.prime.graph.export.ExportGML;
-import com.starcases.prime.graph.log.LogBases3Triple;
-import com.starcases.prime.graph.log.LogBasesNPrime;
 import com.starcases.prime.graph.log.LogGraphStructure;
-import com.starcases.prime.graph.log.LogNodeStructure;
 import com.starcases.prime.graph.visualize.MetaDataTable;
 import com.starcases.prime.graph.visualize.ViewDefault;
 import com.starcases.prime.intfc.BaseTypes;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
+import com.starcases.prime.log.LogBases3Triple;
+import com.starcases.prime.log.LogBasesNPrime;
+import com.starcases.prime.log.LogNodeStructure;
+
 import lombok.extern.java.Log;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;

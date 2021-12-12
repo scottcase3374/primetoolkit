@@ -6,6 +6,11 @@ import java.util.Optional;
 
 import com.starcases.prime.intfc.PrimeRefIntfc;
 
+/**
+ * 
+ * Abstract class for any common prime ref interface functionality.  
+ *
+ */
 public abstract class AbstractPrimeRef implements PrimeRefIntfc 
 {
 	

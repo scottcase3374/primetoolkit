@@ -9,12 +9,8 @@ import com.mxgraph.swing.mxGraphComponent;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 
 /**
- * Display 
- * 	prime/max-base-size
- * 	prime/max dist to prev prime
- *  avg base size
- *  
- * @author scott
+ * Not doing much of anything right now..
+ * 
  *
  */
 public class CompactTreeLayoutBaseMetaDataGraph extends JFrame 

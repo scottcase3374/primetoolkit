@@ -1,5 +1,8 @@
 package com.starcases.prime.graph.visualize;
 
+/**
+ * Circular layout/display of prime / prime-base relationships.
+ */
 import javax.swing.JFrame;
 import java.awt.*;
 import org.jgrapht.Graph;

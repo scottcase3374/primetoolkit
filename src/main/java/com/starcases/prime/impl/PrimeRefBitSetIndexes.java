@@ -13,8 +13,9 @@ import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
 /**
-* The general algorithm idea is that the next prime is derived from 
-* the sum of some subset of previous primes.  
+* 
+*  Alternative Prime representation (of bases)- use bitset to represent bases which is more compact
+*  sometimes for the data. Part of support to determine tradeoffs of different representations.
 * 
 **/
 

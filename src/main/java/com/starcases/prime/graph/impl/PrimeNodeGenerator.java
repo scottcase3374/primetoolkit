@@ -11,11 +11,13 @@ import lombok.extern.java.Log;
 import java.util.NoSuchElementException;
 
 /**
- * This is just an experiment with the GraphStream lib originally 
- * and converted to jgrapht at the moment.
+ * This was just an experiment with the GraphStream lib originally and then converted to jgrapht.
+ * After that, the idea to create a more "tool kit" feeling came to mind and I started to refactor
+ * it in support of that.  There are a number of classes/interfaces/relationships I would
+ * change if I started completely over but this accomplishes what I desired at a minimal level 
+ * even though it could be done better  yet.
  *  
- * Goal: see how well it works for something like this prime# 
- * research project.
+ * Goal: Work with some graph and visualization support to understand capabilities.
  * 
  * 
  */

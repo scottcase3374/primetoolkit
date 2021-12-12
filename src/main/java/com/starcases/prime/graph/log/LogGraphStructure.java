@@ -9,6 +9,12 @@ import com.starcases.prime.intfc.BaseTypes;
 import lombok.extern.java.Log;
 import picocli.CommandLine.Command;
 
+/**
+ * Pulls data from the graph structure and logs it. Main 
+ * distinctions is the use of the jgrapht api calls to access
+ * the main data.
+ * 
+ */
 @Log
 public class LogGraphStructure extends PrimeGrapher implements LogGraphIntfc
 {

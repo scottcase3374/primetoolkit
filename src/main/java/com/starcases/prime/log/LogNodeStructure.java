@@ -1,8 +1,16 @@
-package com.starcases.prime.graph.log;
+package com.starcases.prime.log;
 
 import com.starcases.prime.intfc.PrimeSourceIntfc;
+
 import lombok.extern.java.Log;
 
+/**
+ * 
+ * Logs data about the primes without using the graph structure - instead
+ * it just uses my internal api's and displays some of the available info that
+ * can be provided.
+ *
+ */
 @Log
 public class LogNodeStructure extends AbstractLogBase
 {
@@ -14,11 +22,13 @@ public class LogNodeStructure extends AbstractLogBase
 	@Override
 	public void log()
 	{
+		int idx = 0;
 		try
 		{
-			for (var i = 0; i < ps.getMaxIdx(); i++)
+			var prIt = ps.getPrimeRefIter();
+			while (prIt.hasNext())
 			{ 
-				var ref = ps.getPrimeRef(i).get();
+				var ref = prIt.next();
 				System.out.println(String.format("Prime %d bases %s  <dist[%d], nextPrime[%d]>", 
 						ref.getPrime(), 
 						ref.getIdxPrimes(), 

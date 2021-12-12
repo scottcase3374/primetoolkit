@@ -9,7 +9,7 @@ import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
 /**
- * Quick and dirty export - no attempt at optimizing.
+ * Quick and dirty export 
  *
  */
 

@@ -15,15 +15,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.starcases.prime.intfc.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
-
+import java.util.Iterator;
 import lombok.extern.java.Log;
 
+/**
+ * Provides data structure holding the core data and objects that provide access to the data from the
+ * "public interface for primes". Also some utility support to support alternative algs for
+ * finding primes, working with bases of the primes, and general information/access.
+ *
+ */
 @Log
 public class PrimeSource implements PrimeSourceIntfc
-{
-	static final MathContext mcFloor = new MathContext(7, RoundingMode.FLOOR);
-	static final MathContext mcCeil = new MathContext(7, RoundingMode.CEILING);
-	
+{	
 	private int confidenceLevel = 100;
 	private AtomicInteger nextIdx = new AtomicInteger(-1);
 	
@@ -35,7 +38,11 @@ public class PrimeSource implements PrimeSourceIntfc
 	
 	private BaseTypes activeBaseId = BaseTypes.DEFAULT;
 	private AtomicBoolean doInit = new AtomicBoolean(false);
-	 
+	
+	//
+	// initialization
+	//
+	
 	public PrimeSource(int maxCount, int confidenceLevel)
 	{
 		this(maxCount);
@@ -60,86 +67,7 @@ public class PrimeSource implements PrimeSourceIntfc
 		addPrimeRef(BigInteger.valueOf(2L), tmpBitSet.get(0, 2));
 	}
 	
-	public int getPrimeIdx(BigInteger val)
-	{
-		return this.primes.indexOf(val);
-	}
-	
-	public BigInteger getDistToNextPrime(int curIdx)
-	{
-		return this.distanceToNext.get(curIdx);
-	}
-	
-	public BaseTypes getActiveBaseId()
-	{
-		return activeBaseId;
-	}
-	
-	public void setActiveBaseId(BaseTypes activeBaseId)
-	{
-		this.activeBaseId = activeBaseId;	
-	}
-	
-	public long getNextLowPrime(BigInteger val, int startIdx, int maxOffset)
-	{
-		var ret = Collections.binarySearch(primes, val);
-		if (Math.abs(startIdx - ret) >= maxOffset)
-			return Long.MIN_VALUE;
-		return ret > 0 ? ret-1 : (-ret)-1;  
-	}
-	
-	public long getNextHighPrime(BigInteger val, int startIdx, int maxOffset)
-	{
-		var ret = Collections.binarySearch(primes, val);
-		if (Math.abs(startIdx - ret) >= maxOffset)
-			return Long.MIN_VALUE;
-		return ret > 0 ? ret+1 : (-ret)+1;  
-	}		
-	
-	/**
-	 * return value matches java binarySearch() return foundidx-1 for any result > 0; otherwise returns -val
-	 * @param val
-	 * @return
-	 */
-	public int getNextLowPrimeIdx(BigInteger val)
-	{
-		var ret = Collections.binarySearch(primes, val);
-		// ret >=0 if found
-		// (- (insertion point) -1) ; insertion point > key or == list.size() for key greater than all.
-		return ret > 0 ? ret-1 : (-ret)-2;  
-	}
-
-	public int getNextHighPrimeIdx(BigInteger val)
-	{
-		var ret = Collections.binarySearch(primes, val);
-		// ret >=0 if found
-		// (- (insertion point) -1) ; insertion point > key or == list.size() for key greater than all.		
-		return ret > 0 ? ret+1 : (-ret)-1;  
-	}
-
-	public int getNextLowPrimeIdx(BigDecimal val)
-	{
-		var ret = Collections.binarySearch(primes, val.round(mcCeil).toBigInteger());
-		// ret >=0 if found
-		// (- (insertion point) -1) ; insertion point > key or == list.size() for key greater than all.
-		return ret > 0 ? ret-1 : (-ret)-2;  
-	}
-
-	public int getNextHighPrimeIdx(BigDecimal val)
-	{
-		var ret = Collections.binarySearch(primes, val.round(mcFloor).toBigInteger());
-		// ret >=0 if found
-		// (- (insertion point) -1) ; insertion point > key or == list.size() for key greater than all.		
-		return ret > 0 ? ret+1 : (-ret)-1;  
-	}
-	
-	
-	
-	public int getMaxIdx()
-	{
-		return primeRefs.size()-1;
-	}
-	
+	@Override
 	public void init()
 	{	
 		if (doInit.compareAndExchangeAcquire(false, true))
@@ -208,6 +136,207 @@ public class PrimeSource implements PrimeSourceIntfc
 		while (nextIdx.get() < targetPrimeCount);				
 	}
 	
+	//
+	// non-navigation related / base selection
+	//
+	
+	@Override
+	public BaseTypes getActiveBaseId()
+	{
+		return activeBaseId;
+	}
+	
+	@Override
+	public void setActiveBaseId(BaseTypes activeBaseId)
+	{
+		this.activeBaseId = activeBaseId;	
+	}
+	
+	@Override
+	public boolean baseExist(BaseTypes baseId)
+	{
+		boolean ret = false;
+		try
+		{
+			primeRefs.get(0).getMinPrimeBase(baseId);
+			ret = true;
+		}
+		catch(Exception e)
+		{
+			// base doesn't exist
+		}
+		return ret;
+	}
+	//
+	// navigation - non-index based api
+	//
+	 
+	@Override
+	public Iterator<PrimeRefIntfc> getPrimeRefIter()
+	{
+		return primeRefs.iterator();
+	}
+	
+	//
+	// search and retrieve - non-index apis
+	//
+
+	@Override
+	public Optional<PrimeRefIntfc> getPrimeRef(BigInteger val)
+	{
+		var idx = getPrimeIdx(val);
+		if (idx < 0 || idx > this.getMaxIdx())
+			return Optional.empty();
+		return getPrimeRef(idx);
+	}
+
+	@Override
+	public Optional<PrimeRefIntfc> getNearPrimeRef(BigInteger val)
+	{
+		log.info(String.format("get near prime ref bigint %d", val));
+		var offset = val.signum() < 0 ? -2 : -1;
+		
+		var ret = Collections.binarySearch(primes, val.abs());
+		if (val.signum() < 0 && ret < 0)
+			ret = -ret + offset;  // insertion idx if wasn't found
+			
+		if (ret > getMaxIdx())
+			return getPrimeRef(getMaxIdx());
+		else if (ret < 0)
+			return getPrimeRef(BigInteger.ONE);
+		
+		return getPrimeRef(ret);  	 	
+	}
+
+	@Override
+	public Optional<PrimeRefIntfc> getNearPrimeRef(BigDecimal val)
+	{	
+		var tmpVal = val.setScale(0, RoundingMode.CEILING).toBigInteger();
+		
+		return getNearPrimeRef(tmpVal);  	
+	}
+
+	@Override
+	public Optional<PrimeRefIntfc> getPrimeRefWithinOffset(BigInteger val, BigInteger maxPrimeOffset)
+	{		
+		var offset = val.signum() < 0 ? -1 : 1;
+		
+		var ret = Collections.binarySearch(primes, val.abs());
+		if ( ret < -1 || (ret + offset) < 0 || (ret + offset) > getMaxIdx())
+			return Optional.empty();
+		
+		var p = getPrimeRef(ret+offset).get();
+		return p.getPrime().compareTo(val.add(maxPrimeOffset)) == offset ? Optional.of(p) : Optional.empty();
+	}
+	
+	@Override
+	public Optional<PrimeRefIntfc> getPrimeRefWithinOffset(BigDecimal val, BigDecimal maxPrimeOffset)
+	{
+		return getPrimeRefWithinOffset(val.toBigInteger(), maxPrimeOffset.toBigInteger());
+	}
+	
+	@Override
+	public Optional<PrimeRefIntfc> getPrimeRef(BigInteger val, BigInteger exactOffset)
+	{
+		return getPrimeRef(val.add(exactOffset));
+	}
+	
+	public Optional<BigInteger> getDistToNextPrime(PrimeRefIntfc prime)
+	{
+		return prime.getDistToNextPrime();
+	}
+	
+	//
+	// navigation - index based apis
+	//
+	
+	@Override
+	public int getPrimeIdx(BigInteger val)
+	{
+		return this.primes.indexOf(val);
+	}
+
+	@Override
+	public BigInteger getPrime(int primeIdx)
+	{
+		if (primeIdx > getMaxIdx())
+			throw new IndexOutOfBoundsException();
+		
+		return primes.get(primeIdx);
+	}
+	
+	@Override
+	public Optional<PrimeRefIntfc> getPrimeRef(int primeIdx)
+	{
+		if (primeIdx > getMaxIdx())
+			return Optional.empty();
+
+		return   Optional.of(primeRefs.get(primeIdx));		
+	}
+
+	@Override
+	public BigInteger getDistToNextPrime(int curIdx)
+	{
+		return this.distanceToNext.get(curIdx);
+	}
+	
+	public long getNextLowPrime(BigInteger val, int startIdx, int maxOffset)
+	{
+		var ret = Collections.binarySearch(primes, val);
+		if (ret < startIdx || ret >= maxOffset)
+			return -1;
+		return ret-1;  
+	}
+	
+	public long getNextHighPrime(BigInteger val, int startIdx, int maxOffset)
+	{
+		var ret = Collections.binarySearch(primes, val);
+		if (ret < startIdx || ret >= maxOffset)
+			return -1;
+		return  ret+1;  
+	}		
+	
+	/**
+	 * return value matches java binarySearch() return foundidx-1 for any result > 0; otherwise returns -val
+	 * @param val
+	 * @return
+	 */
+	@Override
+	public int getNextLowPrimeIdx(BigInteger val)
+	{
+		var ret = Collections.binarySearch(primes, val);
+		return ret >= 0 ? Math.max(ret-1, 0) : (-ret-2);  
+	}
+		
+	@Override
+	public int getNextHighPrimeIdx(BigInteger val)
+	{
+		var ret = Collections.binarySearch(primes, val);
+		return ret >= 0 ? ret+1 : Math.max(-ret-1, 0);  
+	}
+
+	@Override
+	public int getNextLowPrimeIdx(BigDecimal val)
+	{
+		return getNextLowPrimeIdx(val.setScale(0, RoundingMode.CEILING).toBigInteger()); 
+	}
+
+	@Override
+	public int getNextHighPrimeIdx(BigDecimal val)
+	{
+		return getNextHighPrimeIdx(val.setScale(0, RoundingMode.CEILING).toBigInteger());  
+	}
+	
+	@Override
+	public int getMaxIdx()
+	{
+		return primeRefs.size()-1;
+	}
+	
+	//
+	// Private apis
+	//
+	
 	private BigInteger calcSumCeiling(BigInteger primeSum)
 	{
 		return primeSum.shiftLeft(1).subtract(BigInteger.ONE);
@@ -263,33 +392,7 @@ public class PrimeSource implements PrimeSourceIntfc
 			distanceToNext.set(curPrimeIdx, dist);			
 		}
 	}	
-	
-	@Override
-	public BigInteger getPrime(int primeIdx)
-	{
-		if (primeIdx > getMaxIdx())
-			throw new IndexOutOfBoundsException();
 		
-		return primes.get(primeIdx);
-	}
-	
-	@Override
-	public Optional<PrimeRefIntfc> getPrimeRef(int primeIdx)
-	{
-		if (primeIdx > getMaxIdx())
-			return Optional.empty();
-
-		return   Optional.of(primeRefs.get(primeIdx));		
-	}
-	
-	@Override
-	public Optional<PrimeRefIntfc> getPrime(BigInteger val)
-	{
-		var idx = getPrimeIdx(val);
-		if (idx < 0 || idx > this.getMaxIdx())
-			return Optional.empty();
-		return getPrimeRef(idx);
-	}
 	/**
 	 * 
 	 * Weed out sums which cannot represent the next prime.								
