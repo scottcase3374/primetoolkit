@@ -1,9 +1,6 @@
 package com.starcases.prime.base;
 
-import java.math.MathContext;
-import java.math.RoundingMode;
 import java.util.logging.Logger;
-
 import com.starcases.prime.intfc.PrimeBaseIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
@@ -18,10 +15,7 @@ public abstract class AbstractPrimeBase implements PrimeBaseIntfc
 	protected PrimeSourceIntfc ps;
 	protected boolean doLog;
 	
-	protected enum State { OVER, UNDER, EQUAL };
-	
-	static final MathContext mcFloor = new MathContext(1, RoundingMode.FLOOR);
-	//static final MathContext mcCeil = new MathContext(1, RoundingMode.CEILING);
+	protected enum State { OVER, UNDER, EQUAL, REVERT }
 	
 	protected AbstractPrimeBase(PrimeSourceIntfc ps, Logger log)
 	{

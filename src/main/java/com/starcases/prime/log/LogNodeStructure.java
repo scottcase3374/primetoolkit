@@ -29,11 +29,12 @@ public class LogNodeStructure extends AbstractLogBase
 			while (prIt.hasNext())
 			{ 
 				var ref = prIt.next();
-				System.out.println(String.format("Prime %d bases %s  <dist[%d], nextPrime[%d]>", 
+				System.out.println(String.format("Prime %d bases %s  <dist[%d], nextPrime[%d]> idx[%d]", 
 						ref.getPrime(), 
 						ref.getIdxPrimes(), 
 						ps.getDistToNextPrime(ref.getPrimeRefIdx()),
-						ps.getPrime(ref.getPrimeRefIdx()+1)));
+						ps.getPrime(ref.getPrimeRefIdx()+1),
+						idx++));
 			}
 		}
 		catch(Exception e)

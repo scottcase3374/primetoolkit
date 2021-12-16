@@ -130,8 +130,7 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 	@Override
 	public void edgeAdded(GraphEdgeChangeEvent<PrimeRefIntfc, DefaultEdge> e) 
 	{
-		
-		
+		// Not handling any edge related logic right now.	
 	}
 
 	@Override

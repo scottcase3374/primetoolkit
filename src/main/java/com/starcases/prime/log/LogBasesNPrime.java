@@ -31,7 +31,7 @@ public class LogBasesNPrime extends AbstractLogBase
 			try
 			{
 				var pr = prIt.next();								
-				System.out.println(String.format("Prime [%d] %s", pr.getPrime(), pr.getIdxPrimes()));
+				System.out.println(String.format("Prime [%d] bases%s Idx[%d]", pr.getPrime(), pr.getIdxPrimes(), idx++));
 			}
 			catch(Exception e)
 			{

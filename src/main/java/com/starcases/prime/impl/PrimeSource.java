@@ -2,9 +2,9 @@ package com.starcases.prime.impl;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.List;
@@ -194,18 +194,21 @@ public class PrimeSource implements PrimeSourceIntfc
 	public Optional<PrimeRefIntfc> getNearPrimeRef(BigInteger val)
 	{
 		log.info(String.format("get near prime ref bigint %d", val));
-		var offset = val.signum() < 0 ? -2 : -1;
+		var dir = val.signum() < 0 ? -2 : -1;
 		
 		var ret = Collections.binarySearch(primes, val.abs());
-		if (val.signum() < 0 && ret < 0)
-			ret = -ret + offset;  // insertion idx if wasn't found
-			
+
+		if (ret < 0) // not found but have 'insertion idx' which is negative
+		{
+			ret = -ret + dir;  // fixup insertion idx  and adjust for searching downward/upward
+		}
+
 		if (ret > getMaxIdx())
-			return getPrimeRef(getMaxIdx());
-		else if (ret < 0)
-			return getPrimeRef(BigInteger.ONE);
+			 ret = getMaxIdx(); // if fixed up idx location past end then use end
 		
-		return getPrimeRef(ret);  	 	
+		var r = getPrimeRef(ret); 
+		log.info( String.format("get near primeref big int [%d] return [%s]", val, r.isPresent() ? r.get().getPrime().toString() : "n/a"));
+		return r;  	 	
 	}
 
 	@Override
@@ -219,14 +222,25 @@ public class PrimeSource implements PrimeSourceIntfc
 	@Override
 	public Optional<PrimeRefIntfc> getPrimeRefWithinOffset(BigInteger val, BigInteger maxPrimeOffset)
 	{		
-		var offset = val.signum() < 0 ? -1 : 1;
+		var dir = maxPrimeOffset.signum() < 0 ? -2 : -1;
 		
 		var ret = Collections.binarySearch(primes, val.abs());
-		if ( ret < -1 || (ret + offset) < 0 || (ret + offset) > getMaxIdx())
-			return Optional.empty();
+
+		if (ret < 0) // not found but have 'insertion idx' which is negative
+		{
+			ret = -ret + dir;  // fixup insertion idx  and adjust for searching downward/upward	
+		}
+
+		if (ret > getMaxIdx())
+			 ret = getMaxIdx(); // if fixed up idx location past end then use end
+
+		var r = getPrimeRef(ret);
 		
-		var p = getPrimeRef(ret+offset).get();
-		return p.getPrime().compareTo(val.add(maxPrimeOffset)) == offset ? Optional.of(p) : Optional.empty();
+		if (r.get().getPrime().compareTo(val.add(maxPrimeOffset)) > 1)
+			r = this.getNearPrimeRef(r.get().getPrime().subtract(BigInteger.ONE));
+		
+		log.info( String.format("get near primeref big int [%d] return [%s]", val, r.isPresent() ? r.get().getPrime().toString() : "n/a"));
+		return r;  	 	
 	}
 	
 	@Override
@@ -245,10 +259,22 @@ public class PrimeSource implements PrimeSourceIntfc
 	{
 		return prime.getDistToNextPrime();
 	}
+
+	public Optional<BigInteger> getDistToPrevPrime(PrimeRefIntfc prime)
+	{
+		return prime.getDistToPrevPrime();
+	}
 	
 	//
 	// navigation - index based apis
 	//
+	
+	
+	@Override
+	public BigInteger getDistToPrevPrime(int curIdx)
+	{
+		return  this.distanceToNext.get(curIdx-1).negate();
+	}
 	
 	@Override
 	public int getPrimeIdx(BigInteger val)
@@ -285,15 +311,15 @@ public class PrimeSource implements PrimeSourceIntfc
 		var ret = Collections.binarySearch(primes, val);
 		if (ret < startIdx || ret >= maxOffset)
 			return -1;
-		return ret-1;  
+		return (long)ret-1;  
 	}
 	
 	public long getNextHighPrime(BigInteger val, int startIdx, int maxOffset)
 	{
 		var ret = Collections.binarySearch(primes, val);
 		if (ret < startIdx || ret >= maxOffset)
-			return -1;
-		return  ret+1;  
+			return -1L;
+		return  (long)ret+1;  
 	}		
 	
 	/**
@@ -393,6 +419,11 @@ public class PrimeSource implements PrimeSourceIntfc
 		}
 	}	
 		
+	public boolean distinct(PrimeRefIntfc [] vals)
+	{
+		return Arrays.asList(vals).stream().distinct().count() == vals.length;
+	}
+	
 	/**
 	 * 
 	 * Weed out sums which cannot represent the next prime.								
@@ -431,7 +462,7 @@ public class PrimeSource implements PrimeSourceIntfc
 	
 	private String getIndexes(BitSet bs)
 	{
-		return bs.stream().boxed().map(i -> i.toString()).collect(Collectors.joining(",","[", "]"));
+		return bs.stream().boxed().map(Object::toString).collect(Collectors.joining(",","[", "]"));
 	}
 
 	private String getPrimes(BitSet bs)

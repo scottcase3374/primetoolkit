@@ -30,8 +30,6 @@ public class PrimeRefBitSetIndexes extends AbstractPrimeRef implements PrimeRefI
 	// Represents sets of base primes that sum to this prime. (index to primes)
 	private Map<BaseTypes, BitSet> primeBaseIdxs = new HashMap<>(); 
 	
-	private static PrimeSourceIntfc primeSrc;
-	
 	/**
 	 * Handle simple prime where the base is simply itself - i.e. 1, 2 
 	 * Simplifies bootstrapping
@@ -50,13 +48,12 @@ public class PrimeRefBitSetIndexes extends AbstractPrimeRef implements PrimeRefI
 		primeSrc = primeSrcIntfc;
 	}
 	
-
-	
 	@Override
 	public int getBaseSize()
 	{
 		 return primeBaseIdxs.get(BaseTypes.DEFAULT).cardinality();
 	}
+
 
 	@Override
 	public int getPrimeRefIdx()

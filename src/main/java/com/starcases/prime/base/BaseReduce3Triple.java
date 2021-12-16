@@ -2,24 +2,19 @@ package com.starcases.prime.base;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.math.MathContext;
-import java.math.RoundingMode;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Optional;
+import java.util.Objects;
+import java.util.Stack;
 import java.util.Iterator;
 import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.BiPredicate;
-import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
+import com.starcases.prime.impl.AbstractPrimeRef;
 import com.starcases.prime.intfc.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
@@ -28,6 +23,13 @@ import lombok.extern.java.Log;
 
 enum TripleIdx { TOP, MID, BOT}
 
+class  Bases3 extends AbstractPrimeRef
+{
+	public Bases3(int primeIdx)
+	{
+		super(primeIdx);
+	}
+}
 /*
  *  Given a prime, find a bitset representing 3 pre-existing primes that sum to the prime. 
  *  
@@ -78,6 +80,69 @@ public class BaseReduce3Triple extends AbstractPrimeBase
 
 	BaseTypes activeBaseId;
 	
+	Stack<PrimeRefIntfc[]> backTrackStack = new Stack<>();
+	
+	
+	BiFunction<PrimeRefIntfc[], BigInteger, State> funcNextTop = 
+			getFunc(
+					valsp -> valsp[TripleIdx.TOP.ordinal()].getNextPrimeRef().ifPresent( ppr -> valsp[TripleIdx.TOP.ordinal()]  = ppr),
+					(valsp, primep) -> { 
+								var s = getAllSum(valsp); 
+								return switch (s.compareTo(primep) )
+										{
+											case 0 ->  State.EQUAL;
+											case 1 -> State.OVER;
+											case -1 -> State.UNDER;
+											default -> State.REVERT;
+										};
+							}
+			);
+	
+	BiFunction<PrimeRefIntfc[], BigInteger, State> funcNextMid = 
+			getFunc(
+					valsp -> valsp[TripleIdx.MID.ordinal()].getNextPrimeRef().ifPresent( ppr -> valsp[TripleIdx.MID.ordinal()]  = ppr),
+					(valsp, primep) -> { 
+								var s = getAllSum(valsp); 
+								return switch ( (ps.distinct(valsp) ? 0x0 : 0xff) |s.compareTo(primep) )
+										{
+											case 0 ->  State.EQUAL;
+											case 1 -> State.OVER;
+											case -1 -> State.UNDER;
+											default -> State.REVERT;
+										};
+							}
+			);
+
+	BiFunction<PrimeRefIntfc[], BigInteger, State> funcPrevTop = 
+			getFunc(
+					valsp -> valsp[TripleIdx.TOP.ordinal()].getPrevPrimeRef().ifPresent( ppr -> valsp[TripleIdx.TOP.ordinal()]  = ppr),
+					(valsp, primep) -> { 
+								var s = getAllSum(valsp); 
+								return switch ( (ps.distinct(valsp) ? 0x0 : 0xff) | s.compareTo(primep) )
+										{
+											case 0 ->  State.EQUAL;
+											case 1 -> State.OVER;
+											case -1 -> State.UNDER;
+											default -> State.REVERT;
+										};
+							}
+			);
+	
+	BiFunction<PrimeRefIntfc[], BigInteger, State> funcPrevMid = 
+			getFunc(
+					valsp -> valsp[TripleIdx.MID.ordinal()].getPrevPrimeRef().ifPresent( ppr -> valsp[TripleIdx.MID.ordinal()]  = ppr),
+					(valsp, primep) -> { 
+								var s = getAllSum(valsp); 
+								return switch ( (ps.distinct(valsp) ? 0x0 : 0xff) | s.compareTo(primep) )
+										{
+											case 0 ->  State.EQUAL;
+											case 1 -> State.OVER;
+											case -1 -> State.UNDER;
+											default -> State.REVERT;
+										};
+							}
+			);	
+	
 	public BaseReduce3Triple(PrimeSourceIntfc ps)
 	{
 		super(ps, log);
@@ -87,6 +152,18 @@ public class BaseReduce3Triple extends AbstractPrimeBase
 		
 		activeBaseId = BaseTypes.THREETRIPLE;
 		ps.setActiveBaseId(activeBaseId);
+	}
+	
+	private void saveVals(PrimeRefIntfc [] vals)
+	{
+		var saved = Arrays.copyOf(vals, vals.length);
+		backTrackStack.push(saved);
+	}
+	
+	private void revertVals(PrimeRefIntfc [] vals)
+	{
+		var saved = backTrackStack.pop();
+		System.arraycopy(saved, 0, vals, 0, saved.length);
 	}
 	
 	/**
@@ -101,19 +178,18 @@ public class BaseReduce3Triple extends AbstractPrimeBase
 			PrimeRefIntfc [] vals,
 			BigInteger diff)
 	{
-		var saved = Arrays.copyOf(vals, vals.length);	
+		saveVals(vals);
 		fn.accept(vals);
 			
 		var ret = pred.apply(vals, diff);
 		
-		if (State.EQUAL != ret)  // revert change if needed
+		if (State.REVERT == ret)  // revert change if needed
 		{
-			System.arraycopy(saved, 0, vals, 0, saved.length);
+			revertVals(vals);
 		}
 		
 		return ret;
 	}
-	
 	
 	private BiFunction<PrimeRefIntfc[], BigInteger, State> getFunc(
 																Consumer<PrimeRefIntfc[]> consumer,
@@ -130,70 +206,12 @@ public class BaseReduce3Triple extends AbstractPrimeBase
 		BigInteger sum = initValues(prime, vals);
 		sum = initHWM(prime, vals, sum);
 		sum = initLWM(prime, vals, sum);
-
-		String s = Arrays.asList(vals).stream().map(b -> b.toString()).collect(Collectors.joining(",", "[","]"));
-		log.info(String.format("Prime %d  sum %d vals:%s", prime.getPrime(), sum, s));
-		var neglist = new ArrayList<Function<PrimeRefIntfc[], State >>();
-		
-		//neglist.add( getFunc( 
-	//							v -> { add(TripleIdx.BOT.ordinal(), v);},
-	//							(v, d) -> { boolean r= getAllSum(v)  }
-	//						) );
 		
 		var stopNow = prime.getPrime().compareTo(sum) == 0;
-		while (!stopNow)  // Not the prettiest code; look for a nicer refactoring.
+		while (!stopNow)
 		{
 			final var diff = prime.getPrime().subtract(getAllSum(vals));
 			final var sign = diff.signum();
-			
-		/*	if (sign == -1) // prime < total , diff should be negative
-			{	
-				// what is dist to next +/- prime (not overlapping other array values)
-				//      H
-				//      M
-				//      L
-				
-				// if sum low
-				//    Can H++ match prime
-				//    can m++ match prime
-				//    can L++ match prime
-				//
-				
-				if (!(stopNow = ensureConstraints(prime, f -> add(BOT, diff, vals), vals)))				
-					;
-				if (!(stopNow = ensureConstraints(prime, f -> add(MID, diff, vals), vals)))
-					;
-				if (!(stopNow = ensureConstraints(prime, f -> add(TOP, diff, vals), vals)))
-					;
-				if (!(stopNow = ensureConstraints(prime, f -> { vals.set(MID, vals.get(MID).getPrevPrimeRef().get());   add(BOT, diff, vals); }, vals)))
-					;
-				if (!(stopNow = ensureConstraints(prime, f -> { vals.set(TOP, vals.get(TOP).getPrevPrimeRef().get());   add(MID, diff, vals); }, vals)))
-					;
-				if (!(stopNow = ensureConstraints(prime, f -> { vals.set(TOP, vals.get(TOP).getPrevPrimeRef().get());   add(BOT, diff, vals); }, vals)))
-						;
-			} 
-			else if (sign == 1) // prime > total, diff should be positive
-			{				
-				if (!(stopNow = ensureConstraints(prime, f -> add(TOP, diff, vals), vals)))
-					;
-				if (!(stopNow = ensureConstraints(prime, f -> add(MID, diff, vals), vals)))
-					;
-				if (!(stopNow = ensureConstraints(prime, f -> add(BOT, diff, vals), vals)))
-					;
-				if (!(stopNow = ensureConstraints(prime, f -> {   vals.set(TOP, vals.get(TOP).getPrevPrimeRef().get());
-																		vals.set(BOT, vals.get(BOT).getNextPrimeRef().get());
-																		add(MID, diff, vals); }, vals)))
-				{
-					stopNow = ensureConstraints(prime  f -> {   vals.set(MID, vals.get(MID).getPrevPrimeRef().get().getPrevPrimeRef().get());
-					vals.set(BOT, vals.get(BOT).getNextPrimeRef().get());
-					 });
-				}
-
-			}
-			else
-			{			
-				break;
-			} */
 			
 			if (prime.getPrime().compareTo(getAllSum(vals)) != 0)
 				stopNow = false;
@@ -214,14 +232,68 @@ public class BaseReduce3Triple extends AbstractPrimeBase
 		}
 	}
 
+	/**
+	 * Initially:
+	 * 		top & mid bases should are adjacent
+	 * 		bot base starts at prime 1
+	 * 
+	 *  if sum > prime then reduce mid
+	 *  if sum < prime then raise bot to make up the difference.
+	 * 
+	 * @param prime
+	 * @param vals
+	 * @return
+	 */
 	private BigInteger initValues(PrimeRefIntfc prime, PrimeRefIntfc [] vals)
 	{
 		var topMuliplier = new BigDecimal("0.4");
 		var upperFraction = (new BigDecimal(prime.getPrime())).multiply(topMuliplier);
-		vals[TripleIdx.TOP.ordinal()] = ps.getNearPrimeRef(upperFraction).get(); 			// search higher
-		vals[TripleIdx.MID.ordinal()] = ps.getNearPrimeRef(upperFraction.negate()).get(); 	// search lower
-		var sum = getAllSum(vals[TripleIdx.TOP.ordinal()], vals[TripleIdx.MID.ordinal()]);
-		log.info(String.format("initValues: prime: %d  sum: %d  vals: %s", prime.getPrime(), sum, Arrays.asList(vals[TripleIdx.TOP.ordinal()] , vals[TripleIdx.MID.ordinal()]).stream().map(i -> i.toString()).collect(Collectors.joining(",", "[", "]"))));
+		
+		ps.getNearPrimeRef(upperFraction)		  .ifPresent(pr -> vals[TripleIdx.TOP.ordinal()] = pr); 	// search higher
+		ps.getNearPrimeRef(upperFraction.negate()).ifPresent(pr -> vals[TripleIdx.MID.ordinal()] = pr); 	// search lower
+		ps.getPrimeRef(BigInteger.ONE).ifPresent(pr -> vals[TripleIdx.BOT.ordinal()] = pr);					// set BOT to 1
+		
+		var sum = getAllSum(vals);
+		
+		if (sum.compareTo(prime.getPrime()) == 0)
+			return sum;
+		
+		var diff = prime.getPrime().subtract(sum);
+		
+		if (diff.signum() > 0 ) // Prime larger than sum
+		{
+			vals[TripleIdx.BOT.ordinal()].getDistToNextPrime().ifPresent(p ->   p.compareTo(diff) == 0 ? this.f);
+			this.
+		
+			ps.getNearPrimeRef(vals[TripleIdx.BOT.ordinal()].getPrime().add(diff)).ifPresent(pr -> vals[TripleIdx.BOT.ordinal()] = pr);
+		}
+
+		sum = getAllSum(vals);
+		
+		if (sum.compareTo(prime.getPrime()) == 0)
+			return sum;
+		
+		diff = prime.getPrime().subtract(sum);
+		
+		
+		if (diff.signum() < 0) // prime less than sum
+		{
+			// find a mid prime lower than current mid
+			ps.getNearPrimeRef(vals[TripleIdx.MID.ordinal()].getPrime().add(diff)).ifPresent(pr -> vals[TripleIdx.MID.ordinal()] = pr);			
+		}
+		
+		sum = getAllSum(vals);
+		diff = prime.getPrime().subtract(sum);
+		
+		if (log.isLoggable(Level.INFO))
+		{
+			log.info(String.format("initValues: prime:[%d]  sum:[%d]  vals:[%s]  sum-prime-diff:[%d]", 
+				prime.getPrime(), 
+				sum, 
+				Arrays.asList(vals).stream().filter(Objects::nonNull).map(Object::toString)
+				.collect(Collectors.joining(",", "[", "]")),
+				diff));
+		}
 		return sum;
 	}
 	
@@ -232,41 +304,33 @@ public class BaseReduce3Triple extends AbstractPrimeBase
 	 */
 	private BigInteger initHWM(PrimeRefIntfc prime, PrimeRefIntfc [] vals, BigInteger sum)
 	{
-		BigInteger hwm =  getAllSum(
-				vals[TripleIdx.TOP.ordinal()],
-				vals[TripleIdx.MID.ordinal()]);
-		
-		int sign = hwm.subtract(prime.getPrime()).signum();
-		
-		if (sign < 0) // normalize to above prime
+		var diff = prime.getPrime().subtract(sum);
+		BigInteger hwm = sum;
+		BigInteger p = prime.getPrime();
+		while (diff.signum() > 0) // sum is lower than prime
 		{
-			do
-			{
-				vals[TripleIdx.TOP.ordinal()].getNextPrimeRef().ifPresent( ppr -> vals[TripleIdx.TOP.ordinal()]  = ppr);
-				vals[TripleIdx.MID.ordinal()].getNextPrimeRef().ifPresent( ppr -> vals[TripleIdx.MID.ordinal()] = ppr);
-			}
-			while ((hwm = getAllSum(
-					vals[TripleIdx.TOP.ordinal()],
-					vals[TripleIdx.MID.ordinal()]) 
-			).subtract(prime.getPrime()).signum() < 0); 
+			funcNextTop.apply(vals, p);
+			funcNextMid.apply(vals, p);
 			
+			hwm = getAllSum(vals);
+			diff = prime.getPrime().subtract(hwm);
 		}
 		
-		// reduce to below prime
-		while ((hwm = getAllSum(
-				vals[TripleIdx.TOP.ordinal()],
-				vals[TripleIdx.MID.ordinal()]) 
-				).subtract(prime.getPrime()).signum() == 1)
+		while (diff.signum() == 1) // reduce to below prime
 		{
-			var overage = sum.subtract(prime.getPrime());
+			funcPrevMid.apply(vals, p);
+			funcPrevTop.apply(vals, p);
 			
-			vals[TripleIdx.TOP.ordinal()].getPrevPrimeRef().ifPresent( ppr -> vals[TripleIdx.TOP.ordinal()]  = ppr);
-			
-			ps.getNearPrimeRef( vals[TripleIdx.MID.ordinal()].getPrime().subtract(overage)).ifPresent( ppr -> vals[TripleIdx.MID.ordinal()] = ppr);
-			log.info(String.format("initHWM: prime: %d  sum: %d  vals: %s", prime.getPrime(), getAllSum(vals), Arrays.asList(vals).stream().filter(i -> i != null).map(i -> i.toString()).collect(Collectors.joining(",", "[", "]"))));
-			break;
-		}
 					
+			hwm = getAllSum(vals);
+			diff = prime.getPrime().subtract(hwm);
+			
+			if (log.isLoggable(Level.INFO))
+				log.info(String.format("initHWM: prime: %d  sum: %d  vals: %s", prime.getPrime(), hwm, Arrays.asList(vals).stream().filter(Objects::nonNull).map(Object::toString).collect(Collectors.joining(",", "[", "]"))));
+		}
+		
+		if (log.isLoggable(Level.INFO))
+			log.info(String.format("initHWM exit: prime: %d  sum: %d  vals: %s", prime.getPrime(), hwm, Arrays.asList(vals).stream().filter(Objects::nonNull).map(Object::toString).collect(Collectors.joining(",", "[", "]"))));
 		return hwm;
 	}
 	
@@ -279,28 +343,26 @@ public class BaseReduce3Triple extends AbstractPrimeBase
 	 */
 	private BigInteger initLWM(PrimeRefIntfc prime, PrimeRefIntfc [] vals, BigInteger sum)
 	{
-		Optional<PrimeRefIntfc> remainder = ps.getNearPrimeRef(sum.subtract(prime.getPrime()));
-		if (remainder.isPresent())
-		{
-			vals[TripleIdx.BOT.ordinal()] = remainder.get();
-			
+		var hwm = sum;
+		BigInteger diff = BigInteger.ZERO;
+		diff = prime.getPrime().subtract(sum);
+		
+		if (log.isLoggable(Level.INFO))
+			log.info(String.format("initLWM - enter: prime: %d  sum: %d  diff: %d vals: %s", prime.getPrime(), hwm, diff, Arrays.asList(vals).stream().filter(Objects::nonNull).map(Object::toString).collect(Collectors.joining(",", "[", "]"))));
+		if (prime.getPrime().compareTo(sum) != 0)
+		{	
+			Optional<PrimeRefIntfc> remainder = ps.getNearPrimeRef(diff);
+			if (remainder.isPresent())
+			{
+				vals[TripleIdx.BOT.ordinal()] = remainder.get();
+			}				
+			hwm = getAllSum(vals);
+			diff = prime.getPrime().subtract(hwm);
 		}
-			
-		//var botMultiplier = new BigDecimal("0.23");
-		//var botCalc = (new BigDecimal(vals[TripleIdx.TOP.ordinal()].getPrime())).multiply(botMultiplier);
-			
-		//vals[TripleIdx.MID.ordinal()] = ps.getNearPrimeRef(botCalc).get(); 			// search higher
-	//	vals[TripleIdx.BOT.ordinal()] = ps.getNearPrimeRef(botCalc.negate()).get(); // search lower
-		return getAllSum(vals);
-	}
-	
-
-	
-	private PrimeRefIntfc add(TripleIdx idx, BigInteger diff, PrimeRefIntfc [] vals)
-	{
-		var tmp = ps.getPrimeRef(vals[idx.ordinal()].getPrime().add(diff));
-		tmp.ifPresent(p -> vals[idx.ordinal()] = p);
-		return vals[idx.ordinal()];
+		
+		if (log.isLoggable(Level.INFO))
+			log.info(String.format("initLWM - exiting: prime: %d  sum: %d  diff: %d vals: %s", prime.getPrime(), hwm, diff, Arrays.asList(vals).stream().filter(Objects::nonNull).map(Object::toString).collect(Collectors.joining(",", "[", "]"))));
+		return hwm;
 	}
 	
 	private void addPrimeBases(PrimeRefIntfc prime, PrimeRefIntfc...vals)
@@ -321,10 +383,9 @@ public class BaseReduce3Triple extends AbstractPrimeBase
 	 */
 	private BigInteger getAllSum(PrimeRefIntfc...vals)
 	{
-		return Arrays.asList(vals).stream().filter(p -> p != null).map(PrimeRefIntfc::getPrime).reduce(BigInteger.ZERO, BigInteger::add);
+		return Arrays.asList(vals).stream().filter(Objects::nonNull).map(PrimeRefIntfc::getPrime).reduce(BigInteger.ZERO, BigInteger::add);
 	}
 	
-		
 	/**
 	 * top-level function; iterate over entire dataset to reduce every item
 	 * @param maxReduce

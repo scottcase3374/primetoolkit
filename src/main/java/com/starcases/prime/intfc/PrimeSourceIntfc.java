@@ -114,6 +114,9 @@ public interface PrimeSourceIntfc
 	 * @return
 	 */
 	Optional<BigInteger>    getDistToNextPrime(PrimeRefIntfc prime);	
+	
+	
+	Optional<BigInteger>    getDistToPrevPrime(PrimeRefIntfc prime);
 
 	// Trying to move off of these index based calls.
 	// Moving off the index based calls would simplify using alternative implementations for
@@ -135,6 +138,10 @@ public interface PrimeSourceIntfc
 	int getPrimeIdx(BigInteger val);
 
 	// index based - related to diff of the actual prime values.
-	BigInteger getDistToNextPrime(int curIdx);	
+	BigInteger getDistToNextPrime(int curIdx);
+	BigInteger getDistToPrevPrime(int curIdx);	
+	
+	
+	boolean distinct(PrimeRefIntfc [] vals);
 	
 }

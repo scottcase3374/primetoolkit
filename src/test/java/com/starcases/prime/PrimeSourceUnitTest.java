@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.starcases.prime.impl.PrimeSource;
+import com.starcases.prime.intfc.PrimeRefIntfc;
 
 @ExtendWith(MockitoExtension.class)
 class PrimeSourceUnitTest 
@@ -83,7 +84,26 @@ class PrimeSourceUnitTest
 
 		Assertions.assertEquals(BigInteger.valueOf(11L), ps.getNearPrimeRef(new BigDecimal("10.5")         ).get().getPrime());    
 		Assertions.assertEquals(BigInteger.valueOf(7L),  ps.getNearPrimeRef(new BigDecimal("10.5").negate()).get().getPrime());
-
+	}
+	
+	@Test
+	void testGetPrimeRefWithinOffset()
+	{
+		Assertions.assertEquals(BigInteger.valueOf(11L), ps.getPrimeRefWithinOffset(BigInteger.valueOf(9), BigInteger.valueOf(2)).get().getPrime());
+		Assertions.assertEquals(BigInteger.valueOf(7L), ps.getPrimeRefWithinOffset(BigInteger.valueOf(9), BigInteger.valueOf(-2)).get().getPrime());
+	}
+	
+	@Test
+	void testDistinct()
+	{
+		PrimeRefIntfc [] vals = {ps.getPrimeRef(BigInteger.ONE).get(), ps.getPrimeRef(BigInteger.TWO).get(), null};
+		Assertions.assertTrue(ps.distinct(vals));
+		
+		PrimeRefIntfc [] vals1 = {ps.getPrimeRef(BigInteger.ONE).get(), null, null};
+		Assertions.assertFalse(ps.distinct(vals1));
+		
+		PrimeRefIntfc [] vals2 = {ps.getPrimeRef(BigInteger.ONE).get(), ps.getPrimeRef(BigInteger.TWO).get(),ps.getPrimeRef(BigInteger.ONE).get()};
+		Assertions.assertFalse(ps.distinct(vals2));
 	}
 
 }
