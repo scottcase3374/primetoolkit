@@ -3,7 +3,7 @@ package com.starcases.prime.cli;
 import java.io.PrintWriter;
 
 import com.starcases.prime.PrimeSourceFactory;
-import com.starcases.prime.base.BaseReduce3Triple;
+import com.starcases.prime.base.BaseReduceTriple;
 import com.starcases.prime.base.BaseReduceNPrime;
 import com.starcases.prime.graph.export.ExportGML;
 import com.starcases.prime.graph.log.LogGraphStructure;
@@ -126,7 +126,7 @@ public class Init implements Runnable
 	
 	void optBaseThreetriple(PrimeSourceIntfc ps)
 	{
-		var base = new BaseReduce3Triple(ps);
+		var base = new BaseReduceTriple(ps);
 		if (baseOpts != null && baseOpts.logGenerate)
 		{
 			base.setLogBaseGeneration(baseOpts.logGenerate);
