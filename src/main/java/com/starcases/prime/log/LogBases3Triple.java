@@ -1,8 +1,9 @@
 package com.starcases.prime.log;
 
+import java.math.BigInteger;
+
 import com.starcases.prime.intfc.BaseTypes;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
-
 import lombok.extern.java.Log;
 import picocli.CommandLine.Command;
 
@@ -35,10 +36,18 @@ public class LogBases3Triple  extends AbstractLogBase
 			var pr = prIt.next();
 			try 
 			{
-				System.out.println(String.format("Prime [%d] idx[%d] bases %s",
+				BigInteger sum = pr.getPrimeBaseIdxs()
+						.stream()
+						.boxed()
+						.map(ps::getPrimeRef)
+						.map(p -> p.get().getPrime())
+						.reduce(BigInteger.ZERO, (a,b) -> a.add(b));
+				
+				System.out.println(String.format("Prime [%d] idx[%d] bases %s => sum: %d %s",
 						pr.getPrime(), 
 						idx++,
-						pr.getIdxPrimes()));
+						pr.getIdxPrimes(),
+						sum, pr.getPrime().equals(sum) ? "":  " ## SUM MISMATCH")) ;
 			}
 			catch(Exception e)
 			{

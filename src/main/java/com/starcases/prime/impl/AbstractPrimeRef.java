@@ -42,6 +42,6 @@ public abstract class AbstractPrimeRef implements PrimeRefIntfc
 	@Override
 	public Optional<BigInteger> getDistToPrevPrime()
 	{
-		return getPrevPrimeRef().map(ppr -> getPrime().subtract(ppr.getPrime()));
+		return getPrevPrimeRef().map(ppr -> ppr.getPrime().subtract(getPrime()));
 	}
 }

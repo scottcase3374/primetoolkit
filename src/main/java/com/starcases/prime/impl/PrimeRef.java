@@ -2,9 +2,10 @@ package com.starcases.prime.impl;
 
 import java.math.BigInteger;
 import java.util.BitSet;
-import java.util.HashMap;
+
 import java.util.List;
 import java.util.Map;
+import java.util.EnumMap;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -30,7 +31,7 @@ public class PrimeRef extends AbstractPrimeRef implements PrimeRefIntfc
 	private int primeIdx;
 	
 	// Represents sets of base primes that sum to this prime. (index to primes)
-	private Map<BaseTypes,List<Integer>> primeBaseIdxs = new HashMap<>(); 
+	private Map<BaseTypes, List<Integer>> primeBaseIdxs = new EnumMap<>(BaseTypes.class); 
 	
 	private static PrimeSourceIntfc primeSrc;
 	
