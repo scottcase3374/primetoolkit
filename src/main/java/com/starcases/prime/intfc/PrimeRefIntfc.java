@@ -2,6 +2,7 @@ package com.starcases.prime.intfc;
 
 import java.math.BigInteger;
 import java.util.BitSet;
+import java.util.Comparator;
 import java.util.Optional;
 
 /**
@@ -11,6 +12,8 @@ import java.util.Optional;
  */
 public interface PrimeRefIntfc
 {
+	static Comparator<PrimeRefIntfc> primeRefComparator = (PrimeRefIntfc o1, PrimeRefIntfc o2) -> o1.getPrime().compareTo(o2.getPrime());
+	
 	BigInteger getPrime();
 	
 	BitSet getPrimeBaseIdxs();

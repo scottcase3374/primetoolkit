@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.Iterator;
+import java.util.Optional;
 
 import com.starcases.prime.intfc.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
@@ -90,8 +91,8 @@ public class BaseReduceNPrime extends AbstractPrimeBase
 		.stream()
 		.boxed()
 		.map(i ->  ps.getPrimeRef(i))
-		.filter(o -> o.isPresent())
-		.map(o -> o.get())
+		.filter(Optional::isPresent)
+		.map(Optional::get)
 		.forEach(reducer);
 	}
 	
@@ -123,7 +124,7 @@ public class BaseReduceNPrime extends AbstractPrimeBase
 				if (doLog && log.isLoggable(Level.INFO)) 
 				{
 					log.info(String.format("Prime [%d] %s", pr.getPrime(), 
-						ret.stream().map(idx -> String.format("base-%d-count:[%d]", ps.getPrime(tmpI[0]++), idx)).collect(Collectors.joining(", "))));
+						ret.stream().map(idx -> String.format("base-%d-count:[%d]", ps.getPrime(tmpI[0]++).get(), idx)).collect(Collectors.joining(", "))));
 				}
 				var bs = new BitSet();
 				ret.stream().forEach(bs::set);

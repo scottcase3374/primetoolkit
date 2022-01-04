@@ -2,8 +2,8 @@ package com.starcases.prime.base;
 
 import java.math.BigInteger;
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Map;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Objects;
@@ -63,6 +63,7 @@ public class BaseReduceTriple extends AbstractPrimeBase
 	static final Comparator<String> nodeComparator = (o1,o2) -> Integer.decode(o1).compareTo(Integer.decode(o2));
 
 	BaseTypes activeBaseId;
+	static int good = 0;
 	
 	public BaseReduceTriple(PrimeSourceIntfc ps)
 	{
@@ -79,32 +80,37 @@ public class BaseReduceTriple extends AbstractPrimeBase
 						ps, 
 						prime, 
 						p1 -> 
-							{ 
-								var multip = "0.4";  
-								return ps.getNearPrimeRef((new BigDecimal(multip)).multiply(new BigDecimal(prime.getPrime()))).get(); 
+							{ 	// initial top estimation
+								var multip = "0.4";
+								var top = ps.getNearPrimeRef((new BigDecimal(multip)).multiply(new BigDecimal(prime.getPrime()))).get();								
+								return top; 
 							},
 						p2 ->
-							{
+							{	// initial bot estimation
 								var multip = "0.2";
-								return ps.getNearPrimeRef((new BigDecimal(multip)).multiply(new BigDecimal(prime.getPrime())).negate()).get(); 	
+								var potentialRet =  ps.getNearPrimeRef((new BigDecimal(multip)).multiply(new BigDecimal(prime.getPrime())).negate()).get();
+								return potentialRet; 	
 							});
 		
 		triple.process().ifPresent( primes ->
 										{
+											var sum = triple.sum();
 											log.warning(String.format("prime %d == sum %d: %s", 
 													prime.getPrime(), 
 													triple.sum(), 
-													prime.getPrime().compareTo(triple.sum()) == 0));
+													prime.getPrime().compareTo(sum) == 0));
+											if (prime.getPrime().compareTo(sum) == 0)
+												good++;
 											addPrimeBases(prime, primes);	
 										}		
 				);
 		
 	}
 
-	private void addPrimeBases(PrimeRefIntfc prime, PrimeRefIntfc...vals)
+	private void addPrimeBases(PrimeRefIntfc prime, Map<TripleIdx, PrimeRefIntfc> vals)
 	{
 		var bs = new BitSet();
-		Arrays.asList(vals).stream().filter(Objects::nonNull).map(PrimeRefIntfc::getPrimeRefIdx).forEach(bs::set);
+		vals.values().stream().filter(Objects::nonNull).map(PrimeRefIntfc::getPrimeRefIdx).forEach(bs::set);
 		prime.addPrimeBase(bs, BaseTypes.THREETRIPLE);
 	}
 	
@@ -153,6 +159,6 @@ public class BaseReduceTriple extends AbstractPrimeBase
 		}
 		
 		if (log.isLoggable(Level.INFO))
-			log.info(String.format("Total valid entries: %d out of %d",  + Triple.good, ps.getMaxIdx()));
+			log.info(String.format("Total valid entries: %d out of %d",  + good, ps.getMaxIdx()));
 	}	
 }

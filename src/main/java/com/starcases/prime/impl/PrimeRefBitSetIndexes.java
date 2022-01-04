@@ -66,7 +66,7 @@ public class PrimeRefBitSetIndexes extends AbstractPrimeRef implements PrimeRefI
 	@Override
 	public BigInteger getPrime() 
 	{
-		return primeSrc.getPrime(primeIdx);
+		return primeSrc.getPrime(primeIdx).get();
 	}
 	
 	@Override
@@ -122,25 +122,25 @@ public class PrimeRefBitSetIndexes extends AbstractPrimeRef implements PrimeRefI
 	@Override
 	public BigInteger getMinPrimeBase()
 	{
-		return primeBaseIdxs.get(primeSrc.getActiveBaseId()).stream().boxed().map(i -> primeSrc.getPrime(i)).min(bigIntComp).get();
+		return primeBaseIdxs.get(primeSrc.getActiveBaseId()).stream().boxed().map(i -> primeSrc.getPrime(i).get()).min(bigIntComp).get();
 	}
 	
 	@Override
 	public BigInteger getMaxPrimeBase()
 	{
-		return primeBaseIdxs.get(primeSrc.getActiveBaseId()).stream().boxed().map(i -> primeSrc.getPrime(i)).max(bigIntComp).get();
+		return primeBaseIdxs.get(primeSrc.getActiveBaseId()).stream().boxed().map(i -> primeSrc.getPrime(i).get()).max(bigIntComp).get();
 	}
 
 	@Override
 	public BigInteger getMinPrimeBase(BaseTypes baseType)
 	{
-		return primeBaseIdxs.get(baseType).stream().boxed().map(i -> primeSrc.getPrime(i)).min(bigIntComp).get();
+		return primeBaseIdxs.get(baseType).stream().boxed().map(i -> primeSrc.getPrime(i).get()).min(bigIntComp).get();
 	}
 
 	@Override
 	public BigInteger getMaxPrimeBase(BaseTypes baseType)
 	{
-		return primeBaseIdxs.get(baseType).stream().boxed().map(i -> primeSrc.getPrime(i)).max(bigIntComp).get();
+		return primeBaseIdxs.get(baseType).stream().boxed().map(i -> primeSrc.getPrime(i).get()).max(bigIntComp).get();
 	}
 	
 	@Override

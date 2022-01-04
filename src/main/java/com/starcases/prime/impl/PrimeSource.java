@@ -79,7 +79,7 @@ public class PrimeSource implements PrimeSourceIntfc
 			log.entering("PrimeSource", "init()");
 		}
 		
-		BigInteger sumCeiling; 
+		
 		
 		final var primeIndexMaxPermutation = new BitSet();
 		var primeIndexPermutation = new BitSet();
@@ -100,13 +100,16 @@ public class PrimeSource implements PrimeSourceIntfc
 			primeIndexPermutation.clear();
 			primeIndexPermutation.set(0); 
 			
-			sumCeiling = calcSumCeiling(curPrime);
+			BigInteger sumCeiling = curPrime.stream().map(this::calcSumCeiling).reduce(BigInteger.ZERO, BigInteger::add);
+			
 			while (!primeIndexPermutation.equals(primeIndexMaxPermutation)) 
 			{					
 				var permutationSum = primeIndexPermutation
 						.stream()						
-						.mapToObj(this::getPrime)						
-						.collect(Collectors.reducing(curPrime, (a,b) -> a.add(b)));
+						.mapToObj(this::getPrime)
+						.filter(Optional::isPresent)
+						.map(Optional::get)
+						.reduce(curPrime.get(), BigInteger::add);
 					
 				if (permutationSum.compareTo(sumCeiling) > 0)
 				{
@@ -115,7 +118,7 @@ public class PrimeSource implements PrimeSourceIntfc
 					break;
 				}
 				
-				if (viablePrime(permutationSum, curPrime))
+				if (curPrime.isPresent() && viablePrime(permutationSum, curPrime.get()))
 				{
 					final var cachedSum = permutationSum;										
 					var sumBaseIdxs = primeIndexPermutation.get(0, numBitsForPrimeCount);
@@ -276,6 +279,20 @@ public class PrimeSource implements PrimeSourceIntfc
 		return  this.distanceToNext.get(curIdx-1).negate();
 	}
 	
+	/**
+	 * Diff of primes at the 2 indexes; order of indexes affects whether result is +/-.
+	 * @param idx1
+	 * @param idx2
+	 * @return
+	 */
+	public Optional<BigInteger> getDistBetween(int idx1, int idx2)
+	{
+		if (idx1 < 0 || idx2 < 0 || idx1 > getMaxIdx() || idx2 > getMaxIdx() )
+			return Optional.empty();
+		
+		return  Optional.of(  idx1 < idx2 ? this.getPrime(idx2).get().subtract(this.getPrime(idx1).get()) : this.getPrime(idx1).get().subtract(this.getPrime(idx2).get()));
+	}
+	
 	@Override
 	public int getPrimeIdx(BigInteger val)
 	{
@@ -283,18 +300,18 @@ public class PrimeSource implements PrimeSourceIntfc
 	}
 
 	@Override
-	public BigInteger getPrime(int primeIdx)
+	public Optional<BigInteger> getPrime(int primeIdx)
 	{
-		if (primeIdx > getMaxIdx())
-			throw new IndexOutOfBoundsException();
+		if (primeIdx > getMaxIdx() || primeIdx < 0)
+			return Optional.empty();
 		
-		return primes.get(primeIdx);
+		return Optional.of(primes.get(primeIdx));
 	}
 	
 	@Override
 	public Optional<PrimeRefIntfc> getPrimeRef(int primeIdx)
 	{
-		if (primeIdx > getMaxIdx())
+		if (primeIdx > getMaxIdx() || primeIdx < 0)
 			return Optional.empty();
 
 		return   Optional.of(primeRefs.get(primeIdx));		
@@ -395,15 +412,16 @@ public class PrimeSource implements PrimeSourceIntfc
 		
 	/**
 	 * Add new prime to shared set of all primes
+	 * 
 	 * @param aPrime
 	 */
 	private void addPrimeRef(BigInteger newPrime, BitSet base, int curPrimeIdx, boolean canAddBase)
 	{
-		if (canAddBase && newPrime.equals(getPrime(curPrimeIdx)))
+		if (canAddBase && newPrime.equals(getPrime(curPrimeIdx).get()))
 		{			
 			var p = getPrimeRef(curPrimeIdx); 						
 			p.ifPresent(pr -> pr.addPrimeBase(base));
-			log.info(String.format("addPrimeRef <added base> new-prime[%d] new-base-indexes %s new-base-primes %s   cur-Prime[%d]", newPrime, getIndexes(base),getPrimes(base), getPrime(curPrimeIdx)));					
+			log.info(String.format("addPrimeRef <added base> new-prime[%d] new-base-indexes %s new-base-primes %s   cur-Prime[%d]", newPrime, getIndexes(base),getPrimes(base), getPrime(curPrimeIdx).get()));					
 		}
 		else
 		{					
@@ -414,8 +432,7 @@ public class PrimeSource implements PrimeSourceIntfc
 			primeRefs.add(idx, ret);	
 			
 			distanceToNext.add(null);
-			var dist = curPrimeIdx > 0 ? newPrime.subtract(this.getPrime(curPrimeIdx)) : BigInteger.ONE;
-			distanceToNext.set(curPrimeIdx, dist);			
+			getPrime(curPrimeIdx).ifPresent(p -> distanceToNext.set(curPrimeIdx, newPrime.subtract(p)));
 		}
 	}	
 		

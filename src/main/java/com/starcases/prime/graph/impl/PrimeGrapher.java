@@ -54,7 +54,8 @@ public abstract class PrimeGrapher
 	{
 		for (var i = 0; i< sum3.length; i++)
 		{
-			sum3[i] = ps.getPrime(indexes[i]);
+			final var x = i;
+			ps.getPrime(indexes[i]).ifPresent(p -> sum3[x] = p);
 		}		
 		return Arrays.asList(sum3).stream().reduce(BigInteger.ZERO, BigInteger::add);
 	}

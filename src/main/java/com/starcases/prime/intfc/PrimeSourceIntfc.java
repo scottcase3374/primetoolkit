@@ -23,7 +23,7 @@ public interface PrimeSourceIntfc
 	// non-navigation related / base selection
 	// 
 	
-	// @TODO note that if an interface is used then end-developers can provide new types.  Need to think about further.
+	// NOTE: if an interface is used then end-developers can provide new types.  Need to think about further.
 	BaseTypes getActiveBaseId();
 	void setActiveBaseId(BaseTypes activeBaseId);
 	boolean baseExist(BaseTypes baseId);
@@ -118,6 +118,14 @@ public interface PrimeSourceIntfc
 	
 	Optional<BigInteger>    getDistToPrevPrime(PrimeRefIntfc prime);
 
+	/**
+	 * Diff of primes at the 2 indexes
+	 * @param idx1
+	 * @param idx2
+	 * @return
+	 */
+	Optional<BigInteger> getDistBetween(int idx1, int idx2);
+	
 	// Trying to move off of these index based calls.
 	// Moving off the index based calls would simplify using alternative implementations for
 	// which an 'index' value might not be a good fit for.
@@ -134,7 +142,7 @@ public interface PrimeSourceIntfc
 	
 	// Index based
 	Optional<PrimeRefIntfc> getPrimeRef(int primeIdx);	
-	BigInteger getPrime(int primeIdx);
+	Optional<BigInteger> getPrime(int primeIdx);
 	int getPrimeIdx(BigInteger val);
 
 	// index based - related to diff of the actual prime values.
