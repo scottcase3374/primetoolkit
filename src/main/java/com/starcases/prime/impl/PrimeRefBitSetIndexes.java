@@ -71,6 +71,12 @@ public class PrimeRefBitSetIndexes extends AbstractPrimeRef implements PrimeRefI
 	}
 	
 	@Override
+	public Optional<PrimeRefIntfc> getPrimeRefWithinOffset(@NonNull BigInteger targetOffset)
+	{
+		return primeSrc.getPrimeRefWithinOffset(this.primeIdx, targetOffset);
+	}
+	
+	@Override
 	public BigInteger getPrime() 
 	{
 		return primeSrc.getPrime(primeIdx).get();

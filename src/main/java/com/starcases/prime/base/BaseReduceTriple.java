@@ -90,14 +90,12 @@ public class BaseReduceTriple extends AbstractPrimeBase
 						p1 -> 
 							{ 	// initial top estimation
 								var multip = "0.4";
-								var top = ps.getNearPrimeRef((new BigDecimal(multip)).multiply(new BigDecimal(prime.getPrime()))).get();								
-								return top; 
+								return ps.getNearPrimeRef((new BigDecimal(multip)).multiply(new BigDecimal(prime.getPrime()))).get();								
 							},
 						p2 ->
 							{	// initial bot estimation
 								var multip = "0.2";
-								var potentialRet =  ps.getNearPrimeRef((new BigDecimal(multip)).multiply(new BigDecimal(prime.getPrime())).negate()).get();
-								return potentialRet; 	
+								return  ps.getNearPrimeRef((new BigDecimal(multip)).multiply(new BigDecimal(prime.getPrime())).negate()).get();
 							});
 		
 		triple.process().ifPresent( primes ->

@@ -3,6 +3,7 @@ package com.starcases.prime;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigInteger;
+import java.util.Optional;
 import java.math.BigDecimal;
 
 import org.junit.jupiter.api.Assertions;
@@ -70,7 +71,7 @@ class PrimeSourceUnitTest
 	@Test
 	void testGetPrime() {
 		
-		var bi101 = BigInteger.valueOf(101L);
+		var bi101 = Optional.of(BigInteger.valueOf(101L));
 		Assertions.assertEquals(bi101, ps.getPrime(26));
 	}
 
@@ -92,8 +93,8 @@ class PrimeSourceUnitTest
 	@Test
 	void testGetPrimeRefWithinOffset()
 	{
-		Assertions.assertEquals(BigInteger.valueOf(11L), ps.getPrimeRefWithinOffset(BigInteger.valueOf(9), BigInteger.valueOf(2)).get().getPrime());
-		Assertions.assertEquals(BigInteger.valueOf(7L), ps.getPrimeRefWithinOffset(BigInteger.valueOf(9), BigInteger.valueOf(-2)).get().getPrime());
+		Assertions.assertEquals(BigInteger.valueOf(11L), ps.getPrimeRefWithinOffset(4, BigInteger.valueOf(2)).get().getPrime());
+		Assertions.assertEquals(BigInteger.valueOf(5L), ps.getPrimeRefWithinOffset(4, BigInteger.valueOf(-2)).get().getPrime());
 	}
 	
 	@Test

@@ -237,33 +237,29 @@ public class PrimeSource implements PrimeSourceIntfc
 	}
 
 	@Override
-	public Optional<PrimeRefIntfc> getPrimeRefWithinOffset(@NonNull BigInteger val, @NonNull BigInteger maxPrimeOffset)
+	public Optional<PrimeRefIntfc> getPrimeRefWithinOffset(@Min(0) int idx, @NonNull BigInteger targetOffset)
 	{		
-		var dir = maxPrimeOffset.signum() < 0 ? -2 : -1;
-		
-		var ret = Collections.binarySearch(primes, val.abs());
-
-		if (ret < 0) // not found but have 'insertion idx' which is negative
+		var dir = targetOffset.signum() < 0 ? -1 : 1;
+			
+		BigInteger tmpOffset = BigInteger.ZERO;
+		int tmpIdx = idx;
+		while (targetOffset.compareTo(tmpOffset) == dir && tmpIdx < this.getMaxIdx() && tmpIdx > 0)
 		{
-			ret = -ret + dir;  // fixup insertion idx  and adjust for searching downward/upward	
-		}
+			tmpIdx += dir;
+			tmpOffset = tmpOffset.add( dir == -1 ?  distanceToNext.get(tmpIdx).negate() : distanceToNext.get(tmpIdx));		
+		} 
 
-		if (ret > getMaxIdx())
-			 ret = getMaxIdx(); // if fixed up idx location past end then use end
-
-		var r = getPrimeRef(ret);
+		var ret = primeRefs.get(tmpIdx);
 		
-		if (r.get().getPrime().compareTo(val.add(maxPrimeOffset)) > 1)
-			r = this.getNearPrimeRef(r.get().getPrime().subtract(BigInteger.ONE));
-		
-		log.info( String.format("get near primeref big int [%d] return [%s]", val, r.isPresent() ? r.get().getPrime().toString() : "n/a"));
-		return r;  	 	
+				
+		log.info( String.format("get near primeref idx [%d] target-offset[%d] return [%d]", idx, targetOffset, ret.getPrime()));
+		return Optional.of(ret);  	 	
 	}
 	
 	@Override
-	public Optional<PrimeRefIntfc> getPrimeRefWithinOffset(@NonNull BigDecimal val, @NonNull BigDecimal maxPrimeOffset)
+	public Optional<PrimeRefIntfc> getPrimeRefWithinOffset(@Min(0) int idx, @NonNull BigDecimal targetOffset)
 	{
-		return getPrimeRefWithinOffset(val.toBigInteger(), maxPrimeOffset.toBigInteger());
+		return getPrimeRefWithinOffset(idx, targetOffset.toBigInteger());
 	}
 	
 	@Override

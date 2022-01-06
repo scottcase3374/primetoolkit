@@ -54,25 +54,22 @@ public class Init implements Runnable
 		ps.init();
 		var baseType = BaseTypes.DEFAULT;
 		
-		if (baseOpts != null)	
+		if (baseOpts != null && baseOpts.bases != null)	
 		{
-			if (baseOpts.bases != null)
+			baseType = baseOpts.bases;
+			switch(baseType)
 			{
-				baseType = baseOpts.bases;
-				switch(baseType)
-				{
-				case NPRIME:
-					optBaseNPrime(ps, baseOpts);					
-					break;
-					
-				case THREETRIPLE:
-					optBaseThreetriple(ps);
-					break;	
-					
-				default:
-					break;
-				}
-			}			
+			case NPRIME:
+				optBaseNPrime(ps, baseOpts);					
+				break;
+				
+			case THREETRIPLE:
+				optBaseThreetriple(ps);
+				break;	
+				
+			default:
+				break;
+			}		
 		}
 		
 		if (logOpts != null && logOpts.logOper != null)
@@ -97,20 +94,14 @@ public class Init implements Runnable
 			}
 		}
 		
-		if (graphOpts != null && graphOpts.graphType != null)
+		if (graphOpts != null && graphOpts.graphType != null && graphOpts.graphType == Graph.DEFAULT)
 		{
-			if (graphOpts.graphType == Graph.DEFAULT)
-			{		
-				graph(ps, baseType);
-			}
+			graph(ps, baseType);
 		}
 		
-		if (exportOpts != null && exportOpts.exportType != null)
-		{
-			if (exportOpts.exportType == Export.GML)
-			{			
-				export(ps);
-			}
+		if (exportOpts != null && exportOpts.exportType != null && exportOpts.exportType == Export.GML)
+		{			
+			export(ps);
 		}
 	}	
 	

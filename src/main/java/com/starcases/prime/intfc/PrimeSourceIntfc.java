@@ -78,14 +78,14 @@ public interface PrimeSourceIntfc
 	Optional<PrimeRefIntfc> getNearPrimeRef(@NonNull BigDecimal val);
 
 	/**
-	 * Find/return first prime (if any exist) that is within the provided prime offset from the provided value.
+	 * Find/return first prime (if any exist) within the provided prime offset from the provided idx.
 	 *  
 	 * @param val Must be positive.
 	 * @param maxPrimeOffset  If positive then looking for 'next' value; if negative then looking for an earlier value.
 	
 	 * @return
 	 */
-	Optional<PrimeRefIntfc> getPrimeRefWithinOffset(@NonNull BigInteger val, @NonNull BigInteger maxPrimeOffset);
+	Optional<PrimeRefIntfc> getPrimeRefWithinOffset(@Min(0) int idx, @NonNull BigInteger targetOffset);
 	
 	/**
 	 * Find/return first prime (if any exist) that is within the provided prime offset from the provided value.
@@ -98,7 +98,7 @@ public interface PrimeSourceIntfc
 	
 	 * @return
 	 */	
-	Optional<PrimeRefIntfc> getPrimeRefWithinOffset(@NonNull BigDecimal val, @NonNull BigDecimal maxPrimeOffset);
+	Optional<PrimeRefIntfc> getPrimeRefWithinOffset(@Min(0) int idx, @NonNull BigDecimal targetOffset);
 	
 	
 	/**

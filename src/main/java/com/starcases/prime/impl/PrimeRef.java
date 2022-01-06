@@ -80,6 +80,12 @@ public class PrimeRef extends AbstractPrimeRef implements PrimeRefIntfc
 	}
 
 	@Override
+	public Optional<PrimeRefIntfc> getPrimeRefWithinOffset(@NonNull BigInteger targetOffset)
+	{
+		return primeSrc.getPrimeRefWithinOffset(this.primeIdx, targetOffset);
+	}
+	
+	@Override
 	public BigInteger getMinPrimeBase()
 	{
 		return primeBaseIdxs

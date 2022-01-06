@@ -52,6 +52,9 @@ public interface PrimeRefIntfc
 	 */
 	void addPrimeBase(@NonNull BitSet primeBase);
 	void addPrimeBase(@NonNull BitSet primeBase, @NonNull BaseTypes baseType);
+
+	
+	Optional<PrimeRefIntfc> getPrimeRefWithinOffset(@NonNull BigInteger targetOffset);
 	
 	/**
 	 * Strings formatted for easy display

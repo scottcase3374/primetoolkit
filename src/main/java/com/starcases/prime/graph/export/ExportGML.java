@@ -105,7 +105,8 @@ class NodeElement implements ElementIntfc
 		pr.println("  node");
 		pr.println("  [");
 		
-		pr.println(String.format("    id %d\n    label \"%s\"", pRef.getPrime(), pRef.getPrime()));
+		pr.println(String.format("    id %d", pRef.getPrime()));
+		pr.println(String.format("label \"%s\"", pRef.getPrime()));
 		pr.println("  ]");
 	}	
 }

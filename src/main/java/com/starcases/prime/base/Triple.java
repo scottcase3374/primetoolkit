@@ -87,8 +87,6 @@ enum SumConstraintState
 	
 	public void symetricChangeSumRange(@NonNull BigInteger primeSumDiff, @NonNull Map<TripleIdx,PrimeRefIntfc> retPrimeRefs, @NonNull BigInteger [] retOffset)
 	{
-		assert(retOffset.length == 1);
-		
 		final var func = String.format("moveSumRange(primeSumDiff[%d])", primeSumDiff);
 		log.info("enter " + func);
 		
@@ -109,23 +107,29 @@ enum SumConstraintState
 		log.info("exit " + func);
 	}
 	
-	public void incOrDecSumRange(@NonNull BigInteger primeSumDiff, @NonNull Map<TripleIdx,PrimeRefIntfc> retPrimeRefs, @NonNull BigInteger [] retOffset)
+	public void incOrDecSumRange(@NonNull BigInteger primeSumDiff, @NonNull Map<TripleIdx,PrimeRefIntfc> retPrimeRefs, @NonNull BigInteger [] retOffset, boolean swapOrder)
 	{
-		final var func = String.format("incOrDecSumRange(diff[%d])", primeSumDiff);
+		final var func = String.format("incOrDecSumRange(diff[%d] swap[%b])", primeSumDiff, swapOrder);
 		log.info("enter " + func);
 		
 		// negative diff or pos diff ->  
 		// 			lower top & raise bottom = RAISE or LOWSER sum depending on size of each change  
 		// 			raise top & lower bottom = RAISE or LOWSER sum depending on size of each change
+		TripleIdx [] idxs = { TripleIdx.TOP, TripleIdx.BOT};
+		if (swapOrder)
+		{
+			idxs[0] = TripleIdx.BOT;
+			idxs[1] = TripleIdx.TOP;
+		}
 		offsetFn(
 				primeSumDiff,  
-				TripleIdx.TOP, 
+				idxs[0], 
 				retPrimeRefs, 
 				retOffset);
 		
 		offsetFn(
 				primeSumDiff.add(retOffset[0]),  
-				TripleIdx.BOT, 
+				idxs[1], 
 				retPrimeRefs, 
 				retOffset);
 		
@@ -168,101 +172,29 @@ enum SumConstraintState
 					.collect(Collectors.joining(",")),
 				retOffset[0]));
 				
-		var p = Optional.ofNullable(retPrimeRefs.get(tripleIdx));		
-		var sum = BigInteger.ZERO;	
-		BigInteger sumAndDiff = BigInteger.ZERO;
-		do 
-		{
-			log.info(String.format("offsetFn start do-while SUM constraint[%s] idx[%s] diff[%d] - retPrimes[%s]  offset[%d] ", 
-					this.toString(),
-					tripleIdx.toString(),
-					diff,
-					retPrimeRefs.values()
-						.stream()
-						.filter(Objects::nonNull)
-						.map(pr -> pr.getPrime().toString())
-						.collect(Collectors.joining(",")),
-					retOffset[0]));
-			
-			final var tmpSum = sum;
-			var curSumDist = fnDistToPrime.apply(p).flatMap(distToPrime -> Optional.ofNullable(distToPrime.add(tmpSum)));
-			if (curSumDist.isEmpty())
-			{
-				log.info(String.format("offsetFn start do-while BREAK bi-is-empty SUM constraint[%s] idx[%s] diff[%d] - retPrimes[%s]  offset[%d] ", 
-						this.toString(),
-						tripleIdx.toString(),
-						diff,
-						retPrimeRefs.values()
-							.stream()
-							.filter(Objects::nonNull)
-							.map(pr -> pr.getPrime().toString())
-							.collect(Collectors.joining(",")),
-						retOffset[0]));				
-				break;
-			}
-						
-			sum = curSumDist.get();
-			sumAndDiff = sum.add(diff);
-			
-			log.info(String.format("offsetFn start do-while bi/sum[%d] SUM constraint[%s] idx[%s] diff[%d] - retPrimes[%s]  offset[%d] ",
-					sum,
-					this.toString(),
-					tripleIdx.toString(),
-					diff,
-					retPrimeRefs.values()
-						.stream()
-						.filter(Objects::nonNull)
-						.map(pr -> pr.getPrime().toString())
-						.collect(Collectors.joining(",")),
-					retOffset[0]));	
-			
-			if (sumAndDiff.signum() == 0)
-			{
-				log.info(String.format("offsetFn start do-while sum<=diff SUM-constraint[%s] idx[%s] diff[%d] sum[%d] sum+diff[%d] - retPrimes[%s]  offset[%d] ", 
-						this.toString(),
-						tripleIdx.toString(),
-						diff,
-						sum,
-						sumAndDiff,
-						retPrimeRefs.values()
-							.stream()
-							.filter(Objects::nonNull)
-							.map(pr -> pr.getPrime().toString())
-							.collect(Collectors.joining(",")),
-						retOffset[0]));							
-				
-				p.ifPresent(p1 -> retPrimeRefs.put(tripleIdx, p1));
-			}
-			else
-			{
-				p = uopChgPrime.apply(p);	
-			}
-		}
-		while (sumAndDiff.signum() < 0);
+		var p = Optional.ofNullable(retPrimeRefs.get(tripleIdx));	
+		p.ifPresent( 
+				pRef -> pRef
+						.getPrimeRefWithinOffset(diff)
+						.ifPresent(tgtRef -> { 
+												// fail if constraints violated
+												ValueConstraintState vcs = ValueConstraintState.checkValueConstraint(retPrimeRefs, tgtRef, tripleIdx);
+												if (vcs == ValueConstraintState.OK)
+												{
+													retPrimeRefs.put(tripleIdx, tgtRef); 
+													retOffset[0] = pRef.getPrime().subtract(tgtRef.getPrime());
+												}
+												else
+												{
+													log.severe(String.format("offsetFn - vcs[%s]", vcs));
+												}
+												})
+				);
 		
-		retPrimeRefs.put(tripleIdx, p.get());
-		
-		log.info(String.format("offsetFn after do-while SUM constraint[%s] idx[%s] diff[%d] sum[%d] sum+diff[%d]  - retPrimes[%s]  offset[%d] ", 
-				this.toString(),
-				tripleIdx.toString(),
-				diff,
-				sum,
-				sumAndDiff,
-				retPrimeRefs.values()
-					.stream()
-					.filter(Objects::nonNull)
-					.map(pr -> pr.getPrime().toString())
-					.collect(Collectors.joining(",")),
-				retOffset[0]));	
-		
-		retOffset[0] = retOffset[0].add(sum);
-		
-		log.info(String.format("offsetFn exit SUM constraint[%s] idx[%s] diff[%d] sum[%d] sum+diff[%d]   - retPrimes[%s]  offset[%d] ", 
+		log.info(String.format("offsetFn exit SUM constraint[%s] idx[%s] diff[%d]  - retPrimes[%s]  offset[%d] ", 
 				this.toString(), 
 				tripleIdx.toString(),
 				diff,
-				sum,
-				sumAndDiff,
 				retPrimeRefs.values()
 					.stream()
 					.filter(Objects::nonNull)
@@ -270,8 +202,43 @@ enum SumConstraintState
 					.collect(Collectors.joining(",")),
 				retOffset[0]));
 	}	
+	
+	public static SumConstraintState checkSumConstraints(@NonNull Map<TripleIdx, PrimeRefIntfc> primeRefs, @NonNull PrimeRefIntfc targetPrime, BigInteger [] vals, TripleIdx [] idxs)
+	{
+		// sum the current prime refs except for item indexed by array idxs
+		var sum1 = Arrays.
+						stream(TripleIdx.values()).
+						filter(i ->  idxs == null || Arrays.stream(idxs).allMatch(ii -> ii != i) ).
+						map(primeRefs::get).
+						filter(Objects::nonNull).
+						map(PrimeRefIntfc::getPrime).
+						reduce(BigInteger.ZERO, BigInteger::add);
+		
+		// sum the items in array vals [which should equate to overrides of the prime refs specified by array idxs.
+		var sum2 = vals == null ? BigInteger.ZERO : 
+				Arrays.
+				stream(vals).
+				filter(Objects::nonNull).
+				reduce(BigInteger.ZERO, BigInteger::add);
+
+		// Create total sum from both sets which should be sourced from 3 items in one or the other of primeRefs or vals.
+		var finalSum = sum1.add(sum2);
+		
+		// determine if sum is higher than prime, equal to prime, less than prime or just doesn't match for some reason.
+		var sumComptoPrime = finalSum.compareTo(targetPrime.getPrime());
+			
+		return SumConstraintState.getEnum(sumComptoPrime);
+	}
+
+	public static SumConstraintState checkSumConstraint(@NonNull Map<TripleIdx, PrimeRefIntfc> primeRefs,@NonNull PrimeRefIntfc targetPrime, @NonNull BigInteger val, TripleIdx idx)
+	{
+		BigInteger [] vals = {val};
+		TripleIdx [] idxs = {idx};
+		return checkSumConstraints(primeRefs, targetPrime, vals, idxs);
+ 	}
 }
 
+@Log
 enum ValueConstraintState 
 { 
 	/**
@@ -294,37 +261,9 @@ enum ValueConstraintState
 	/**
 	 * No errors with values
 	 */
-	OK 
-}
-
-@Log
-@NoArgsConstructor
-class Triple
-{
-	@NonNull
-	PrimeRefIntfc targetPrime;
+	OK;
 	
-	@NonNull
-	PrimeSourceIntfc ps;
-	
-	@NonNull
-	Function<PrimeRefIntfc, PrimeRefIntfc> initTop;
-	
-	@NonNull
-	Function<PrimeRefIntfc, PrimeRefIntfc> initBot;
-	
-	@Getter
-	final Map<TripleIdx, PrimeRefIntfc> primeRefs = new TreeMap<>();
-		
-	Triple(@NonNull PrimeSourceIntfc ps, @NonNull PrimeRefIntfc targetPrime, @NonNull UnaryOperator<PrimeRefIntfc> initTop, @NonNull UnaryOperator<PrimeRefIntfc> initBot)
-	{
-		this.ps = ps;
-		this.targetPrime = targetPrime;
-		this.initTop = initTop;		
-		this.initBot = initBot;
-	}
-		 
-	ValueConstraintState checkValueConstraints(@NonNull BigInteger [] vals, TripleIdx [] idxs)
+	public static ValueConstraintState checkValueConstraints(@NonNull Map<TripleIdx, PrimeRefIntfc> primeRefs, PrimeRefIntfc [] pOverrideRefs, TripleIdx [] idxs)
 	{
 		// TripleIdx - BOT,MID,TOP
 		var cs = ValueConstraintState.OK;
@@ -333,27 +272,26 @@ class Triple
 		BigInteger tmpPrime = null;
 		for (var idx : TripleIdx.values())
 		{
+			var idxsNumProvided = idxs == null ? 0 : idxs.length;
+			
 			var cont = false;
-			for (var i=0; i < idxs.length; i++)
+			for (var i=0; i < idxsNumProvided; i++)
 			{
-				if (idx == idxs[i])
+				if (idx == idxs[i] && pOverrideRefs != null && pOverrideRefs[i] != null)
 				{			
-					if (vals[i] != null)
+					if (tmpPrime == null || tmpPrime.compareTo(pOverrideRefs[i].getPrime()) < 0)
 					{
-						if (tmpPrime == null || tmpPrime.compareTo(vals[i]) < 0)
-						{
-							tmpPrime = vals[i];
-						}
-						else 
-						{
-							cs = ValueConstraintState.RANGE_ERROR;
-						}
-						
-						baseCount++;						
-						bases.add(vals[i]);
-						log.finest(String.format("checkValueConstraints overrides - idx[%s] val[%d]", idx.toString(), vals[i]));
-						cont = true;
+						tmpPrime = pOverrideRefs[i].getPrime();
 					}
+					else 
+					{
+						cs = ValueConstraintState.RANGE_ERROR;
+					}
+					
+					baseCount++;						
+					bases.add(pOverrideRefs[i].getPrime());
+					log.finest(String.format("checkValueConstraints overrides - idx[%s] val[%d]", idx.toString(), pOverrideRefs[i].getPrime()));
+					cont = true;
 				}				
 			}
 		
@@ -396,51 +334,46 @@ class Triple
 		return cs;
 	}
 	
-	ValueConstraintState checkValueConstraints(@NonNull BigInteger val, TripleIdx idx)
+	public static ValueConstraintState checkValueConstraint(@NonNull Map<TripleIdx, PrimeRefIntfc> primeRefs, @NonNull PrimeRefIntfc pOverrideRef, TripleIdx idx)
 	{
-		BigInteger [] vals = {val};
+		PrimeRefIntfc [] pRefs = {pOverrideRef};
 		TripleIdx [] idxs = {idx};
-		return checkValueConstraints(vals, idxs);
-	}
+		return checkValueConstraints(primeRefs, pRefs, idxs);
+	}	
+}
 
+@Log
+@NoArgsConstructor
+class Triple
+{
+	@NonNull
+	PrimeRefIntfc targetPrime;
+	
+	@NonNull
+	PrimeSourceIntfc ps;
+	
+	@NonNull
+	Function<PrimeRefIntfc, PrimeRefIntfc> initTop;
+	
+	@NonNull
+	Function<PrimeRefIntfc, PrimeRefIntfc> initBot;
+	
+	@Getter
+	final Map<TripleIdx, PrimeRefIntfc> primeRefs = new TreeMap<>();
+		
+	Triple(@NonNull PrimeSourceIntfc ps, @NonNull PrimeRefIntfc targetPrime, @NonNull UnaryOperator<PrimeRefIntfc> initTop, @NonNull UnaryOperator<PrimeRefIntfc> initBot)
+	{
+		this.ps = ps;
+		this.targetPrime = targetPrime;
+		this.initTop = initTop;		
+		this.initBot = initBot;
+	}
+		 
 	BigInteger tgtP()
 	{
 		return this.targetPrime.getPrime();
 	}
 
-	SumConstraintState checkSumConstraints(@NonNull BigInteger [] vals, TripleIdx [] idxs)
-	{
-		// sum the current prime refs except for item indexed by array idxs
-		var sum1 = Arrays.
-						stream(TripleIdx.values()).
-						filter(i ->  Arrays.stream(idxs).allMatch(ii -> ii != i) ).
-						map(i -> primeRefs.get(i)).
-						filter(Objects::nonNull).
-						map(PrimeRefIntfc::getPrime).
-						reduce(BigInteger.ZERO, BigInteger::add);
-		
-		// sum the items in array vals [which should equate to overrides of the prime refs specified by array idxs.
-		var sum2 = Arrays.
-				stream(vals).
-				filter(Objects::nonNull).
-				reduce(BigInteger.ZERO, BigInteger::add);
-
-		// Create total sum from both sets which should be sourced from 3 items in one or the other of primeRefs or vals.
-		var finalSum = sum1.add(sum2);
-		
-		// determine if sum is higher than prime, equal to prime, less than prime or just doesn't match for some reason.
-		var sumComptoPrime = finalSum.compareTo(targetPrime.getPrime());
-			
-		return SumConstraintState.getEnum(sumComptoPrime);
-	}
-
-	SumConstraintState checkSumConstraints(@NonNull BigInteger val, TripleIdx idx)
-	{
-		BigInteger [] vals = {val};
-		TripleIdx [] idxs = {idx};
-		return checkSumConstraints(vals, idxs);
- 	}
-	
 	public BigInteger sum()
 	{
 		return primeRefs.values().stream().filter(Objects::nonNull).map(PrimeRefIntfc::getPrime).reduce(BigInteger.ZERO, BigInteger::add);
@@ -479,7 +412,7 @@ class Triple
 		final var func = String.format("setVal(prime=%d, idx=%s)", prime.getPrime(), idx.toString());
 		// Update prime ref for target idx		
 		primeRefs.put(idx, prime);
-		var valueConstraintState = checkValueConstraints(prime.getPrime(), idx);
+		var valueConstraintState = ValueConstraintState.checkValueConstraint(primeRefs, prime, idx);
 		lexit(func, null, valueConstraintState);
 		return valueConstraintState;
 	}
@@ -492,7 +425,7 @@ class Triple
 	ValueConstraintState setValidVal(@NonNull Optional<PrimeRefIntfc> prime, @NonNull TripleIdx idx)
 	{
 		TripleIdx [] localIdxs = { idx };
-		BigInteger [] localPrimes = {null};
+		PrimeRefIntfc [] localPrimes = {null};
 		
 		final var func = String.format("setValidVal(prime=%s, idx=%s)  - enter", prime, idx.toString());
 		lenter(func, null, null);
@@ -500,12 +433,12 @@ class Triple
 		ValueConstraintState[] valueConstraintState = {null};
 		
 		if (prime.isEmpty())
-			valueConstraintState[0] = checkValueConstraints(localPrimes, localIdxs);
+			valueConstraintState[0] = ValueConstraintState.checkValueConstraints(primeRefs, localPrimes, localIdxs);
 		
 		prime.ifPresent( p ->
 					{
-						localPrimes[0] = p.getPrime();
-						valueConstraintState[0] = checkValueConstraints(localPrimes, localIdxs);
+						localPrimes[0] = p;
+						valueConstraintState[0] = ValueConstraintState.checkValueConstraints(primeRefs, localPrimes, localIdxs);
 						
 						// Update prime ref for target idx if value constraint ok		
 						if (valueConstraintState[0] == ValueConstraintState.OK)
@@ -525,7 +458,7 @@ class Triple
 	 */
 	ValueConstraintState setValidVal(@NonNull PrimeRefIntfc prime, @NonNull TripleIdx idx)
 	{
-		var valueConstraintState = checkValueConstraints(prime.getPrime(), idx);
+		var valueConstraintState = ValueConstraintState.checkValueConstraint(primeRefs, prime, idx);
 		final var func = String.format("setValidVal(prime=%d, idx=%s) - final-state[%s]", prime.getPrime(), idx.toString(), valueConstraintState.name());
 		// Update prime ref for target idx if value constraint ok		
 		if (valueConstraintState == ValueConstraintState.OK)
@@ -614,7 +547,8 @@ class Triple
 		
 		BigInteger [] tmpPrimeSumDiff = { BigInteger.ZERO };
 		ValueConstraintState [] valueConstraintState = { ValueConstraintState.MISSING_BASE};
-
+		SumConstraintState [] sumConstraintState = { SumConstraintState.NONMATCH };
+		
 		tmpMidPrimeRef.ifPresent(pMidRef -> 
 										{
 											valueConstraintState[0] = setValidVal(pMidRef, TripleIdx.MID);
@@ -627,7 +561,8 @@ class Triple
 
 		var retPrimeRefs = new TreeMap<TripleIdx,PrimeRefIntfc>(primeRefs);
 		BigInteger [] retOffset = {BigInteger.ZERO};
-		valueConstraintState[0] = this.checkValueConstraints(BigInteger.ZERO, null);
+		valueConstraintState[0] = ValueConstraintState.checkValueConstraints(primeRefs, null, null);
+		sumConstraintState[0] = SumConstraintState.checkSumConstraints(primeRefs, targetPrime, null, null);
 		
 		SumConstraintState
 		.getEnum(tmpPrimeSumDiff[0].signum())
@@ -636,16 +571,41 @@ class Triple
 				retPrimeRefs, 
 				retOffset);
 		
-		retPrimeRefs.forEach( (k,v) -> primeRefs.put(k, v));
+		valueConstraintState[0] = ValueConstraintState.checkValueConstraints(primeRefs, null, null);
+		sumConstraintState[0] = SumConstraintState.checkSumConstraints(primeRefs, targetPrime, null, null);
+		
+		retPrimeRefs.forEach( (k,v) -> setValidVal(v, k));
+
+		valueConstraintState[0] = ValueConstraintState.checkValueConstraints(primeRefs, null, null);
+		sumConstraintState[0] = SumConstraintState.checkSumConstraints(primeRefs, targetPrime, null, null);
 		
 		SumConstraintState
 		.getEnum(tmpPrimeSumDiff[0].signum())
 		.incOrDecSumRange( 
-				tmpPrimeSumDiff[0],  							 
+				tmpPrimeSumDiff[0].add(retOffset[0]),  							 
 				retPrimeRefs, 
-				retOffset);
+				retOffset,
+				false);
+
+		valueConstraintState[0] = ValueConstraintState.checkValueConstraints(primeRefs, null, null);
+		sumConstraintState[0] = SumConstraintState.checkSumConstraints(primeRefs, targetPrime, null, null);
+
+		retPrimeRefs.forEach( (k,v) -> setValidVal(v, k));
+
+		valueConstraintState[0] = ValueConstraintState.checkValueConstraints(primeRefs, null, null);
+		sumConstraintState[0] = SumConstraintState.checkSumConstraints(primeRefs, targetPrime, null, null);
+		if (sumConstraintState[0] != SumConstraintState.MATCH)
+		{
+			SumConstraintState
+			.getEnum(tmpPrimeSumDiff[0].signum())
+			.incOrDecSumRange( 
+					tmpPrimeSumDiff[0].add(retOffset[0]),  							 
+					retPrimeRefs, 
+					retOffset,
+					true);			
 		
-		retPrimeRefs.forEach( (k,v) -> primeRefs.put(k, v));
+			retPrimeRefs.forEach( (k,v) -> setValidVal(v, k));
+		}
 		
 		lexit(func, null, null);
 	}
@@ -663,36 +623,13 @@ class Triple
 		valueConstraintState[0] = setVal(initBot.apply(targetPrime), TripleIdx.BOT);
 		
 		adjustTop();
-		adjustBot();
-				
+		adjustBot();	
 		handleMid(targetPrime, sum());
 		
-		/*tmpMidPrimeRef.ifPresent( localMidPrimeRef ->
-					{
-						var newMidPrimeRef = Optional.of(localMidPrimeRef);
-						
-						// Desire to continue on in a state where the mid value is not a dupe but may not generate correct sum.
-						if ((valueConstraintState[0] = setValidVal(newMidPrimeRef, TripleIdx.MID)) != ValueConstraintState.OK)							
-						{
-							var offset = 1;
-							while (valueConstraintState[0] != ValueConstraintState.OK)
-							{
-								var tp1 = ps.getPrimeRef(newMidPrimeRef.get().getPrimeRefIdx()+offset);			
-								tp1.ifPresent( p1 ->   valueConstraintState[0] = setValidVal(p1, TripleIdx.MID) );
-
-								if (valueConstraintState[0] != ValueConstraintState.OK)
-								{
-									var tp2 = ps.getPrimeRef(newMidPrimeRef.get().getPrimeRefIdx()-offset);			
-									tp2.ifPresent( p ->   valueConstraintState[0] = setValidVal(p, TripleIdx.MID) );
-								}						
-								offset++;
-							}						
-						}						
-					}
-				);
-				*/
-		sumConstraintState[0] = checkSumConstraints(BigInteger.ZERO, null);
-		valueConstraintState[0] = this.checkValueConstraints(BigInteger.ZERO, null);
+		sumConstraintState[0] = SumConstraintState.checkSumConstraints(primeRefs, targetPrime, null, null);
+		valueConstraintState[0] = ValueConstraintState.checkValueConstraints(primeRefs, null, null);
+		
+		
 		switch(valueConstraintState[0])
 			{					
 			case OK:

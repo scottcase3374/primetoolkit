@@ -94,10 +94,9 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 			{
 				primeMaxDistToPrev = e.getVertex();
 			}
-			else if (edist.isPresent())
-			{
-				if (edist.get().abs().compareTo(pdist.get().abs()) > 0)
-					primeMaxDistToPrev = e.getVertex();
+			else if (edist.isPresent() && edist.get().abs().compareTo(pdist.get().abs()) > 0)
+			{				
+				primeMaxDistToPrev = e.getVertex();
 			} 
 		}
 		data[0][PRIME_MAX_DIST_PREV_PRIME] = String.format("Prime [%d] / max-dist[%d]", primeMaxDistToPrev.getPrime(), primeMaxDistToPrev.getDistToPrevPrime().orElse(BigInteger.ZERO));	

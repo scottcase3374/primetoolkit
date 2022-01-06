@@ -34,7 +34,7 @@ public class LogNodeStructure extends AbstractLogBase
 						ref.getPrime(), 
 						ref.getIdxPrimes(), 
 						ps.getDistToNextPrime(ref.getPrimeRefIdx()),
-						ps.getPrime(ref.getPrimeRefIdx()+1),
+						ps.getPrime(ref.getPrimeRefIdx()+1).get(),
 						idx++));
 			}
 		}
