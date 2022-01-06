@@ -11,13 +11,19 @@ import org.jgrapht.graph.DefaultEdge;
 import com.mxgraph.layout.mxCircleLayout;
 import com.mxgraph.swing.mxGraphComponent;
 import com.starcases.prime.intfc.PrimeRefIntfc;
+
+import lombok.NonNull;
 public class CircularLayoutPrimesGraph extends JFrame
 {
 	private static final long serialVersionUID = 1L;
+	
+	@NonNull
 	private transient JGraphXAdapter<PrimeRefIntfc, DefaultEdge> jgxAdapter;
+	
+	@NonNull
     private static final Dimension DEFAULT_SIZE = new Dimension(900,900);
     
-    public CircularLayoutPrimesGraph(Graph<PrimeRefIntfc,DefaultEdge> graph)
+    public CircularLayoutPrimesGraph(@NonNull Graph<PrimeRefIntfc,DefaultEdge> graph)
     {
         // create a visualization using JGraph, via an adapter
         jgxAdapter = new JGraphXAdapter<>(graph);

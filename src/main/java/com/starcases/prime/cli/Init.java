@@ -2,6 +2,11 @@ package com.starcases.prime.cli;
 
 import java.io.PrintWriter;
 
+import java.util.ArrayList;
+
+import org.jgrapht.event.GraphListener;
+import org.jgrapht.graph.DefaultEdge;
+
 import com.starcases.prime.PrimeSourceFactory;
 import com.starcases.prime.base.BaseReduceTriple;
 import com.starcases.prime.base.BaseReduceNPrime;
@@ -10,6 +15,7 @@ import com.starcases.prime.graph.log.LogGraphStructure;
 import com.starcases.prime.graph.visualize.MetaDataTable;
 import com.starcases.prime.graph.visualize.ViewDefault;
 import com.starcases.prime.intfc.BaseTypes;
+import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import com.starcases.prime.log.LogBases3Triple;
 import com.starcases.prime.log.LogBasesNPrime;
@@ -93,21 +99,17 @@ public class Init implements Runnable
 		
 		if (graphOpts != null && graphOpts.graphType != null)
 		{
-			switch(graphOpts.graphType)
-			{
-			case DEFAULT:
+			if (graphOpts.graphType == Graph.DEFAULT)
+			{		
 				graph(ps, baseType);
-				break;
 			}
 		}
 		
 		if (exportOpts != null && exportOpts.exportType != null)
 		{
-			switch(exportOpts.exportType)
-			{
-			case GML:
+			if (exportOpts.exportType == Export.GML)
+			{			
 				export(ps);
-				break;
 			}
 		}
 	}	
@@ -162,9 +164,11 @@ public class Init implements Runnable
 	void graph(PrimeSourceIntfc ps, BaseTypes baseType)
 	{
 		var metaDataView = new MetaDataTable();
+		var viewList = new ArrayList<GraphListener<PrimeRefIntfc, DefaultEdge>>();
+		viewList.add(metaDataView);
 		metaDataView.setSize(400, 320);
 		metaDataView.setVisible(true);
-		var vd = new ViewDefault(ps,  baseType, metaDataView);
+		var vd = new ViewDefault(ps,  baseType, viewList);
 		vd.viewDefault();
 	}
 	

@@ -6,6 +6,8 @@ import java.util.Optional;
 
 import com.starcases.prime.intfc.PrimeRefIntfc;
 
+import lombok.NonNull;
+
 /**
  * 
  * Abstract class for any common prime ref interface functionality.  
@@ -13,8 +15,8 @@ import com.starcases.prime.intfc.PrimeRefIntfc;
  */
 public abstract class AbstractPrimeRef implements PrimeRefIntfc 
 {
-	
-	protected Comparator<BigInteger> bigIntComp = (b1, b2) -> b1.compareTo(b2);
+	@NonNull
+	protected static final Comparator<BigInteger> bigIntComp = (b1, b2) -> b1.compareTo(b2);
 	
 	public PrimeRefIntfc getPrimeRef()
 	{

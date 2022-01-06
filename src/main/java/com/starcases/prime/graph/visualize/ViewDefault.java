@@ -1,12 +1,16 @@
 package com.starcases.prime.graph.visualize;
 
 import javax.swing.WindowConstants;
-
+import java.util.List;
 import org.jgrapht.event.GraphListener;
+import org.jgrapht.graph.DefaultEdge;
 
 import com.starcases.prime.graph.impl.PrimeGrapher;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import com.starcases.prime.intfc.BaseTypes;
+import com.starcases.prime.intfc.PrimeRefIntfc;
+
+import lombok.NonNull;
 import lombok.extern.java.Log;
 
 /**
@@ -18,8 +22,7 @@ import lombok.extern.java.Log;
 @Log
 public class ViewDefault extends PrimeGrapher
 {	
-	
-	public ViewDefault(PrimeSourceIntfc ps, BaseTypes baseType, GraphListener...graphs)
+	public ViewDefault(@NonNull PrimeSourceIntfc ps, @NonNull BaseTypes baseType, @NonNull List<GraphListener<PrimeRefIntfc, DefaultEdge>> graphs)
 	{
 		super(ps, log, baseType, graphs);
 	}

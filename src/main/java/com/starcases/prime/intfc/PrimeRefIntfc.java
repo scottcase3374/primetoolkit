@@ -5,6 +5,8 @@ import java.util.BitSet;
 import java.util.Comparator;
 import java.util.Optional;
 
+import lombok.NonNull;
+
 /**
  * 
  * Main interface for working with the primes and accessing the info on bases.
@@ -12,18 +14,18 @@ import java.util.Optional;
  */
 public interface PrimeRefIntfc
 {
-	static Comparator<PrimeRefIntfc> primeRefComparator = (PrimeRefIntfc o1, PrimeRefIntfc o2) -> o1.getPrime().compareTo(o2.getPrime());
+	static final Comparator<PrimeRefIntfc> primeRefComparator = (PrimeRefIntfc o1, PrimeRefIntfc o2) -> o1.getPrime().compareTo(o2.getPrime());
 	
 	BigInteger getPrime();
 	
 	BitSet getPrimeBaseIdxs();
-	BitSet getPrimeBaseIdxs(BaseTypes baseType);
+	BitSet getPrimeBaseIdxs(@NonNull BaseTypes baseType);
 	
 	BigInteger getMinPrimeBase();
 	BigInteger getMaxPrimeBase();
 
-	BigInteger getMinPrimeBase(BaseTypes baseType);
-	BigInteger getMaxPrimeBase(BaseTypes baseType);
+	BigInteger getMinPrimeBase(@NonNull BaseTypes baseType);
+	BigInteger getMaxPrimeBase(@NonNull BaseTypes baseType);
 
 	/**
 	 * 
@@ -48,8 +50,8 @@ public interface PrimeRefIntfc
 	 * 
 	 * @param primeBase
 	 */
-	void addPrimeBase(BitSet primeBase);
-	void addPrimeBase(BitSet primeBase, BaseTypes baseType);
+	void addPrimeBase(@NonNull BitSet primeBase);
+	void addPrimeBase(@NonNull BitSet primeBase, @NonNull BaseTypes baseType);
 	
 	/**
 	 * Strings formatted for easy display
@@ -62,7 +64,6 @@ public interface PrimeRefIntfc
 	 * Strings formatted for easy display
 	 * @return
 	 */
-	String getIndexes(BaseTypes baseType);
-	String getIdxPrimes(BaseTypes baseType);
-
+	String getIndexes(@NonNull BaseTypes baseType);
+	String getIdxPrimes(@NonNull BaseTypes baseType);
 }

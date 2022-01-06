@@ -9,10 +9,13 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.Iterator;
 import java.util.Optional;
-
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import com.starcases.prime.intfc.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
+
+import lombok.NonNull;
 import lombok.extern.java.Log;
 
 /**
@@ -45,16 +48,18 @@ import lombok.extern.java.Log;
 @Log
 public class BaseReduceNPrime extends AbstractPrimeBase
 {
-	static Comparator<String> nodeComparator = (String o1, String o2) -> Integer.decode(o1).compareTo(Integer.decode(o2));
+	static final Comparator<String> nodeComparator = (String o1, String o2) -> Integer.decode(o1).compareTo(Integer.decode(o2));
 	
+	@Min(2)
+	@Max(3)
 	private int maxReduce;
 	
-	public BaseReduceNPrime(PrimeSourceIntfc ps)
+	public BaseReduceNPrime(@NonNull PrimeSourceIntfc ps)
 	{
 		super(ps,log);
 	}
 	
-	public void setMaxReduce(int maxReduce)
+	public void setMaxReduce(@Min(2) @Max(3) int maxReduce)
 	{
 		this.maxReduce = maxReduce;
 	}
@@ -64,7 +69,7 @@ public class BaseReduceNPrime extends AbstractPrimeBase
 	 * a  arraylist of current result indexes shared throughout the call chain
 	 * idx the current index being processed
 	 */
-	final BiFunction<Integer, ArrayList<Integer>, Consumer<PrimeRefIntfc>> reducer = (m, a)-> idx -> 
+	final BiFunction<Integer, ArrayList<Integer>, Consumer<PrimeRefIntfc>> fnReducer = (m, a)-> idx -> 
 	{
 		if (idx.getPrimeRefIdx() < m)
 		{
@@ -75,7 +80,7 @@ public class BaseReduceNPrime extends AbstractPrimeBase
 		}
 		else 
 		{ 
-			this.primeReduction(idx, this.reducer.apply(m, a)); 
+			this.primeReduction(idx, this.fnReducer.apply(m, a)); 
 		}
 	};
 		 
@@ -84,7 +89,7 @@ public class BaseReduceNPrime extends AbstractPrimeBase
 	 * @param idx idx current index to reduce;
 	 * @param reducer function implementing reduction algo
 	 */
-	private void primeReduction(PrimeRefIntfc primeRef, Consumer<PrimeRefIntfc> reducer)
+	private void primeReduction(@NonNull PrimeRefIntfc primeRef, @NonNull Consumer<PrimeRefIntfc> reducer)
 	{	
 		primeRef
 		.getPrimeBaseIdxs()
@@ -119,7 +124,7 @@ public class BaseReduceNPrime extends AbstractPrimeBase
 			try
 			{
 				ArrayList<Integer> ret = new ArrayList<>();
-				primeReduction(pr, reducer.apply(maxReduce, ret));
+				primeReduction(pr, fnReducer.apply(maxReduce, ret));
 				int [] tmpI = {0};			
 				if (doLog && log.isLoggable(Level.INFO)) 
 				{

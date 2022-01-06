@@ -2,6 +2,7 @@ package com.starcases.prime.log;
 
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
+import lombok.NonNull;
 import lombok.extern.java.Log;
 import picocli.CommandLine.Command;
 
@@ -13,7 +14,7 @@ import picocli.CommandLine.Command;
 @Log
 public class LogBasesNPrime extends AbstractLogBase
 {
-	public LogBasesNPrime(PrimeSourceIntfc ps)
+	public LogBasesNPrime(@NonNull PrimeSourceIntfc ps)
 	{
 		super(ps, log);
 	}

@@ -10,9 +10,14 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+
 import com.starcases.prime.intfc.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
+
+import lombok.NonNull;
 
 /**
  * Default prime representation.
@@ -28,11 +33,14 @@ public class PrimeRef extends AbstractPrimeRef implements PrimeRefIntfc
 	 *  Index for this instance of a prime.
 	 *  index to bitsets or collections for this val
 	 */
+	@Min(0)
 	private int primeIdx;
 	
+	@NonNull
 	// Represents sets of base primes that sum to this prime. (index to primes)
-	private Map<BaseTypes, List<Integer>> primeBaseIdxs = new EnumMap<>(BaseTypes.class); 
+	private final Map<BaseTypes, List<Integer>> primeBaseIdxs = new EnumMap<>(BaseTypes.class); 
 	
+	@NonNull
 	private static PrimeSourceIntfc primeSrc;
 	
 	/**
@@ -41,14 +49,14 @@ public class PrimeRef extends AbstractPrimeRef implements PrimeRefIntfc
 	 * 
 	 * @param prime
 	 */
-	PrimeRef(int primeIdx, BitSet primeBaseIdxs)
+	PrimeRef(@Min(0) @Max(2) int primeIdx, @NonNull BitSet primeBaseIdxs)
 	{
 		this.primeIdx = primeIdx;
 		
 		addPrimeBase(primeBaseIdxs);
-	} 
+	}
 
-	public static void setPrimeSource(PrimeSourceIntfc primeSrcIntfc)
+	public static void setPrimeSource(@NonNull PrimeSourceIntfc primeSrcIntfc)
 	{
 		primeSrc = primeSrcIntfc;
 	}
@@ -77,9 +85,11 @@ public class PrimeRef extends AbstractPrimeRef implements PrimeRefIntfc
 		return primeBaseIdxs
 				.get(PrimeRef.primeSrc.getActiveBaseId())
 				.stream()
-				.map(i -> primeSrc.getPrime(i).get())
+				.map(i -> primeSrc.getPrime(i))
+				.filter(Optional::isPresent)
+				.map(Optional::get)
 				.min(bigIntComp)
-				.get();
+				.orElse(BigInteger.ZERO);
 	}
 	
 	@Override
@@ -89,20 +99,20 @@ public class PrimeRef extends AbstractPrimeRef implements PrimeRefIntfc
 	}
 
 	@Override
-	public BigInteger getMinPrimeBase(BaseTypes baseType)
+	public BigInteger getMinPrimeBase(@NonNull BaseTypes baseType)
 	{
 		return primeBaseIdxs.get(baseType).stream().map(i -> primeSrc.getPrime(i).get()).min(bigIntComp).get();
 	}
 
 	@Override
-	public BigInteger getMaxPrimeBase(BaseTypes baseType)
+	public BigInteger getMaxPrimeBase(@NonNull BaseTypes baseType)
 	{
 		return primeBaseIdxs
 				.get(baseType)
 				.stream()
-				.map(i -> primeSrc.getPrime(i).get())
+				.map(i -> primeSrc.getPrime(i).orElse(BigInteger.ZERO))
 				.max(bigIntComp)
-				.get();
+				.orElse(BigInteger.ZERO);
 	}
 	
 	@Override
@@ -128,7 +138,7 @@ public class PrimeRef extends AbstractPrimeRef implements PrimeRefIntfc
 	}	
 	
 	@Override
-	public BitSet getPrimeBaseIdxs(BaseTypes baseType) {
+	public BitSet getPrimeBaseIdxs(@NonNull BaseTypes baseType) {
 		var b = new BitSet();
 		primeBaseIdxs.get(baseType).stream().forEach(b::set);
 		return b;
@@ -139,13 +149,13 @@ public class PrimeRef extends AbstractPrimeRef implements PrimeRefIntfc
 	 * @param primeBase
 	 */
 	@Override
-	public void addPrimeBase(BitSet primeBase)
+	public void addPrimeBase(@NonNull BitSet primeBase)
 	{
 		this.primeBaseIdxs.merge(primeSrc.getActiveBaseId(), primeBase.stream().boxed().toList(), (a,b) -> b );
 	}
 
 	@Override
-	public void addPrimeBase(BitSet primeBase, BaseTypes baseType)
+	public void addPrimeBase(@NonNull BitSet primeBase, @NonNull BaseTypes baseType)
 	{
 		this.primeBaseIdxs.merge(baseType, primeBase.stream().boxed().toList(), (a,b) -> b );
 	}	
@@ -166,12 +176,12 @@ public class PrimeRef extends AbstractPrimeRef implements PrimeRefIntfc
 		return getPrimeBaseIdxs()
 				.stream()
 				.boxed()
-				.map(i -> primeSrc.getPrime(i).toString())
+				.map(i -> primeSrc.getPrime(i).get().toString())
 				.collect(Collectors.joining(",","[", "]"));
 	}
 	
 	@Override
-	public String getIndexes(BaseTypes baseType)
+	public String getIndexes(@NonNull BaseTypes baseType)
 	{
 		return this.getPrimeBaseIdxs(baseType)
 				.stream()
@@ -181,7 +191,7 @@ public class PrimeRef extends AbstractPrimeRef implements PrimeRefIntfc
 	}
 	
 	@Override
-	public String getIdxPrimes(BaseTypes baseType)
+	public String getIdxPrimes(@NonNull BaseTypes baseType)
 	{
 		return getPrimeBaseIdxs(baseType)
 				.stream()

@@ -8,6 +8,8 @@ import org.jgrapht.event.GraphVertexChangeEvent;
 import com.starcases.prime.intfc.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 
+import lombok.NonNull;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import javax.swing.JFrame;
@@ -35,14 +37,16 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 	static final int AVG_DIST_PREV_PRIME = 3;
 	static final int MAX_PRIME_BASE = 4;
 	
-	String [] column = {
+	@NonNull
+	static final String [] column = {
 			"prime / max num-bases (Default type)",
 			"prime / max dist to prev prime",
 			"avg base size",
 			"avg dist to prev",
 			"Highest prime base"
 	};  
-	
+
+	@NonNull
 	String [][] data = { {"","","", "", ""}};
 
 	transient PrimeRefIntfc primeMaxBaseSize = null;
@@ -50,7 +54,9 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 	transient BigDecimal totalBases = BigDecimal.ZERO;
 	transient PrimeRefIntfc highPrimeBase = null;
 
+	@NonNull
 	private JTable table;
+	
 	/**
 	 * Create the frame.
 	 */
@@ -63,7 +69,7 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 		getContentPane().add(scrollPane);	
 	}
 
-	protected void handlePrimeMaxBaseSize(GraphVertexChangeEvent<PrimeRefIntfc> e)
+	protected void handlePrimeMaxBaseSize(@NonNull GraphVertexChangeEvent<PrimeRefIntfc> e)
 	{
 		if (primeMaxBaseSize == null || e.getVertex().getBaseSize() > primeMaxBaseSize.getBaseSize())
 		{
@@ -74,7 +80,7 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 		
 	}
 
-	protected void handlePrimeMaxDistToPrevPrime(GraphVertexChangeEvent<PrimeRefIntfc> e)
+	protected void handlePrimeMaxDistToPrevPrime(@NonNull GraphVertexChangeEvent<PrimeRefIntfc> e)
 	{
 		if (primeMaxDistToPrev == null)
 		{
@@ -97,7 +103,7 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 		data[0][PRIME_MAX_DIST_PREV_PRIME] = String.format("Prime [%d] / max-dist[%d]", primeMaxDistToPrev.getPrime(), primeMaxDistToPrev.getDistToPrevPrime().orElse(BigInteger.ZERO));	
 	}
 	
-	protected void handleAvgBaseSize(GraphVertexChangeEvent<PrimeRefIntfc> e)
+	protected void handleAvgBaseSize(@NonNull GraphVertexChangeEvent<PrimeRefIntfc> e)
 	{
 		totalBases = totalBases.add(BigDecimal.valueOf(e.getVertex().getBaseSize()));
 		data[0][AVG_BASE_SIZE] = String.format("# primes [%d], total-bases[%d] avg-bases[%f]", primeMaxDistToPrev.getPrimeRefIdx(), totalBases.longValue(), ((double)totalBases.longValue() / (primeMaxDistToPrev.getPrimeRefIdx()+1))); 
@@ -108,7 +114,7 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 		data[0][AVG_DIST_PREV_PRIME] = String.format("Total dist[%d], total-primes[%d] avg-dist[%f]", primeMaxDistToPrev.getPrime().longValue(), primeMaxDistToPrev.getPrimeRefIdx() , ((double)primeMaxDistToPrev.getPrime().longValue() / (primeMaxDistToPrev.getPrimeRefIdx()+1))); 
 	}
 	
-	protected void handleHighPrimeBase(GraphVertexChangeEvent<PrimeRefIntfc> e)
+	protected void handleHighPrimeBase(@NonNull GraphVertexChangeEvent<PrimeRefIntfc> e)
 	{
 		if (highPrimeBase == null || e.getVertex().getPrimeBaseIdxs().length() > highPrimeBase.getPrimeBaseIdxs().length())
 		{
@@ -118,7 +124,7 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 	}
 
 	@Override
-	public void vertexAdded(GraphVertexChangeEvent<PrimeRefIntfc> e) 
+	public void vertexAdded(@NonNull GraphVertexChangeEvent<PrimeRefIntfc> e) 
 	{
 		handlePrimeMaxBaseSize(e);
 		handlePrimeMaxDistToPrevPrime(e);
@@ -140,7 +146,7 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 	}
 
 	@Override
-	public void edgeWeightUpdated(GraphEdgeChangeEvent<PrimeRefIntfc, DefaultEdge> e) 
+	public void edgeWeightUpdated(@NonNull GraphEdgeChangeEvent<PrimeRefIntfc, DefaultEdge> e) 
 	{
 		GraphListener.super.edgeWeightUpdated(e);
 	}

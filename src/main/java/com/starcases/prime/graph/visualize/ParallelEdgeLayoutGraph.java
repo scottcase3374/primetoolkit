@@ -8,6 +8,8 @@ import org.jgrapht.graph.DefaultEdge;
 import com.mxgraph.layout.mxParallelEdgeLayout;
 import com.mxgraph.swing.mxGraphComponent;
 
+import lombok.NonNull;
+
 /**
  * 
  * Not doing much of anything right now with this.
@@ -16,10 +18,11 @@ import com.mxgraph.swing.mxGraphComponent;
 public class ParallelEdgeLayoutGraph extends JFrame
 {
 	private static final long serialVersionUID = 1L;
+	
+	@NonNull
 	private transient JGraphXAdapter<String, DefaultEdge> jgxAdapter;
   
-    
-    public ParallelEdgeLayoutGraph(Graph<String,DefaultEdge> graph)
+    public ParallelEdgeLayoutGraph(@NonNull Graph<String,DefaultEdge> graph)
     {
         // create a visualization using JGraph, via an adapter
         jgxAdapter = new JGraphXAdapter<>(graph);

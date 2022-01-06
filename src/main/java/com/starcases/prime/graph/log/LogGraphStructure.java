@@ -3,9 +3,11 @@ package com.starcases.prime.graph.log;
 import java.util.stream.Collectors;
 
 import com.starcases.prime.graph.impl.PrimeGrapher;
+import com.starcases.prime.intfc.BaseTypes;
 import com.starcases.prime.intfc.LogGraphIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
-import com.starcases.prime.intfc.BaseTypes;
+
+import lombok.NonNull;
 import lombok.extern.java.Log;
 import picocli.CommandLine.Command;
 
@@ -18,7 +20,7 @@ import picocli.CommandLine.Command;
 @Log
 public class LogGraphStructure extends PrimeGrapher implements LogGraphIntfc
 {
-	public LogGraphStructure(PrimeSourceIntfc ps, BaseTypes baseType)
+	public LogGraphStructure(@NonNull PrimeSourceIntfc ps, @NonNull BaseTypes baseType)
 	{
 		super(ps, log, baseType);
 	}

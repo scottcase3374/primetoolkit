@@ -10,9 +10,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.starcases.prime.impl.PrimeSource;
 
+import lombok.NonNull;
+
 @ExtendWith(MockitoExtension.class)
 class TripleUnitTest 
 {
+	@NonNull
 	private PrimeSource ps;
 	
 	@BeforeEach
@@ -30,5 +33,4 @@ class TripleUnitTest
 		var bi41 = BigInteger.valueOf(41L);
 		Assertions.assertEquals(1, ps.getPrimeRef(bi41).get().getPrimeRefIdx()-ps.getPrimeRef(bi37).get().getPrimeRefIdx());
 	}
-	
 }

@@ -6,6 +6,8 @@ import org.jgrapht.Graph;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.BaseTypes;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
+
+import lombok.NonNull;
 import lombok.extern.java.Log;
 
 import java.util.NoSuchElementException;
@@ -25,12 +27,19 @@ import java.util.NoSuchElementException;
 public class PrimeNodeGenerator
 {
 	int level = 0;
+	
 	PrimeRefIntfc primeRef = null;
+	
+	@NonNull
 	PrimeSourceIntfc ps;
+	
+	@NonNull
 	Graph<PrimeRefIntfc, DefaultEdge> graph;
+	
+	@NonNull
 	BaseTypes baseType;
 	
-	public PrimeNodeGenerator(PrimeSourceIntfc ps, Graph<PrimeRefIntfc, DefaultEdge> graph, BaseTypes baseType)
+	public PrimeNodeGenerator(@NonNull PrimeSourceIntfc ps, Graph<PrimeRefIntfc, DefaultEdge> graph, @NonNull BaseTypes baseType)
 	{
 		this.ps = ps;
 		this.graph = graph;

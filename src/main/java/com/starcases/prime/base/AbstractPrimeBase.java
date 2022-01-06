@@ -3,6 +3,7 @@ package com.starcases.prime.base;
 import java.util.logging.Logger;
 import com.starcases.prime.intfc.PrimeBaseIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
+import lombok.NonNull;
 
 /**
  * 
@@ -11,13 +12,17 @@ import com.starcases.prime.intfc.PrimeSourceIntfc;
  */
 public abstract class AbstractPrimeBase implements PrimeBaseIntfc 
 {
+	@NonNull
 	protected Logger log;
+	
+	@NonNull
 	protected PrimeSourceIntfc ps;
+	
 	protected boolean doLog;
 	
 	protected enum State { OVER, UNDER, EQUAL, REVERT }
 	
-	protected AbstractPrimeBase(PrimeSourceIntfc ps, Logger log)
+	protected AbstractPrimeBase(@NonNull PrimeSourceIntfc ps, @NonNull Logger log)
 	{
 		this.log = log;
 		this.ps = ps;

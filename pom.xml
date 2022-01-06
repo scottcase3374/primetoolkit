@@ -28,6 +28,7 @@
 		<mockito.version>2.23.0</mockito.version>
 		<maven.surefire.version>2.19.1</maven.surefire.version>
 		<commons.collections4.versino>4.4</commons.collections4.versino>
+		<validator.api.version>2.0.1.Final</validator.api.version>
 	</properties>
 
 	<dependencies>
@@ -84,6 +85,11 @@
 			<scope>test</scope>
 		</dependency>
 	
+		<dependency>
+  			<groupId>javax.validation</groupId>
+    		<artifactId>validation-api</artifactId>
+			<version>${validator.api.version}</version>
+		</dependency>
 	</dependencies>
 
 	<dependencyManagement>

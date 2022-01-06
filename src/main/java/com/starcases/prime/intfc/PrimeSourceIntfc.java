@@ -3,6 +3,11 @@ package com.starcases.prime.intfc;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Optional;
+
+import javax.validation.constraints.Min;
+
+import lombok.NonNull;
+
 import java.util.Iterator;
 
 /**
@@ -25,8 +30,8 @@ public interface PrimeSourceIntfc
 	
 	// NOTE: if an interface is used then end-developers can provide new types.  Need to think about further.
 	BaseTypes getActiveBaseId();
-	void setActiveBaseId(BaseTypes activeBaseId);
-	boolean baseExist(BaseTypes baseId);
+	void setActiveBaseId(@NonNull BaseTypes activeBaseId);
+	boolean baseExist(@NonNull BaseTypes baseId);
 	//
 	// Navigation - non-index based api
 	//
@@ -50,7 +55,7 @@ public interface PrimeSourceIntfc
 
 	 * @return
 	 */
-	Optional<PrimeRefIntfc> getPrimeRef(BigInteger val);
+	Optional<PrimeRefIntfc> getPrimeRef(@NonNull BigInteger val);
 	
 	/**
 	 * Get prime ref nearest provided value.
@@ -59,7 +64,7 @@ public interface PrimeSourceIntfc
 
 	 * @return
 	 */
-	Optional<PrimeRefIntfc> getNearPrimeRef(BigInteger val);	
+	Optional<PrimeRefIntfc> getNearPrimeRef(@NonNull BigInteger val);	
 
 	
 	/**
@@ -70,7 +75,7 @@ public interface PrimeSourceIntfc
 
 	 * @return
 	 */
-	Optional<PrimeRefIntfc> getNearPrimeRef(BigDecimal val);
+	Optional<PrimeRefIntfc> getNearPrimeRef(@NonNull BigDecimal val);
 
 	/**
 	 * Find/return first prime (if any exist) that is within the provided prime offset from the provided value.
@@ -80,7 +85,7 @@ public interface PrimeSourceIntfc
 	
 	 * @return
 	 */
-	Optional<PrimeRefIntfc> getPrimeRefWithinOffset(BigInteger val, BigInteger maxPrimeOffset);
+	Optional<PrimeRefIntfc> getPrimeRefWithinOffset(@NonNull BigInteger val, @NonNull BigInteger maxPrimeOffset);
 	
 	/**
 	 * Find/return first prime (if any exist) that is within the provided prime offset from the provided value.
@@ -93,7 +98,7 @@ public interface PrimeSourceIntfc
 	
 	 * @return
 	 */	
-	Optional<PrimeRefIntfc> getPrimeRefWithinOffset(BigDecimal val, BigDecimal maxPrimeOffset);
+	Optional<PrimeRefIntfc> getPrimeRefWithinOffset(@NonNull BigDecimal val, @NonNull BigDecimal maxPrimeOffset);
 	
 	
 	/**
@@ -105,7 +110,7 @@ public interface PrimeSourceIntfc
 	 * 
 	 * @return
 	 */
-	Optional<PrimeRefIntfc> getPrimeRef(BigInteger val, BigInteger exactOffset);
+	Optional<PrimeRefIntfc> getPrimeRef(@NonNull BigInteger val, @NonNull BigInteger exactOffset);
 		
 	/**
 	 * Returns    value of primeRef+1 minus value of primeref
@@ -113,10 +118,10 @@ public interface PrimeSourceIntfc
 	 * 
 	 * @return
 	 */
-	Optional<BigInteger>    getDistToNextPrime(PrimeRefIntfc prime);	
+	Optional<BigInteger>    getDistToNextPrime(@NonNull PrimeRefIntfc prime);	
 	
 	
-	Optional<BigInteger>    getDistToPrevPrime(PrimeRefIntfc prime);
+	Optional<BigInteger>    getDistToPrevPrime(@NonNull PrimeRefIntfc prime);
 
 	/**
 	 * Diff of primes at the 2 indexes
@@ -124,7 +129,7 @@ public interface PrimeSourceIntfc
 	 * @param idx2
 	 * @return
 	 */
-	Optional<BigInteger> getDistBetween(int idx1, int idx2);
+	Optional<BigInteger> getDistBetween(@Min(0) int idx1, @Min(1) int idx2);
 	
 	// Trying to move off of these index based calls.
 	// Moving off the index based calls would simplify using alternative implementations for
@@ -134,22 +139,21 @@ public interface PrimeSourceIntfc
 	int getMaxIdx();
 	
 	// index based oriented - index to primeref intfc
-	int getNextLowPrimeIdx(BigInteger val);
-	int getNextHighPrimeIdx(BigInteger val);
+	int getNextLowPrimeIdx(@NonNull @Min(1) BigInteger val);
+	int getNextHighPrimeIdx(@NonNull @Min(1) BigInteger val);
 	
-	int getNextLowPrimeIdx(BigDecimal val);
-	int getNextHighPrimeIdx(BigDecimal val);
+	int getNextLowPrimeIdx(@NonNull @Min(1) BigDecimal val);
+	int getNextHighPrimeIdx(@NonNull @Min(1) BigDecimal val);
 	
 	// Index based
-	Optional<PrimeRefIntfc> getPrimeRef(int primeIdx);	
-	Optional<BigInteger> getPrime(int primeIdx);
-	int getPrimeIdx(BigInteger val);
+	Optional<PrimeRefIntfc> getPrimeRef(@Min(0) int primeIdx);	
+	Optional<BigInteger> getPrime(@Min(0) int primeIdx);
+	int getPrimeIdx(@NonNull @Min(1) BigInteger val);
 
 	// index based - related to diff of the actual prime values.
-	BigInteger getDistToNextPrime(int curIdx);
-	BigInteger getDistToPrevPrime(int curIdx);	
+	BigInteger getDistToNextPrime(@Min(0) int curIdx);
+	BigInteger getDistToPrevPrime(@Min(0) int curIdx);	
 	
 	
-	boolean distinct(PrimeRefIntfc [] vals);
-	
+	boolean distinct(@NonNull PrimeRefIntfc [] vals);
 }

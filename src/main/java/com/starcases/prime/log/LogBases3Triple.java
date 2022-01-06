@@ -1,9 +1,12 @@
 package com.starcases.prime.log;
 
 import java.math.BigInteger;
+import java.util.Optional;
 
 import com.starcases.prime.intfc.BaseTypes;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
+
+import lombok.NonNull;
 import lombok.extern.java.Log;
 import picocli.CommandLine.Command;
 
@@ -17,7 +20,7 @@ import picocli.CommandLine.Command;
 @Log
 public class LogBases3Triple  extends AbstractLogBase
 {
-	public LogBases3Triple(PrimeSourceIntfc ps)
+	public LogBases3Triple(@NonNull PrimeSourceIntfc ps)
 	{
 		super(ps, log);
 	}
@@ -40,6 +43,7 @@ public class LogBases3Triple  extends AbstractLogBase
 						.stream()
 						.boxed()
 						.map(ps::getPrimeRef)
+						.filter(Optional::isPresent)
 						.map(p -> p.get().getPrime())
 						.reduce(BigInteger.ZERO, (a,b) -> a.add(b));
 				

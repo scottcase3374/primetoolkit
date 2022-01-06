@@ -9,9 +9,13 @@ import java.util.Iterator;
 import java.util.Objects;
 import java.util.logging.Level;
 
+import javax.validation.constraints.Min;
+
 import com.starcases.prime.intfc.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
+
+import lombok.NonNull;
 import lombok.extern.java.Log;
 
 /*
@@ -60,12 +64,16 @@ import lombok.extern.java.Log;
 @Log
 public class BaseReduceTriple extends AbstractPrimeBase
 {
+	@NonNull
 	static final Comparator<String> nodeComparator = (o1,o2) -> Integer.decode(o1).compareTo(Integer.decode(o2));
 
+	@NonNull
 	BaseTypes activeBaseId;
+	
+	@Min(0)
 	static int good = 0;
 	
-	public BaseReduceTriple(PrimeSourceIntfc ps)
+	public BaseReduceTriple(@NonNull PrimeSourceIntfc ps)
 	{
 		super(ps, log);
 		
@@ -73,7 +81,7 @@ public class BaseReduceTriple extends AbstractPrimeBase
 		ps.setActiveBaseId(activeBaseId);
 	}
 	
-	private void reducePrime(PrimeRefIntfc prime)
+	private void reducePrime(@NonNull PrimeRefIntfc prime)
 	{	
 		Triple triple = 
 				new Triple(
@@ -107,7 +115,7 @@ public class BaseReduceTriple extends AbstractPrimeBase
 		
 	}
 
-	private void addPrimeBases(PrimeRefIntfc prime, Map<TripleIdx, PrimeRefIntfc> vals)
+	private void addPrimeBases(@NonNull PrimeRefIntfc prime, @NonNull Map<TripleIdx, PrimeRefIntfc> vals)
 	{
 		var bs = new BitSet();
 		vals.values().stream().filter(Objects::nonNull).map(PrimeRefIntfc::getPrimeRefIdx).forEach(bs::set);

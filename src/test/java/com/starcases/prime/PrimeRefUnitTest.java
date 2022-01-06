@@ -11,9 +11,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.starcases.prime.impl.PrimeSource;
 
+import lombok.NonNull;
+
 @ExtendWith(MockitoExtension.class)
 class PrimeRefUnitTest 
 {
+	@NonNull
 	private PrimeSource ps;
 	
 	@BeforeEach

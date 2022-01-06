@@ -5,6 +5,8 @@ import java.math.BigInteger;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import lombok.extern.java.Log;
+import lombok.NonNull;
+import javax.validation.constraints.Min;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
@@ -21,12 +23,16 @@ interface ElementIntfc
 @Log
 public class ExportGML 
 {
-	Deque<ElementIntfc> stack = new ArrayDeque<>();
+	@NonNull
+	final Deque<ElementIntfc> stack = new ArrayDeque<>();
 	
+	@NonNull
 	PrimeSourceIntfc ps;
+	
+	@NonNull
 	PrintWriter pr;
 	
-	public ExportGML(PrimeSourceIntfc ps, PrintWriter pr)
+	public ExportGML(@NonNull PrimeSourceIntfc ps, @NonNull PrintWriter pr)
 	{
 		this.ps = ps;
 		this.pr = pr;
@@ -63,7 +69,7 @@ public class ExportGML
 		pr.println("  directed 1");
 	}
 	
-	private void expNode(PrimeRefIntfc prime)
+	private void expNode(@NonNull PrimeRefIntfc prime)
 	{
 		new NodeElement(ps, pr, prime).output();
 		stack.add(new EdgeElement(prime, pr));
@@ -78,11 +84,16 @@ public class ExportGML
 
 class NodeElement implements ElementIntfc
 {
+	@NonNull
 	PrimeRefIntfc pRef;
+	
+	@NonNull
 	PrimeSourceIntfc ps;
+	
+	@NonNull
 	PrintWriter pr;
 	
-	public NodeElement(PrimeSourceIntfc ps, PrintWriter pr, PrimeRefIntfc prime)
+	public NodeElement(@NonNull PrimeSourceIntfc ps, @NonNull PrintWriter pr, @NonNull PrimeRefIntfc prime)
 	{
 		this.pRef = prime;
 		this.ps = ps;
@@ -101,10 +112,13 @@ class NodeElement implements ElementIntfc
 
 class EdgeElement implements ElementIntfc
 {
+	@NonNull
 	PrimeRefIntfc pRef;
+	
+	@NonNull
 	PrintWriter pr;
 	
-	public EdgeElement(PrimeRefIntfc prime, PrintWriter pr)
+	public EdgeElement(@NonNull PrimeRefIntfc prime, @NonNull PrintWriter pr)
 	{
 		this.pRef = prime;
 		this.pr = pr;
@@ -115,7 +129,7 @@ class EdgeElement implements ElementIntfc
 		pRef.getPrimeBaseIdxs().stream().forEach(s -> outputEdge(pr, s, pRef.getPrime()));
 	}
 	
-	private void outputEdge(PrintWriter pr, Integer source, BigInteger target)
+	private void outputEdge(@NonNull PrintWriter pr, @NonNull @Min(1) Integer source, @NonNull @Min(1) BigInteger target)
 	{
 		pr.println("  edge");
 		pr.println("  [");

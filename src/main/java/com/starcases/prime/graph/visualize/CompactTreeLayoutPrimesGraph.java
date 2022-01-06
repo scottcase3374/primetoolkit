@@ -5,6 +5,9 @@ import org.jgrapht.Graph;
 import org.jgrapht.ext.JGraphXAdapter;
 import org.jgrapht.graph.DefaultEdge;
 import com.starcases.prime.intfc.PrimeRefIntfc;
+
+import lombok.NonNull;
+
 import com.mxgraph.layout.mxCompactTreeLayout;
 import com.mxgraph.swing.mxGraphComponent;
 
@@ -18,9 +21,11 @@ import com.mxgraph.swing.mxGraphComponent;
 public class CompactTreeLayoutPrimesGraph extends JFrame 
 {
 	private static final long serialVersionUID = 1L;
+	
+	@NonNull
 	private transient JGraphXAdapter<PrimeRefIntfc, DefaultEdge> jgxAdapter;
 	
-    public CompactTreeLayoutPrimesGraph(Graph<PrimeRefIntfc,DefaultEdge> graph)
+    public CompactTreeLayoutPrimesGraph(@NonNull Graph<PrimeRefIntfc,DefaultEdge> graph)
     {
         // create a visualization using JGraph, via an adapter
         jgxAdapter = new JGraphXAdapter<>(graph);

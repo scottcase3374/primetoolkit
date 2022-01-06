@@ -2,6 +2,7 @@ package com.starcases.prime.log;
 
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
+import lombok.NonNull;
 import lombok.extern.java.Log;
 
 /**
@@ -14,7 +15,7 @@ import lombok.extern.java.Log;
 @Log
 public class LogNodeStructure extends AbstractLogBase
 {
-	public LogNodeStructure(PrimeSourceIntfc ps)
+	public LogNodeStructure(@NonNull PrimeSourceIntfc ps)
 	{
 		super(ps, log);
 	}
