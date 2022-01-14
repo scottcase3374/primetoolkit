@@ -1,12 +1,15 @@
 package com.starcases.prime.base;
 
 import java.math.BigInteger;
-import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.Map;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.Objects;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
 import javax.validation.constraints.Min;
@@ -19,21 +22,20 @@ import lombok.NonNull;
 import lombok.extern.java.Log;
 
 /*
- *  Given a prime, find a bitset representing 3 pre-existing primes that sum to the prime. 
- *  
- *  Algorithm TRIES to avoid use of the initial values as bases- 1, 2, 3.
- *  
- *  For example (not required responses but valid).
+ *  Given a prime, find every set of 3 pre-existing primes that sum to the prime.
+ *
+ *
+ *  A few examples of a single triple (or 2) per prime.
  *     P     B
  *	   R     A
  *  I  I     S
  *  D  M     E
  *  X  E     S
- *  
+ *
  *  0  1      x
  *  1  2      x
  *  2  3      x
- *  3  5      x 
+ *  3  5      x
  *  4  7	  x
  *  5 11 -> 1,3,7
  *  6 13 -> 1,5,7
@@ -58,8 +60,8 @@ import lombok.extern.java.Log;
  * 25 97 -> 13,41,43; 19,37,41
  * 26 101-> 23,37,41
  * 27 103-> 19,41,43
- * 28 107-> 
- * 29 109-> 31,37,41 *	
+ * 28 107->
+ * 29 109-> 31,37,41 *
  */
 @Log
 public class BaseReduceTriple extends AbstractPrimeBase
@@ -69,102 +71,95 @@ public class BaseReduceTriple extends AbstractPrimeBase
 
 	@NonNull
 	BaseTypes activeBaseId;
-	
+
 	@Min(0)
-	static int good = 0;
-	
+	static AtomicInteger good = new AtomicInteger(0);
+
+	/**
+	 * Constructor
+	 *
+	 * @param ps
+	 */
 	public BaseReduceTriple(@NonNull PrimeSourceIntfc ps)
 	{
 		super(ps, log);
-		
+
 		activeBaseId = BaseTypes.THREETRIPLE;
 		ps.setActiveBaseId(activeBaseId);
 	}
-	
+
+	/**
+	 * Main method responsible for producing the triples for a single prime.
+	 * @param prime
+	 */
 	private void reducePrime(@NonNull PrimeRefIntfc prime)
-	{	
-		Triple triple = 
-				new Triple(
-						ps, 
-						prime, 
-						p1 -> 
-							{ 	// initial top estimation
-								var multip = "0.4";
-								return ps.getNearPrimeRef((new BigDecimal(multip)).multiply(new BigDecimal(prime.getPrime()))).get();								
-							},
-						p2 ->
-							{	// initial bot estimation
-								var multip = "0.2";
-								return  ps.getNearPrimeRef((new BigDecimal(multip)).multiply(new BigDecimal(prime.getPrime())).negate()).get();
-							});
-		
-		triple.process().ifPresent( primes ->
-										{
-											var sum = triple.sum();
-											log.warning(String.format("prime %d == sum %d: %s", 
-													prime.getPrime(), 
-													triple.sum(), 
-													prime.getPrime().compareTo(sum) == 0));
-											if (prime.getPrime().compareTo(sum) == 0)
-												good++;
-											addPrimeBases(prime, primes);	
-										}		
-				);
-		
+	{
+		AllTriples triple = new AllTriples(ps, prime);
+		triple.process();
 	}
 
-	private void addPrimeBases(@NonNull PrimeRefIntfc prime, @NonNull Map<TripleIdx, PrimeRefIntfc> vals)
-	{
-		var bs = new BitSet();
-		vals.values().stream().filter(Objects::nonNull).map(PrimeRefIntfc::getPrimeRefIdx).forEach(bs::set);
-		prime.addPrimeBase(bs, BaseTypes.THREETRIPLE);
-	}
-	
 	/**
-	 * top-level function; iterate over entire dataset to reduce every item
+	 * top-level function; iterate over entire dataset to reduce every prime
 	 * @param maxReduce
 	 */
 	public void genBases()
 	{
-		int counter = 0;
+		AtomicInteger counter = new AtomicInteger(0);
 		if (doLog)
 			log.entering("BaseReduce3Triple", "genBases()");
-		
+
 		BigInteger seven = BigInteger.valueOf(7L);
 		final var minPrimeIdx = ps.getPrimeIdx(seven);
-		
+
 		Iterator<PrimeRefIntfc> pRefIt = ps.getPrimeRefIter();
-		
+
 		// handle Bootstrap values - can't really represent < 11 with a sum of 3 primes
 		while(pRefIt.hasNext())
 		{
-			var curPrime = pRefIt.next();			
+			var curPrime = pRefIt.next();
 			var bNew = new BitSet();
-			bNew.set(counter);
-			counter++;
+			bNew.set(counter.incrementAndGet());
+
 			curPrime.addPrimeBase(bNew, BaseTypes.THREETRIPLE);
 			if (curPrime.getPrimeRefIdx() == minPrimeIdx)
 				break;
 		}
-		
-		// Process
-		while (pRefIt.hasNext()) 
-		{ 
+
+		ExecutorService workStealingPool = Executors.newWorkStealingPool(100);
+		List<CompletableFuture> futures = new ArrayList<>();
+
+		// Process the values which can be represented by the sum of 3 primes.
+		while (pRefIt.hasNext())
+		{
 			var curPrime = pRefIt.next();
-			counter++;
-			try
-			{
-				reducePrime(curPrime);
-			}
-			catch(Exception e)
-			{
-				log.severe(String.format("BaseReduce3Triple generation => idx[%d] prime [%d] error: %s", counter, curPrime.getPrime(), e.toString()));
-				e.printStackTrace();
-				break;
-			}				
+
+			CompletableFuture<String> compFuture = new CompletableFuture<>();
+			futures.add(compFuture);
+
+			compFuture.completeAsync(() ->  handlePrime(curPrime, counter.incrementAndGet()) , workStealingPool);
 		}
-		
+
+		futures.stream().map(CompletableFuture::join).forEach(System.out::println);
+
 		if (log.isLoggable(Level.INFO))
-			log.info(String.format("Total valid entries: %d out of %d",  + good, ps.getMaxIdx()));
-	}	
+			log.info(String.format("Total valid entries: %d out of %d",  + good.get(), ps.getMaxIdx()));
+	}
+
+
+	String handlePrime(PrimeRefIntfc curPrime, int counter)
+	{
+		var retVal = String.format("p[%d]idx[%d] good=", curPrime.getPrime(), counter);
+		try
+		{
+			reducePrime(curPrime);
+			good.getAndIncrement();
+			return retVal + good.get();
+		}
+		catch(Exception e)
+		{
+			log.severe(String.format("BaseReduce3Triple generation => idx[%d] prime [%d] error: %s", counter, curPrime.getPrime(), e.toString()));
+			e.printStackTrace();
+		}
+		return retVal + "false";
+	}
 }

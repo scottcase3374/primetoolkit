@@ -1,6 +1,8 @@
 package com.starcases.prime.graph.visualize;
 
 /**
+ * Visualization example
+ *
  * Circular layout/display of prime / prime-base relationships.
  */
 import javax.swing.JFrame;
@@ -16,13 +18,13 @@ import lombok.NonNull;
 public class CircularLayoutPrimesGraph extends JFrame
 {
 	private static final long serialVersionUID = 1L;
-	
+
 	@NonNull
 	private transient JGraphXAdapter<PrimeRefIntfc, DefaultEdge> jgxAdapter;
-	
+
 	@NonNull
     private static final Dimension DEFAULT_SIZE = new Dimension(900,900);
-    
+
     public CircularLayoutPrimesGraph(@NonNull Graph<PrimeRefIntfc,DefaultEdge> graph)
     {
         // create a visualization using JGraph, via an adapter
@@ -32,16 +34,16 @@ public class CircularLayoutPrimesGraph extends JFrame
         component.setConnectable(false);
         component.getGraph().setAllowDanglingEdges(false);
         getContentPane().add(component);
-      
+
         // circle layout
         var radius = 100;
-        var layout = new mxCircleLayout(jgxAdapter);        
+        var layout = new mxCircleLayout(jgxAdapter);
         layout.setX0((DEFAULT_SIZE.width / 2.0) - radius);
         layout.setY0((DEFAULT_SIZE.height / 2.0) - radius);
         layout.setRadius(radius);
         layout.setMoveCircle(true);
-		
-        
+
+
         layout.execute(jgxAdapter.getDefaultParent());
     }
 }

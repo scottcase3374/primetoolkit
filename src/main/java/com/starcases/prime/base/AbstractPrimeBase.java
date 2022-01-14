@@ -6,22 +6,22 @@ import com.starcases.prime.intfc.PrimeSourceIntfc;
 import lombok.NonNull;
 
 /**
- * 
- * Abstract class for any common prime base functionality.
+ *
+ * Abstract class for common prime base functionality.
  *
  */
-public abstract class AbstractPrimeBase implements PrimeBaseIntfc 
+public abstract class AbstractPrimeBase implements PrimeBaseIntfc
 {
 	@NonNull
 	protected Logger log;
-	
+
 	@NonNull
 	protected PrimeSourceIntfc ps;
-	
+
 	protected boolean doLog;
-	
+
 	protected enum State { OVER, UNDER, EQUAL, REVERT }
-	
+
 	protected AbstractPrimeBase(@NonNull PrimeSourceIntfc ps, @NonNull Logger log)
 	{
 		this.log = log;
@@ -30,8 +30,8 @@ public abstract class AbstractPrimeBase implements PrimeBaseIntfc
 	}
 
 	@Override
-	public void setLogBaseGeneration(boolean doLog) 
+	public void setLogBaseGeneration(boolean doLog)
 	{
-		this.doLog = doLog;	
+		this.doLog = doLog;
 	}
 }
