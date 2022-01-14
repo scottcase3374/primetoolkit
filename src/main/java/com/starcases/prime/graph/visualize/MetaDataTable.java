@@ -18,25 +18,27 @@ import javax.swing.WindowConstants;
 import javax.swing.JScrollPane;
 
 /**
+ * Visualization - table oriented
+ *
  * Display some "meta-data" pulled/calc'ed/summarized from the graph data.
- * 
+ *
  * Uses the graph listener interface to receive events on vertex/edge changes
  * and mostly uses those to calculate information that may be of interest.
  *
  */
-public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc, DefaultEdge> 
+public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc, DefaultEdge>
 {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
-	
+
 	static final int PRIME_MAX_BASE_SIZE = 0;
 	static final int PRIME_MAX_DIST_PREV_PRIME = 1;
 	static final int AVG_BASE_SIZE = 2;
 	static final int AVG_DIST_PREV_PRIME = 3;
 	static final int MAX_PRIME_BASE = 4;
-	
+
 	@NonNull
 	static final String [] column = {
 			"prime / max num-bases (Default type)",
@@ -44,7 +46,7 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 			"avg base size",
 			"avg dist to prev",
 			"Highest prime base"
-	};  
+	};
 
 	@NonNull
 	String [][] data = { {"","","", "", ""}};
@@ -56,103 +58,100 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 
 	@NonNull
 	private JTable table;
-	
+
 	/**
 	 * Create the frame.
 	 */
-	public MetaDataTable() 
+	public MetaDataTable()
 	{
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		table = new JTable(data, column);
 		var scrollPane = new JScrollPane(table);
 		table.setFillsViewportHeight(true);
-		getContentPane().add(scrollPane);	
+		getContentPane().add(scrollPane);
 	}
 
 	protected void handlePrimeMaxBaseSize(@NonNull GraphVertexChangeEvent<PrimeRefIntfc> e)
 	{
 		if (primeMaxBaseSize == null || e.getVertex().getBaseSize() > primeMaxBaseSize.getBaseSize())
 		{
-			primeMaxBaseSize = e.getVertex();	
+			primeMaxBaseSize = e.getVertex();
 		}
-		
+
 		data[0][PRIME_MAX_BASE_SIZE]= String.format("Prime [%d] / Base# [%d] / Bases [%s]", primeMaxBaseSize.getPrime(), primeMaxBaseSize.getBaseSize(), primeMaxBaseSize.getIdxPrimes(BaseTypes.DEFAULT));
-		
+
 	}
 
 	protected void handlePrimeMaxDistToPrevPrime(@NonNull GraphVertexChangeEvent<PrimeRefIntfc> e)
 	{
 		if (primeMaxDistToPrev == null)
 		{
-			primeMaxDistToPrev = e.getVertex();	
+			primeMaxDistToPrev = e.getVertex();
 		}
-		else 
+		else
 		{
 			var edist = e.getVertex().getDistToPrevPrime();
 			var pdist = primeMaxDistToPrev.getDistToPrevPrime();
-			if (pdist.isEmpty())
+
+			if (pdist.isEmpty() || (edist.isPresent() && edist.get().abs().compareTo(pdist.get().abs()) > 0))
 			{
 				primeMaxDistToPrev = e.getVertex();
 			}
-			else if (edist.isPresent() && edist.get().abs().compareTo(pdist.get().abs()) > 0)
-			{				
-				primeMaxDistToPrev = e.getVertex();
-			} 
 		}
-		data[0][PRIME_MAX_DIST_PREV_PRIME] = String.format("Prime [%d] / max-dist[%d]", primeMaxDistToPrev.getPrime(), primeMaxDistToPrev.getDistToPrevPrime().orElse(BigInteger.ZERO));	
+		data[0][PRIME_MAX_DIST_PREV_PRIME] = String.format("Prime [%d] / max-dist[%d]", primeMaxDistToPrev.getPrime(), primeMaxDistToPrev.getDistToPrevPrime().orElse(BigInteger.ZERO));
 	}
-	
+
 	protected void handleAvgBaseSize(@NonNull GraphVertexChangeEvent<PrimeRefIntfc> e)
 	{
 		totalBases = totalBases.add(BigDecimal.valueOf(e.getVertex().getBaseSize()));
-		data[0][AVG_BASE_SIZE] = String.format("# primes [%d], total-bases[%d] avg-bases[%f]", primeMaxDistToPrev.getPrimeRefIdx(), totalBases.longValue(), ((double)totalBases.longValue() / (primeMaxDistToPrev.getPrimeRefIdx()+1))); 
+		data[0][AVG_BASE_SIZE] = String.format("# primes [%d], total-bases[%d] avg-bases[%f]", primeMaxDistToPrev.getPrimeRefIdx(), totalBases.longValue(), ((double)totalBases.longValue() / (primeMaxDistToPrev.getPrimeRefIdx()+1)));
 	}
 
 	protected void handleAvgDistToPrev()
-	{		
-		data[0][AVG_DIST_PREV_PRIME] = String.format("Total dist[%d], total-primes[%d] avg-dist[%f]", primeMaxDistToPrev.getPrime().longValue(), primeMaxDistToPrev.getPrimeRefIdx() , ((double)primeMaxDistToPrev.getPrime().longValue() / (primeMaxDistToPrev.getPrimeRefIdx()+1))); 
+	{
+		data[0][AVG_DIST_PREV_PRIME] = String.format("Total dist[%d], total-primes[%d] avg-dist[%f]", primeMaxDistToPrev.getPrime().longValue(), primeMaxDistToPrev.getPrimeRefIdx() , ((double)primeMaxDistToPrev.getPrime().longValue() / (primeMaxDistToPrev.getPrimeRefIdx()+1)));
 	}
-	
+
 	protected void handleHighPrimeBase(@NonNull GraphVertexChangeEvent<PrimeRefIntfc> e)
 	{
-		if (highPrimeBase == null || e.getVertex().getPrimeBaseIdxs().length() > highPrimeBase.getPrimeBaseIdxs().length())
+		if (highPrimeBase == null || e.getVertex().getPrimeBaseIdxs().get(0).length() > highPrimeBase.getPrimeBaseIdxs().get(0).length())
 		{
-			highPrimeBase = e.getVertex();	
+			highPrimeBase = e.getVertex();
 		}
 		data[0][MAX_PRIME_BASE] = String.format("Prime[%d], Highest base[%d]", highPrimeBase.getPrime(), highPrimeBase.getMaxPrimeBase());
 	}
 
 	@Override
-	public void vertexAdded(@NonNull GraphVertexChangeEvent<PrimeRefIntfc> e) 
+	public void vertexAdded(@NonNull GraphVertexChangeEvent<PrimeRefIntfc> e)
 	{
 		handlePrimeMaxBaseSize(e);
 		handlePrimeMaxDistToPrevPrime(e);
 		handleAvgBaseSize(e);
-		handleAvgDistToPrev();	
+		handleAvgDistToPrev();
 		handleHighPrimeBase(e);
-	}
-	
-	@Override
-	public void edgeAdded(GraphEdgeChangeEvent<PrimeRefIntfc, DefaultEdge> e) 
-	{
-		// Not handling any edge related logic right now.	
 	}
 
 	@Override
-	public void vertexRemoved(GraphVertexChangeEvent<PrimeRefIntfc> e) 
+	public void edgeAdded(GraphEdgeChangeEvent<PrimeRefIntfc, DefaultEdge> e)
+	{
+		// Not handling any edge related logic right now.
+	}
+
+	@Override
+	public void vertexRemoved(GraphVertexChangeEvent<PrimeRefIntfc> e)
 	{
 		// No removal performed
 	}
 
 	@Override
-	public void edgeWeightUpdated(@NonNull GraphEdgeChangeEvent<PrimeRefIntfc, DefaultEdge> e) 
+	public void edgeWeightUpdated(@NonNull GraphEdgeChangeEvent<PrimeRefIntfc, DefaultEdge> e)
 	{
 		GraphListener.super.edgeWeightUpdated(e);
 	}
 
 
 	@Override
-	public void edgeRemoved(GraphEdgeChangeEvent<PrimeRefIntfc, DefaultEdge> e) 
+	public void edgeRemoved(GraphEdgeChangeEvent<PrimeRefIntfc, DefaultEdge> e)
 	{
 		// No removals performed
 	}

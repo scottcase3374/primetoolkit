@@ -9,24 +9,24 @@ import com.starcases.prime.intfc.PrimeRefIntfc;
 import lombok.NonNull;
 
 /**
- * 
- * Abstract class for any common prime ref interface functionality.  
+ *
+ * Abstract class for common prime ref interface functionality.
  *
  */
-public abstract class AbstractPrimeRef implements PrimeRefIntfc 
+public abstract class AbstractPrimeRef implements PrimeRefIntfc
 {
 	@NonNull
 	protected static final Comparator<BigInteger> bigIntComp = (b1, b2) -> b1.compareTo(b2);
-	
+
 	public PrimeRefIntfc getPrimeRef()
 	{
 		return this;
 	}
-	
+
 	/**
 	 * absolute value of difference with next prime
 	 * if the next prime is known.
-	 * 
+	 *
 	 * empty optional if next prime is unknown/not calculated
 	 */
 	@Override
@@ -34,11 +34,11 @@ public abstract class AbstractPrimeRef implements PrimeRefIntfc
 	{
 		return  getNextPrimeRef().map(npr -> npr.getPrime().subtract(getPrime()));
 	}
-	
+
 	/**
 	 * absolute value of difference with prev prime
 	 * if the prev prime is known/exists.
-	 * 
+	 *
 	 * empty optional if prev prime is unknown/doesn't exist
 	 */
 	@Override

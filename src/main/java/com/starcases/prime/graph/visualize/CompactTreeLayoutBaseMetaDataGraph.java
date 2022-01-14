@@ -11,18 +11,19 @@ import com.starcases.prime.intfc.PrimeRefIntfc;
 import lombok.NonNull;
 
 /**
+ * visualization example
+ *
  * Not doing much of anything right now..
- * 
  *
  */
-public class CompactTreeLayoutBaseMetaDataGraph extends JFrame 
+public class CompactTreeLayoutBaseMetaDataGraph extends JFrame
 {
 	private static final long serialVersionUID = 1L;
-	
+
 	@NonNull
 	private transient JGraphXAdapter<PrimeRefIntfc, DefaultEdge> jgxAdapter;
 
-    
+
     public CompactTreeLayoutBaseMetaDataGraph(@NonNull Graph<PrimeRefIntfc,DefaultEdge> graph)
     {
         // create a visualization using JGraph, via an adapter
@@ -32,7 +33,7 @@ public class CompactTreeLayoutBaseMetaDataGraph extends JFrame
         component.setConnectable(false);
         component.getGraph().setAllowDanglingEdges(false);
         getContentPane().add(component);
-        
+
         var layout = new mxCompactTreeLayout(jgxAdapter, false, false);
         layout.setEdgeRouting(true);
         layout.setLevelDistance(140);
@@ -41,7 +42,7 @@ public class CompactTreeLayoutBaseMetaDataGraph extends JFrame
         layout.setGroupPadding(100);
         layout.setMoveTree(true);
         layout.setInvert(true);
-        
+
         layout.execute(jgxAdapter.getDefaultParent());
     }
 }

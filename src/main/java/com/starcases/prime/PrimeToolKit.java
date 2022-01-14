@@ -9,11 +9,15 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Spec;
 import picocli.CommandLine.Model.CommandSpec;
 
-
+/**
+ *
+ * CLI Driver
+ *
+ */
 @Log
 @Command(name = "ptk", subcommands = { Init.class, CommandLine.HelpCommand.class }  , description="Prime Tool Kit")
-public class PrimeToolKit  
-{	
+public class PrimeToolKit
+{
 	@Spec CommandSpec spec;
 
 	public static void main(@NonNull String [] args)
@@ -22,9 +26,9 @@ public class PrimeToolKit
 		var cl = new CommandLine(ptk);
 		cl.registerConverter(java.util.logging.Level.class, Level::parse);
 		var exitCode = cl.execute(args);
-	
+
 		System.exit(exitCode);
 		log.info("exited");
-	}	
+	}
 }
 

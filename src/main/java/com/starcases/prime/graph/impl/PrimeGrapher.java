@@ -21,42 +21,37 @@ import lombok.NonNull;
  * Provide support for the graph oriented processing - base class.
  *
  */
-public abstract class PrimeGrapher 
+public abstract class PrimeGrapher
 {
 	@NonNull
 	protected static final Comparator<PrimeRefIntfc> nodeComparator = (PrimeRefIntfc o1, PrimeRefIntfc o2) -> o1.getPrime().compareTo(o2.getPrime());
 
 	@NonNull
 	protected PrimeSourceIntfc ps;
-	
+
 	@NonNull
 	protected final GraphBuilder<PrimeRefIntfc, DefaultEdge, DefaultDirectedGraph<PrimeRefIntfc, DefaultEdge>> primeGraphBuilder = new GraphBuilder<>(new DefaultDirectedGraph<>(DefaultEdge.class));
-	
+
 	@NonNull
 	protected Graph<PrimeRefIntfc,DefaultEdge> graph;
-	
+
 	@NonNull
 	protected Logger log;
-	
+
 	@NonNull
 	protected BaseTypes baseType;
-	
+
 	/**
-	 * 
-	 * @param ps
-	 * @param log
-	 * @param graphs
+	 * General constructor
+	 *
 	 */
 	protected PrimeGrapher(@NonNull PrimeSourceIntfc ps, @NonNull Logger log, @NonNull BaseTypes baseType)
 	{
 		this(ps, log, baseType, Collections.emptyList());
-	}	
-	
+	}
+
 	/**
-	 * 
-	 * @param ps
-	 * @param log
-	 * @param graphs
+	 * Provide support for visual output related to graphs
 	 */
 	protected PrimeGrapher(@NonNull PrimeSourceIntfc ps, @NonNull Logger log, @NonNull BaseTypes baseType, @NonNull List<GraphListener<PrimeRefIntfc, DefaultEdge>> graphs)
 	{
@@ -64,30 +59,33 @@ public abstract class PrimeGrapher
 		this.ps = ps;
 		this.baseType = baseType;
 		this.ps.init();
-		
+
 		var lgraph = new DefaultListenableGraph<PrimeRefIntfc, DefaultEdge>(primeGraphBuilder.build(), true);
 		graphs.stream().forEach(lgraph::addGraphListener);
 		this.graph = lgraph;
-		
+
 		this.populateData();
 	}
-	
+
 	BigInteger getTotalSum(@NonNull BigInteger [] sum3, @NonNull Integer [] indexes)
 	{
 		for (var i = 0; i< sum3.length; i++)
 		{
 			final var x = i;
 			ps.getPrime(indexes[i]).ifPresent(p -> sum3[x] = p);
-		}		
+		}
 		return Arrays.asList(sum3).stream().reduce(BigInteger.ZERO, BigInteger::add);
 	}
-	
+
+	/**
+	 * Perform the data population
+	 */
 	void populateData()
 	{
 		// Start setting up the actual graph/data generations
 		var primeNodeGenerator = new PrimeNodeGenerator(ps, graph, baseType);
 		primeNodeGenerator.begin();
-		
-		while (primeNodeGenerator.nextEvents());		
+
+		while (primeNodeGenerator.nextEvents());
 	}
 }

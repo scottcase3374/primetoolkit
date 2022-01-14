@@ -11,17 +11,18 @@ import com.mxgraph.swing.mxGraphComponent;
 import lombok.NonNull;
 
 /**
- * 
+ * Visualization example
+ *
  * Not doing much of anything right now with this.
  *
  */
 public class ParallelEdgeLayoutGraph extends JFrame
 {
 	private static final long serialVersionUID = 1L;
-	
+
 	@NonNull
 	private transient JGraphXAdapter<String, DefaultEdge> jgxAdapter;
-  
+
     public ParallelEdgeLayoutGraph(@NonNull Graph<String,DefaultEdge> graph)
     {
         // create a visualization using JGraph, via an adapter
@@ -31,10 +32,10 @@ public class ParallelEdgeLayoutGraph extends JFrame
         component.setConnectable(false);
         component.getGraph().setAllowDanglingEdges(false);
         getContentPane().add(component);
-      
+
         //parallel edge layout - not useful at moment
         var layout = new mxParallelEdgeLayout(jgxAdapter, 120);
-        
+
         layout.execute(jgxAdapter.getDefaultParent());
     }
 }

@@ -1,3 +1,8 @@
 package com.starcases.prime.cli;
 
-enum LogOper {NODESTRUCT, GRAPHSTRUCT, NPRIME, THREETRIPLE}
+/**
+ *
+ * enumerations naming the available log production types.
+ *
+ */
+enum LogOper {NODESTRUCT, GRAPHSTRUCT, NPRIME, ALLTHREETRIPLE}
