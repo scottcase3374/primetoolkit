@@ -139,10 +139,11 @@ public class BaseReduceTriple extends AbstractPrimeBase
 			compFuture.completeAsync(() ->  handlePrime(curPrime, counter.incrementAndGet()) , workStealingPool);
 		}
 
-		futures.stream().map(CompletableFuture::join).forEach(System.out::println);
+		long [] c = {0};
+		futures.stream().map(CompletableFuture::join).forEach(x ->  c[0]++);
 
 		if (log.isLoggable(Level.INFO))
-			log.info(String.format("Total valid entries: %d out of %d",  + good.get(), ps.getMaxIdx()));
+			log.info(String.format("Total valid entries: %d out of %d; completed(%d)",  + good.get(), ps.getMaxIdx(),c[0]));
 	}
 
 

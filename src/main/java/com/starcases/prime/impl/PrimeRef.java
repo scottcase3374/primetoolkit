@@ -158,7 +158,7 @@ public class PrimeRef extends AbstractPrimeRef implements PrimeRefIntfc
 	{
 		this.primeBaseIdxs
 			.merge(
-					primeSrc.getActiveBaseId(), 
+					primeSrc.getActiveBaseId(),
 					primeBase.stream().boxed().toList(),
 					(a,b) -> { a.addAll(b); return a; } );
 	}

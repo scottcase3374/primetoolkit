@@ -21,7 +21,7 @@
 		- Additive method (P-1000 = P-999 + n)
 		- Possible combinations of subset of the above
 
-## Reasoning
+## Reasons
 Given a reasonably powerful desktop computer with 64Gb of memory; Some of the above goals can be done with several million primes and the related data *in memory*. A question is - can a dynamic mix of data representations allow processing significantly more data in memory efficiently? In the process of determining that, some interesting properties of primes may also be found.  Minimum goal would be 15 million primes + associated data with a stretch goal of probably 50-70 million.
 
 Current processing on my i7 with 64Gb RAM reaches about 3-5 million (for a simple base generation) before system speed / stability / etc start to suffer. Graph visualizations slow once you get into the low thousands. Exporting and using other external tools (GML format) performed better for visualizations.

@@ -312,16 +312,16 @@ class AllTriples
 	 */
 	void process()
 	{
-		SumConstraintState [] sumConstraint = {SumConstraintState.INCREMENT_SUM};
-		ConditionConstraintState [] conditionConstraint = {ConditionConstraintState.MISSING_BASE};
-
 		final EnumSet<ConditionConstraintState> BAD_CONDITION_STATE = EnumSet.of(ConditionConstraintState.DUPE, ConditionConstraintState.RANGE_ERROR);
 		final EnumSet<SumConstraintState> GOOD_SUM_STATE = EnumSet.of(SumConstraintState.MATCH, SumConstraintState.INCREMENT_SUM);
 
 		Map<TripleIdx, Optional<PrimeRefIntfc>> triple = new TreeMap<>();
-		triple.put(TripleIdx.TOP, ps.getPrimeRef(2) );
-		triple.put(TripleIdx.MID, ps.getPrimeRef(1) );
+		triple.put(TripleIdx.TOP, ps.getPrimeRef(4) );
+		triple.put(TripleIdx.MID, ps.getPrimeRef(2) );
 		triple.put(TripleIdx.BOT,  ps.getPrimeRef(0) );
+
+		SumConstraintState [] sumConstraint = {SumConstraintState.checkSumConstraints(triple, targetPrime, null, null)};
+		ConditionConstraintState [] conditionConstraint = {ConditionConstraintState.MISSING_BASE};
 
 		do // cur top
 		{
@@ -329,12 +329,13 @@ class AllTriples
 			{
 				do // cur bot
 				{
-					this.nextPrimeRef(TripleIdx.BOT, triple, sumConstraint, conditionConstraint);
 					if (sumConstraint[0] == SumConstraintState.MATCH && conditionConstraint[0] != ConditionConstraintState.DUPE)
 					{
 						addPrimeBases(targetPrime, triple);
 						break;
 					}
+					this.nextPrimeRef(TripleIdx.BOT, triple, sumConstraint, conditionConstraint);
+
 				}
 				while(GOOD_SUM_STATE.contains(sumConstraint[0]) && !BAD_CONDITION_STATE.contains(conditionConstraint[0]));
 

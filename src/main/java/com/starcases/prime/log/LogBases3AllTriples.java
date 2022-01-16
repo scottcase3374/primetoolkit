@@ -1,5 +1,7 @@
 package com.starcases.prime.log;
 
+import java.util.Arrays;
+
 import com.starcases.prime.intfc.BaseTypes;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
@@ -36,12 +38,26 @@ public class LogBases3AllTriples  extends AbstractLogBase
 			var pr = prIt.next();
 			try
 			{
-				System.out.println(String.format("Prime [%d] idx[%d] #-bases[%d]\n\t bases %s",
+				System.out.println(String.format("\nPrime [%d] idx[%d] #-bases[%d]\n",
 						pr.getPrime(),
 						idx++,
-						pr.getPrimeBaseIdxs().size(),
-						pr.getIdxPrimes()
+						pr.getPrimeBaseIdxs().size()
 						));
+
+				String remTrips = pr.getIdxPrimes();
+				String [] trips;
+				int maxSplit = 6;
+				do
+				{
+					trips = remTrips.split(" ", maxSplit);
+					System.out.print("\t");
+					Arrays.stream(trips).limit(5).forEach(System.out::print);
+					if (trips.length == maxSplit)
+					{
+						remTrips = trips[maxSplit-1];
+					}
+					System.out.println("");
+				} while (trips.length == maxSplit);
 			}
 			catch(Exception e)
 			{

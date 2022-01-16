@@ -143,7 +143,7 @@ public class PrimeRefBitSetIndexes extends AbstractPrimeRef implements PrimeRefI
 		return getPrimeBaseIdxs(baseType)
 				.stream()
 				.map(bs -> bs.stream().boxed().map(i -> primeSrc.getPrime(i).get().toString()).collect(Collectors.joining(",","[","]")))
-				.collect(Collectors.joining(",","[", "]"));
+				.collect(Collectors.joining(", ","[", "]"));
 	}
 
 	@Override
