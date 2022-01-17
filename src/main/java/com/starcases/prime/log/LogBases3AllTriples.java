@@ -64,7 +64,7 @@ public class LogBases3AllTriples  extends AbstractLogBase
 													if (cnt[0] < size)
 														sb.append(", ");
 
-													if (cnt[0] % 5 == 0)
+													if (cnt[0] % 5 == 0 || cnt[0] >= size)
 													{
 														consumer.accept(sb.toString());
 														sb.setLength(0);
