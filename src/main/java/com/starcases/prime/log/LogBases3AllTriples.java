@@ -1,6 +1,6 @@
 package com.starcases.prime.log;
 
-import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import com.starcases.prime.intfc.BaseTypes;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
@@ -38,26 +38,41 @@ public class LogBases3AllTriples  extends AbstractLogBase
 			var pr = prIt.next();
 			try
 			{
-				System.out.println(String.format("\nPrime [%d] idx[%d] #-bases[%d]\n",
+				long size = pr.getPrimeBaseIdxs().size();
+				System.out.println(String.format("%nPrime [%d] idx[%d] #-bases[%d]%n",
 						pr.getPrime(),
 						idx++,
-						pr.getPrimeBaseIdxs().size()
+						size
 						));
 
-				String remTrips = pr.getIdxPrimes();
-				String [] trips;
-				int maxSplit = 6;
-				do
-				{
-					trips = remTrips.split(" ", maxSplit);
-					System.out.print("\t");
-					Arrays.stream(trips).limit(5).forEach(System.out::print);
-					if (trips.length == maxSplit)
-					{
-						remTrips = trips[maxSplit-1];
-					}
-					System.out.println("");
-				} while (trips.length == maxSplit);
+					long [] cnt = {0};
+					StringBuilder sb = new StringBuilder("\t");
+
+					pr.getPrimeBaseIdxs()
+							.stream()
+							.<String>mapMulti((bs, consumer) ->
+												{
+													cnt[0]++;
+													sb.append(
+													 	bs
+													 	.stream()
+													 	.boxed()
+													 	.map(i -> ps.getPrime(i).get().toString())
+													 	.collect(Collectors.joining(",","[","]"))
+													 	);
+
+													if (cnt[0] < size)
+														sb.append(", ");
+
+													if (cnt[0] % 5 == 0)
+													{
+														consumer.accept(sb.toString());
+														sb.setLength(0);
+														sb.append("\t");
+													}
+												}
+									)
+							.forEach(System.out::println);
 			}
 			catch(Exception e)
 			{

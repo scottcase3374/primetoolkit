@@ -145,8 +145,8 @@ enum ConditionConstraintState
 	 */
 	OK;
 
-	public static ConditionConstraintState checkConditionConstraints(@NonNull Map<TripleIdx,
-			@NonNull Optional<PrimeRefIntfc>> primeRefs,
+	public static ConditionConstraintState checkConditionConstraints(
+			@NonNull Map<TripleIdx, Optional<PrimeRefIntfc>> primeRefs,
 			PrimeRefIntfc [] pOverrideRefs,
 			TripleIdx [] idxs)
 	{
@@ -162,7 +162,7 @@ enum ConditionConstraintState
 			var cont = false;
 			for (var i=0; i < idxsNumProvided; i++)
 			{
-				if (pOverrideRefs != null && idxs != null && idx == idxs[i] && pOverrideRefs != null && pOverrideRefs[i] != null)
+				if (pOverrideRefs != null && idxs != null && idx == idxs[i] && pOverrideRefs[i] != null)
 				{
 					if (tmpPrime == null || tmpPrime.compareTo(pOverrideRefs[i].getPrime()) < 0)
 					{
@@ -183,7 +183,7 @@ enum ConditionConstraintState
 				continue;
 
 			var pr = primeRefs.get(idx);
-			if (pr != null && pr.isPresent())
+			if (pr.isPresent())
 			{
 				if (tmpPrime == null || tmpPrime.compareTo(pr.get().getPrime()) < 0)
 				{

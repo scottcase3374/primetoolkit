@@ -113,7 +113,7 @@ public class PrimeRefBitSetIndexes extends AbstractPrimeRef implements PrimeRefI
 	@Override
 	public void addPrimeBase(@NonNull BitSet primeBase, @NonNull BaseTypes baseType)
 	{
-		this.primeBaseIdxs.merge(baseType, new ArrayList<BitSet>(Arrays.asList(primeBase)), (a,b) -> { a.addAll(b); return a;} );
+		this.primeBaseIdxs.merge(baseType, new ArrayList<>(Arrays.asList(primeBase)), (a,b) -> { a.addAll(b); return a;} );
 	}
 
 	@Override

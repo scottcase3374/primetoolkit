@@ -126,7 +126,7 @@ public class BaseReduceTriple extends AbstractPrimeBase
 		}
 
 		ExecutorService workStealingPool = Executors.newWorkStealingPool(100);
-		List<CompletableFuture> futures = new ArrayList<>();
+		List<CompletableFuture<String>> futures = new ArrayList<>();
 
 		// Process the values which can be represented by the sum of 3 primes.
 		while (pRefIt.hasNext())
