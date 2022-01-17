@@ -18,8 +18,6 @@ import lombok.NoArgsConstructor;
 import lombok.extern.java.Log;
 import lombok.NonNull;
 
-
-// FIXME Known error ; low tuples are missing - i.e. tuples which include '1' as the first item in the tuple.
 /**
  *
  * Track specific item as part of a triple.
