@@ -1,5 +1,8 @@
 package com.starcases.prime.log;
 
+import java.util.stream.Collectors;
+
+import com.starcases.prime.intfc.BaseTypes;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
 import lombok.NonNull;
@@ -18,26 +21,63 @@ public class LogBasesNPrime extends AbstractLogBase
 	{
 		super(ps, log);
 	}
-	
+
 	@Override
 	@Command
 	public void log()
 	{
-		log.entering("LogBaseNPrime", "log()");
-		int idx =0;
+		// Get desired data
+		ps.setActiveBaseId(BaseTypes.THREETRIPLE);
+
+		int idx = 0;
 		var prIt = ps.getPrimeRefIter();
-		
 		while (prIt.hasNext())
-		{ 				
+		{
+			var pr = prIt.next();
 			try
 			{
-				var pr = prIt.next();								
-				System.out.println(String.format("Prime [%d] bases%s Idx[%d]", pr.getPrime(), pr.getIdxPrimes(), idx++));
+				long size = pr.getPrimeBaseIdxs().size();
+				System.out.println(String.format("%nPrime [%d] idx[%d] #-bases[%d]%n",
+						pr.getPrime(),
+						idx++,
+						size
+						));
+
+					long [] cnt = {0};
+					StringBuilder sb = new StringBuilder("\t");
+
+					pr.getPrimeBaseIdxs()
+							.stream()
+							.<String>mapMulti((bs, consumer) ->
+												{
+													cnt[0]++;
+													sb.append(
+													 	bs
+													 	.stream()
+													 	.boxed()
+													 	.map(i -> ps.getPrime(i).get().toString())
+													 	.collect(Collectors.joining(",","[","]"))
+													 	);
+
+													if (cnt[0] < size)
+														sb.append(", ");
+
+													if (cnt[0] % 5 == 0 || cnt[0] >= size)
+													{
+														consumer.accept(sb.toString());
+														sb.setLength(0);
+														sb.append("\t");
+													}
+												}
+									)
+							.forEach(System.out::println);
 			}
 			catch(Exception e)
 			{
-				log.severe("Error: " + e);
-			}				
-		}	
+				log.severe(String.format("Can't show bases for: %d exception:", pr.getPrime()));
+				log.throwing(this.getClass().getName(), "log", e);
+				e.printStackTrace();
+			}
+		}
 	}
 }

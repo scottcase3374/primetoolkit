@@ -65,26 +65,26 @@ public class BaseReduceNPrime extends AbstractPrimeBase
 	/*
 	 * m  the highest (non-inclusive) index to reduce to.
 	 * a  arraylist of current result indexes shared throughout the call chain
-	 * idx the current index being processed
+	 * idx the currentindex being processed
 	 */
-	final BiFunction<Integer, ArrayList<Integer>, Consumer<PrimeRefIntfc>> fnReducer = (m, a)-> idx ->
+	final BiFunction<Integer, ArrayList<Integer>, Consumer<PrimeRefIntfc>> fnReducer = (maxNumResultBasePrimes, outputCntALst)-> prime ->
 	{
-		if (idx.getPrimeRefIdx() < m)
+		if (prime.getPrimeRefIdx() < maxNumResultBasePrimes)
 		{
-			while (m > a.size())
-				a.add(0);
+			while (maxNumResultBasePrimes > outputCntALst.size())
+				outputCntALst.add(0);
 
-			a.set(idx.getPrimeRefIdx(), a.get(idx.getPrimeRefIdx())+1);
+			outputCntALst.set(prime.getPrimeRefIdx(), outputCntALst.get(prime.getPrimeRefIdx())+1);
 		}
 		else
 		{
-			this.primeReduction(idx, this.fnReducer.apply(m, a));
+			this.primeReduction(prime, this.fnReducer.apply(maxNumResultBasePrimes, outputCntALst));
 		}
 	};
 
 	/**
 	 *
-	 * @param idx idx current index to reduce;
+	 * @param primeRef cur prime being reduced
 	 * @param reducer function implementing reduction algo
 	 */
 	private void primeReduction(@NonNull PrimeRefIntfc primeRef, @NonNull Consumer<PrimeRefIntfc> reducer)
