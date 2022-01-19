@@ -211,6 +211,5 @@ Prime [773] idx[137] #-bases[796]
 	- More test coverage
 	- Other graphing/visualization items (looking at some ideas which leverage lwjgl).
 	- More metrics generation
-	- Replace the one use of recursion which prevents scaling of one of the processes.
 	- Specialized data structures
 	- Better support for tracking performance (run-time) of the various stages (prime determination, prime bases generation, logging, etc).
