@@ -8,17 +8,17 @@ import lombok.NonNull;
 import java.util.logging.Logger;
 
 /**
- * Base for algorithms that just log info (which it maybe just calculated).
+ * Base for algorithms that just log info (which it may just calculate).
  *
  */
 public abstract class AbstractLogBase implements LogGraphIntfc
 {
 	@NonNull
-	PrimeSourceIntfc ps;
-	
+	protected PrimeSourceIntfc ps;
+
 	@NonNull
-	Logger log;
-	
+	protected Logger log;
+
 	protected AbstractLogBase(@NonNull PrimeSourceIntfc ps, @NonNull Logger log)
 	{
 		this.ps = ps;

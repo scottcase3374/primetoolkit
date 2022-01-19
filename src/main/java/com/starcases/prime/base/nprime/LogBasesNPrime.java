@@ -1,25 +1,24 @@
-package com.starcases.prime.log;
+package com.starcases.prime.base.nprime;
 
 import java.util.stream.Collectors;
 
-import com.starcases.prime.intfc.BaseTypes;
+import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
+import com.starcases.prime.log.AbstractLogBase;
 
 import lombok.NonNull;
 import lombok.extern.java.Log;
 import picocli.CommandLine.Command;
 
-/**
- *
- * Intent was to log the base type that consisted specifically of 3 prime bases
- * that sum to each prime#. Not much differentiation between this and LogBaseNPrime
- * after a refactor.
- *
- */
+/*
+* Intent was to log the base type that consisted specifically of some N prime bases
+* that sum to each prime#. Not much differentiation between this and LogBase3Triple
+* after I did some extensive refactoring - log statement is slighly different but method is same.
+*/
 @Log
-public class LogBases3AllTriples  extends AbstractLogBase
+public class LogBasesNPrime extends AbstractLogBase
 {
-	public LogBases3AllTriples(@NonNull PrimeSourceIntfc ps)
+	public LogBasesNPrime(@NonNull PrimeSourceIntfc ps)
 	{
 		super(ps, log);
 	}

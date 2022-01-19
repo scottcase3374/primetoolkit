@@ -5,7 +5,6 @@ import org.jgrapht.event.GraphEdgeChangeEvent;
 import org.jgrapht.event.GraphListener;
 import org.jgrapht.event.GraphVertexChangeEvent;
 
-import com.starcases.prime.intfc.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 
 import lombok.NonNull;
@@ -78,8 +77,10 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 			primeMaxBaseSize = e.getVertex();
 		}
 
-		data[0][PRIME_MAX_BASE_SIZE]= String.format("Prime [%d] / Base# [%d] / Bases [%s]", primeMaxBaseSize.getPrime(), primeMaxBaseSize.getBaseSize(), primeMaxBaseSize.getIdxPrimes(BaseTypes.DEFAULT));
-
+		data[0][PRIME_MAX_BASE_SIZE] =
+				String.format("Prime [%d] / Base# [%d] ",
+						primeMaxBaseSize.getPrime(),
+						primeMaxBaseSize.getBaseSize());
 	}
 
 	protected void handlePrimeMaxDistToPrevPrime(@NonNull GraphVertexChangeEvent<PrimeRefIntfc> e)

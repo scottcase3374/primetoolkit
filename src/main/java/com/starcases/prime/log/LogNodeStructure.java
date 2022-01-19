@@ -1,12 +1,14 @@
 package com.starcases.prime.log;
 
+import java.util.stream.Collectors;
+
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
 import lombok.NonNull;
 import lombok.extern.java.Log;
 
 /**
- * 
+ *
  * Logs data about the primes without using the graph structure - instead
  * it just uses my internal api's and displays some of the available info that
  * can be provided.
@@ -19,28 +21,59 @@ public class LogNodeStructure extends AbstractLogBase
 	{
 		super(ps, log);
 	}
-	
+
 	@Override
 	public void log()
 	{
 		int idx = 0;
-		try
+		var prIt = ps.getPrimeRefIter();
+		while (prIt.hasNext())
 		{
-			var prIt = ps.getPrimeRefIter();
-			while (prIt.hasNext())
-			{ 
-				var ref = prIt.next();
-				System.out.println(String.format("Prime %d bases %s  <dist[%d], nextPrime[%d]> idx[%d]", 
-						ref.getPrime(), 
-						ref.getIdxPrimes(), 
-						ps.getDistToNextPrime(ref.getPrimeRefIdx()),
-						ps.getPrime(ref.getPrimeRefIdx()+1).get(),
-						idx++));
+			var pr = prIt.next();
+			try
+			{
+				long size = pr.getPrimeBaseIdxs().size();
+				System.out.println(String.format("%nPrime [%d] idx[%d] #-bases[%d]%n",
+						pr.getPrime(),
+						idx++,
+						size
+						));
+
+					long [] cnt = {0};
+					StringBuilder sb = new StringBuilder("\t");
+
+					pr.getPrimeBaseIdxs()
+							.stream()
+							.<String>mapMulti((bs, consumer) ->
+												{
+													cnt[0]++;
+													sb.append(
+													 	bs
+													 	.stream()
+													 	.boxed()
+													 	.map(i -> ps.getPrime(i).get().toString())
+													 	.collect(Collectors.joining(",","[","]"))
+													 	);
+
+													if (cnt[0] < size)
+														sb.append(", ");
+
+													if (cnt[0] % 5 == 0 || cnt[0] >= size)
+													{
+														consumer.accept(sb.toString());
+														sb.setLength(0);
+														sb.append("\t");
+													}
+												}
+									)
+							.forEach(System.out::println);
 			}
-		}
-		catch(Exception e)
-		{
-			log.severe("Exception:" + e);
+			catch(Exception e)
+			{
+				log.severe(String.format("Can't show bases for: %d exception:", pr.getPrime()));
+				log.throwing(this.getClass().getName(), "log", e);
+				e.printStackTrace();
+			}
 		}
 	}
 }

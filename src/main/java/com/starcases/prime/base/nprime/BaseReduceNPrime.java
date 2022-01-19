@@ -1,17 +1,20 @@
-package com.starcases.prime.base;
+package com.starcases.prime.base.nprime;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Comparator;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
+import java.util.Deque;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.Iterator;
-import java.util.Optional;
+import java.util.List;
+
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-import com.starcases.prime.intfc.BaseTypes;
+
+import com.starcases.prime.base.AbstractPrimeBase;
+import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
@@ -20,9 +23,8 @@ import lombok.extern.java.Log;
 
 /**
  * Note, this is output as part of the base generation and not part of the "log" directive.
+ * Need to fix that.
  *
- *
- * @FIXME Since this uses some recursion it easily runs out of stack space; rework it to avoid problem.
  *
  * Given a prime and a maximum number of primes; reduce default bases to multiples
  * of the bases <= maximum prime provided.
@@ -62,42 +64,59 @@ public class BaseReduceNPrime extends AbstractPrimeBase
 		this.maxReduce = maxReduce;
 	}
 
-	/*
-	 * m  the highest (non-inclusive) index to reduce to.
-	 * a  arraylist of current result indexes shared throughout the call chain
-	 * idx the currentindex being processed
-	 */
-	final BiFunction<Integer, ArrayList<Integer>, Consumer<PrimeRefIntfc>> fnReducer = (maxNumResultBasePrimes, outputCntALst)-> prime ->
-	{
-		if (prime.getPrimeRefIdx() < maxNumResultBasePrimes)
-		{
-			while (maxNumResultBasePrimes > outputCntALst.size())
-				outputCntALst.add(0);
-
-			outputCntALst.set(prime.getPrimeRefIdx(), outputCntALst.get(prime.getPrimeRefIdx())+1);
-		}
-		else
-		{
-			this.primeReduction(prime, this.fnReducer.apply(maxNumResultBasePrimes, outputCntALst));
-		}
-	};
-
 	/**
+	 * Non-recursive algo to go through bases of bases to count those that we want counts for.
 	 *
 	 * @param primeRef cur prime being reduced
-	 * @param reducer function implementing reduction algo
 	 */
-	private void primeReduction(@NonNull PrimeRefIntfc primeRef, @NonNull Consumer<PrimeRefIntfc> reducer)
+	private void primeReduction(@NonNull PrimeRefIntfc primeRef, @NonNull List<Integer> outputCntALst)
 	{
-		primeRef
-		.getPrimeBaseIdxs()
-		.get(0)
-		.stream()
-		.boxed()
-		.map(i ->  ps.getPrimeRef(i))
-		.filter(Optional::isPresent)
-		.map(Optional::get)
-		.forEach(reducer);
+		Deque<Integer> q = new ArrayDeque<>();
+
+		// want to process initial bases for prime
+		primeRef.getPrimeBaseIdxs().get(0).stream().boxed().forEach(q::add);
+
+		while (true)
+		{
+			var integerIt = q.iterator();
+			if (integerIt.hasNext())
+			{
+				// Get next base to process it - remove from deque;
+				// high bases of current base get added back to deqeue.
+				var i = integerIt.next();
+				integerIt.remove();
+
+				  ps.getPrimeRef(i)
+					.get()
+					.getPrimeBaseIdxs()
+					.get(0)
+					.stream()
+					.boxed() // index integers
+					.<Integer>mapMulti(
+							(ii, consumer) ->
+										{
+											if (ii < maxReduce)
+											{
+												// found a non-high base so process it
+												consumer.accept(ii);
+											}
+											else
+											{
+												// base is high so add it to deque for later processing
+												// by outer loop
+												q.add(ii);
+											}
+										}
+								)
+					.forEach(
+							idx ->
+									// Increment the appropriate target base count
+									outputCntALst.set(idx, outputCntALst.get(idx)+1)
+							);
+			}
+			else
+				break;
+		}
 	}
 
 	/**
@@ -116,23 +135,31 @@ public class BaseReduceNPrime extends AbstractPrimeBase
 			}
 		}
 
-		Iterator<PrimeRefIntfc> it = ps.getPrimeRefIter();
-		while (it.hasNext())
+		Iterator<PrimeRefIntfc> primeIt = ps.getPrimeRefIter();
+		while (primeIt.hasNext())
 		{
-			PrimeRefIntfc pr = it.next();
+			PrimeRefIntfc curPrime = primeIt.next();
 			try
 			{
-				ArrayList<Integer> ret = new ArrayList<>();
-				primeReduction(pr, fnReducer.apply(maxReduce, ret));
+				ArrayList<Integer> countForBaseIdx = new ArrayList<>(maxReduce);
+				for (int i=0; i < maxReduce; i++)
+					countForBaseIdx.add(i, 0);
+
+				primeReduction(curPrime,countForBaseIdx);
+
 				int [] tmpI = {0};
 				if (doLog && log.isLoggable(Level.INFO))
 				{
-					log.info(String.format("Prime [%d] %s", pr.getPrime(),
-						ret.stream().map(idx -> String.format("base-%d-count:[%d]", ps.getPrime(tmpI[0]++).get(), idx)).collect(Collectors.joining(", "))));
+					log.info(String.format("Prime [%d] idx[%d] %s",
+							curPrime.getPrime(),
+							curPrime.getPrimeRefIdx(),
+							countForBaseIdx.stream()
+								.map(countForBasePrime -> String.format("base-%d-count:[%d]", ps.getPrime(tmpI[0]++).get(), countForBasePrime))
+								.collect(Collectors.joining(", "))));
 				}
 				var bs = new BitSet();
-				ret.stream().forEach(bs::set);
-				pr.addPrimeBase(bs, BaseTypes.NPRIME);
+				countForBaseIdx.stream().forEach(bs::set);
+				curPrime.addPrimeBase(bs, BaseTypes.NPRIME);
 			}
 			catch(Exception e)
 			{

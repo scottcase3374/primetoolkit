@@ -15,7 +15,8 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.concurrent.atomic.AtomicBoolean;
-import com.starcases.prime.intfc.BaseTypes;
+
+import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import java.util.Iterator;

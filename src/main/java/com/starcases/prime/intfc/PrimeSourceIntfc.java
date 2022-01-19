@@ -7,6 +7,8 @@ import java.util.Optional;
 
 import javax.validation.constraints.Min;
 
+import com.starcases.prime.base.BaseTypes;
+
 import lombok.NonNull;
 
 /**

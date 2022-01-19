@@ -1,4 +1,4 @@
-package com.starcases.prime.base;
+package com.starcases.prime.base.triples;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -14,7 +14,8 @@ import java.util.logging.Level;
 
 import javax.validation.constraints.Min;
 
-import com.starcases.prime.intfc.BaseTypes;
+import com.starcases.prime.base.AbstractPrimeBase;
+import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 

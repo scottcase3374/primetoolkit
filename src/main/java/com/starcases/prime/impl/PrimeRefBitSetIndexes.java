@@ -8,13 +8,12 @@ import java.util.Map;
 import java.util.List;
 import java.util.EnumMap;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import javax.validation.constraints.Min;
 
 import java.util.Optional;
 
-import com.starcases.prime.intfc.BaseTypes;
+import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
@@ -114,36 +113,6 @@ public class PrimeRefBitSetIndexes extends AbstractPrimeRef implements PrimeRefI
 	public void addPrimeBase(@NonNull BitSet primeBase, @NonNull BaseTypes baseType)
 	{
 		this.primeBaseIdxs.merge(baseType, new ArrayList<>(Arrays.asList(primeBase)), (a,b) -> { a.addAll(b); return a;} );
-	}
-
-	@Override
-	public String getIndexes()
-	{
-		return getIndexes(primeSrc.getActiveBaseId());
-	}
-
-	@Override
-	public String getIndexes(@NonNull BaseTypes baseType)
-	{
-		return getPrimeBaseIdxs(baseType)
-					.stream()
-					.map(bs -> bs.stream().boxed().map(i -> i.toString()).collect(Collectors.joining(",","[","]")))
-					.collect(Collectors.joining(",","[", "]"));
-	}
-
-	@Override
-	public String getIdxPrimes()
-	{
-		return getIdxPrimes(primeSrc.getActiveBaseId());
-	}
-
-	@Override
-	public String getIdxPrimes(@NonNull BaseTypes baseType)
-	{
-		return getPrimeBaseIdxs(baseType)
-				.stream()
-				.map(bs -> bs.stream().boxed().map(i -> primeSrc.getPrime(i).get().toString()).collect(Collectors.joining(",","[","]")))
-				.collect(Collectors.joining(", ","[", "]"));
 	}
 
 	@Override

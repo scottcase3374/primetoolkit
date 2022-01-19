@@ -13,8 +13,9 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.builder.GraphBuilder;
 import org.jgrapht.graph.DefaultListenableGraph;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
+import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
-import com.starcases.prime.intfc.BaseTypes;
+
 import lombok.NonNull;
 
 /**

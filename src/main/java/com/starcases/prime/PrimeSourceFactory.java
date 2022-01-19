@@ -6,13 +6,13 @@ import java.util.function.Consumer;
 
 import javax.validation.constraints.Min;
 
+import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.impl.PrimeRef;
 import com.starcases.prime.impl.PrimeSource;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
 import lombok.NonNull;
 
-import com.starcases.prime.intfc.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 
 /**

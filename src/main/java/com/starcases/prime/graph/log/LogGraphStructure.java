@@ -2,8 +2,8 @@ package com.starcases.prime.graph.log;
 
 import java.util.stream.Collectors;
 
+import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.graph.impl.PrimeGrapher;
-import com.starcases.prime.intfc.BaseTypes;
 import com.starcases.prime.intfc.LogGraphIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 

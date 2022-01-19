@@ -5,9 +5,9 @@ import java.util.List;
 import org.jgrapht.event.GraphListener;
 import org.jgrapht.graph.DefaultEdge;
 
+import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.graph.impl.PrimeGrapher;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
-import com.starcases.prime.intfc.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 
 import lombok.NonNull;

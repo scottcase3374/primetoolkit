@@ -1,6 +1,6 @@
 package com.starcases.prime.cli;
 
-import com.starcases.prime.intfc.BaseTypes;
+import com.starcases.prime.base.BaseTypes;
 
 import picocli.CommandLine.Option;
 

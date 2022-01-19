@@ -1,4 +1,4 @@
-package com.starcases.prime.base;
+package com.starcases.prime.base.triples;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import com.starcases.prime.intfc.BaseTypes;
+import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import lombok.NoArgsConstructor;

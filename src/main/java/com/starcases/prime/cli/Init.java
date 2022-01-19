@@ -8,19 +8,20 @@ import org.jgrapht.event.GraphListener;
 import org.jgrapht.graph.DefaultEdge;
 
 import com.starcases.prime.PrimeSourceFactory;
-import com.starcases.prime.base.BaseReduceTriple;
-import com.starcases.prime.base.BaseReduceNPrime;
+import com.starcases.prime.base.BaseTypes;
+import com.starcases.prime.base.nprime.BaseReduceNPrime;
+import com.starcases.prime.base.nprime.LogBasesNPrime;
+import com.starcases.prime.base.triples.BaseReduceTriple;
+import com.starcases.prime.base.triples.LogBases3AllTriples;
 import com.starcases.prime.graph.export.ExportGML;
 import com.starcases.prime.graph.log.LogGraphStructure;
+//import com.starcases.prime.graph.lwjgl.HelloWorld;
 import com.starcases.prime.graph.visualize.MetaDataTable;
 import com.starcases.prime.graph.visualize.ViewDefault;
 import com.starcases.prime.impl.PrimeRefBitSetIndexes;
-import com.starcases.prime.intfc.BaseTypes;
 import com.starcases.prime.intfc.LogGraphIntfc;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
-import com.starcases.prime.log.LogBases3AllTriples;
-import com.starcases.prime.log.LogBasesNPrime;
 import com.starcases.prime.log.LogNodeStructure;
 
 import lombok.extern.java.Log;
@@ -50,6 +51,9 @@ public class Init implements Runnable
 
 	@ArgGroup(exclusive = false, validate = false)
 	GraphOpts graphOpts;
+
+//	@ArgGroup(exclusive = false, validate = false)
+//	LWJGLOps jglOps;
 
 	@ArgGroup(exclusive = false, validate = false)
 	ExportOpts exportOpts;
@@ -122,6 +126,11 @@ public class Init implements Runnable
 		{
 			graph(ps, baseType);
 		}
+
+//		if (jglOps != null && jglOps.lwjglOper != null && jglOps.lwjglOper == LWJGLOper.HW)
+//		{
+//			new HelloWorld().run();
+//		}
 
 		if (exportOpts != null && exportOpts.exportType != null && exportOpts.exportType == Export.GML)
 		{
