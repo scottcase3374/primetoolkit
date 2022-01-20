@@ -1,12 +1,9 @@
 package com.starcases.prime.impl;
 
 import java.math.BigInteger;
-import java.util.Comparator;
 import java.util.Optional;
 
 import com.starcases.prime.intfc.PrimeRefIntfc;
-
-import lombok.NonNull;
 
 /**
  *
@@ -15,9 +12,6 @@ import lombok.NonNull;
  */
 public abstract class AbstractPrimeRef implements PrimeRefIntfc
 {
-	@NonNull
-	protected static final Comparator<BigInteger> bigIntComp = (b1, b2) -> b1.compareTo(b2);
-
 	public PrimeRefIntfc getPrimeRef()
 	{
 		return this;

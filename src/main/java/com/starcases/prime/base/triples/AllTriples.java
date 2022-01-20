@@ -143,6 +143,14 @@ enum ConditionConstraintState
 	 */
 	OK;
 
+	/**
+	 * Need to simplify still.
+	 *
+	 * @param primeRefs
+	 * @param pOverrideRefs
+	 * @param idxs
+	 * @return
+	 */
 	public static ConditionConstraintState checkConditionConstraints(
 			@NonNull Map<TripleIdx, Optional<PrimeRefIntfc>> primeRefs,
 			PrimeRefIntfc [] pOverrideRefs,
@@ -362,6 +370,6 @@ class AllTriples
 			.map(Optional::get)
 			.map(PrimeRefIntfc::getPrimeRefIdx).forEach(bs::set);
 
-		prime.addPrimeBase(bs, BaseTypes.THREETRIPLE);
+		prime.getPrimeBaseData().addPrimeBase(bs, BaseTypes.THREETRIPLE);
 	}
 }

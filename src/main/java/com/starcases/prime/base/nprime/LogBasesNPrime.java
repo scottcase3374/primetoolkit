@@ -11,9 +11,9 @@ import lombok.extern.java.Log;
 import picocli.CommandLine.Command;
 
 /*
-* Intent was to log the base type that consisted specifically of some N prime bases
-* that sum to each prime#. Not much differentiation between this and LogBase3Triple
-* after I did some extensive refactoring - log statement is slighly different but method is same.
+* Need to actually save the n-prime bases so logging actually pulls the content - current output
+* is all generated during creation of the n-prime bases and not here. Need to refactor base handling
+* to accomplish this well.
 */
 @Log
 public class LogBasesNPrime extends AbstractLogBase
@@ -28,7 +28,7 @@ public class LogBasesNPrime extends AbstractLogBase
 	public void log()
 	{
 		// Get desired data
-		ps.setActiveBaseId(BaseTypes.THREETRIPLE);
+		ps.setActiveBaseId(BaseTypes.NPRIME);
 
 		int idx = 0;
 		var prIt = ps.getPrimeRefIter();
@@ -37,7 +37,7 @@ public class LogBasesNPrime extends AbstractLogBase
 			var pr = prIt.next();
 			try
 			{
-				long size = pr.getPrimeBaseIdxs().size();
+				long size = pr.getPrimeBaseData().getPrimeBaseIdxs().size();
 				System.out.println(String.format("%nPrime [%d] idx[%d] #-bases[%d]%n",
 						pr.getPrime(),
 						idx++,
@@ -47,7 +47,7 @@ public class LogBasesNPrime extends AbstractLogBase
 					long [] cnt = {0};
 					StringBuilder sb = new StringBuilder("\t");
 
-					pr.getPrimeBaseIdxs()
+					pr.getPrimeBaseData().getPrimeBaseIdxs()
 							.stream()
 							.<String>mapMulti((bs, consumer) ->
 												{

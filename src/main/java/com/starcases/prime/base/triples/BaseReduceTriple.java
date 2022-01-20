@@ -14,7 +14,7 @@ import java.util.logging.Level;
 
 import javax.validation.constraints.Min;
 
-import com.starcases.prime.base.AbstractPrimeBase;
+import com.starcases.prime.base.AbstractPrimeBaseGenerator;
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
@@ -65,7 +65,7 @@ import lombok.extern.java.Log;
  * 29 109-> 31,37,41 *
  */
 @Log
-public class BaseReduceTriple extends AbstractPrimeBase
+public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 {
 	@NonNull
 	static final Comparator<String> nodeComparator = (o1,o2) -> Integer.decode(o1).compareTo(Integer.decode(o2));
@@ -121,7 +121,7 @@ public class BaseReduceTriple extends AbstractPrimeBase
 			var bNew = new BitSet();
 			bNew.set(counter.incrementAndGet());
 
-			curPrime.addPrimeBase(bNew, BaseTypes.THREETRIPLE);
+			curPrime.getPrimeBaseData().addPrimeBase(bNew, BaseTypes.THREETRIPLE);
 			if (curPrime.getPrimeRefIdx() == minPrimeIdx)
 				break;
 		}

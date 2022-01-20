@@ -82,7 +82,7 @@ public class PrimeNodeGenerator
 	protected void addNode()
 	{
 		// Link from prime node to prime bases (i.e. unique set of smaller primes that sums to this prime).
-		primeRef.getPrimeBaseIdxs(baseType)
+		primeRef.getPrimeBaseData().getPrimeBaseIdxs(baseType)
 							.get(0)
 							.stream()
 							.forEach(

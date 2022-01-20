@@ -32,7 +32,7 @@ public class LogNodeStructure extends AbstractLogBase
 			var pr = prIt.next();
 			try
 			{
-				long size = pr.getPrimeBaseIdxs().size();
+				long size = pr.getPrimeBaseData().getPrimeBaseIdxs().size();
 				System.out.println(String.format("%nPrime [%d] idx[%d] #-bases[%d]%n",
 						pr.getPrime(),
 						idx++,
@@ -42,7 +42,7 @@ public class LogNodeStructure extends AbstractLogBase
 					long [] cnt = {0};
 					StringBuilder sb = new StringBuilder("\t");
 
-					pr.getPrimeBaseIdxs()
+					pr.getPrimeBaseData().getPrimeBaseIdxs()
 							.stream()
 							.<String>mapMulti((bs, consumer) ->
 												{

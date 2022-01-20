@@ -2,17 +2,14 @@ package com.starcases.prime.impl;
 
 import java.math.BigInteger;
 import java.util.BitSet;
-
-import java.util.List;
-import java.util.Map;
-import java.util.EnumMap;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
-import com.starcases.prime.base.BaseTypes;
+import com.starcases.prime.intfc.PrimeBaseIntfc;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
@@ -36,11 +33,10 @@ public class PrimeRef extends AbstractPrimeRef implements PrimeRefIntfc
 	private int primeIdx;
 
 	@NonNull
-	// Represents sets of base primes that sum to this prime. (index to primes)
-	private final Map<BaseTypes, List<Integer>> primeBaseIdxs = new EnumMap<>(BaseTypes.class);
+	private static PrimeSourceIntfc primeSrc;
 
 	@NonNull
-	private static PrimeSourceIntfc primeSrc;
+	private PrimeBaseIntfc primeBaseData;
 
 	/**
 	 * Handle simple prime where the base is simply itself - i.e. 1, 2
@@ -48,11 +44,14 @@ public class PrimeRef extends AbstractPrimeRef implements PrimeRefIntfc
 	 *
 	 * @param prime
 	 */
-	PrimeRef(@Min(0) @Max(2) int primeIdx, @NonNull BitSet primeBaseIdxs)
+	public PrimeRef(@Min(0) @Max(2) int primeIdx,
+					@NonNull BitSet primeBaseIdxs,
+					@NonNull Supplier<PrimeBaseIntfc> primeBaseSupplier
+					)
 	{
 		this.primeIdx = primeIdx;
-
-		addPrimeBase(primeBaseIdxs);
+		primeBaseData = primeBaseSupplier.get();
+		this.getPrimeBaseData().addPrimeBase(primeBaseIdxs);
 	}
 
 	public static void setPrimeSource(@NonNull PrimeSourceIntfc primeSrcIntfc)
@@ -85,87 +84,13 @@ public class PrimeRef extends AbstractPrimeRef implements PrimeRefIntfc
 	}
 
 	@Override
-	public BigInteger getMinPrimeBase()
-	{
-		return primeBaseIdxs
-				.get(PrimeRef.primeSrc.getActiveBaseId())
-				.stream()
-				.map(i -> primeSrc.getPrime(i))
-				.filter(Optional::isPresent)
-				.map(Optional::get)
-				.min(bigIntComp)
-				.orElse(BigInteger.ZERO);
-	}
-
-	@Override
-	public BigInteger getMaxPrimeBase()
-	{
-		return primeBaseIdxs.get(PrimeRef.primeSrc.getActiveBaseId()).stream().map(i -> primeSrc.getPrime(i).get()).max(bigIntComp).get();
-	}
-
-	@Override
-	public BigInteger getMinPrimeBase(@NonNull BaseTypes baseType)
-	{
-		return primeBaseIdxs.get(baseType).stream().map(i -> primeSrc.getPrime(i).get()).min(bigIntComp).get();
-	}
-
-	@Override
-	public BigInteger getMaxPrimeBase(@NonNull BaseTypes baseType)
-	{
-		return primeBaseIdxs
-				.get(baseType)
-				.stream()
-				.map(i -> primeSrc.getPrime(i).orElse(BigInteger.ZERO))
-				.max(bigIntComp)
-				.orElse(BigInteger.ZERO);
-	}
-
-	@Override
 	public BigInteger getPrime() {
 		return primeSrc.getPrime(primeIdx).get();
 	}
 
-	/**
-	 * Returns the number of bases used to sum to the
-	 * current prime.
-	 */
-	@Override
-	public int getBaseSize()
+	public PrimeBaseIntfc getPrimeBaseData()
 	{
-		 return primeBaseIdxs.get(BaseTypes.DEFAULT).size();
-	}
-
-	@Override
-	public List<BitSet> getPrimeBaseIdxs()
-	{
-		return getPrimeBaseIdxs(PrimeRef.primeSrc.getActiveBaseId());
-	}
-
-	@Override
-	public List<BitSet> getPrimeBaseIdxs(@NonNull BaseTypes baseType) {
-		var b = new BitSet();
-		primeBaseIdxs.get(baseType).stream().forEach(b::set);
-		return List.of(b);
-	}
-
-	/**
-	 * Include a set of primes in the set of prime bases for the current prime.
-	 * @param primeBase
-	 */
-	@Override
-	public void addPrimeBase(@NonNull BitSet primeBase)
-	{
-		this.primeBaseIdxs
-			.merge(
-					primeSrc.getActiveBaseId(),
-					primeBase.stream().boxed().toList(),
-					(a,b) -> { a.addAll(b); return a; } );
-	}
-
-	@Override
-	public void addPrimeBase(@NonNull BitSet primeBase, @NonNull BaseTypes baseType)
-	{
-		this.primeBaseIdxs.merge(baseType, primeBase.stream().boxed().toList(), (a,b) -> b );
+		return this.primeBaseData;
 	}
 
 	public String toString()

@@ -127,7 +127,7 @@ class EdgeElement implements ElementIntfc
 
 	public void output()
 	{
-		pRef.getPrimeBaseIdxs().get(0).stream().forEach(s -> outputEdge(pr, s, pRef.getPrime()));
+		pRef.getPrimeBaseData().getPrimeBaseIdxs().get(0).stream().forEach(s -> outputEdge(pr, s, pRef.getPrime()));
 	}
 
 	private void outputEdge(@NonNull PrintWriter pr, @NonNull @Min(1) Integer source, @NonNull @Min(1) BigInteger target)

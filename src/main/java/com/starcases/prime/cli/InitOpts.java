@@ -19,4 +19,11 @@ class InitOpts
 
 	@Option(names = { "--log-level"}, description = "Valid vals: ${COMPLETION-CANDIDATES}", defaultValue="INFO", required = false)
 	Level logLevel;
+
+	@Option(names = { "--log-file"}, description = "Path/file for log output", required = false)
+	String logFile;
+
+	@Option(names = { "--output-file"}, description = "Path/file for non-log output (i.e. console)", required = false)
+	String outputFile;
+
 }

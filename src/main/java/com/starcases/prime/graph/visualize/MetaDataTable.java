@@ -72,7 +72,7 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 
 	protected void handlePrimeMaxBaseSize(@NonNull GraphVertexChangeEvent<PrimeRefIntfc> e)
 	{
-		if (primeMaxBaseSize == null || e.getVertex().getBaseSize() > primeMaxBaseSize.getBaseSize())
+		if (primeMaxBaseSize == null || e.getVertex().getPrimeBaseData().getBaseSize() > primeMaxBaseSize.getPrimeBaseData().getBaseSize())
 		{
 			primeMaxBaseSize = e.getVertex();
 		}
@@ -80,7 +80,7 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 		data[0][PRIME_MAX_BASE_SIZE] =
 				String.format("Prime [%d] / Base# [%d] ",
 						primeMaxBaseSize.getPrime(),
-						primeMaxBaseSize.getBaseSize());
+						primeMaxBaseSize.getPrimeBaseData().getBaseSize());
 	}
 
 	protected void handlePrimeMaxDistToPrevPrime(@NonNull GraphVertexChangeEvent<PrimeRefIntfc> e)
@@ -104,7 +104,7 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 
 	protected void handleAvgBaseSize(@NonNull GraphVertexChangeEvent<PrimeRefIntfc> e)
 	{
-		totalBases = totalBases.add(BigDecimal.valueOf(e.getVertex().getBaseSize()));
+		totalBases = totalBases.add(BigDecimal.valueOf(e.getVertex().getPrimeBaseData().getBaseSize()));
 		data[0][AVG_BASE_SIZE] = String.format("# primes [%d], total-bases[%d] avg-bases[%f]", primeMaxDistToPrev.getPrimeRefIdx(), totalBases.longValue(), ((double)totalBases.longValue() / (primeMaxDistToPrev.getPrimeRefIdx()+1)));
 	}
 
@@ -115,11 +115,11 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 
 	protected void handleHighPrimeBase(@NonNull GraphVertexChangeEvent<PrimeRefIntfc> e)
 	{
-		if (highPrimeBase == null || e.getVertex().getPrimeBaseIdxs().get(0).length() > highPrimeBase.getPrimeBaseIdxs().get(0).length())
+		if (highPrimeBase == null || e.getVertex().getPrimeBaseData().getPrimeBaseIdxs().get(0).length() > highPrimeBase.getPrimeBaseData().getPrimeBaseIdxs().get(0).length())
 		{
 			highPrimeBase = e.getVertex();
 		}
-		data[0][MAX_PRIME_BASE] = String.format("Prime[%d], Highest base[%d]", highPrimeBase.getPrime(), highPrimeBase.getMaxPrimeBase());
+		data[0][MAX_PRIME_BASE] = String.format("Prime[%d], Highest base[%d]", highPrimeBase.getPrime(), highPrimeBase.getPrimeBaseData().getMaxPrimeBase());
 	}
 
 	@Override

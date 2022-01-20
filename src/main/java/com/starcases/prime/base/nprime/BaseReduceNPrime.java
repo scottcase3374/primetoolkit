@@ -13,7 +13,7 @@ import java.util.List;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
-import com.starcases.prime.base.AbstractPrimeBase;
+import com.starcases.prime.base.AbstractPrimeBaseGenerator;
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
@@ -46,7 +46,7 @@ import lombok.extern.java.Log;
  *          which reduces to:  1(x11), 2(x16)   =>  1x11 + 2x16 = 43
  */
 @Log
-public class BaseReduceNPrime extends AbstractPrimeBase
+public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 {
 	static final Comparator<String> nodeComparator = (String o1, String o2) -> Integer.decode(o1).compareTo(Integer.decode(o2));
 
@@ -74,20 +74,21 @@ public class BaseReduceNPrime extends AbstractPrimeBase
 		Deque<Integer> q = new ArrayDeque<>();
 
 		// want to process initial bases for prime
-		primeRef.getPrimeBaseIdxs().get(0).stream().boxed().forEach(q::add);
+		primeRef.getPrimeBaseData().getPrimeBaseIdxs().get(0).stream().boxed().forEach(q::add);
 
 		while (true)
 		{
 			var integerIt = q.iterator();
 			if (integerIt.hasNext())
 			{
-				// Get next base to process it - remove from deque;
+				// Get next base to process it and remove from deque
 				// high bases of current base get added back to deqeue.
 				var i = integerIt.next();
 				integerIt.remove();
 
 				  ps.getPrimeRef(i)
 					.get()
+					.getPrimeBaseData()
 					.getPrimeBaseIdxs()
 					.get(0)
 					.stream()
@@ -159,7 +160,7 @@ public class BaseReduceNPrime extends AbstractPrimeBase
 				}
 				var bs = new BitSet();
 				countForBaseIdx.stream().forEach(bs::set);
-				curPrime.addPrimeBase(bs, BaseTypes.NPRIME);
+				curPrime.getPrimeBaseData().addPrimeBase(bs, BaseTypes.NPRIME);
 			}
 			catch(Exception e)
 			{

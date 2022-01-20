@@ -44,7 +44,6 @@ public interface PrimeSourceIntfc
 	 */
 	Iterator<PrimeRefIntfc> getPrimeRefIter();
 
-
 	//
 	// Search and retrieve - non-index apis
 	//
@@ -66,7 +65,6 @@ public interface PrimeSourceIntfc
 	 * @return
 	 */
 	Optional<PrimeRefIntfc> getNearPrimeRef(@NonNull BigInteger val);
-
 
 	/**
 	 * Get prime ref nearest provided value. Typical use is locating a prime above/below some
@@ -120,7 +118,6 @@ public interface PrimeSourceIntfc
 	 * @return
 	 */
 	Optional<BigInteger>    getDistToNextPrime(@NonNull PrimeRefIntfc prime);
-
 
 	Optional<BigInteger>    getDistToPrevPrime(@NonNull PrimeRefIntfc prime);
 

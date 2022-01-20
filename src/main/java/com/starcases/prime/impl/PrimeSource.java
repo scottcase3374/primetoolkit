@@ -58,8 +58,19 @@ public class PrimeSource implements PrimeSourceIntfc
 	@NonNull
 	private AtomicBoolean doInit = new AtomicBoolean(false);
 
-
-	private BiFunction<Integer, BitSet, PrimeRefIntfc> primeRefCtor = PrimeRef::new;
+	// Default PrimeRef implementation to use for this PrimeSource.
+	//
+	// This is non-static because it currently can be overridden by passing
+	// an appropriate "new" function ptr into the PrimeSource
+	// constructor  -> param primeRefCtor
+	//
+	// Currently no plan to allow changing primeRefCtor after initial PrimeSource
+	// creation - should have a static setter if I want to move the override
+	// of this out of the constructor.
+	//
+	// This does seem a bit hacky - may revisit later.
+	@NonNull
+	private BiFunction<Integer, BitSet, PrimeRefIntfc> primeRefCtor;
 
 	//
 	// initialization
@@ -68,30 +79,30 @@ public class PrimeSource implements PrimeSourceIntfc
 	public PrimeSource(
 			@Min(1) int maxCount,
 			@Min(1) int confidenceLevel,
-			BiFunction<Integer, BitSet, PrimeRefIntfc> primeRefCtor,
-			Consumer<PrimeSourceIntfc> fnSetPrimeSrc
+			@NonNull BiFunction<Integer, BitSet, PrimeRefIntfc> primeRefCtor,
+			@NonNull Consumer<PrimeSourceIntfc> fnSetPrimeSrc,
+			@NonNull Consumer<PrimeSourceIntfc> baseSetPrimeSrc
 			)
 	{
-		this(maxCount, primeRefCtor, fnSetPrimeSrc);
+		this(maxCount, primeRefCtor, fnSetPrimeSrc, baseSetPrimeSrc);
 		this.confidenceLevel = confidenceLevel;
 	}
 
 	public PrimeSource(
 			@Min(1) int maxCount,
-			BiFunction<Integer, BitSet, PrimeRefIntfc> primeRefCtor,
-			Consumer<PrimeSourceIntfc> fnSetPrimeSrc
+			@NonNull BiFunction<Integer, BitSet, PrimeRefIntfc> primeRefCtor,
+			@NonNull Consumer<PrimeSourceIntfc> consumerSetPrimeSrc,
+			@NonNull Consumer<PrimeSourceIntfc> baseSetPrimeSrc
 			)
 	{
 		primes = new ArrayList<>(maxCount);
 		primeRefs = new ArrayList<>(maxCount);
 		distanceToNext = new ArrayList<>(maxCount);
-		this.targetPrimeCount = maxCount;
+		targetPrimeCount = maxCount;
 
-		if (primeRefCtor != null)
-			this.primeRefCtor = primeRefCtor;
-
-		if (fnSetPrimeSrc != null)
-			fnSetPrimeSrc.accept(this);
+		this.primeRefCtor = primeRefCtor;
+		consumerSetPrimeSrc.accept(this);
+		baseSetPrimeSrc.accept(this);
 
 		var tmpBitSet = new BitSet();
 		tmpBitSet.set(0);
@@ -194,7 +205,7 @@ public class PrimeSource implements PrimeSourceIntfc
 		boolean ret = false;
 		try
 		{
-			primeRefs.get(0).getMinPrimeBase(baseId);
+			primeRefs.get(0).getPrimeBaseData().getMinPrimeBase(baseId);
 			ret = true;
 		}
 		catch(Exception e)
@@ -450,7 +461,7 @@ public class PrimeSource implements PrimeSourceIntfc
 		if (canAddBase && newPrime.equals(getPrime(curPrimeIdx).get()))
 		{
 			var p = getPrimeRef(curPrimeIdx);
-			p.ifPresent(pr -> pr.addPrimeBase(base));
+			p.ifPresent(pr -> pr.getPrimeBaseData().addPrimeBase(base));
 			log.info(String.format("addPrimeRef <added base> new-prime[%d] new-base-indexes %s new-base-primes %s   cur-Prime[%d]", newPrime, getIndexes(base),getPrimes(base), getPrime(curPrimeIdx).get()));
 		}
 		else

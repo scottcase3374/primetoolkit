@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.starcases.prime.base.PrimeBaseWithLists;
 import com.starcases.prime.impl.PrimeRef;
 import com.starcases.prime.impl.PrimeSource;
 
@@ -23,7 +24,7 @@ class PrimeRefUnitTest
 	@BeforeEach
 	void init()
 	{
-		ps = new PrimeSource(120,100, null, PrimeRef::setPrimeSource);
+		ps = new PrimeSource(120,100, null, PrimeRef::setPrimeSource, PrimeBaseWithLists::setPrimeSource);
 		ps.init();
 	}
 

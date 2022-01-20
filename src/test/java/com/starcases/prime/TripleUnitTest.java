@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.starcases.prime.base.PrimeBaseWithBitsets;
 import com.starcases.prime.impl.PrimeRefBitSetIndexes;
 import com.starcases.prime.impl.PrimeSource;
 
@@ -22,7 +23,7 @@ class TripleUnitTest
 	@BeforeEach
 	void init()
 	{
-		ps = new PrimeSource(120,100, null, PrimeRefBitSetIndexes::setPrimeSource);
+		ps = new PrimeSource(120,100, null, PrimeRefBitSetIndexes::setPrimeSource, PrimeBaseWithBitsets::setPrimeSource);
 		ps.init();
 	}
 
