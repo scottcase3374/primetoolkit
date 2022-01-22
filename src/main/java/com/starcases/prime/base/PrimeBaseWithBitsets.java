@@ -16,7 +16,9 @@ import lombok.NonNull;
 public class PrimeBaseWithBitsets implements PrimeBaseIntfc
 {
 	public PrimeBaseWithBitsets()
-	{}
+	{
+		// nothing to init here
+	}
 
 	@NonNull
 	private static PrimeSourceIntfc primeSrc;
@@ -108,7 +110,7 @@ public class PrimeBaseWithBitsets implements PrimeBaseIntfc
 	@Override
 	public BigInteger getMinPrimeBase(@NonNull BaseTypes baseType)
 	{
-		// Need to redo this; the result of Optional<Optional<>> is just silly.
+		// TODO Need to redo this; the result of Optional<Optional<>> is just silly.
 		return primeBaseIdxs
 				.get(baseType)
 				.stream()

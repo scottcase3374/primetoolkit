@@ -28,7 +28,9 @@ public class PrimeBaseWithLists implements PrimeBaseIntfc
 	}
 
 	public PrimeBaseWithLists()
-	{}
+	{
+		// nothing to init here
+	}
 
 	/**
 	 * Returns the number of bases used to sum to the

@@ -111,7 +111,7 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 								)
 					.forEach(
 							idx ->
-									// Increment the appropriate target base count
+									// Process the low-bases; Increment the appropriate target base count
 									outputCntALst.set(idx, outputCntALst.get(idx)+1)
 							);
 			}

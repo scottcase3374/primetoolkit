@@ -41,9 +41,10 @@ Current processing on my i7 with 64Gb RAM reaches about 3-5 million (cmd line ar
     - Logs data from node structure and renders some graphs/data
 - init --max-count=500 --log=BASES --base=THREETRIPLE
     - Logs the prime, index, #bases(triples) and each triple
-
 - init --max-count=250 --log=BASES --base=NPRIME --max-reduce=2
+    - Logs the prime, index, and a base-prime/count for each prime associated to "max-reduce" indexes
 - init --max-count=250 --LOG=BASES --base=NPRIME --max-reduce=3
+    - Logs the prime, index, and a base-prime/count for each prime associated to "max-reduce" indexes
 
 Adding the option:
 	--log-generate
@@ -218,6 +219,19 @@ Prime [773] idx[137] #-bases[796]
 	[13,17,743], [11,19,743], [7,23,743], [1,29,743], [5,17,751],
 	[3,19,751], [5,11,757], [3,13,757], [5,7,761], [1,11,761],
 	[1,3,769]
+
+- For N-base reductions, the output is currently done during base generation and not the logging action. Example output:
+
+INFO: Prime [1583] idx[250] base-prime-1-count:[155], base-prime-2-count:[224], base-prime-3-count:[170], base-prime-5-count:[94]
+
+which is interpreted as: Prime value 1583 is represented by: 1 x 155 + 2 x 224 + 3 x 170 + 5 x 94
+
+
+## Implementation
+- Command line parsing is handled using the picocli library and the resulting options processed; resulting in
+adding a Consumer<> instance to a list of actions for each pertinent action.  Once the command line args
+are processed, each of the Consumer<> objects is evaluated.  The first actions generate the default prime
+information and then new base generation, logging and graphing actions are added as needed.
 
 ## ToDo
 	- More test coverage
