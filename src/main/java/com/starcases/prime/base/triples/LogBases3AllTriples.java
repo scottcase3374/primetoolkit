@@ -1,5 +1,6 @@
 package com.starcases.prime.base.triples;
 
+import java.math.BigInteger;
 import java.util.stream.Collectors;
 
 import com.starcases.prime.base.BaseTypes;
@@ -32,14 +33,20 @@ public class LogBases3AllTriples  extends AbstractLogBase
 		// Get desired data
 		ps.setActiveBaseId(BaseTypes.THREETRIPLE);
 
-		int idx = 0;
+		int idx = 5;
 		var prIt = ps.getPrimeRefIter();
+
+		// Primes under 11 don't have a representation consisting of 3 primes summed.
+		while (prIt.hasNext() && !prIt.next().getPrime().equals(BigInteger.valueOf(7L)));
+
+		final int maxBasesInRow = 5;
+
 		while (prIt.hasNext())
 		{
 			var pr = prIt.next();
 			try
 			{
-				long size = pr.getPrimeBaseData().getPrimeBaseIdxs().size();
+				long size = pr.getPrimeBaseData().getPrimeBaseIdxs(BaseTypes.THREETRIPLE).size();
 				System.out.println(String.format("%nPrime [%d] idx[%d] #-bases[%d]%n",
 						pr.getPrime(),
 						idx++,
@@ -49,7 +56,7 @@ public class LogBases3AllTriples  extends AbstractLogBase
 					long [] cnt = {0};
 					StringBuilder sb = new StringBuilder("\t");
 
-					pr.getPrimeBaseData().getPrimeBaseIdxs()
+					pr.getPrimeBaseData().getPrimeBaseIdxs(BaseTypes.THREETRIPLE)
 							.stream()
 							.<String>mapMulti((bs, consumer) ->
 												{
@@ -65,7 +72,7 @@ public class LogBases3AllTriples  extends AbstractLogBase
 													if (cnt[0] < size)
 														sb.append(", ");
 
-													if (cnt[0] % 5 == 0 || cnt[0] >= size)
+													if (cnt[0] % maxBasesInRow == 0 || cnt[0] >= size)
 													{
 														consumer.accept(sb.toString());
 														sb.setLength(0);

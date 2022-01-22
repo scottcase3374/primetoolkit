@@ -70,7 +70,6 @@ public class PrimeNodeGenerator
 		catch(NoSuchElementException | IndexOutOfBoundsException | NullPointerException e)
 		{
 			// do nothing - final return handles it.
-			log.info("dataset exhaused");
 		}
 		return false;
 	}

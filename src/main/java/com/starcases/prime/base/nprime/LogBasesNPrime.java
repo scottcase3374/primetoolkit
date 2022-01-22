@@ -37,7 +37,7 @@ public class LogBasesNPrime extends AbstractLogBase
 			var pr = prIt.next();
 			try
 			{
-				long size = pr.getPrimeBaseData().getPrimeBaseIdxs().size();
+				long size = pr.getPrimeBaseData().getPrimeBaseIdxs(BaseTypes.NPRIME).size();
 				System.out.println(String.format("%nPrime [%d] idx[%d] #-bases[%d]%n",
 						pr.getPrime(),
 						idx++,
@@ -47,7 +47,7 @@ public class LogBasesNPrime extends AbstractLogBase
 					long [] cnt = {0};
 					StringBuilder sb = new StringBuilder("\t");
 
-					pr.getPrimeBaseData().getPrimeBaseIdxs()
+					pr.getPrimeBaseData().getPrimeBaseIdxs(BaseTypes.NPRIME)
 							.stream()
 							.<String>mapMulti((bs, consumer) ->
 												{

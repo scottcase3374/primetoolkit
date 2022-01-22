@@ -77,20 +77,21 @@ public class Init implements Runnable
 	@Override
 	public void run()
 	{
-		PTKFactory.maxCount = initOpts.maxCount;
-		PTKFactory.confidenceLevel = initOpts.confidenceLevel;
+		PTKFactory.setMaxCount(initOpts.maxCount);
+		PTKFactory.setConfidenceLevel(initOpts.confidenceLevel);
 
-		PTKFactory.activeBaseId = BaseTypes.DEFAULT;
-		PTKFactory.baseSetPrimeSource = s -> PrimeBaseWithLists.setPrimeSource(s);
-		PTKFactory.primeRefSetPrimeSource = s -> PrimeRef.setPrimeSource(s);
+		PTKFactory.setActiveBaseId(BaseTypes.DEFAULT);
+		PTKFactory.setBaseSetPrimeSource(PrimeBaseWithLists::setPrimeSource);
+		PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
 
-		PTKFactory.primeBaseCtor = PrimeBaseWithLists::new;
-		PTKFactory.primeRefCtor = (i, base) -> new PrimeRef(i, base, PTKFactory.primeBaseCtor);
+		PTKFactory.setPrimeBaseCtor(PrimeBaseWithLists::new);
+		PTKFactory.setPrimeRefCtor( (i, base) -> new PrimeRef(i, base, PTKFactory.getPrimeBaseCtor()) );
 
 		actions.add(s -> {
 							FactoryIntfc factory = PTKFactory.getFactory();
 							ps = factory.getPrimeSource();
 							ps.init();
+							ps.setActiveBaseId(PTKFactory.getActiveBaseId());
 						});
 
 		if (baseOpts != null)
@@ -100,11 +101,11 @@ public class Init implements Runnable
 				switch(baseOpts.bases)
 				{
 				case NPRIME:
-					PTKFactory.activeBaseId = BaseTypes.DEFAULT;
-					PTKFactory.primeRefSetPrimeSource = s ->  PrimeRef.setPrimeSource(s);
-					PTKFactory.baseSetPrimeSource = s -> PrimeBaseWithLists.setPrimeSource(s);
-					PTKFactory.primeBaseCtor = PrimeBaseWithLists::new;
-					PTKFactory.primeRefCtor = (i, base) -> new PrimeRef(i, base, PTKFactory.primeBaseCtor);
+					PTKFactory.setActiveBaseId(BaseTypes.NPRIME);
+					PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
+					PTKFactory.setBaseSetPrimeSource(PrimeBaseWithLists::setPrimeSource);
+					PTKFactory.setPrimeBaseCtor(PrimeBaseWithLists::new);
+					PTKFactory.setPrimeRefCtor( (i, base) -> new PrimeRef(i, base, PTKFactory.getPrimeBaseCtor()) );
 
 					actions.add(s ->
 									{
@@ -116,11 +117,11 @@ public class Init implements Runnable
 					break;
 
 				case THREETRIPLE:
-					PTKFactory.activeBaseId = BaseTypes.THREETRIPLE;
-					PTKFactory.primeRefSetPrimeSource = s -> PrimeRefBitSetIndexes.setPrimeSource(s);
-					PTKFactory.baseSetPrimeSource = s -> PrimeBaseWithBitsets.setPrimeSource(s);
-					PTKFactory.primeBaseCtor = PrimeBaseWithBitsets::new;
-					PTKFactory.primeRefCtor = (i, base) -> new PrimeRefBitSetIndexes(i, base, PTKFactory.primeBaseCtor);
+					PTKFactory.setActiveBaseId(BaseTypes.THREETRIPLE);
+					PTKFactory.setPrimeRefSetPrimeSource(PrimeRefBitSetIndexes::setPrimeSource);
+					PTKFactory.setBaseSetPrimeSource( PrimeBaseWithBitsets::setPrimeSource);
+					PTKFactory.setPrimeBaseCtor(PrimeBaseWithBitsets::new);
+					PTKFactory.setPrimeRefCtor( (i, base) -> new PrimeRefBitSetIndexes(i, base, PTKFactory.getPrimeBaseCtor() ));
 
 					actions.add(s ->
 									{
@@ -145,22 +146,26 @@ public class Init implements Runnable
 				break;
 
 			case GRAPHSTRUCT:
-				actions.add(s -> (new LogGraphStructure(ps, PTKFactory.activeBaseId )).log() );
+				actions.add(s -> (new LogGraphStructure(ps, PTKFactory.getActiveBaseId() )).log() );
 				break;
 
-			case NPRIME:
-				actions.add(s -> (new LogBasesNPrime(ps)).log() );
-				break;
-
-			case ALLTHREETRIPLE:
-				actions.add(s -> (new LogBases3AllTriples(ps)).log() );
+			case BASES:
+				if (PTKFactory.getActiveBaseId() == BaseTypes.THREETRIPLE)
+				{
+					actions.add(s -> (new LogBases3AllTriples(ps)).log() );
+				}
+				else if (PTKFactory.getActiveBaseId() == BaseTypes.NPRIME)
+				{
+					actions.add(s -> (new LogBasesNPrime(ps)).log() );
+				}
 				break;
 			}
 		}
 
 		if (graphOpts != null && graphOpts.graphType != null && graphOpts.graphType == Graph.DEFAULT)
 		{
-			actions.add(s -> graph(ps, baseOpts.bases));
+
+			actions.add(s -> graph(ps, PTKFactory.getActiveBaseId() != null ? PTKFactory.getActiveBaseId() : BaseTypes.DEFAULT));
 		}
 
 //		if (jglOps != null && jglOps.lwjglOper != null && jglOps.lwjglOper == LWJGLOper.HW)

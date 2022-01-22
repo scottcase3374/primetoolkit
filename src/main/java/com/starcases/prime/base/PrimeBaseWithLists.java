@@ -2,6 +2,7 @@ package com.starcases.prime.base;
 
 import java.math.BigInteger;
 import java.util.BitSet;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -27,9 +28,7 @@ public class PrimeBaseWithLists implements PrimeBaseIntfc
 	}
 
 	public PrimeBaseWithLists()
-	{
-
-	}
+	{}
 
 	/**
 	 * Returns the number of bases used to sum to the
@@ -41,16 +40,26 @@ public class PrimeBaseWithLists implements PrimeBaseIntfc
 		 return primeBaseIdxs.get(BaseTypes.DEFAULT).size();
 	}
 
+	/**
+	 * Returns the number of bases used to sum to the
+	 * current prime.
+	 */
+	@Override
+	public int getBaseSize(@NonNull BaseTypes baseType)
+	{
+		 return primeBaseIdxs.get(baseType).size();
+	}
+
 	@Override
 	public List<BitSet> getPrimeBaseIdxs()
 	{
-		return getPrimeBaseIdxs(PrimeBaseWithLists.primeSrc.getActiveBaseId());
+		return getPrimeBaseIdxs(BaseTypes.DEFAULT);
 	}
 
 	@Override
 	public List<BitSet> getPrimeBaseIdxs(@NonNull BaseTypes baseType) {
 		var b = new BitSet();
-		primeBaseIdxs.get(baseType).stream().forEach(b::set);
+		primeBaseIdxs.getOrDefault(baseType, Collections.emptyList()).stream().forEach(b::set);
 		return List.of(b);
 	}
 
@@ -63,7 +72,7 @@ public class PrimeBaseWithLists implements PrimeBaseIntfc
 	{
 		this.primeBaseIdxs
 			.merge(
-					primeSrc.getActiveBaseId(),
+					BaseTypes.DEFAULT,
 					primeBase.stream().boxed().toList(),
 					(a,b) -> { a.addAll(b); return a; } );
 	}
@@ -78,7 +87,7 @@ public class PrimeBaseWithLists implements PrimeBaseIntfc
 	public BigInteger getMinPrimeBase()
 	{
 		return primeBaseIdxs
-				.get(PrimeBaseWithLists.primeSrc.getActiveBaseId())
+				.get(BaseTypes.DEFAULT)
 				.stream()
 				.map(i -> primeSrc.getPrime(i))
 				.filter(Optional::isPresent)
@@ -90,7 +99,7 @@ public class PrimeBaseWithLists implements PrimeBaseIntfc
 	@Override
 	public BigInteger getMaxPrimeBase()
 	{
-		return primeBaseIdxs.get(PrimeBaseWithLists.primeSrc.getActiveBaseId()).stream().map(i -> primeSrc.getPrime(i).get()).max(bigIntComp).get();
+		return primeBaseIdxs.get(BaseTypes.DEFAULT).stream().map(i -> primeSrc.getPrime(i).get()).max(bigIntComp).get();
 	}
 
 	@Override

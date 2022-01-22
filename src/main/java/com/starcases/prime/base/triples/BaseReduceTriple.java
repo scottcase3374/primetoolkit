@@ -107,10 +107,11 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 	{
 		AtomicInteger counter = new AtomicInteger(0);
 		if (doLog)
+		{
 			log.entering("BaseReduce3Triple", "genBases()");
+		}
 
-		BigInteger seven = BigInteger.valueOf(7L);
-		final var minPrimeIdx = ps.getPrimeIdx(seven);
+		BigInteger lastNonViablePrime = BigInteger.valueOf(7L);
 
 		Iterator<PrimeRefIntfc> pRefIt = ps.getPrimeRefIter();
 
@@ -118,16 +119,19 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 		while(pRefIt.hasNext())
 		{
 			var curPrime = pRefIt.next();
-			var bNew = new BitSet();
-			bNew.set(counter.incrementAndGet());
 
-			curPrime.getPrimeBaseData().addPrimeBase(bNew, BaseTypes.THREETRIPLE);
-			if (curPrime.getPrimeRefIdx() == minPrimeIdx)
+			curPrime
+				.getPrimeBaseData()
+				.addPrimeBase(
+							curPrime.getPrimeBaseData().getPrimeBaseIdxs(BaseTypes.DEFAULT).get(0),
+							BaseTypes.THREETRIPLE);
+
+			if (curPrime.getPrime().equals(lastNonViablePrime))
 				break;
 		}
 
 		ExecutorService workStealingPool = Executors.newWorkStealingPool(100);
-		List<CompletableFuture<String>> futures = new ArrayList<>();
+		List<CompletableFuture<String>> futures = new ArrayList<>(100);
 
 		// Process the values which can be represented by the sum of 3 primes.
 		while (pRefIt.hasNext())
@@ -137,11 +141,11 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 			CompletableFuture<String> compFuture = new CompletableFuture<>();
 			futures.add(compFuture);
 
-			compFuture.completeAsync(() ->  handlePrime(curPrime, counter.incrementAndGet()) , workStealingPool);
+			compFuture.completeAsync(() -> handlePrime(curPrime, counter.incrementAndGet()) , workStealingPool);
 		}
 
 		long [] c = {0};
-		futures.stream().map(CompletableFuture::join).forEach(x ->  c[0]++);
+		futures.stream().map(CompletableFuture::join).forEach(x -> c[0]++ );
 
 		if (log.isLoggable(Level.INFO))
 			log.info(String.format("Total valid entries: %d out of %d; completed(%d)",  + good.get(), ps.getMaxIdx(),c[0]));
@@ -154,8 +158,7 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 		try
 		{
 			reducePrime(curPrime);
-			good.getAndIncrement();
-			return retVal + good.get();
+			return retVal + good.getAndIncrement();
 		}
 		catch(Exception e)
 		{

@@ -27,15 +27,27 @@ Given a reasonably powerful desktop computer with 64Gb of memory; Some of the ab
 Current processing on my i7 with 64Gb RAM reaches about 3-5 million (cmd line args of:  init --max-count=3000000 --log=NODESTRUCT) before system speed / stability / etc start to suffer. Graph visualizations slow once you get into the low thousands. Exporting and using other external tools (GML format) performed better for visualizations.
 
 ## Execution - command line argument examples
-- init --max-count=1000 --log=GRAPHSTRUCT
-- init --max-count=500  --base=THREETRIPLE  --log-generate  --active-base-id=THREETRIPLE  --log=ALLTHREETRIPLE
-- init  --base=NPRIME --log-generate  --max-count=250 --active-base-id=NPRIME --max-reduce=2
-- init  --base=NPRIME --log-generate  --max-count=250 --active-base-id=NPRIME --max-reduce=3
-- init --max-count=1250  --log=NPRIME
+- init --max-count=100 --log=BASES
+    - Logs the prime#'s and the index; #-bases is just 1
 - init --max-count=100000 -e=GML
+    - Dumps primes to a GML file in home directory
+- init --max-count=1000 --log=GRAPHSTRUCT
+    - Logs data from the graph structure
 - init --max-count=100 --log=GRAPHSTRUCT --graph=DEFAULT
-- init --max-count=1000000 --log=NODESTRUCT
+    - Logs data from graph structure and renders some graphs/data
 - init --max-count=3000000 --log=NODESTRUCT
+    - Logs data from the node structure
+- init --max-count=3000000 --log=NODESTRUCT --graph=DEFAULT
+    - Logs data from node structure and renders some graphs/data
+- init --max-count=500 --log=BASES --base=THREETRIPLE
+    - Logs the prime, index, #bases(triples) and each triple
+
+- init --max-count=250 --log=BASES --base=NPRIME --max-reduce=2
+- init --max-count=250 --LOG=BASES --base=NPRIME --max-reduce=3
+
+Adding the option:
+	--log-generate
+may generate some additional intermediate logging.
 
 ## Performance
 Not much has been tuned at this point. I made some improvements when performance was so poor as to prevent running default base creation for any meaningful number of primes. I'm more interested in improvements at the data structure selection level than anything else this moment so that will be the focus for now. The creation of triples does use CompletableFuture (1 per target prime) which does help with that process - running for 500 primes still takes 1+ minutes though. The logging to console out is probably one of the largest time consumers (especially when running in an IDE such as Eclipse) - I may switch to file output and see what difference it makes. If that simple change produces a reasonable speedup then it allows faster turn-around times for other changes I want to make.
@@ -46,7 +58,7 @@ Not much has been tuned at this point. I made some improvements when performance
 
 Prime [773] idx[137] #-bases[796]
 
-[241,263,269], [239,263,271], [233,269,271], [239,257,277], [233,263,277],
+	[241,263,269], [239,263,271], [233,269,271], [239,257,277], [233,263,277],
 	[227,269,277], [241,251,281], [229,263,281], [223,269,281], [239,251,283],
 	[233,257,283], [227,263,283], [239,241,293], [229,251,293], [223,257,293],
 	[211,269,293], [199,281,293], [197,283,293], [227,239,307], [197,269,307],

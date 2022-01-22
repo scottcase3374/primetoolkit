@@ -41,6 +41,7 @@ public interface PrimeBaseIntfc
 	BigInteger getMaxPrimeBase(@NonNull BaseTypes baseType);
 
 	int getBaseSize();
+	int getBaseSize(@NonNull BaseTypes baseType);
 
 	/**
 	 * Utility method - not useful in initial context but

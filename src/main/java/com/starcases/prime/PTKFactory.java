@@ -12,7 +12,9 @@ import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.impl.PrimeSource;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 
 import com.starcases.prime.intfc.FactoryIntfc;
 import com.starcases.prime.intfc.PrimeBaseIntfc;
@@ -23,22 +25,40 @@ import com.starcases.prime.intfc.PrimeRefIntfc;
  * factory providing defaults for some example usages.
  *
  */
+
 public class PTKFactory
 {
-	public static @Min(1) int maxCount;
-	public static @Max(3) int maxReduce;
-	public static @Min(1) int confidenceLevel;
+	@Getter
+	@Setter
+	static @Min(1) int maxCount;
 
-	public static @NonNull BaseTypes activeBaseId;
+	@Getter
+	@Setter
+	static @Max(3) int maxReduce;
 
-	public static @NonNull BiFunction<Integer, BitSet, PrimeRefIntfc> primeRefCtor;
+	@Getter
+	@Setter
+	static @Min(1) int confidenceLevel;
 
-	public static @NonNull Consumer<PrimeSourceIntfc> primeRefSetPrimeSource;
-	public static @NonNull Consumer<PrimeSourceIntfc> baseSetPrimeSource;
+	@Getter
+	@Setter
+	static @NonNull BaseTypes activeBaseId;
 
-	public static @NonNull Supplier<PrimeBaseIntfc> primeBaseCtor;
+	@Getter
+	@Setter
+	static @NonNull BiFunction<Integer, BitSet, PrimeRefIntfc> primeRefCtor;
 
+	@Getter
+	@Setter
+	static @NonNull Consumer<PrimeSourceIntfc> primeRefSetPrimeSource;
 
+	@Getter
+	@Setter
+	static @NonNull Consumer<PrimeSourceIntfc> baseSetPrimeSource;
+
+	@Getter
+	@Setter
+	static @NonNull Supplier<PrimeBaseIntfc> primeBaseCtor;
 
 	private PTKFactory()
 	{}
@@ -86,8 +106,6 @@ public class PTKFactory
 			@NonNull Consumer<PrimeSourceIntfc> baseSetPrimeSource
 			)
 	{
-		var ps = new PrimeSource(maxCount, confidenceLevel, primeRefCtor, consumerSetPrimeSource, baseSetPrimeSource);
-		ps.setActiveBaseId(activeBaseId);
-		return ps;
+		return new PrimeSource(maxCount, confidenceLevel, primeRefCtor, consumerSetPrimeSource, baseSetPrimeSource);
 	}
 }

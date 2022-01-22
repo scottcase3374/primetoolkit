@@ -16,9 +16,7 @@ import lombok.NonNull;
 public class PrimeBaseWithBitsets implements PrimeBaseIntfc
 {
 	public PrimeBaseWithBitsets()
-	{
-
-	}
+	{}
 
 	@NonNull
 	private static PrimeSourceIntfc primeSrc;
@@ -28,20 +26,40 @@ public class PrimeBaseWithBitsets implements PrimeBaseIntfc
 		primeSrc = primeSrcIntfc;
 	}
 
-	// Represents sets of base primes that sum to this prime. (index to primes)
+	/**
+	 * Represents sets of base primes that sum to this prime. (index to primes)
+	 *
+	 * NOTE: This supports multiple alternative bases per base type - the PrimeBaseWithLists only supports 1 base
+	 *       per base type.
+	 */
 	@NonNull
 	private final Map<BaseTypes, List<BitSet>> primeBaseIdxs = new EnumMap<>(BaseTypes.class);
 
+	/**
+	 * size for DEFAULT base type
+	 */
 	@Override
 	public int getBaseSize()
 	{
-		 return primeBaseIdxs.get(BaseTypes.DEFAULT).get(0).cardinality();
+		 return primeBaseIdxs.get(BaseTypes.DEFAULT).size();
 	}
 
+	/**
+	 * size for DEFAULT base type
+	 */
+	@Override
+	public int getBaseSize(@NonNull BaseTypes baseType)
+	{
+		 return primeBaseIdxs.get(baseType).size();
+	}
+
+	/**
+	 * For DEFAULT base type
+	 */
 	@Override
 	public List<BitSet> getPrimeBaseIdxs()
 	{
-		return getPrimeBaseIdxs(primeSrc.getActiveBaseId());
+		return getPrimeBaseIdxs(BaseTypes.DEFAULT);
 	}
 
 	@Override
@@ -57,20 +75,29 @@ public class PrimeBaseWithBitsets implements PrimeBaseIntfc
 	@Override
 	public void addPrimeBase(@NonNull BitSet primeBase)
 	{
-
-		addPrimeBase(primeBase, primeSrc.getActiveBaseId());
+		addPrimeBase(primeBase, BaseTypes.DEFAULT);
 	}
 
 	@Override
 	public void addPrimeBase(@NonNull BitSet primeBase, @NonNull BaseTypes baseType)
 	{
-		this.primeBaseIdxs.merge(baseType, new ArrayList<>(Arrays.asList(primeBase)), (a,b) -> { a.addAll(b); return a;} );
+		this.primeBaseIdxs.compute(baseType,
+				(k, v) ->
+					{
+						if (v == null)
+						{
+							return new ArrayList<BitSet>(Arrays.asList(primeBase));
+						}
+
+						v.add(primeBase);
+						return v;
+					});
 	}
 
 	@Override
 	public BigInteger getMinPrimeBase()
 	{
-		return getMinPrimeBase(primeSrc.getActiveBaseId());
+		return getMinPrimeBase(BaseTypes.DEFAULT);
 	}
 
 	/**
@@ -92,7 +119,7 @@ public class PrimeBaseWithBitsets implements PrimeBaseIntfc
 	@Override
 	public BigInteger getMaxPrimeBase()
 	{
-		return getMaxPrimeBase(primeSrc.getActiveBaseId());
+		return getMaxPrimeBase(BaseTypes.DEFAULT);
 	}
 
 	/**

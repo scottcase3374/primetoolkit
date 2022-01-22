@@ -74,7 +74,7 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 		Deque<Integer> q = new ArrayDeque<>();
 
 		// want to process initial bases for prime
-		primeRef.getPrimeBaseData().getPrimeBaseIdxs().get(0).stream().boxed().forEach(q::add);
+		primeRef.getPrimeBaseData().getPrimeBaseIdxs(BaseTypes.DEFAULT).get(0).stream().boxed().forEach(q::add);
 
 		while (true)
 		{
@@ -89,7 +89,7 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 				  ps.getPrimeRef(i)
 					.get()
 					.getPrimeBaseData()
-					.getPrimeBaseIdxs()
+					.getPrimeBaseIdxs(BaseTypes.DEFAULT)
 					.get(0)
 					.stream()
 					.boxed() // index integers
@@ -155,7 +155,7 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 							curPrime.getPrime(),
 							curPrime.getPrimeRefIdx(),
 							countForBaseIdx.stream()
-								.map(countForBasePrime -> String.format("base-%d-count:[%d]", ps.getPrime(tmpI[0]++).get(), countForBasePrime))
+								.map(countForBasePrime -> String.format("base-prime-%d-count:[%d]", ps.getPrime(tmpI[0]++).get(), countForBasePrime))
 								.collect(Collectors.joining(", "))));
 				}
 				var bs = new BitSet();

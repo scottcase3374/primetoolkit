@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
@@ -201,7 +200,7 @@ enum ConditionConstraintState
 				}
 
 				baseCount++;
-				bases.add(primeRefs.get(idx).get().getPrime());
+				bases.add(primeRefs.get(idx).orElseThrow().getPrime());
 			}
 		}
 
@@ -233,6 +232,15 @@ enum ConditionConstraintState
 @NoArgsConstructor
 class AllTriples
 {
+	static final EnumSet<ConditionConstraintState> BAD_CONDITION_STATE =
+			EnumSet.of(ConditionConstraintState.DUPE,
+					ConditionConstraintState.RANGE_ERROR,
+					ConditionConstraintState.MISSING_BASE);
+
+	static final EnumSet<SumConstraintState> GOOD_SUM_STATE =
+			EnumSet.of(SumConstraintState.MATCH,
+					SumConstraintState.INCREMENT_SUM);
+
 	@NonNull
 	PrimeRefIntfc targetPrime;
 
@@ -283,27 +291,9 @@ class AllTriples
 						@NonNull SumConstraintState [] sumConstraint,
 						@NonNull ConditionConstraintState [] conditionConstraint)
 	{
-		 triple.computeIfPresent(idx, (t, op) -> op.flatMap(PrimeRefIntfc::getNextPrimeRef));
+		 triple.compute(idx, (t, op) -> op.flatMap(PrimeRefIntfc::getNextPrimeRef));
 		 sumConstraint[0] = SumConstraintState.checkSumConstraints(triple, targetPrime, null, null);
 		 conditionConstraint[0] = ConditionConstraintState.checkConditionConstraints(triple, null, null);
-	}
-
-	/**
-	 * Utility method for extracting a string version of the bases. Probably should move to the log functionality.
-	 *
-	 * @param triple
-	 * @return
-	 */
-	String bases(@NonNull Map<TripleIdx, Optional<PrimeRefIntfc>> triple)
-	{
-		return triple
-				.values()
-				.stream()
-				.filter(Objects::nonNull)
-				.filter(Optional::isPresent)
-				.map(Optional::get)
-				.map(p -> p.getPrime().toString())
-				.collect(Collectors.joining(","));
 	}
 
 	/**
@@ -318,16 +308,17 @@ class AllTriples
 	 */
 	void process()
 	{
-		final EnumSet<ConditionConstraintState> BAD_CONDITION_STATE = EnumSet.of(ConditionConstraintState.DUPE, ConditionConstraintState.RANGE_ERROR);
-		final EnumSet<SumConstraintState> GOOD_SUM_STATE = EnumSet.of(SumConstraintState.MATCH, SumConstraintState.INCREMENT_SUM);
-
 		Map<TripleIdx, Optional<PrimeRefIntfc>> triple = new TreeMap<>();
-		triple.put(TripleIdx.TOP, ps.getPrimeRef(4) );
-		triple.put(TripleIdx.MID, ps.getPrimeRef(2) );
-		triple.put(TripleIdx.BOT,  ps.getPrimeRef(0) );
+		triple.put(TripleIdx.TOP, ps.getPrimeRef(4) );  // prime 7
+		triple.put(TripleIdx.MID, ps.getPrimeRef(2) );  // prime 3
+		triple.put(TripleIdx.BOT,  ps.getPrimeRef(0) ); // prime 1
+
+		assert(triple.size() == 3);
+		assert(!triple.containsValue(null));
+		assert(!triple.values().contains(null));
 
 		SumConstraintState [] sumConstraint = {SumConstraintState.checkSumConstraints(triple, targetPrime, null, null)};
-		ConditionConstraintState [] conditionConstraint = {ConditionConstraintState.MISSING_BASE};
+		ConditionConstraintState [] conditionConstraint = {ConditionConstraintState.checkConditionConstraints(triple, null, null)};
 
 		do // cur top
 		{
@@ -335,13 +326,12 @@ class AllTriples
 			{
 				do // cur bot
 				{
-					if (sumConstraint[0] == SumConstraintState.MATCH && conditionConstraint[0] != ConditionConstraintState.DUPE)
+					if (sumConstraint[0] == SumConstraintState.MATCH && !BAD_CONDITION_STATE.contains(conditionConstraint[0]))
 					{
 						addPrimeBases(targetPrime, triple);
 						break;
 					}
 					this.nextPrimeRef(TripleIdx.BOT, triple, sumConstraint, conditionConstraint);
-
 				}
 				while(GOOD_SUM_STATE.contains(sumConstraint[0]) && !BAD_CONDITION_STATE.contains(conditionConstraint[0]));
 
@@ -363,12 +353,17 @@ class AllTriples
 
 	private void addPrimeBases(@NonNull PrimeRefIntfc prime, @NonNull Map<TripleIdx, Optional<PrimeRefIntfc>> vals)
 	{
+		assert(vals.size() == 3);
+		assert(!vals.containsValue(null));
+		assert(!vals.values().contains(null));
+
 		var bs = new BitSet();
 		vals.values().stream()
 			.filter(Objects::nonNull)
 			.filter(Optional::isPresent)
 			.map(Optional::get)
-			.map(PrimeRefIntfc::getPrimeRefIdx).forEach(bs::set);
+			.map(PrimeRefIntfc::getPrimeRefIdx)
+			.forEach(bs::set);
 
 		prime.getPrimeBaseData().addPrimeBase(bs, BaseTypes.THREETRIPLE);
 	}

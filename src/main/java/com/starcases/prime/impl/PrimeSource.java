@@ -153,7 +153,7 @@ public class PrimeSource implements PrimeSourceIntfc
 						.mapToObj(this::getPrime)
 						.filter(Optional::isPresent)
 						.map(Optional::get)
-						.reduce(curPrime.get(), BigInteger::add);
+						.reduce(curPrime.orElseThrow(), BigInteger::add);
 
 				if (permutationSum.compareTo(sumCeiling) > 0)
 				{
@@ -456,7 +456,11 @@ public class PrimeSource implements PrimeSourceIntfc
 	 *
 	 * @param aPrime
 	 */
-	private void addPrimeRef(@NonNull @Min(1) BigInteger newPrime, @NonNull BitSet base, @Min(0) int curPrimeIdx, boolean canAddBase)
+	private void addPrimeRef(
+			@NonNull @Min(1) BigInteger newPrime,
+			@NonNull BitSet base, @Min(0)
+			int curPrimeIdx,
+			boolean canAddBase)
 	{
 		if (canAddBase && newPrime.equals(getPrime(curPrimeIdx).get()))
 		{
