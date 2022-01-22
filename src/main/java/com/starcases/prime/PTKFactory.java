@@ -70,7 +70,7 @@ public class PTKFactory
 					@Override
 					public PrimeSourceIntfc getPrimeSource()
 					{
-						return primeSource(maxCount, confidenceLevel, activeBaseId, getPrimeRefConstructor(), primeRefSetPrimeSource, baseSetPrimeSource);
+						return primeSource(maxCount, confidenceLevel, getPrimeRefConstructor(), primeRefSetPrimeSource, baseSetPrimeSource);
 					}
 
 					@Override
@@ -100,7 +100,6 @@ public class PTKFactory
 	static PrimeSourceIntfc primeSource(
 			@Min(1) int maxCount,
 			@Min(1) int confidenceLevel,
-			BaseTypes activeBaseId,
 			@NonNull BiFunction<Integer, BitSet, PrimeRefIntfc> primeRefCtor,
 			@NonNull Consumer<PrimeSourceIntfc> consumerSetPrimeSource,
 			@NonNull Consumer<PrimeSourceIntfc> baseSetPrimeSource

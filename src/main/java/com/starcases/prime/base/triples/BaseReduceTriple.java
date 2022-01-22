@@ -2,7 +2,6 @@ package com.starcases.prime.base.triples;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
