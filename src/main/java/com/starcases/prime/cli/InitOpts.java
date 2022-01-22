@@ -1,5 +1,6 @@
 package com.starcases.prime.cli;
 
+import java.io.File;
 import java.util.logging.Level;
 
 import picocli.CommandLine.Option;
@@ -20,10 +21,10 @@ class InitOpts
 	@Option(names = { "--log-level"}, description = "Valid vals: ${COMPLETION-CANDIDATES}", defaultValue="INFO", required = false)
 	Level logLevel;
 
-	@Option(names = { "--log-file"}, description = "Path/file for log output", required = false)
+	@Option(names = { "--log-file"}, description = "Path/file for logger output", required = false)
 	String logFile;
 
-	@Option(names = { "--output-file"}, description = "Path/file for non-log output (i.e. console)", required = false)
-	String outputFile;
+	@Option(names = { "--output-file"}, description = "Path/file for non-logger output (i.e. std-out / console)", required = false)
+	File outputFile;
 
 }

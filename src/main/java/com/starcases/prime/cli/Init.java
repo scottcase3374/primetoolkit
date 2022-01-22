@@ -1,5 +1,8 @@
 package com.starcases.prime.cli;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 
 import java.util.ArrayList;
@@ -77,6 +80,40 @@ public class Init implements Runnable
 	@Override
 	public void run()
 	{
+		if (initOpts.outputFile != null)
+		{
+			try
+			{
+				if (initOpts.outputFile.exists())
+				{
+					try
+					{
+						File ren = File.createTempFile("ptk", ".old", new File(initOpts.outputFile.getParent()));
+						if (initOpts.outputFile.renameTo(ren))
+						{
+							System.err.println("Renamed output file: " + initOpts.outputFile + " to " + ren.getCanonicalPath());
+						}
+						else
+						{
+							System.err.println("FAILED: RenamE output file: " + initOpts.outputFile + " to " + ren.getCanonicalPath());
+						}
+					}
+					catch(Exception e)
+					{
+						System.err.println("couldn't rename output file");
+					}
+				}
+				else
+					System.out.println("Created outputfile: " + initOpts.outputFile.getCanonicalPath() + " :" +    initOpts.outputFile.createNewFile());
+				System.setOut(new PrintStream(initOpts.outputFile));
+			}
+			catch(IOException e)
+			{
+				System.err.println("ERROR: could not set standard out to file: " + initOpts.outputFile);
+				System.err.println(e.toString());
+			}
+		}
+
 		PTKFactory.setMaxCount(initOpts.maxCount);
 		PTKFactory.setConfidenceLevel(initOpts.confidenceLevel);
 
