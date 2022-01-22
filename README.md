@@ -42,13 +42,21 @@ Current processing on my i7 with 64Gb RAM reaches about 3-5 million (cmd line ar
 - init --max-count=500 --log=BASES --base=THREETRIPLE
     - Logs the prime, index, #bases(triples) and each triple
 - init --max-count=250 --log=BASES --base=NPRIME --max-reduce=2
-    - Logs the prime, index, and a base-prime/count for each prime associated to "max-reduce" indexes
-- init --max-count=250 --LOG=BASES --base=NPRIME --max-reduce=3
-    - Logs the prime, index, and a base-prime/count for each prime associated to "max-reduce" indexes
+    - Logs the prime, index, and a base-prime/count for each prime associated to "max-reduce" indexes (i.e. primes 1 and 2)
+- init --max-count=250 --LOG=BASES --base=NPRIME --max-reduce=4
+    - Logs the prime, index, and a base-prime/count for each prime associated to "max-reduce" indexes  (i.e. primes, 1,2,3,5)
 
-Adding the option:
+Adding option:
+
 	--log-generate
 may generate some additional intermediate logging.
+
+Adding option similar to:
+
+   --output-file=/home/scott/ptk.output
+
+will force console/standard-out redirection to that file. If filename already exist, it is renamed.
+
 
 ## Performance
 Not much has been tuned at this point. I made some improvements when performance was so poor as to prevent running default base creation for any meaningful number of primes. I'm more interested in improvements at the data structure selection level than anything else this moment so that will be the focus for now. The creation of triples does use CompletableFuture (1 per target prime) which does help with that process - running for 500 primes still takes 1+ minutes though. The logging to console out is probably one of the largest time consumers (especially when running in an IDE such as Eclipse) - I may switch to file output and see what difference it makes. If that simple change produces a reasonable speedup then it allows faster turn-around times for other changes I want to make.
