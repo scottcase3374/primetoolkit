@@ -68,8 +68,8 @@ public class Init implements Runnable
 	@ArgGroup(exclusive = false, validate = false)
 	GraphOpts graphOpts;
 
-//	@ArgGroup(exclusive = false, validate = false)
-//	LWJGLOps jglOps;
+	@ArgGroup(exclusive = false, validate = false)
+	LWJGLOps jglOps;
 
 	@ArgGroup(exclusive = false, validate = false)
 	ExportOpts exportOpts;
@@ -207,7 +207,7 @@ public class Init implements Runnable
 
 //		if (jglOps != null && jglOps.lwjglOper != null && jglOps.lwjglOper == LWJGLOper.HW)
 //		{
-//			new HelloWorld().run();
+//			actions.add(s -> new HelloWorld().run() );
 //		}
 
 		if (exportOpts != null && exportOpts.exportType != null && exportOpts.exportType == Export.GML)

@@ -25,15 +25,20 @@ import lombok.NonNull;
 
 public class PrimeRef extends AbstractPrimeRef implements PrimeRefIntfc
 {
+	@NonNull
+	private static PrimeSourceIntfc primeSrc;
+
+	public static void setPrimeSource(@NonNull PrimeSourceIntfc primeSrcIntfc)
+	{
+		primeSrc = primeSrcIntfc;
+	}
+
 	/*
 	 *  Index for this instance of a prime.
 	 *  index to bitsets or collections for this val
 	 */
 	@Min(0)
 	private int primeIdx;
-
-	@NonNull
-	private static PrimeSourceIntfc primeSrc;
 
 	@NonNull
 	private PrimeBaseIntfc primeBaseData;
@@ -54,55 +59,6 @@ public class PrimeRef extends AbstractPrimeRef implements PrimeRefIntfc
 		this.getPrimeBaseData().addPrimeBase(primeBaseIdxs);
 	}
 
-	public static void setPrimeSource(@NonNull PrimeSourceIntfc primeSrcIntfc)
-	{
-		primeSrc = primeSrcIntfc;
-	}
-
-	public int getPrimeRefIdx()
-	{
-		return this.primeIdx;
-	}
-
-	public Optional<PrimeRefIntfc> getNextPrimeRef()
-	{
-		return primeSrc.getPrimeRef(primeIdx +1);
-	}
-
-	public Optional<PrimeRefIntfc> getPrevPrimeRef()
-	{
-		if (primeIdx == 0)
-			return Optional.empty();
-
-		return primeSrc.getPrimeRef(primeIdx -1);
-	}
-
-	@Override
-	public Optional<PrimeRefIntfc> getPrimeRefWithinOffset(@NonNull BigInteger targetOffset)
-	{
-		return primeSrc.getPrimeRefWithinOffset(this.primeIdx, targetOffset);
-	}
-
-	@Override
-	public BigInteger getPrime() {
-		return primeSrc.getPrime(primeIdx).get();
-	}
-
-	public PrimeBaseIntfc getPrimeBaseData()
-	{
-		return this.primeBaseData;
-	}
-
-	public String toString()
-	{
-		return this.getPrime().toString();
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(primeIdx);
-	}
-
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -113,5 +69,54 @@ public class PrimeRef extends AbstractPrimeRef implements PrimeRefIntfc
 			return false;
 		PrimeRef other = (PrimeRef) obj;
 		return primeIdx == other.primeIdx;
+	}
+
+	@Override
+	public Optional<PrimeRefIntfc> getNextPrimeRef()
+	{
+		return primeSrc.getPrimeRef(primeIdx +1);
+	}
+
+	@Override
+	public Optional<PrimeRefIntfc> getPrevPrimeRef()
+	{
+		if (primeIdx == 0)
+			return Optional.empty();
+
+		return primeSrc.getPrimeRef(primeIdx -1);
+	}
+
+	@Override
+	public BigInteger getPrime() {
+		return primeSrc.getPrime(primeIdx).get();
+	}
+
+	@Override
+	public PrimeBaseIntfc getPrimeBaseData()
+	{
+		return this.primeBaseData;
+	}
+
+	@Override
+	public int getPrimeRefIdx()
+	{
+		return this.primeIdx;
+	}
+
+	@Override
+	public Optional<PrimeRefIntfc> getPrimeRefWithinOffset(@NonNull BigInteger targetOffset)
+	{
+		return primeSrc.getPrimeRefWithinOffset(this.primeIdx, targetOffset);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(primeIdx);
+	}
+
+	@Override
+	public String toString()
+	{
+		return this.getPrime().toString();
 	}
 }

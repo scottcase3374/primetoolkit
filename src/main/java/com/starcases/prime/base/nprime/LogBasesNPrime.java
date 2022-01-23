@@ -1,5 +1,6 @@
 package com.starcases.prime.base.nprime;
 
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 import com.starcases.prime.base.BaseTypes;
@@ -27,43 +28,57 @@ public class LogBasesNPrime extends AbstractLogBase
 	@Command
 	public void log()
 	{
+		final int maxBasesInRow = 5;
+
 		// Get desired data
 		ps.setActiveBaseId(BaseTypes.NPRIME);
 
-		int idx = 0;
 		var prIt = ps.getPrimeRefIter();
 		while (prIt.hasNext())
 		{
 			var pr = prIt.next();
 			try
 			{
-				long size = pr.getPrimeBaseData().getPrimeBaseIdxs(BaseTypes.NPRIME).size();
-				System.out.println(String.format("%nPrime [%d] idx[%d] #-bases[%d]%n",
-						pr.getPrime(),
-						idx++,
-						size
-						));
+				// Handle "header" info for the current prime - prime value and the index of the prime.
+				System.out.println(String.format("%nPrime [%d] idx[%d]%n",
+													pr.getPrime(),
+													pr.getPrimeRefIdx()
+													));
 
-					long [] cnt = {0};
-					StringBuilder sb = new StringBuilder("\t");
+					final var sb = new StringBuilder("\t");
 
-					pr.getPrimeBaseData().getPrimeBaseIdxs(BaseTypes.NPRIME)
+					// get list of counts for the target prime indexes that we reduced to.
+					final var counts =
+							switch(pr.getPrimeBaseData().getBaseMetadata())
+							{
+							case NPrimeBaseMetadata npbmd -> npbmd.getCountForBaseIdx();
+							default -> Collections.emptyList();
+							};
+
+					pr.getPrimeBaseData()
+							.getPrimeBaseIdxs(BaseTypes.NPRIME)
 							.stream()
-							.<String>mapMulti((bs, consumer) ->
-												{
-													cnt[0]++;
+							.<String>mapMulti((indexBitset, consumer) ->
+									{
+													// No direct correlation between index bit set 'index' value in the map() below
+													// and the list of counts. Each item in the count-list is simply associated with the next
+													// prime starting at index 0 and incrementing index by 1.
+													//
+													// Remember, the reduction is reducing to a "prefix" list of the primes.
+													int [] primeIdxCntIdx = {0};
+
 													sb.append(
-													 	bs
+													 	indexBitset
 													 	.stream()
 													 	.boxed()
-													 	.map(i -> ps.getPrime(i).get().toString())
+													 	.map(index -> String.format("base-prime-%d count:[%d]", ps.getPrime(primeIdxCntIdx[0]).get(), counts.get(primeIdxCntIdx[0]++)) )
 													 	.collect(Collectors.joining(",","[","]"))
 													 	);
 
-													if (cnt[0] < size)
+													if (primeIdxCntIdx[0] < counts.size())
 														sb.append(", ");
 
-													if (cnt[0] % 5 == 0 || cnt[0] >= size)
+													if (primeIdxCntIdx[0] % maxBasesInRow == 0 || primeIdxCntIdx[0] >= counts.size())
 													{
 														consumer.accept(sb.toString());
 														sb.setLength(0);
@@ -75,7 +90,7 @@ public class LogBasesNPrime extends AbstractLogBase
 			}
 			catch(Exception e)
 			{
-				log.severe(String.format("Can't show bases for: %d exception:", pr.getPrime()));
+				log.severe(String.format("Can't show bases for prime [%d] index[%d] exception:", pr.getPrime(), pr.getPrimeRefIdx()));
 				log.throwing(this.getClass().getName(), "log", e);
 				e.printStackTrace();
 			}

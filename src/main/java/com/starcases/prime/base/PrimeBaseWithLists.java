@@ -8,9 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.starcases.prime.intfc.BaseMetadataIntfc;
 import com.starcases.prime.intfc.PrimeBaseIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
+import lombok.Getter;
 import lombok.NonNull;
 
 public class PrimeBaseWithLists implements PrimeBaseIntfc
@@ -18,6 +20,9 @@ public class PrimeBaseWithLists implements PrimeBaseIntfc
 	@NonNull
 	// Represents sets of base primes that sum to this prime. (index to primes)
 	private final Map<BaseTypes, List<Integer>> primeBaseIdxs = new EnumMap<>(BaseTypes.class);
+
+	@Getter
+	private BaseMetadataIntfc baseMetadata;
 
 	@NonNull
 	private static PrimeSourceIntfc primeSrc;
@@ -83,6 +88,13 @@ public class PrimeBaseWithLists implements PrimeBaseIntfc
 	public void addPrimeBase(@NonNull BitSet primeBase, @NonNull BaseTypes baseType)
 	{
 		this.primeBaseIdxs.merge(baseType, primeBase.stream().boxed().toList(), (a,b) -> b );
+	}
+
+	@Override
+	public void addPrimeBase(@NonNull BaseTypes baseType, @NonNull BitSet primeBase, @NonNull BaseMetadataIntfc baseMetadata)
+	{
+		this.primeBaseIdxs.merge(baseType, primeBase.stream().boxed().toList(), (a,b) -> b );
+		this.baseMetadata = baseMetadata;
 	}
 
 	@Override

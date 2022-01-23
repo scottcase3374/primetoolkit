@@ -13,8 +13,11 @@ import lombok.NonNull;
 
 /**
  *
- * Main interface for needs related to prime / base generation and alternative
- * algs.
+ * Main interface for needs related to prime / base generation and alternative algs.
+ *
+ * Implementations of this interface generally contain the primes data and directly data
+ * directly related to the primes.  This allows near direct access to the individual primes
+ * and data for navigating amongst the primes.
  *
  */
 public interface PrimeSourceIntfc

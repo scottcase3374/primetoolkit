@@ -8,9 +8,11 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
+import com.starcases.prime.intfc.BaseMetadataIntfc;
 import com.starcases.prime.intfc.PrimeBaseIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
+import lombok.Getter;
 import lombok.NonNull;
 
 public class PrimeBaseWithBitsets implements PrimeBaseIntfc
@@ -36,6 +38,9 @@ public class PrimeBaseWithBitsets implements PrimeBaseIntfc
 	 */
 	@NonNull
 	private final Map<BaseTypes, List<BitSet>> primeBaseIdxs = new EnumMap<>(BaseTypes.class);
+
+	@Getter
+	private BaseMetadataIntfc baseMetadata;
 
 	/**
 	 * size for DEFAULT base type
@@ -94,6 +99,23 @@ public class PrimeBaseWithBitsets implements PrimeBaseIntfc
 						v.add(primeBase);
 						return v;
 					});
+	}
+
+	@Override
+	public void addPrimeBase(@NonNull BaseTypes baseType, @NonNull BitSet primeBase, @NonNull BaseMetadataIntfc baseMetadata)
+	{
+		this.primeBaseIdxs.compute(baseType,
+				(k, v) ->
+					{
+						if (v == null)
+						{
+							return new ArrayList<BitSet>(Arrays.asList(primeBase));
+						}
+
+						v.add(primeBase);
+						return v;
+					});
+		this.baseMetadata = baseMetadata;
 	}
 
 	@Override

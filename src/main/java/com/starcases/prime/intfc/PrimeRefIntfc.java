@@ -10,12 +10,22 @@ import lombok.NonNull;
  *
  * Main interface for working with the primes and accessing the info on bases.
  *
+ * Generally, the primes are not stored in the classes implementing this interface.
+ *
+ * The PrimeSourceIntfc implementations generally store the primes and other directly
+ * related data - this facilitated the use of integer indexes and data types
+ * which support near O(1) lookups by index.  The index should be managed by each
+ * class implementing this PrimeRefIntfc interface.
+ *
  */
 public interface PrimeRefIntfc
 {
 	static final Comparator<PrimeRefIntfc> primeRefComparator = (PrimeRefIntfc o1, PrimeRefIntfc o2) -> o1.getPrime().compareTo(o2.getPrime());
 
+	//
 	// prime reference related
+	//
+
 	BigInteger getPrime();
 	Optional<PrimeRefIntfc> getPrimeRefWithinOffset(@NonNull BigInteger targetOffset);
 
@@ -24,6 +34,11 @@ public interface PrimeRefIntfc
 
 	Optional<BigInteger> getDistToNextPrime();
 	Optional<BigInteger> getDistToPrevPrime();
+
+	//
+	// Base related info
+	//
+	PrimeBaseIntfc getPrimeBaseData();
 
 	//
 	// Index related info
@@ -35,7 +50,4 @@ public interface PrimeRefIntfc
 	 * overall list of primes.
 	 */
 	int getPrimeRefIdx();
-
-
-	PrimeBaseIntfc getPrimeBaseData();
 }

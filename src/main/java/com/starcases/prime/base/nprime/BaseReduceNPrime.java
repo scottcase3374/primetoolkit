@@ -6,7 +6,6 @@ import java.util.BitSet;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 import java.util.Iterator;
 import java.util.List;
 
@@ -22,10 +21,6 @@ import lombok.NonNull;
 import lombok.extern.java.Log;
 
 /**
- * Note, this is output as part of the base generation and not part of the "log" directive.
- * Need to fix that.
- *
- *
  * Given a prime and a maximum number of primes; reduce default bases to multiples
  * of the bases <= maximum prime provided.
  *
@@ -148,19 +143,10 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 
 				primeReduction(curPrime,countForBaseIdx);
 
-				int [] tmpI = {0};
-				if (doLog && log.isLoggable(Level.INFO))
-				{
-					log.info(String.format("Prime [%d] idx[%d] %s",
-							curPrime.getPrime(),
-							curPrime.getPrimeRefIdx(),
-							countForBaseIdx.stream()
-								.map(countForBasePrime -> String.format("base-prime-%d-count:[%d]", ps.getPrime(tmpI[0]++).get(), countForBasePrime))
-								.collect(Collectors.joining(", "))));
-				}
 				var bs = new BitSet();
 				countForBaseIdx.stream().forEach(bs::set);
-				curPrime.getPrimeBaseData().addPrimeBase(bs, BaseTypes.NPRIME);
+
+				curPrime.getPrimeBaseData().addPrimeBase(BaseTypes.NPRIME, bs, new NPrimeBaseMetadata(countForBaseIdx));
 			}
 			catch(Exception e)
 			{

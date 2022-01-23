@@ -25,15 +25,20 @@ import lombok.NonNull;
 
 public class PrimeRefBitSetIndexes extends AbstractPrimeRef implements PrimeRefIntfc
 {
+	@NonNull
+	private static PrimeSourceIntfc primeSrc;
+
+	public static void setPrimeSource(@NonNull PrimeSourceIntfc primeSrcIntfc)
+	{
+		primeSrc = primeSrcIntfc;
+	}
+
 	/*
 	 *  Index for this instance of a prime.
 	 *  index to bitsets or collections for this val
 	 */
 	@Min(0)
 	private int primeIdx;
-
-	@NonNull
-	private static PrimeSourceIntfc primeSrc;
 
 	@NonNull
 	private PrimeBaseIntfc primeBaseData;
@@ -52,41 +57,6 @@ public class PrimeRefBitSetIndexes extends AbstractPrimeRef implements PrimeRefI
 		this.primeIdx = primeIdx;
 		primeBaseData = primeBaseSupplier.get();
 		getPrimeBaseData().addPrimeBase(primeBaseIdxs);
-	}
-
-	public static void setPrimeSource(@NonNull PrimeSourceIntfc primeSrcIntfc)
-	{
-		primeSrc = primeSrcIntfc;
-	}
-
-	@Override
-	public int getPrimeRefIdx()
-	{
-		return this.primeIdx;
-	}
-
-	@Override
-	public Optional<PrimeRefIntfc> getPrimeRefWithinOffset(@NonNull BigInteger targetOffset)
-	{
-		return primeSrc.getPrimeRefWithinOffset(this.primeIdx, targetOffset);
-	}
-
-	@Override
-	public BigInteger getPrime()
-	{
-		return primeSrc.getPrime(primeIdx).get();
-	}
-
-	@Override
-	public PrimeBaseIntfc getPrimeBaseData()
-	{
-		return this.primeBaseData;
-	}
-
-	@Override
-	public int hashCode()
-	{
-		return Objects.hash(primeIdx);
 	}
 
 	@Override
@@ -112,5 +82,35 @@ public class PrimeRefBitSetIndexes extends AbstractPrimeRef implements PrimeRefI
 	public Optional<PrimeRefIntfc> getPrevPrimeRef()
 	{
 		return primeSrc.getPrimeRef(primeIdx-1);
+	}
+
+	@Override
+	public BigInteger getPrime()
+	{
+		return primeSrc.getPrime(primeIdx).get();
+	}
+
+	@Override
+	public PrimeBaseIntfc getPrimeBaseData()
+	{
+		return this.primeBaseData;
+	}
+
+	@Override
+	public int getPrimeRefIdx()
+	{
+		return this.primeIdx;
+	}
+
+	@Override
+	public Optional<PrimeRefIntfc> getPrimeRefWithinOffset(@NonNull BigInteger targetOffset)
+	{
+		return primeSrc.getPrimeRefWithinOffset(this.primeIdx, targetOffset);
+	}
+
+	@Override
+	public int hashCode()
+	{
+		return Objects.hash(primeIdx);
 	}
 }

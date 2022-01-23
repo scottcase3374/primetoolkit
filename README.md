@@ -26,6 +26,9 @@ Given a reasonably powerful desktop computer with 64Gb of memory; Some of the ab
 
 Current processing on my i7 with 64Gb RAM reaches about 3-5 million (cmd line args of:  init --max-count=3000000 --log=NODESTRUCT) before system speed / stability / etc start to suffer. Graph visualizations slow once you get into the low thousands. Exporting and using other external tools (GML format) performed better for visualizations.
 
+## Build requirements
+The codebase uses Java 17 with Java 17 preview features enabled. This is mostly for switch statements using pattern matching.
+
 ## Execution - command line argument examples
 - init --max-count=100 --log=BASES
     - Logs the prime#'s and the index; #-bases is just 1
@@ -228,11 +231,13 @@ Prime [773] idx[137] #-bases[796]
 	[3,19,751], [5,11,757], [3,13,757], [5,7,761], [1,11,761],
 	[1,3,769]
 
-- For N-base reductions, the output is currently done during base generation and not the logging action. Example output:
+- For N-base reductions - Example output:
 
-INFO: Prime [1583] idx[250] base-prime-1-count:[155], base-prime-2-count:[224], base-prime-3-count:[170], base-prime-5-count:[94]
+Prime [1583] idx[250]
 
-which is interpreted as: Prime value 1583 is represented by: 1 x 155 + 2 x 224 + 3 x 170 + 5 x 94
+	[base-prime-1 count:[155],base-prime-2 count:[318],base-prime-3 count:[264]]
+
+which is interpreted as: Prime value 1583 is represented by: 1 x 155 + 2 x 318 + 3 x 264
 
 
 ## Implementation
