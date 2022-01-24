@@ -107,14 +107,13 @@ public class PrimeSource implements PrimeSourceIntfc
 		consumerSetPrimeSrc.accept(this);
 		baseSetPrimeSrc.accept(this);
 
-		var tmpBitSet = new BitSet();
+		var tmpBitSet = new BitSet(2);
 		tmpBitSet.set(0);
 		addPrimeRef(BigInteger.valueOf(1L), tmpBitSet.get(0, 1));
 
 		tmpBitSet.clear();
 		tmpBitSet.set(1);
 		addPrimeRef(BigInteger.valueOf(2L), tmpBitSet.get(0, 2));
-
 	}
 
 	@Override
