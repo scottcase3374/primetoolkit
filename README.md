@@ -248,7 +248,7 @@ information and then new base generation, logging and graphing actions are added
 
 ## ToDo
 	- More test coverage
-	- Other graphing/visualization items (looking at some ideas which leverage lwjgl).
+	- ~~Other graphing/visualization items (looking at some ideas which leverage lwjgl).~~
 	- More metrics generation
 	- Specialized data structures
 	- Better support for tracking performance (run-time) of the various stages (prime determination, prime bases generation, logging, etc).
