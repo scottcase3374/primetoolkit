@@ -22,7 +22,6 @@ import com.starcases.prime.base.triples.BaseReduceTriple;
 import com.starcases.prime.base.triples.LogBases3AllTriples;
 import com.starcases.prime.graph.export.ExportGML;
 import com.starcases.prime.graph.log.LogGraphStructure;
-//import com.starcases.prime.graph.lwjgl.HelloWorld;
 import com.starcases.prime.graph.visualize.MetaDataTable;
 import com.starcases.prime.graph.visualize.ViewDefault;
 import com.starcases.prime.impl.PrimeRef;
@@ -69,9 +68,6 @@ public class Init implements Runnable
 	GraphOpts graphOpts;
 
 	@ArgGroup(exclusive = false, validate = false)
-	LWJGLOps jglOps;
-
-	@ArgGroup(exclusive = false, validate = false)
 	ExportOpts exportOpts;
 
 	@NonNull
@@ -80,142 +76,21 @@ public class Init implements Runnable
 	@Override
 	public void run()
 	{
-		if (initOpts.outputFile != null)
-		{
-			try
-			{
-				if (initOpts.outputFile.exists())
-				{
-					try
-					{
-						File ren = File.createTempFile("ptk", ".old", new File(initOpts.outputFile.getParent()));
-						if (initOpts.outputFile.renameTo(ren))
-						{
-							System.err.println("Renamed output file: " + initOpts.outputFile + " to " + ren.getCanonicalPath());
-						}
-						else
-						{
-							System.err.println("FAILED: RenamE output file: " + initOpts.outputFile + " to " + ren.getCanonicalPath());
-						}
-					}
-					catch(Exception e)
-					{
-						System.err.println("couldn't rename output file");
-					}
-				}
-				else
-					System.out.println("Created outputfile: " + initOpts.outputFile.getCanonicalPath() + " :" +    initOpts.outputFile.createNewFile());
-				System.setOut(new PrintStream(initOpts.outputFile));
-			}
-			catch(IOException e)
-			{
-				System.err.println("ERROR: could not set standard out to file: " + initOpts.outputFile);
-				System.err.println(e.toString());
-			}
-		}
+		stdOutRedirect();
 
-		PTKFactory.setMaxCount(initOpts.maxCount);
-		PTKFactory.setConfidenceLevel(initOpts.confidenceLevel);
+		setFactoryDefaults();
 
-		PTKFactory.setActiveBaseId(BaseTypes.DEFAULT);
-		PTKFactory.setBaseSetPrimeSource(PrimeBaseWithLists::setPrimeSource);
-		PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
+		actionInitDefaultPrimeContent();
 
-		PTKFactory.setPrimeBaseCtor(PrimeBaseWithLists::new);
-		PTKFactory.setPrimeRefCtor( (i, base) -> new PrimeRef(i, base, PTKFactory.getPrimeBaseCtor()) );
+		actionHandleAlternativeBases();
 
-		actions.add(s -> {
-							FactoryIntfc factory = PTKFactory.getFactory();
-							ps = factory.getPrimeSource();
-							ps.init();
-							ps.setActiveBaseId(PTKFactory.getActiveBaseId());
-						});
+		actionHandleLogging();
 
-		if (baseOpts != null)
-		{
-			if (baseOpts.bases != null)
-			{
-				switch(baseOpts.bases)
-				{
-				case NPRIME:
-					PTKFactory.setActiveBaseId(BaseTypes.NPRIME);
-					PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
-					PTKFactory.setBaseSetPrimeSource(PrimeBaseWithLists::setPrimeSource);
-					PTKFactory.setPrimeBaseCtor(PrimeBaseWithLists::new);
-					PTKFactory.setPrimeRefCtor( (i, base) -> new PrimeRef(i, base, PTKFactory.getPrimeBaseCtor()) );
+		actionHandleGraphing();
 
-					actions.add(s ->
-									{
-										var base = new BaseReduceNPrime(ps);
-										base.setLogBaseGeneration(baseOpts.logGenerate);
-										base.setMaxReduce(baseOpts.maxReduce);
-										base.genBases();
-									});
-					break;
+		actionHandleExports();
 
-				case THREETRIPLE:
-					PTKFactory.setActiveBaseId(BaseTypes.THREETRIPLE);
-					PTKFactory.setPrimeRefSetPrimeSource(PrimeRefBitSetIndexes::setPrimeSource);
-					PTKFactory.setBaseSetPrimeSource( PrimeBaseWithBitsets::setPrimeSource);
-					PTKFactory.setPrimeBaseCtor(PrimeBaseWithBitsets::new);
-					PTKFactory.setPrimeRefCtor( (i, base) -> new PrimeRefBitSetIndexes(i, base, PTKFactory.getPrimeBaseCtor() ));
-
-					actions.add(s ->
-									{
-										var base = new BaseReduceTriple(ps);
-										base.setLogBaseGeneration(baseOpts.logGenerate);
-										base.genBases();
-									});
-					break;
-
-				default:
-					break;
-				}
-			}
-		}
-
-		if (logOpts != null && logOpts.logOper != null)
-		{
-			switch (logOpts.logOper)
-			{
-			case NODESTRUCT:
-				actions.add(s -> (new LogNodeStructure(ps)).log() );
-				break;
-
-			case GRAPHSTRUCT:
-				actions.add(s -> (new LogGraphStructure(ps, PTKFactory.getActiveBaseId() )).log() );
-				break;
-
-			case BASES:
-				if (PTKFactory.getActiveBaseId() == BaseTypes.THREETRIPLE)
-				{
-					actions.add(s -> (new LogBases3AllTriples(ps)).log() );
-				}
-				else if (PTKFactory.getActiveBaseId() == BaseTypes.NPRIME)
-				{
-					actions.add(s -> (new LogBasesNPrime(ps)).log() );
-				}
-				break;
-			}
-		}
-
-		if (graphOpts != null && graphOpts.graphType != null && graphOpts.graphType == Graph.DEFAULT)
-		{
-
-			actions.add(s -> graph(ps, PTKFactory.getActiveBaseId() != null ? PTKFactory.getActiveBaseId() : BaseTypes.DEFAULT));
-		}
-
-//		if (jglOps != null && jglOps.lwjglOper != null && jglOps.lwjglOper == LWJGLOper.HW)
-//		{
-//			actions.add(s -> new HelloWorld().run() );
-//		}
-
-		if (exportOpts != null && exportOpts.exportType != null && exportOpts.exportType == Export.GML)
-		{
-			actions.add(s -> export(ps));
-		}
-
-		actions.stream().forEach(c -> c.accept("execute action"));
+		executeActions();
 	}
 
 	void graph(PrimeSourceIntfc ps, BaseTypes baseType)
@@ -244,5 +119,154 @@ public class Init implements Runnable
 		{
 			log.severe("Exception "+ e);
 		}
+	}
+
+	void setFactoryDefaults()
+	{
+		PTKFactory.setMaxCount(initOpts.maxCount);
+		PTKFactory.setConfidenceLevel(initOpts.confidenceLevel);
+
+		PTKFactory.setActiveBaseId(BaseTypes.DEFAULT);
+		PTKFactory.setBaseSetPrimeSource(PrimeBaseWithLists::setPrimeSource);
+		PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
+
+		PTKFactory.setPrimeBaseCtor(PrimeBaseWithLists::new);
+		PTKFactory.setPrimeRefCtor( (i, base) -> new PrimeRef(i, base, PTKFactory.getPrimeBaseCtor()) );
+	}
+
+	void stdOutRedirect()
+	{
+		if (initOpts.outputFile != null)
+		{
+			try
+			{
+				if (initOpts.outputFile.exists())
+				{
+					File ren = File.createTempFile("ptk", ".old", new File(initOpts.outputFile.getParent()));
+					if (initOpts.outputFile.renameTo(ren))
+					{
+						log.info("Renamed output file: " + initOpts.outputFile + " to " + ren.getCanonicalPath());
+					}
+					else
+					{
+						log.severe("FAILED: Rename output file: " + initOpts.outputFile + " to " + ren.getCanonicalPath());
+					}
+				}
+				else
+					log.info("Created outputfile: " + initOpts.outputFile.getCanonicalPath() + " :" +    initOpts.outputFile.createNewFile());
+
+				// Point standard out to our selected output file.
+				System.setOut(new PrintStream(initOpts.outputFile));
+			}
+			catch(IOException e)
+			{
+				log.severe("ERROR: could not set standard out to file: " + initOpts.outputFile);
+				log.severe(e.toString());
+			}
+		}
+	}
+
+	void actionInitDefaultPrimeContent()
+	{
+		actions.add(s -> {
+			FactoryIntfc factory = PTKFactory.getFactory();
+			ps = factory.getPrimeSource();
+			ps.init();
+			ps.setActiveBaseId(PTKFactory.getActiveBaseId());
+		});
+	}
+
+	void actionHandleAlternativeBases()
+	{
+		if (baseOpts != null && baseOpts.bases != null)
+		{
+
+			switch(baseOpts.bases)
+			{
+			case NPRIME:
+				PTKFactory.setActiveBaseId(BaseTypes.NPRIME);
+				PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
+				PTKFactory.setBaseSetPrimeSource(PrimeBaseWithLists::setPrimeSource);
+				PTKFactory.setPrimeBaseCtor(PrimeBaseWithLists::new);
+				PTKFactory.setPrimeRefCtor( (i, base) -> new PrimeRef(i, base, PTKFactory.getPrimeBaseCtor()) );
+
+				actions.add(s ->
+								{
+									var base = new BaseReduceNPrime(ps);
+									base.setLogBaseGeneration(baseOpts.logGenerate);
+									base.setMaxReduce(baseOpts.maxReduce);
+									base.genBases();
+								});
+				break;
+
+			case THREETRIPLE:
+				PTKFactory.setActiveBaseId(BaseTypes.THREETRIPLE);
+				PTKFactory.setPrimeRefSetPrimeSource(PrimeRefBitSetIndexes::setPrimeSource);
+				PTKFactory.setBaseSetPrimeSource( PrimeBaseWithBitsets::setPrimeSource);
+				PTKFactory.setPrimeBaseCtor(PrimeBaseWithBitsets::new);
+				PTKFactory.setPrimeRefCtor( (i, base) -> new PrimeRefBitSetIndexes(i, base, PTKFactory.getPrimeBaseCtor() ));
+
+				actions.add(s ->
+								{
+									var base = new BaseReduceTriple(ps);
+									base.setLogBaseGeneration(baseOpts.logGenerate);
+									base.genBases();
+								});
+				break;
+
+			default:
+				break;
+			}
+		}
+	}
+
+	void actionHandleLogging()
+	{
+		if (logOpts != null && logOpts.logOper != null)
+		{
+			switch (logOpts.logOper)
+			{
+			case NODESTRUCT:
+				actions.add(s -> (new LogNodeStructure(ps)).log() );
+				break;
+
+			case GRAPHSTRUCT:
+				actions.add(s -> (new LogGraphStructure(ps, PTKFactory.getActiveBaseId() )).log() );
+				break;
+
+			case BASES:
+				if (PTKFactory.getActiveBaseId() == BaseTypes.THREETRIPLE)
+				{
+					actions.add(s -> (new LogBases3AllTriples(ps)).log() );
+				}
+				else if (PTKFactory.getActiveBaseId() == BaseTypes.NPRIME)
+				{
+					actions.add(s -> (new LogBasesNPrime(ps)).log() );
+				}
+				break;
+			}
+		}
+	}
+
+	void actionHandleGraphing()
+	{
+		if (graphOpts != null && graphOpts.graphType != null && graphOpts.graphType == Graph.DEFAULT)
+		{
+
+			actions.add(s -> graph(ps, PTKFactory.getActiveBaseId() != null ? PTKFactory.getActiveBaseId() : BaseTypes.DEFAULT));
+		}
+	}
+
+	void actionHandleExports()
+	{
+		if (exportOpts != null && exportOpts.exportType != null && exportOpts.exportType == Export.GML)
+		{
+			actions.add(s -> export(ps));
+		}
+	}
+
+	void executeActions()
+	{
+		actions.stream().forEach(c -> c.accept("execute action"));
 	}
 }

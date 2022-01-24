@@ -72,6 +72,9 @@ public class PrimeSource implements PrimeSourceIntfc
 	@NonNull
 	private BiFunction<Integer, BitSet, PrimeRefIntfc> primeRefCtor;
 
+	// Used for informative purposes - like a progress meter.
+	long primesProcessed1k = 0;
+
 	//
 	// initialization
 	//
@@ -111,6 +114,7 @@ public class PrimeSource implements PrimeSourceIntfc
 		tmpBitSet.clear();
 		tmpBitSet.set(1);
 		addPrimeRef(BigInteger.valueOf(2L), tmpBitSet.get(0, 2));
+
 	}
 
 	@Override
@@ -175,10 +179,18 @@ public class PrimeSource implements PrimeSourceIntfc
 					incrementPermutation(primeIndexPermutation);
 			}
 
-			if (nextIdx.get() % 100000 == 0)
-				log.info("100k");
-			else if (nextIdx.get() % 1000 == 0)
-				System.out.print("K");
+			if (nextIdx.get() % 1000 == 0)
+			{
+				primesProcessed1k++;
+				if (primesProcessed1k % 100 == 0)
+				{
+					System.out.println(String.format("%n %d00k primes", (int)(primesProcessed1k / 100)));
+				}
+				else
+				{
+					System.out.print("K");
+				}
+			}
 		}
 		while (nextIdx.get() < targetPrimeCount);
 	}
@@ -466,7 +478,7 @@ public class PrimeSource implements PrimeSourceIntfc
 		{
 			var p = getPrimeRef(curPrimeIdx);
 			p.ifPresent(pr -> pr.getPrimeBaseData().addPrimeBase(base));
-			log.info(String.format("addPrimeRef <added base> new-prime[%d] new-base-indexes %s new-base-primes %s   cur-Prime[%d]", newPrime, getIndexes(base),getPrimes(base), getPrime(curPrimeIdx).get()));
+			log.info(String.format("addPrimeRef <added base> new-prime[%d] new-base-indexes %s new-base-primes %s   cur-Prime[%d]", newPrime, getIndexes(base),getPrimes(base), getPrime(curPrimeIdx).orElse(BigInteger.valueOf(-1L))));
 		}
 		else
 		{
