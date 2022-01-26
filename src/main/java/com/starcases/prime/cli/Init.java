@@ -82,7 +82,7 @@ public class Init implements Runnable
 
 		actionInitDefaultPrimeContent();
 
-		actionHandleAlternativeBases();
+		actionHandleAdditionalBases();
 
 		actionHandleLogging();
 
@@ -176,7 +176,7 @@ public class Init implements Runnable
 		});
 	}
 
-	void actionHandleAlternativeBases()
+	void actionHandleAdditionalBases()
 	{
 		if (baseOpts != null && baseOpts.bases != null)
 		{
@@ -243,6 +243,9 @@ public class Init implements Runnable
 				{
 					actions.add(s -> (new LogBasesNPrime(ps)).log() );
 				}
+				break;
+
+			default:
 				break;
 			}
 		}

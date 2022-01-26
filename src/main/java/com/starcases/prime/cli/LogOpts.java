@@ -9,6 +9,6 @@ import picocli.CommandLine.Option;
  */
 class LogOpts
 {
-	@Option(names = {"--log","-l"}, arity = "0..1", description = "Valid vals: ${COMPLETION-CANDIDATES}")
+	@Option(names = {"--log","-l"}, arity = "0..2", description = "Valid vals: ${COMPLETION-CANDIDATES}")
 	LogOper logOper;
 }

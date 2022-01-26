@@ -23,7 +23,7 @@ import lombok.NonNull;
 *
 **/
 
-public class PrimeRefBitSetIndexes extends AbstractPrimeRef implements PrimeRefIntfc
+public class PrimeRefBitSetIndexes extends AbstractPrimeRef
 {
 	@NonNull
 	private static PrimeSourceIntfc primeSrc;
@@ -54,6 +54,7 @@ public class PrimeRefBitSetIndexes extends AbstractPrimeRef implements PrimeRefI
 									@NonNull Supplier<PrimeBaseIntfc> primeBaseSupplier
 									)
 	{
+		super();
 		this.primeIdx = primeIdx;
 		primeBaseData = primeBaseSupplier.get();
 		getPrimeBaseData().addPrimeBase(primeBaseIdxs);

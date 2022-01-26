@@ -23,7 +23,7 @@ import lombok.NonNull;
 *
 **/
 
-public class PrimeRef extends AbstractPrimeRef implements PrimeRefIntfc
+public class PrimeRef extends AbstractPrimeRef
 {
 	@NonNull
 	private static PrimeSourceIntfc primeSrc;
@@ -54,6 +54,7 @@ public class PrimeRef extends AbstractPrimeRef implements PrimeRefIntfc
 					@NonNull Supplier<PrimeBaseIntfc> primeBaseSupplier
 					)
 	{
+		super();
 		this.primeIdx = primeIdx;
 		primeBaseData = primeBaseSupplier.get();
 		this.getPrimeBaseData().addPrimeBase(primeBaseIdxs);

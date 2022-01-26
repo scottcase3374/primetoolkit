@@ -52,10 +52,13 @@ public class PrimeNodeGenerator
 		// bootstrap
 		for (level = 0; level < 2; level++)
 		{
-			var targetNode = ps.getPrimeRef(level).get();
-
-			graph.addVertex(targetNode);
-			graph.addEdge(targetNode, targetNode);
+			ps.getPrimeRef(level).ifPresent(
+					targetNode ->
+									{
+										graph.addVertex(targetNode);
+										graph.addEdge(targetNode, targetNode);
+									}
+					);
 		}
 	}
 
@@ -99,6 +102,6 @@ public class PrimeNodeGenerator
 
 	protected void addBaseEdge(PrimeRefIntfc primeRef, int baseIdx)
 	{
-		graph.addEdge( ps.getPrimeRef(baseIdx).get(), primeRef);
+		ps.getPrimeRef(baseIdx).ifPresent( p -> graph.addEdge(p , primeRef));
 	}
 }

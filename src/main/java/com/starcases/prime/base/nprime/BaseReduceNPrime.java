@@ -81,34 +81,35 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 				var i = integerIt.next();
 				integerIt.remove();
 
-				  ps.getPrimeRef(i)
-					.get()
-					.getPrimeBaseData()
-					.getPrimeBaseIdxs(BaseTypes.DEFAULT)
-					.get(0)
-					.stream()
-					.boxed() // index integers
-					.<Integer>mapMulti(
-							(ii, consumer) ->
-										{
-											if (ii < maxReduce)
-											{
-												// found a non-high base so process it
-												consumer.accept(ii);
-											}
-											else
-											{
-												// base is high so add it to deque for later processing
-												// by outer loop
-												q.add(ii);
-											}
-										}
-								)
-					.forEach(
-							idx ->
-									// Process the low-bases; Increment the appropriate target base count
-									outputCntALst.set(idx, outputCntALst.get(idx)+1)
-							);
+				  ps.getPrimeRef(i).ifPresent( p->
+
+							   p.getPrimeBaseData()
+								.getPrimeBaseIdxs(BaseTypes.DEFAULT)
+								.get(0)
+								.stream()
+								.boxed() // index integers
+								.<Integer>mapMulti(
+										(ii, consumer) ->
+													{
+														if (ii < maxReduce)
+														{
+															// found a non-high base so process it
+															consumer.accept(ii);
+														}
+														else
+														{
+															// base is high so add it to deque for later processing
+															// by outer loop
+															q.add(ii);
+														}
+													}
+											)
+								.forEach(
+										idx ->
+												// Process the low-bases; Increment the appropriate target base count
+												outputCntALst.set(idx, outputCntALst.get(idx)+1)
+										)
+						  );
 			}
 			else
 				break;

@@ -13,7 +13,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.starcases.prime.base.BaseTypes;
@@ -171,13 +170,14 @@ public class PrimeSource implements PrimeSourceIntfc
 					var sumBaseIdxs = primeIndexPermutation.get(0, numBitsForPrimeCount);
 					sumBaseIdxs.set(curPrimeIdx); // sum of primes from these indexes should match 'sum'
 					final var cachedBases = sumBaseIdxs;
-					addPrimeRef(cachedSum, cachedBases, curPrimeIdx, true);
+					addPrimeRef(cachedSum, cachedBases, curPrimeIdx);
 					break;
 				}
 				else
 					incrementPermutation(primeIndexPermutation);
 			}
 
+			// display some progress info
 			if (nextIdx.get() % 1000 == 0)
 			{
 				primesProcessed1k++;
@@ -459,7 +459,7 @@ public class PrimeSource implements PrimeSourceIntfc
 	 */
 	private void addPrimeRef(@NonNull @Min(1) BigInteger nextPrime, @NonNull BitSet baseIdx)
 	{
-		addPrimeRef(nextPrime, baseIdx, nextIdx.get()+1, false);
+		addPrimeRef(nextPrime, baseIdx, nextIdx.get()+1);
 	}
 
 	/**
@@ -470,26 +470,16 @@ public class PrimeSource implements PrimeSourceIntfc
 	private void addPrimeRef(
 			@NonNull @Min(1) BigInteger newPrime,
 			@NonNull BitSet base, @Min(0)
-			int curPrimeIdx,
-			boolean canAddBase)
+			int curPrimeIdx)
 	{
-		if (canAddBase && newPrime.equals(getPrime(curPrimeIdx).get()))
-		{
-			var p = getPrimeRef(curPrimeIdx);
-			p.ifPresent(pr -> pr.getPrimeBaseData().addPrimeBase(base));
-			log.info(String.format("addPrimeRef <added base> new-prime[%d] new-base-indexes %s new-base-primes %s   cur-Prime[%d]", newPrime, getIndexes(base),getPrimes(base), getPrime(curPrimeIdx).orElse(BigInteger.valueOf(-1L))));
-		}
-		else
-		{
-			var idx = nextIdx.incrementAndGet();
+		var idx = nextIdx.incrementAndGet();
 
-			primes.add(idx, newPrime);
-			PrimeRefIntfc ret = primeRefCtor.apply(idx, base);
-			primeRefs.add(idx, ret);
+		primes.add(idx, newPrime);
+		PrimeRefIntfc ret = primeRefCtor.apply(idx, base);
+		primeRefs.add(idx, ret);
 
-			distanceToNext.add(null);
-			getPrime(curPrimeIdx).ifPresent(p -> distanceToNext.set(curPrimeIdx, newPrime.subtract(p)));
-		}
+		distanceToNext.add(null);
+		getPrime(curPrimeIdx).ifPresent(p -> distanceToNext.set(curPrimeIdx, newPrime.subtract(p)));
 	}
 
 	public boolean distinct(@NonNull PrimeRefIntfc [] vals)
@@ -531,15 +521,5 @@ public class PrimeSource implements PrimeSourceIntfc
 		while (false);
 
 		return isPrimeSum;
-	}
-
-	private String getIndexes(@NonNull BitSet bs)
-	{
-		return bs.stream().boxed().map(Object::toString).collect(Collectors.joining(",","[", "]"));
-	}
-
-	private String getPrimes(@NonNull BitSet bs)
-	{
-		return bs.stream().boxed().map(i -> this.getPrime(i).toString()).collect(Collectors.joining(",","[", "]"));
 	}
 }

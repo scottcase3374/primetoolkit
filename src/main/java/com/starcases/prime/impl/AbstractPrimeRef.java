@@ -10,8 +10,11 @@ import com.starcases.prime.intfc.PrimeRefIntfc;
  * Abstract class for common prime ref interface functionality.
  *
  */
-public abstract class AbstractPrimeRef implements PrimeRefIntfc
+abstract class AbstractPrimeRef implements PrimeRefIntfc
 {
+	public AbstractPrimeRef()
+	{}
+
 	public PrimeRefIntfc getPrimeRef()
 	{
 		return this;
