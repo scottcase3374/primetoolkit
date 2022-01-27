@@ -16,6 +16,7 @@ import com.starcases.prime.PTKFactory;
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.base.PrimeBaseWithBitsets;
 import com.starcases.prime.base.PrimeBaseWithLists;
+import com.starcases.prime.base.def.LogDefaultBasePrefixes;
 import com.starcases.prime.base.nprime.BaseReduceNPrime;
 import com.starcases.prime.base.nprime.LogBasesNPrime;
 import com.starcases.prime.base.triples.BaseReduceTriple;
@@ -104,11 +105,14 @@ public class Init implements Runnable
 		vd.viewDefault();
 	}
 
-	void export(PrimeSourceIntfc ps)
+	void export(PrimeSourceIntfc ps, String exportFile)
 	{
 		try
 		{
-			try (var pw = new PrintWriter("/home/scott/graph.gml"))
+			if (exportFile == null)
+				exportFile = "/tmp/export.gml";
+
+			try (var pw = new PrintWriter(exportFile))
 			{
 				var e = new ExportGML(ps, pw);
 				e.export();
@@ -245,8 +249,11 @@ public class Init implements Runnable
 				}
 				break;
 
-			default:
+			case PREFIX:
+				actions.add(s ->  (new LogDefaultBasePrefixes(ps)).log() );
 				break;
+
+
 			}
 		}
 	}
@@ -264,7 +271,7 @@ public class Init implements Runnable
 	{
 		if (exportOpts != null && exportOpts.exportType != null && exportOpts.exportType == Export.GML)
 		{
-			actions.add(s -> export(ps));
+			actions.add(s -> export(ps, exportOpts.exportFile));
 		}
 	}
 

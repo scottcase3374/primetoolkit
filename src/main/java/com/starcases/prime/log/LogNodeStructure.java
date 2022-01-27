@@ -33,10 +33,9 @@ public class LogNodeStructure extends AbstractLogBase
 			try
 			{
 				long size = pr.getPrimeBaseData().getPrimeBaseIdxs().size();
-				System.out.println(String.format("%nPrime [%d] idx[%d] #-bases[%d]%n",
+				System.out.println(String.format("%nPrime [%d] idx[%d] %n",
 						pr.getPrime(),
-						idx++,
-						size
+						idx++
 						));
 
 					long [] cnt = {0};
