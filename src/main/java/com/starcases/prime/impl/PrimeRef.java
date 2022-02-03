@@ -16,9 +16,9 @@ import com.starcases.prime.intfc.PrimeSourceIntfc;
 import lombok.NonNull;
 
 /**
- * Default prime representation.
+ * Default prefixPrime representation.
  *
-* The general algorithm idea is that the next prime is derived from
+* The general algorithm idea is that the next prefixPrime is derived from
 * the sum of some subset of previous primes.
 *
 **/
@@ -34,7 +34,7 @@ public class PrimeRef extends AbstractPrimeRef
 	}
 
 	/*
-	 *  Index for this instance of a prime.
+	 *  Index for this instance of a prefixPrime.
 	 *  index to bitsets or collections for this val
 	 */
 	@Min(0)
@@ -44,10 +44,10 @@ public class PrimeRef extends AbstractPrimeRef
 	private PrimeBaseIntfc primeBaseData;
 
 	/**
-	 * Handle simple prime where the base is simply itself - i.e. 1, 2
+	 * Handle simple prefixPrime where the base is simply itself - i.e. 1, 2
 	 * Simplifies bootstrapping
 	 *
-	 * @param prime
+	 * @param prefixPrime
 	 */
 	public PrimeRef(@Min(0) @Max(2) int primeIdx,
 					@NonNull BitSet primeBaseIdxs,

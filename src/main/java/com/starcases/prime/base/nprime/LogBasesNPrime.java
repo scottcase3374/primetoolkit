@@ -12,8 +12,8 @@ import lombok.extern.java.Log;
 import picocli.CommandLine.Command;
 
 /*
-* Need to actually save the n-prime bases so logging actually pulls the content - current output
-* is all generated during creation of the n-prime bases and not here. Need to refactor base handling
+* Need to actually save the n-prefixPrime bases so logging actually pulls the content - current output
+* is all generated during creation of the n-prefixPrime bases and not here. Need to refactor base handling
 * to accomplish this well.
 */
 @Log
@@ -39,7 +39,7 @@ public class LogBasesNPrime extends AbstractLogBase
 			var pr = prIt.next();
 			try
 			{
-				// Handle "header" info for the current prime - prime value and the index of the prime.
+				// Handle "header" info for the current prefixPrime - prefixPrime value and the index of the prefixPrime.
 				System.out.println(String.format("%nPrime [%d] idx[%d]%n",
 													pr.getPrime(),
 													pr.getPrimeRefIdx()
@@ -47,7 +47,7 @@ public class LogBasesNPrime extends AbstractLogBase
 
 					final var sb = new StringBuilder("\t");
 
-					// get list of counts for the target prime indexes that we reduced to.
+					// get list of counts for the target prefixPrime indexes that we reduced to.
 					final var counts =
 							switch(pr.getPrimeBaseData().getBaseMetadata())
 							{
@@ -62,7 +62,7 @@ public class LogBasesNPrime extends AbstractLogBase
 									{
 													// No direct correlation between index bit set 'index' value in the map() below
 													// and the list of counts. Each item in the count-list is simply associated with the next
-													// prime starting at index 0 and incrementing index by 1.
+													// prefixPrime starting at index 0 and incrementing index by 1.
 													//
 													// Remember, the reduction is reducing to a "prefix" list of the primes.
 													int [] primeIdxCntIdx = {0};
@@ -71,7 +71,7 @@ public class LogBasesNPrime extends AbstractLogBase
 													 	indexBitset
 													 	.stream()
 													 	.boxed()
-													 	.map(index -> String.format("base-prime-%d count:[%d]", ps.getPrime(primeIdxCntIdx[0]).get(), counts.get(primeIdxCntIdx[0]++)) )
+													 	.map(index -> String.format("base-prefixPrime-%d count:[%d]", ps.getPrime(primeIdxCntIdx[0]).get(), counts.get(primeIdxCntIdx[0]++)) )
 													 	.collect(Collectors.joining(",","[","]"))
 													 	);
 
@@ -90,7 +90,7 @@ public class LogBasesNPrime extends AbstractLogBase
 			}
 			catch(Exception e)
 			{
-				log.severe(String.format("Can't show bases for prime [%d] index[%d] exception:", pr.getPrime(), pr.getPrimeRefIdx()));
+				log.severe(String.format("Can't show bases for prefixPrime [%d] index[%d] exception:", pr.getPrime(), pr.getPrimeRefIdx()));
 				log.throwing(this.getClass().getName(), "log", e);
 				e.printStackTrace();
 			}

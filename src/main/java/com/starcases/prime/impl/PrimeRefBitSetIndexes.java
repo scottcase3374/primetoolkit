@@ -18,8 +18,8 @@ import lombok.NonNull;
 *
 *  Alternative Prime representation (of bases)- use bitset to represent bases which is more compact
 *  sometimes for the data. Part of support to determine tradeoffs of different representations.
-*  This implementation also includes support for multiple bases per prime - useful when needing
-*  to find multiple combinations of 3 primes that sum to a specific prime (see code related to triple).
+*  This implementation also includes support for multiple bases per prefixPrime - useful when needing
+*  to find multiple combinations of 3 primes that sum to a specific prefixPrime (see code related to triple).
 *
 **/
 
@@ -34,7 +34,7 @@ public class PrimeRefBitSetIndexes extends AbstractPrimeRef
 	}
 
 	/*
-	 *  Index for this instance of a prime.
+	 *  Index for this instance of a prefixPrime.
 	 *  index to bitsets or collections for this val
 	 */
 	@Min(0)
@@ -44,10 +44,10 @@ public class PrimeRefBitSetIndexes extends AbstractPrimeRef
 	private PrimeBaseIntfc primeBaseData;
 
 	/**
-	 * Handle simple prime where the base is simply itself - i.e. 1, 2
+	 * Handle simple prefixPrime where the base is simply itself - i.e. 1, 2
 	 * Simplifies bootstrapping
 	 *
-	 * @param prime
+	 * @param prefixPrime
 	 */
 	public PrimeRefBitSetIndexes(@Min(0) int primeIdx,
 									@NonNull BitSet primeBaseIdxs,

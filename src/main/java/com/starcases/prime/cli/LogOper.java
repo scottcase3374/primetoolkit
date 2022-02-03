@@ -18,6 +18,12 @@ enum LogOper
 	PREFIX,
 
 	/**
+	 * Logs prefixes as a tree when multiple bases exist which may have a prefix of items; i.e. default bases
+	 */
+	PREFIXTREE,
+
+
+	/**
 	 * logs the dataset from the graph structure used in visualizations
 	 */
 	GRAPHSTRUCT,

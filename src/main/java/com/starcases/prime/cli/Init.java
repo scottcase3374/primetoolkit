@@ -16,6 +16,7 @@ import com.starcases.prime.PTKFactory;
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.base.PrimeBaseWithBitsets;
 import com.starcases.prime.base.PrimeBaseWithLists;
+import com.starcases.prime.base.def.LogDefaultBasePrefixTree;
 import com.starcases.prime.base.def.LogDefaultBasePrefixes;
 import com.starcases.prime.base.nprime.BaseReduceNPrime;
 import com.starcases.prime.base.nprime.LogBasesNPrime;
@@ -253,7 +254,9 @@ public class Init implements Runnable
 				actions.add(s ->  (new LogDefaultBasePrefixes(ps)).log() );
 				break;
 
-
+			case PREFIXTREE:
+				actions.add(s ->  (new LogDefaultBasePrefixTree(ps)).log() );
+				break;
 			}
 		}
 	}

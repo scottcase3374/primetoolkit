@@ -40,11 +40,11 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 
 	@NonNull
 	static final String [] column = {
-			"prime / max num-bases (Default type)",
-			"prime / max dist to prev prime",
+			"prefixPrime / max num-bases (Default type)",
+			"prefixPrime / max dist to prev prefixPrime",
 			"avg base size",
 			"avg dist to prev",
-			"Highest prime base"
+			"Highest prefixPrime base"
 	};
 
 	@NonNull

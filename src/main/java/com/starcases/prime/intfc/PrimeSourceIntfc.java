@@ -13,7 +13,7 @@ import lombok.NonNull;
 
 /**
  *
- * Main interface for needs related to prime / base generation and alternative algs.
+ * Main interface for needs related to prefixPrime / base generation and alternative algs.
  *
  * Implementations of this interface generally contain the primes data and directly data
  * directly related to the primes.  This allows near direct access to the individual primes
@@ -52,7 +52,7 @@ public interface PrimeSourceIntfc
 	//
 
 	/**
-	 * Get exact prime ref instance for value if it is a prime and was previously identified and a prime ref was created.
+	 * Get exact prefixPrime ref instance for value if it is a prefixPrime and was previously identified and a prefixPrime ref was created.
 	 *
 	 * @param val Must be positive value.
 
@@ -61,7 +61,7 @@ public interface PrimeSourceIntfc
 	Optional<PrimeRefIntfc> getPrimeRef(@NonNull BigInteger val);
 
 	/**
-	 * Get prime ref nearest provided value.
+	 * Get prefixPrime ref nearest provided value.
 	 *
 	 * @param val If positive then looking for 'next' value; if negative then looking for an earlier value.
 
@@ -70,7 +70,7 @@ public interface PrimeSourceIntfc
 	Optional<PrimeRefIntfc> getNearPrimeRef(@NonNull BigInteger val);
 
 	/**
-	 * Get prime ref nearest provided value. Typical use is locating a prime above/below some
+	 * Get prefixPrime ref nearest provided value. Typical use is locating a prefixPrime above/below some
 	 * fractional value.
 	 *
 	 * @param val If positive then looking for 'next' value; if negative then looking for an earlier value.
@@ -80,7 +80,7 @@ public interface PrimeSourceIntfc
 	Optional<PrimeRefIntfc> getNearPrimeRef(@NonNull BigDecimal val);
 
 	/**
-	 * Find/return first prime (if any exist) within the provided prime offset from the provided idx.
+	 * Find/return first prefixPrime (if any exist) within the provided prefixPrime offset from the provided idx.
 	 *
 	 * @param val Must be positive.
 	 * @param maxPrimeOffset  If positive then looking for 'next' value; if negative then looking for an earlier value.
@@ -90,9 +90,9 @@ public interface PrimeSourceIntfc
 	Optional<PrimeRefIntfc> getPrimeRefWithinOffset(@Min(0) int idx, @NonNull BigInteger targetOffset);
 
 	/**
-	 * Find/return first prime (if any exist) that is within the provided prime offset from the provided value.
+	 * Find/return first prefixPrime (if any exist) that is within the provided prefixPrime offset from the provided value.
 	 *
-	 * Typical use is locating a prime above/below some
+	 * Typical use is locating a prefixPrime above/below some
 	 * fractional value.
 	 *
 	 * @param val Must be positive.
@@ -104,7 +104,7 @@ public interface PrimeSourceIntfc
 
 
 	/**
-	 * Utility method for finding exact prime using an offset. logically equivalent to calling  getPrimeRef(val+ offset)
+	 * Utility method for finding exact prefixPrime using an offset. logically equivalent to calling  getPrimeRef(val+ offset)
 	 * See @getPrime(BigInteger val) for details.
 	 *
 	 * @param val Must be positive
@@ -116,7 +116,7 @@ public interface PrimeSourceIntfc
 
 	/**
 	 * Returns    value of primeRef+1 minus value of primeref
-	 * @param prime
+	 * @param prefixPrime
 	 *
 	 * @return
 	 */
@@ -151,7 +151,7 @@ public interface PrimeSourceIntfc
 	Optional<BigInteger> getPrime(@Min(0) int primeIdx);
 	int getPrimeIdx(@NonNull @Min(1) BigInteger val);
 
-	// index based - related to diff of the actual prime values.
+	// index based - related to diff of the actual prefixPrime values.
 	BigInteger getDistToNextPrime(@Min(0) int curIdx);
 	BigInteger getDistToPrevPrime(@Min(0) int curIdx);
 

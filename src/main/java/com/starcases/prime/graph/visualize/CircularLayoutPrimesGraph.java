@@ -3,7 +3,7 @@ package com.starcases.prime.graph.visualize;
 /**
  * Visualization example
  *
- * Circular layout/display of prime / prime-base relationships.
+ * Circular layout/display of prefixPrime / prefixPrime-base relationships.
  */
 import javax.swing.JFrame;
 import java.awt.*;

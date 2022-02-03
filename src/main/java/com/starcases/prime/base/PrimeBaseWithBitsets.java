@@ -31,7 +31,7 @@ public class PrimeBaseWithBitsets implements PrimeBaseIntfc
 	}
 
 	/**
-	 * Represents sets of base primes that sum to this prime. (index to primes)
+	 * Represents sets of base primes that sum to this prefixPrime. (index to primes)
 	 *
 	 * NOTE: This supports multiple alternative bases per base type - the PrimeBaseWithLists only supports 1 base
 	 *       per base type.
@@ -76,7 +76,7 @@ public class PrimeBaseWithBitsets implements PrimeBaseIntfc
 	}
 
 	/**
-	 * Include a set of primes in the set of prime bases for the current prime.
+	 * Include a set of primes in the set of prefixPrime bases for the current prefixPrime.
 	 * @param primeBase
 	 */
 	@Override
@@ -125,8 +125,8 @@ public class PrimeBaseWithBitsets implements PrimeBaseIntfc
 	}
 
 	/**
-	 * Need to think about how to handle multiple sets of bases for a single prime.  In that
-	 * scenario, which base set should be used to determine the min prime base.  The
+	 * Need to think about how to handle multiple sets of bases for a single prefixPrime.  In that
+	 * scenario, which base set should be used to determine the min prefixPrime base.  The
 	 * current usage is just general reporting but the results should be consistent.
 	 */
 	@Override
@@ -147,8 +147,8 @@ public class PrimeBaseWithBitsets implements PrimeBaseIntfc
 	}
 
 	/**
-	 * Need to think about how to handle multiple sets of bases for a single prime.  In that
-	 * scenario, which base set should be used to determine the max prime base.  The
+	 * Need to think about how to handle multiple sets of bases for a single prefixPrime.  In that
+	 * scenario, which base set should be used to determine the max prefixPrime base.  The
 	 * current usage is just general reporting but the results should be consistent.
 	 */
 	@Override

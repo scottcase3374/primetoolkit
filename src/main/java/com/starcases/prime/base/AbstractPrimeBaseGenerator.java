@@ -7,7 +7,7 @@ import lombok.NonNull;
 
 /**
  *
- * Abstract class for common prime base functionality.
+ * Abstract class for common prefixPrime base functionality.
  *
  */
 public abstract class AbstractPrimeBaseGenerator implements PrimeBaseGenerateIntfc

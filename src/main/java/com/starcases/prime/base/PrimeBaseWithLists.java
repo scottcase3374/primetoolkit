@@ -18,7 +18,7 @@ import lombok.NonNull;
 public class PrimeBaseWithLists implements PrimeBaseIntfc
 {
 	@NonNull
-	// Represents sets of base primes that sum to this prime. (index to primes)
+	// Represents sets of base primes that sum to this prefixPrime. (index to primes)
 	private final Map<BaseTypes, List<Integer>> primeBaseIdxs = new EnumMap<>(BaseTypes.class);
 
 	@Getter
@@ -39,7 +39,7 @@ public class PrimeBaseWithLists implements PrimeBaseIntfc
 
 	/**
 	 * Returns the number of bases used to sum to the
-	 * current prime.
+	 * current prefixPrime.
 	 */
 	@Override
 	public int getBaseSize()
@@ -49,7 +49,7 @@ public class PrimeBaseWithLists implements PrimeBaseIntfc
 
 	/**
 	 * Returns the number of bases used to sum to the
-	 * current prime.
+	 * current prefixPrime.
 	 */
 	@Override
 	public int getBaseSize(@NonNull BaseTypes baseType)
@@ -71,7 +71,7 @@ public class PrimeBaseWithLists implements PrimeBaseIntfc
 	}
 
 	/**
-	 * Include a set of primes in the set of prime bases for the current prime.
+	 * Include a set of primes in the set of prefixPrime bases for the current prefixPrime.
 	 * @param primeBase
 	 */
 	@Override

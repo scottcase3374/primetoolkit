@@ -7,7 +7,7 @@ import com.starcases.prime.intfc.PrimeRefIntfc;
 
 /**
  *
- * Abstract class for common prime ref interface functionality.
+ * Abstract class for common prefixPrime ref interface functionality.
  *
  */
 abstract class AbstractPrimeRef implements PrimeRefIntfc
@@ -21,10 +21,10 @@ abstract class AbstractPrimeRef implements PrimeRefIntfc
 	}
 
 	/**
-	 * absolute value of difference with next prime
-	 * if the next prime is known.
+	 * absolute value of difference with next prefixPrime
+	 * if the next prefixPrime is known.
 	 *
-	 * empty optional if next prime is unknown/not calculated
+	 * empty optional if next prefixPrime is unknown/not calculated
 	 */
 	@Override
 	public Optional<BigInteger> getDistToNextPrime()
@@ -33,10 +33,10 @@ abstract class AbstractPrimeRef implements PrimeRefIntfc
 	}
 
 	/**
-	 * absolute value of difference with prev prime
-	 * if the prev prime is known/exists.
+	 * absolute value of difference with prev prefixPrime
+	 * if the prev prefixPrime is known/exists.
 	 *
-	 * empty optional if prev prime is unknown/doesn't exist
+	 * empty optional if prev prefixPrime is unknown/doesn't exist
 	 */
 	@Override
 	public Optional<BigInteger> getDistToPrevPrime()

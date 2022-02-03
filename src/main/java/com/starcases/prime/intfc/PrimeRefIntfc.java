@@ -23,7 +23,7 @@ public interface PrimeRefIntfc
 	static final Comparator<PrimeRefIntfc> primeRefComparator = (PrimeRefIntfc o1, PrimeRefIntfc o2) -> o1.getPrime().compareTo(o2.getPrime());
 
 	//
-	// prime reference related
+	// prefixPrime reference related
 	//
 
 	BigInteger getPrime();

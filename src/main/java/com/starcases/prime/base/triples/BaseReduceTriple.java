@@ -22,10 +22,10 @@ import lombok.NonNull;
 import lombok.extern.java.Log;
 
 /*
- *  Given a prime, find every set of 3 pre-existing primes that sum to the prime.
+ *  Given a prefixPrime, find every set of 3 pre-existing primes that sum to the prefixPrime.
  *
  *
- *  A few examples of a single triple (or 2) per prime.
+ *  A few examples of a single triple (or 2) per prefixPrime.
  *     P     B
  *	   R     A
  *  I  I     S
@@ -89,8 +89,8 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 	}
 
 	/**
-	 * Main method responsible for producing the triples for a single prime.
-	 * @param prime
+	 * Main method responsible for producing the triples for a single prefixPrime.
+	 * @param prefixPrime
 	 */
 	private void reducePrime(@NonNull PrimeRefIntfc prime)
 	{
@@ -99,7 +99,7 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 	}
 
 	/**
-	 * top-level function; iterate over entire dataset to reduce every prime
+	 * top-level function; iterate over entire dataset to reduce every prefixPrime
 	 * @param maxReduce
 	 */
 	public void genBases()
@@ -161,7 +161,7 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 		}
 		catch(Exception e)
 		{
-			log.severe(String.format("BaseReduce3Triple generation => idx[%d] prime [%d] error: %s", counter, curPrime.getPrime(), e.toString()));
+			log.severe(String.format("BaseReduce3Triple generation => idx[%d] prefixPrime [%d] error: %s", counter, curPrime.getPrime(), e.toString()));
 			e.printStackTrace();
 		}
 		return retVal + "false";

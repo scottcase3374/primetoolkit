@@ -79,11 +79,11 @@ public class PrimeNodeGenerator
 
 	/**
 	 * get a primeRef and add to graph.
-	 * Create edges from prime node to primes from the base sets representing the prime.
+	 * Create edges from prefixPrime node to primes from the base sets representing the prefixPrime.
 	 */
 	protected void addNode()
 	{
-		// Link from prime node to prime bases (i.e. unique set of smaller primes that sums to this prime).
+		// Link from prefixPrime node to prefixPrime bases (i.e. unique set of smaller primes that sums to this prefixPrime).
 		primeRef.getPrimeBaseData().getPrimeBaseIdxs(baseType)
 							.get(0)
 							.stream()

@@ -33,7 +33,7 @@ public interface PrimeBaseIntfc
 
 	/**
 	 *
-	 * Not every use case needs multiple bases per prime - only the
+	 * Not every use case needs multiple bases per prefixPrime - only the
 	 * list of bitsets implementation supports multiples.
 	 *
 	 *
@@ -72,7 +72,7 @@ public interface PrimeBaseIntfc
 	//
 
 	/**
-	 * Not every use case needs multiple bases per prime - only the
+	 * Not every use case needs multiple bases per prefixPrime - only the
 	 * list of bitsets implementation supports multiples.
 	 * @return
 	 */

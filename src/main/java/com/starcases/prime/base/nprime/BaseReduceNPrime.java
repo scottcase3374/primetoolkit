@@ -21,10 +21,10 @@ import lombok.NonNull;
 import lombok.extern.java.Log;
 
 /**
- * Given a prime and a maximum number of primes; reduce default bases to multiples
- * of the bases <= maximum prime provided.
+ * Given a prefixPrime and a maximum number of primes; reduce default bases to multiples
+ * of the bases <= maximum prefixPrime provided.
  *
- * Example: For max base-prime of 2.
+ * Example: For max base-prefixPrime of 2.
  *  Prime 43 -> bases 7,            17												 ,19
  *                   /\			 /--/------\					 					  /\----------------------\
  *                  2  5	    1  5        11                                       1  5          				13
@@ -62,13 +62,13 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 	/**
 	 * Non-recursive algo to go through bases of bases to count those that we want counts for.
 	 *
-	 * @param primeRef cur prime being reduced
+	 * @param primeRef cur prefixPrime being reduced
 	 */
 	private void primeReduction(@NonNull PrimeRefIntfc primeRef, @NonNull List<Integer> outputCntALst)
 	{
 		Deque<Integer> q = new ArrayDeque<>();
 
-		// want to process initial bases for prime
+		// want to process initial bases for prefixPrime
 		primeRef.getPrimeBaseData().getPrimeBaseIdxs(BaseTypes.DEFAULT).get(0).stream().boxed().forEach(q::add);
 
 		while (true)

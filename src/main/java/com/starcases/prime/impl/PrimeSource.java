@@ -130,13 +130,13 @@ public class PrimeSource implements PrimeSourceIntfc
 		final var primeIndexMaxPermutation = new BitSet();
 		var primeIndexPermutation = new BitSet();
 
-		// each iteration increases the #bits by 1; i.e. a new prime is determined per iteration
+		// each iteration increases the #bits by 1; i.e. a new prefixPrime is determined per iteration
 		do
 		{
 			final var curPrimeIdx = nextIdx.get();
 			final var curPrime = getPrime(curPrimeIdx);
 
-			// Represents a X-bit search space of indexes for primes to add for next prime.
+			// Represents a X-bit search space of indexes for primes to add for next prefixPrime.
 			final var numBitsForPrimeCount = primeRefs.size()-1;
 			primeIndexMaxPermutation.clear(numBitsForPrimeCount-1);
 			primeIndexMaxPermutation.set(numBitsForPrimeCount); // keep 'shifting' max bit left
@@ -159,7 +159,7 @@ public class PrimeSource implements PrimeSourceIntfc
 
 				if (permutationSum.compareTo(sumCeiling) > 0)
 				{
-					// limit useless work - if we exceed a known prime then we are
+					// limit useless work - if we exceed a known prefixPrime then we are
 					// done with this iteration.
 					break;
 				}
@@ -251,7 +251,7 @@ public class PrimeSource implements PrimeSourceIntfc
 	@Override
 	public Optional<PrimeRefIntfc> getNearPrimeRef(@NonNull BigInteger val)
 	{
-		log.info(String.format("get near prime ref bigint %d", val));
+		log.info(String.format("get near prefixPrime ref bigint %d", val));
 		var dir = val.signum() < 0 ? -2 : -1;
 
 		var ret = Collections.binarySearch(primes, val.abs());
@@ -453,7 +453,7 @@ public class PrimeSource implements PrimeSourceIntfc
 	}
 
 	/**
-	 * Add new prime to shared set of all primes
+	 * Add new prefixPrime to shared set of all primes
 	 * Base will be same as aPrime and using same index.
 	 * @param aPrime
 	 */
@@ -463,7 +463,7 @@ public class PrimeSource implements PrimeSourceIntfc
 	}
 
 	/**
-	 * Add new prime to shared set of all primes
+	 * Add new prefixPrime to shared set of all primes
 	 *
 	 * @param aPrime
 	 */
@@ -489,10 +489,10 @@ public class PrimeSource implements PrimeSourceIntfc
 
 	/**
 	 *
-	 * Weed out sums which cannot represent the next prime.
+	 * Weed out sums which cannot represent the next prefixPrime.
 	 *
 	 * @param sumOfPrimeSet
-	 * @return true for sum that is viable prime; false otherwise
+	 * @return true for sum that is viable prefixPrime; false otherwise
 	 */
 	private boolean viablePrime(@NonNull @Min(1) BigInteger primeSum, @Min(1) BigInteger lastMaxPrime)
 	{
@@ -500,19 +500,19 @@ public class PrimeSource implements PrimeSourceIntfc
 
 		do
 		{
-			// Part of "non-cheating" prime checks.
+			// Part of "non-cheating" prefixPrime checks.
 			// only want sets summing to greater than the current
-			// max prime.
+			// max prefixPrime.
 			if (primeSum.compareTo(lastMaxPrime) <= 0)
 				break;
 
-			// Part of "non-cheating" prime checks.
-			// Not a prime if is even.
+			// Part of "non-cheating" prefixPrime checks.
+			// Not a prefixPrime if is even.
 			if (!primeSum.testBit(0))
 				break;
 
 			// This was bootstrap logic while getting the general framework working.
-			// This block should be removed and allow the remaining blocks to determine next prime.
+			// This block should be removed and allow the remaining blocks to determine next prefixPrime.
 			if (!primeSum.isProbablePrime(confidenceLevel))
 				break;
 

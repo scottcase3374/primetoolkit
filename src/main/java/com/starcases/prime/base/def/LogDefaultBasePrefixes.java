@@ -44,11 +44,8 @@ public class LogDefaultBasePrefixes extends AbstractLogBase
 		super(ps, log);
 	}
 
-	@Override
-	public void log()
+	void generate()
 	{
-		System.out.println(String.format("%n"));
-
 		var prIt = ps.getPrimeRefIter();
 		while (prIt.hasNext())
 		{
@@ -59,7 +56,9 @@ public class LogDefaultBasePrefixes extends AbstractLogBase
 
 				BitSet prefixBS = (BitSet)origBS.clone();
 
-				prefixBS.clear(origBS.length()-1);
+				if (!origBS.isEmpty())
+					prefixBS.clear(origBS.length()-1);
+
 				int prefixIdx = prefixes.indexOf(prefixBS);
 				if (prefixIdx == -1)
 				{
@@ -72,8 +71,6 @@ public class LogDefaultBasePrefixes extends AbstractLogBase
 				{
 					primes.get(prefixIdx).set(pr.getPrimeRefIdx());
 				}
-
-
 			}
 			catch(Exception e)
 			{
@@ -82,6 +79,14 @@ public class LogDefaultBasePrefixes extends AbstractLogBase
 				e.printStackTrace();
 			}
 		}
+	}
+
+	@Override
+	public void log()
+	{
+		generate();
+
+		System.out.println(String.format("%n"));
 
 		StringBuilder sb = new StringBuilder();
 
@@ -102,11 +107,11 @@ public class LogDefaultBasePrefixes extends AbstractLogBase
 								var localCnt = primes.get(itemIdx[0]).cardinality();
 								totalHandled[0] += localCnt;
 								sb.append(String.format("  count: [%d]", localCnt));
-								//sb.append(
-								//		String.format(
-								//			" Primes %s",
-								//			primes.get(itemIdx[0]).stream().boxed().map(i2 -> ps.getPrime(i2).get().toString()).collect(Collectors.joining(",", "[", "]")) ));
-								//sb.append(String.format("%n"));
+								sb.append(
+										String.format(
+											" Primes %s",
+											primes.get(itemIdx[0]).stream().boxed().map(i2 -> ps.getPrime(i2).get().toString()).collect(Collectors.joining(",", "[", "]")) ));
+								sb.append(String.format("%n"));
 								consumer.accept(sb.toString());
 								sb.setLength(0);
 								itemIdx[0]++;
@@ -115,7 +120,6 @@ public class LogDefaultBasePrefixes extends AbstractLogBase
 		.forEach(System.out::println);
 
 		System.out.println("Total handled = " + totalHandled[0]);
-
 	}
 }
 

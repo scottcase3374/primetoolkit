@@ -13,7 +13,7 @@ public enum BaseTypes
 	DEFAULT,
 
 	/**
-	 * Reduce prime bases to some N non-unique initial primes.  sum count of duplicates; more useful as input for logging of interesting info.
+	 * Reduce prefixPrime bases to some N non-unique initial primes.  sum count of duplicates; more useful as input for logging of interesting info.
 	 */
 	NPRIME,
 
