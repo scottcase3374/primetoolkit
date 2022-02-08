@@ -27,4 +27,6 @@ class InitOpts
 	@Option(names = { "--output-file"}, description = "Path/file for non-logger output (i.e. std-out / console)", required = false)
 	File outputFile;
 
+	@Option(names = {"--prefer-parallel"}, description = "Prefer parallel streams when possible", defaultValue = "true", required = false)
+	boolean preferParallel;
 }

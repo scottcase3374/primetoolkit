@@ -198,6 +198,7 @@ public class Init implements Runnable
 				actions.add(s ->
 								{
 									var base = new BaseReduceNPrime(ps);
+									base.doPreferParallel(initOpts.preferParallel);
 									base.setLogBaseGeneration(baseOpts.logGenerate);
 									base.setMaxReduce(baseOpts.maxReduce);
 									base.genBases();
@@ -214,6 +215,7 @@ public class Init implements Runnable
 				actions.add(s ->
 								{
 									var base = new BaseReduceTriple(ps);
+									base.doPreferParallel(initOpts.preferParallel);
 									base.setLogBaseGeneration(baseOpts.logGenerate);
 									base.genBases();
 								});
@@ -232,30 +234,30 @@ public class Init implements Runnable
 			switch (logOpts.logOper)
 			{
 			case NODESTRUCT:
-				actions.add(s -> (new LogNodeStructure(ps)).log() );
+				actions.add(s -> (new LogNodeStructure(ps)).doPreferParallel(initOpts.preferParallel).log() );
 				break;
 
 			case GRAPHSTRUCT:
-				actions.add(s -> (new LogGraphStructure(ps, PTKFactory.getActiveBaseId() )).log() );
+				actions.add(s -> (new LogGraphStructure(ps, PTKFactory.getActiveBaseId() )).doPreferParallel(initOpts.preferParallel).log() );
 				break;
 
 			case BASES:
 				if (PTKFactory.getActiveBaseId() == BaseTypes.THREETRIPLE)
 				{
-					actions.add(s -> (new LogBases3AllTriples(ps)).log() );
+					actions.add(s -> (new LogBases3AllTriples(ps)).doPreferParallel(initOpts.preferParallel).log() );
 				}
 				else if (PTKFactory.getActiveBaseId() == BaseTypes.NPRIME)
 				{
-					actions.add(s -> (new LogBasesNPrime(ps)).log() );
+					actions.add(s -> (new LogBasesNPrime(ps)).doPreferParallel(initOpts.preferParallel).log() );
 				}
 				break;
 
 			case PREFIX:
-				actions.add(s ->  (new LogDefaultBasePrefixes(ps)).log() );
+				actions.add(s ->  (new LogDefaultBasePrefixes(ps)).doPreferParallel(initOpts.preferParallel).log() );
 				break;
 
 			case PREFIXTREE:
-				actions.add(s ->  (new LogDefaultBasePrefixTree(ps)).log() );
+				actions.add(s ->  (new LogDefaultBasePrefixTree(ps)).doPreferParallel(initOpts.preferParallel).log() );
 				break;
 			}
 		}

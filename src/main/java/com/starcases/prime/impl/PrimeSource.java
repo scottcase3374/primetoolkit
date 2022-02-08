@@ -243,9 +243,9 @@ public class PrimeSource implements PrimeSourceIntfc
 	}
 
 	@Override
-	public Stream<PrimeRefIntfc> getPrimeRefStream()
+	public Stream<PrimeRefIntfc> getPrimeRefStream(boolean preferParallel)
 	{
-		return primeRefs.parallelStream();
+		return preferParallel ? primeRefs.parallelStream() : primeRefs.stream();
 	}
 
 	//

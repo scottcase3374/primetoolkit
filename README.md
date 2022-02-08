@@ -48,6 +48,8 @@ The codebase uses Java 17 with Java 17 preview features enabled. This is mostly 
     - Logs the prime, index, and a base-prime/count for each prime associated to "max-reduce" indexes (i.e. primes 1 and 2)
 - init --max-count=250 --LOG=BASES --base=NPRIME --max-reduce=4
     - Logs the prime, index, and a base-prime/count for each prime associated to "max-reduce" indexes  (i.e. primes, 1,2,3,5)
+- init --max-count=25000 --log=BASES --base=NPRIME --max-reduce=3 --prefer-parallel=true
+    - Generates in parallel then logs the prime, index, and a base-prime/count for each prime associated to "max-reduce" indexes (i.e. primes 1,2,3)
 
 Adding option:
 
@@ -67,7 +69,17 @@ You may need the following Java VM arguments depending on JDK version and setup/
 
 
 ## Performance
-Not much has been tuned at this point. I made some improvements when performance was so poor as to prevent running default base creation for any meaningful number of primes. I'm more interested in improvements at the data structure selection level than anything else this moment so that will be the focus for now. The creation of triples does use CompletableFuture (1 per target prime) which does help with that process - running for 500 primes still takes 1+ minutes though. The logging to console out is probably one of the largest time consumers (especially when running in an IDE such as Eclipse) - I may switch to file output and see what difference it makes. If that simple change produces a reasonable speedup then it allows faster turn-around times for other changes I want to make.
+I made some improvements when performance was so poor as to prevent running default base creation for any meaningful number of primes. I'm more interested in improvements at the data structure selection level than anything else this moment so that will be the focus for now. The creation of triples does use CompletableFuture (1 per target prime) which does help with that process - running for 500 primes still takes 1+ minutes though. The logging to console out is probably one of the largest time consumers (especially when running in an IDE such as Eclipse) - I may switch to file output and see what difference it makes. If that simple change produces a reasonable speedup then it allows faster turn-around times for other changes I want to make.
+
+For a command line of:
+- init --max-count=25000 --log=BASES --base=NPRIME --max-reduce=3 --prefer-parallel=true
+
+The run times when changing the prefer-parallel boolean were.
+- false: 4m 8s
+- true: 1m 5s.
+
+That flag applies to several base-logging and base-generation methods now. It generally drives either the use of parallel streams or aspects of the use of completableFutures.
+
 
 ## Observations
 - When logging 3 million node structs with other settings set to default - meaning you get a target prime # and a set of bases which includes the previous prime plus some subset of lower primes that sum to the target prime. The largest value in the subset of small primes in each base is usually less than 23 from a quick look at the data.  Example output: Prime 49979681 bases [[1,2,3,5,7,49979663]]  <dist[6], nextPrime[49979687]> idx[2999999]
@@ -253,8 +265,6 @@ information and then new base generation, logging and graphing actions are added
 
 ## ToDo
 	- More test coverage
-	- ~~Other graphing/visualization items (looking at some ideas which leverage lwjgl).~~
 	- More metrics generation
 	- Specialized data structures
 	- Better support for tracking performance (run-time) of the various stages (prime determination, prime bases generation, logging, etc).
-	- Add Optional.isPresent/isEmpty checks to the 12 or so remaining items needing it.

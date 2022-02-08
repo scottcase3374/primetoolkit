@@ -49,7 +49,7 @@ public interface PrimeSourceIntfc extends Serializable
 	 */
 	Iterator<PrimeRefIntfc> getPrimeRefIter();
 
-	Stream<PrimeRefIntfc> getPrimeRefStream();
+	Stream<PrimeRefIntfc> getPrimeRefStream(boolean preferParallel);
 
 	//
 	// Search and retrieve - non-index apis

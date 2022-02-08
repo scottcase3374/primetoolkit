@@ -1,10 +1,10 @@
 package com.starcases.prime.base.nprime;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.logging.Level;
-import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -59,20 +59,18 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 	 *
 	 * @param primeRef cur prefixPrime being reduced
 	 */
-	private void primeReduction(@NonNull PrimeRefIntfc primeRef, @NonNull List<Integer> outputCntALst)
+	private void primeReduction(@NonNull PrimeRefIntfc primeRef, @NonNull BitSet retBaseIdxs, @NonNull int [] retOutputIdxCount)
 	{
-		final var q = new ArrayDeque<Integer>();
-
 		// want to process initial bases for prefixPrime
-		primeRef.getPrimeBaseData().getPrimeBaseIdxs(BaseTypes.DEFAULT).get(0).stream().boxed().forEach(q::add);
+		final var q = primeRef.getPrimeBaseData().getPrimeBaseIdxs(BaseTypes.DEFAULT).get(0).stream().boxed().collect(Collectors.toCollection(ConcurrentLinkedDeque::new));
 
 		while (true)
 		{
 			var integerIt = q.iterator();
 			if (integerIt.hasNext())
 			{
-				// Get next base to process it and remove from deque
-				// high bases of current base get added back to deqeue.
+				// Get next base to process it and remove from "queue"
+				// high bases of current base get added back to "queue"
 				var i = integerIt.next();
 				integerIt.remove();
 
@@ -102,7 +100,7 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 								.forEach(
 										idx ->
 												// Process the low-bases; Increment the appropriate target base count
-												outputCntALst.set(idx, outputCntALst.get(idx)+1)
+												{ retOutputIdxCount[idx]++; retBaseIdxs.set(idx); }
 										)
 						  );
 			}
@@ -127,29 +125,22 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 			}
 		}
 
-		var primeIt = ps.getPrimeRefIter();
-		while (primeIt.hasNext())
+		ps.getPrimeRefStream(this.preferParallel)
+				.forEach( curPrime ->
 		{
-			var curPrime = primeIt.next();
 			try
 			{
-				var countForBaseIdx = new ArrayList<Integer>(maxReduce);
-				for (var i=0; i < maxReduce; i++)
-					countForBaseIdx.add(i, 0);
+				int [] retCountForBaseIdx = new int[maxReduce];
+				var retBaseIdxs = new BitSet();
+				primeReduction(curPrime, retBaseIdxs, retCountForBaseIdx);
 
-				primeReduction(curPrime, countForBaseIdx);
-
-				var bs = new BitSet();
-				for (var i=0; i < maxReduce; i++)
-					bs.set(i, countForBaseIdx.get(i) > 0);
-
-				curPrime.getPrimeBaseData().addPrimeBase(BaseTypes.NPRIME, bs, new NPrimeBaseMetadata(countForBaseIdx));
+				curPrime.getPrimeBaseData().addPrimeBase(BaseTypes.NPRIME, retBaseIdxs, new NPrimeBaseMetadata(retCountForBaseIdx));
 			}
 			catch(Exception e)
 			{
 				log.severe("Error: " + e);
-				break;
+
 			}
-		}
+		});
 	}
 }

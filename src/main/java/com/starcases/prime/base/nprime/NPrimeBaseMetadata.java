@@ -1,5 +1,6 @@
 package com.starcases.prime.base.nprime;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.starcases.prime.intfc.BaseMetadataIntfc;
@@ -17,8 +18,8 @@ public class NPrimeBaseMetadata implements BaseMetadataIntfc
 	@Getter
 	private final List<Integer> countForBaseIdx;
 
-	public NPrimeBaseMetadata(@NonNull List<Integer> countForBaseIdx)
+	public NPrimeBaseMetadata(@NonNull int [] countForBaseIdx)
 	{
-		this.countForBaseIdx = countForBaseIdx;
+		this.countForBaseIdx = Arrays.stream(countForBaseIdx).boxed().toList();
 	}
 }

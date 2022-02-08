@@ -14,8 +14,8 @@ import lombok.extern.java.Log;
 @Log
 public class LogDefaultBasePrefixes extends AbstractLogBase
 {
-	final List<BitSet> prefixes = new ArrayList<>();
-	final List<BitSet> primes = new ArrayList<>();
+	private final List<BitSet> prefixes = new ArrayList<>();
+	private final List<BitSet> primes = new ArrayList<>();
 
 	public LogDefaultBasePrefixes(@NonNull PrimeSourceIntfc ps)
 	{
@@ -24,7 +24,7 @@ public class LogDefaultBasePrefixes extends AbstractLogBase
 
 	void generate()
 	{
-		final var prStream = ps.getPrimeRefStream();
+		final var prStream = ps.getPrimeRefStream(preferParallel);
 		prStream.forEach(pr ->
 				{
 					try

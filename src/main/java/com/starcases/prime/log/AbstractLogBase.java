@@ -19,6 +19,14 @@ public abstract class AbstractLogBase implements LogGraphIntfc
 	@NonNull
 	protected final Logger log;
 
+	protected boolean preferParallel;
+
+	public LogGraphIntfc doPreferParallel(boolean preferParallel)
+	{
+		this.preferParallel = preferParallel;
+		return this;
+	}
+
 	protected AbstractLogBase(@NonNull PrimeSourceIntfc ps, @NonNull Logger log)
 	{
 		this.ps = ps;

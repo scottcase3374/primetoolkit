@@ -13,7 +13,7 @@ import java.util.TreeMap;
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
-import lombok.NoArgsConstructor;
+
 import lombok.extern.java.Log;
 import lombok.NonNull;
 
@@ -66,14 +66,14 @@ enum SumConstraintState
 	MATCH(0)
 	{};
 
-	private final  @NonNull Integer compToResult;
+	private final Integer compToResult;
 
-	SumConstraintState(@NonNull Integer compToResult)
+	SumConstraintState(Integer compToResult)
 	{
 		this.compToResult = compToResult;
 	}
 
-	static SumConstraintState getEnum(@NonNull Integer compToResult)
+	static SumConstraintState getEnum(Integer compToResult)
 	{
 		return Arrays.stream(SumConstraintState.values()).filter(e -> Objects.nonNull(e.compToResult)).filter(e -> e.compToResult.equals(compToResult)).findAny().orElse(NONMATCH);
 	}
@@ -229,8 +229,7 @@ enum ConditionConstraintState
  *
  */
 @Log
-@NoArgsConstructor
-class AllTriples
+public class AllTriples
 {
 	static final EnumSet<ConditionConstraintState> BAD_CONDITION_STATE =
 			EnumSet.of(ConditionConstraintState.DUPE,
@@ -242,21 +241,15 @@ class AllTriples
 					SumConstraintState.INCREMENT_SUM);
 
 	@NonNull
-	PrimeRefIntfc targetPrime;
+	private  PrimeRefIntfc targetPrime;
 
 	@NonNull
-	PrimeSourceIntfc ps;
+	private  PrimeSourceIntfc ps;
 
-	/**
-	 * Constructors - only need package visibility.
-	 *
-	 * @param ps
-	 * @param targetPrime
-	 */
-	AllTriples(@NonNull PrimeSourceIntfc ps, @NonNull PrimeRefIntfc targetPrime)
+	public AllTriples(@NonNull PrimeSourceIntfc ps, @NonNull PrimeRefIntfc targetPrime)
 	{
-		this.ps = ps;
 		this.targetPrime = targetPrime;
+		this.ps = ps;
 	}
 
 	/**

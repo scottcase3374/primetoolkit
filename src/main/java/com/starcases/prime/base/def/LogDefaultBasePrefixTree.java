@@ -97,7 +97,7 @@ public class LogDefaultBasePrefixTree extends AbstractLogBase
 	{
 		System.out.println(String.format("%n"));
 
-		ps.getPrimeRefStream().forEach(
+		ps.getPrimeRefStream(preferParallel).forEach(
 				curPrime ->
 				{
 					try
