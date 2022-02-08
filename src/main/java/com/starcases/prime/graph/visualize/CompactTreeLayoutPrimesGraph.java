@@ -24,20 +24,21 @@ public class CompactTreeLayoutPrimesGraph extends JFrame
 {
 	private static final long serialVersionUID = 1L;
 
+	// Sonar complains about wanting jgxAdapter to be either serializable or transient
 	@NonNull
-	private transient JGraphXAdapter<PrimeRefIntfc, DefaultEdge> jgxAdapter;
+	private final transient JGraphXAdapter<PrimeRefIntfc, DefaultEdge> jgxAdapter;
 
     public CompactTreeLayoutPrimesGraph(@NonNull Graph<PrimeRefIntfc,DefaultEdge> graph)
     {
         // create a visualization using JGraph, via an adapter
         jgxAdapter = new JGraphXAdapter<>(graph);
 
-        var component = new mxGraphComponent(jgxAdapter);
+        final var component = new mxGraphComponent(jgxAdapter);
         component.setConnectable(false);
         component.getGraph().setAllowDanglingEdges(false);
         getContentPane().add(component);
 
-        var layout = new mxCompactTreeLayout(jgxAdapter, false, false);
+        final var layout = new mxCompactTreeLayout(jgxAdapter, false, false);
         layout.setEdgeRouting(true);
         layout.setLevelDistance(140);
         layout.setNodeDistance(140);

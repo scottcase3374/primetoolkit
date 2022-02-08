@@ -265,7 +265,6 @@ public class Init implements Runnable
 	{
 		if (graphOpts != null && graphOpts.graphType != null && graphOpts.graphType == Graph.DEFAULT)
 		{
-
 			actions.add(s -> graph(ps, PTKFactory.getActiveBaseId() != null ? PTKFactory.getActiveBaseId() : BaseTypes.DEFAULT));
 		}
 	}

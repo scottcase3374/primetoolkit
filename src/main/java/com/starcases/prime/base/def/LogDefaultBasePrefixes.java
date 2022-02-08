@@ -2,7 +2,6 @@ package com.starcases.prime.base.def;
 
 import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,29 +14,8 @@ import lombok.extern.java.Log;
 @Log
 public class LogDefaultBasePrefixes extends AbstractLogBase
 {
-	static Comparator<BitSet> bsComparator = (bs1, bs2) ->
-		{
-			var bs1it = bs1.stream().iterator();
-			var bs2it = bs2.stream().iterator();
-
-			int diff = 0;
-			while (bs1it.hasNext() && bs2it.hasNext() && diff == 0)
-			{
-				var bs1int = bs1it.next();
-				var bs2int = bs2it.next();
-				diff = bs1int - bs2int;
-			}
-
-			if (diff == 0 && bs1it.hasNext())
-			{
-				diff = 1;
-			}
-			return diff;
-
-		} ;
-
-	List<BitSet> prefixes = new ArrayList<>();
-	List<BitSet> primes = new ArrayList<>();
+	final List<BitSet> prefixes = new ArrayList<>();
+	final List<BitSet> primes = new ArrayList<>();
 
 	public LogDefaultBasePrefixes(@NonNull PrimeSourceIntfc ps)
 	{
@@ -46,39 +24,38 @@ public class LogDefaultBasePrefixes extends AbstractLogBase
 
 	void generate()
 	{
-		var prIt = ps.getPrimeRefIter();
-		while (prIt.hasNext())
-		{
-			var pr = prIt.next();
-			try
-			{
-				BitSet origBS = pr.getPrimeBaseData().getPrimeBaseIdxs().get(0);
-
-				BitSet prefixBS = (BitSet)origBS.clone();
-
-				if (!origBS.isEmpty())
-					prefixBS.clear(origBS.length()-1);
-
-				int prefixIdx = prefixes.indexOf(prefixBS);
-				if (prefixIdx == -1)
+		final var prStream = ps.getPrimeRefStream();
+		prStream.forEach(pr ->
 				{
-					prefixes.add(prefixBS);
-					BitSet p = new BitSet();
-					p.set(pr.getPrimeRefIdx());
-					primes.add(p);
-				}
-				else
-				{
-					primes.get(prefixIdx).set(pr.getPrimeRefIdx());
-				}
-			}
-			catch(Exception e)
-			{
-				log.severe(String.format("Can't show bases for: %d exception:", pr.getPrime()));
-				log.throwing(this.getClass().getName(), "log", e);
-				e.printStackTrace();
-			}
-		}
+					try
+					{
+						final var origBS = pr.getPrimeBaseData().getPrimeBaseIdxs().get(0);
+
+						final var prefixBS = (BitSet)origBS.clone();
+
+						if (!origBS.isEmpty())
+							prefixBS.clear(origBS.length()-1);
+
+						final var prefixIdx = prefixes.indexOf(prefixBS);
+						if (prefixIdx == -1)
+						{
+							prefixes.add(prefixBS);
+							final var p = new BitSet();
+							p.set(pr.getPrimeRefIdx());
+							primes.add(p);
+						}
+						else
+						{
+							primes.get(prefixIdx).set(pr.getPrimeRefIdx());
+						}
+					}
+					catch(Exception e)
+					{
+						log.severe(String.format("Can't show bases for: %d exception:", pr.getPrime()));
+						log.throwing(this.getClass().getName(), "log", e);
+						e.printStackTrace();
+					}
+				});
 	}
 
 	@Override
@@ -88,11 +65,11 @@ public class LogDefaultBasePrefixes extends AbstractLogBase
 
 		System.out.println(String.format("%n"));
 
-		StringBuilder sb = new StringBuilder();
+		final var sb = new StringBuilder();
 
-		int [] totalHandled = {0};
-		int [] itemIdx = {0};
-		//prefixes.sort(bsComparator);
+		final int [] totalHandled = {0};
+		final int [] itemIdx = {0};
+
 		prefixes.stream()
 		.<String>mapMulti((bs, consumer) ->
 							{
@@ -104,7 +81,7 @@ public class LogDefaultBasePrefixes extends AbstractLogBase
 								 	.map(i -> ps.getPrime(i).get().toString())
 								 	.collect(Collectors.joining(",","[","]"))
 								 	);
-								var localCnt = primes.get(itemIdx[0]).cardinality();
+								final var localCnt = primes.get(itemIdx[0]).cardinality();
 								totalHandled[0] += localCnt;
 								sb.append(String.format("  count: [%d]", localCnt));
 								sb.append(

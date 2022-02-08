@@ -33,13 +33,13 @@ public class ViewDefault extends PrimeGrapher
 	{
         try
 		{
-			var defaultGraph = new CircularLayoutPrimesGraph(this.graph);
+			final var defaultGraph = new CircularLayoutPrimesGraph(this.graph);
 			defaultGraph.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 			defaultGraph.setSize(400, 320);
 			defaultGraph.setVisible(true);
 			defaultGraph.getRootPane().grabFocus();
 
-			var compactTreeGraph = new CompactTreeLayoutPrimesGraph(this.graph);
+			final var compactTreeGraph = new CompactTreeLayoutPrimesGraph(this.graph);
 			compactTreeGraph.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 			compactTreeGraph.setSize(400, 320);
 			compactTreeGraph.setVisible(true);

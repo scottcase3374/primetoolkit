@@ -66,9 +66,9 @@ enum SumConstraintState
 	MATCH(0)
 	{};
 
-	final Integer compToResult;
+	private final  @NonNull Integer compToResult;
 
-	SumConstraintState(Integer compToResult)
+	SumConstraintState(@NonNull Integer compToResult)
 	{
 		this.compToResult = compToResult;
 	}
@@ -85,7 +85,7 @@ enum SumConstraintState
 			TripleIdx [] idxs)
 	{
 		// sum the current prefixPrime refs except for item indexed by array idxs
-		var sum1 = Arrays.
+		final var sum1 = Arrays.
 						stream(TripleIdx.values())
 						.filter(i ->  idxs == null || (idxs != null && Arrays.stream(idxs).allMatch(ii -> ii != i)) )
 						.map(primeRefs::get)
@@ -96,17 +96,17 @@ enum SumConstraintState
 						.reduce(BigInteger.ZERO, BigInteger::add);
 
 		// sum the items in array vals [which should equate to overrides of the prefixPrime refs specified by array idxs.
-		var sum2 = vals == null ? BigInteger.ZERO :
+		final var sum2 = vals == null ? BigInteger.ZERO :
 				Arrays.
 				stream(vals).
 				filter(Objects::nonNull).
 				reduce(BigInteger.ZERO, BigInteger::add);
 
 		// Create total sum from both sets which should be sourced from 3 items in one or the other of primeRefs or vals.
-		var finalSum = sum1.add(sum2);
+		final var finalSum = sum1.add(sum2);
 
 		// determine if sum is higher than prefixPrime, equal to prefixPrime, less than prefixPrime or just doesn't match for some reason.
-		var sumComptoPrime = targetPrime.getPrime().compareTo(finalSum);
+		final var sumComptoPrime = targetPrime.getPrime().compareTo(finalSum);
 
 		return SumConstraintState.getEnum(sumComptoPrime);
 	}
@@ -308,7 +308,7 @@ class AllTriples
 	 */
 	void process()
 	{
-		Map<TripleIdx, Optional<PrimeRefIntfc>> triple = new TreeMap<>();
+		final Map<TripleIdx, Optional<PrimeRefIntfc>> triple = new TreeMap<>();
 		triple.put(TripleIdx.TOP, ps.getPrimeRef(4) );  // prefixPrime 7
 		triple.put(TripleIdx.MID, ps.getPrimeRef(2) );  // prefixPrime 3
 		triple.put(TripleIdx.BOT,  ps.getPrimeRef(0) ); // prefixPrime 1
@@ -317,8 +317,8 @@ class AllTriples
 		assert(!triple.containsValue(null));
 		assert(!triple.values().contains(null));
 
-		SumConstraintState [] sumConstraint = {SumConstraintState.checkSumConstraints(triple, targetPrime, null, null)};
-		ConditionConstraintState [] conditionConstraint = {ConditionConstraintState.checkConditionConstraints(triple, null, null)};
+		final SumConstraintState [] sumConstraint = {SumConstraintState.checkSumConstraints(triple, targetPrime, null, null)};
+		final ConditionConstraintState [] conditionConstraint = {ConditionConstraintState.checkConditionConstraints(triple, null, null)};
 
 		do // cur top
 		{

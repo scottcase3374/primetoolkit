@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.starcases.prime.base.BaseTypes;
@@ -33,29 +34,34 @@ import javax.validation.constraints.Min;
 @Log
 public class PrimeSource implements PrimeSourceIntfc
 {
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 1L;
+
 	@Min(1)
-	private int confidenceLevel = 100;
+	private final int confidenceLevel;
 
 	@Min(-1)
-	private AtomicInteger nextIdx = new AtomicInteger(-1);
+	private final AtomicInteger nextIdx = new AtomicInteger(-1);
 
 	@NonNull
-	private List<BigInteger> primes;
+	private final List<BigInteger> primes;
 
 	@NonNull
-	private List<PrimeRefIntfc> primeRefs;
+	private final List<PrimeRefIntfc> primeRefs;
 
 	@NonNull
-	private List<BigInteger> distanceToNext;
+	private final List<BigInteger> distanceToNext;
 
 	@Min(1)
-	private int targetPrimeCount;
+	private final int targetPrimeCount;
 
 	@NonNull
 	private BaseTypes activeBaseId = BaseTypes.DEFAULT;
 
 	@NonNull
-	private AtomicBoolean doInit = new AtomicBoolean(false);
+	private final AtomicBoolean doInit = new AtomicBoolean(false);
 
 	// Default PrimeRef implementation to use for this PrimeSource.
 	//
@@ -69,7 +75,7 @@ public class PrimeSource implements PrimeSourceIntfc
 	//
 	// This does seem a bit hacky - may revisit later.
 	@NonNull
-	private BiFunction<Integer, BitSet, PrimeRefIntfc> primeRefCtor;
+	private final BiFunction<Integer, BitSet, PrimeRefIntfc> primeRefCtor;
 
 	// Used for informative purposes - like a progress meter.
 	long primesProcessed1k = 0;
@@ -80,21 +86,10 @@ public class PrimeSource implements PrimeSourceIntfc
 
 	public PrimeSource(
 			@Min(1) int maxCount,
-			@Min(1) int confidenceLevel,
-			@NonNull BiFunction<Integer, BitSet, PrimeRefIntfc> primeRefCtor,
-			@NonNull Consumer<PrimeSourceIntfc> fnSetPrimeSrc,
-			@NonNull Consumer<PrimeSourceIntfc> baseSetPrimeSrc
-			)
-	{
-		this(maxCount, primeRefCtor, fnSetPrimeSrc, baseSetPrimeSrc);
-		this.confidenceLevel = confidenceLevel;
-	}
-
-	public PrimeSource(
-			@Min(1) int maxCount,
 			@NonNull BiFunction<Integer, BitSet, PrimeRefIntfc> primeRefCtor,
 			@NonNull Consumer<PrimeSourceIntfc> consumerSetPrimeSrc,
-			@NonNull Consumer<PrimeSourceIntfc> baseSetPrimeSrc
+			@NonNull Consumer<PrimeSourceIntfc> baseSetPrimeSrc,
+			@Min(1) int confidenceLevel
 			)
 	{
 		primes = new ArrayList<>(maxCount);
@@ -113,6 +108,18 @@ public class PrimeSource implements PrimeSourceIntfc
 		tmpBitSet.clear();
 		tmpBitSet.set(1);
 		addPrimeRef(BigInteger.valueOf(2L), tmpBitSet.get(0, 2));
+
+		this.confidenceLevel = confidenceLevel;
+	}
+
+	public PrimeSource(
+			@Min(1) int maxCount,
+			@NonNull BiFunction<Integer, BitSet, PrimeRefIntfc> primeRefCtor,
+			@NonNull Consumer<PrimeSourceIntfc> consumerSetPrimeSrc,
+			@NonNull Consumer<PrimeSourceIntfc> baseSetPrimeSrc
+			)
+	{
+		this(maxCount, primeRefCtor, consumerSetPrimeSrc, baseSetPrimeSrc, 100);
 	}
 
 	@Override
@@ -128,7 +135,7 @@ public class PrimeSource implements PrimeSourceIntfc
 		}
 
 		final var primeIndexMaxPermutation = new BitSet();
-		var primeIndexPermutation = new BitSet();
+		final var primeIndexPermutation = new BitSet();
 
 		// each iteration increases the #bits by 1; i.e. a new prefixPrime is determined per iteration
 		do
@@ -146,11 +153,11 @@ public class PrimeSource implements PrimeSourceIntfc
 			primeIndexPermutation.clear();
 			primeIndexPermutation.set(0);
 
-			BigInteger sumCeiling = curPrime.stream().map(this::calcSumCeiling).reduce(BigInteger.ZERO, BigInteger::add);
+			final var sumCeiling = curPrime.stream().map(this::calcSumCeiling).reduce(BigInteger.ZERO, BigInteger::add);
 
 			while (!primeIndexPermutation.equals(primeIndexMaxPermutation))
 			{
-				var permutationSum = primeIndexPermutation
+				final var permutationSum = primeIndexPermutation
 						.stream()
 						.mapToObj(this::getPrime)
 						.filter(Optional::isPresent)
@@ -167,7 +174,7 @@ public class PrimeSource implements PrimeSourceIntfc
 				if (curPrime.isPresent() && viablePrime(permutationSum, curPrime.get()))
 				{
 					final var cachedSum = permutationSum;
-					var sumBaseIdxs = primeIndexPermutation.get(0, numBitsForPrimeCount);
+					final var sumBaseIdxs = primeIndexPermutation.get(0, numBitsForPrimeCount);
 					sumBaseIdxs.set(curPrimeIdx); // sum of primes from these indexes should match 'sum'
 					final var cachedBases = sumBaseIdxs;
 					addPrimeRef(cachedSum, cachedBases, curPrimeIdx);
@@ -213,7 +220,7 @@ public class PrimeSource implements PrimeSourceIntfc
 	@Override
 	public boolean baseExist(@NonNull BaseTypes baseId)
 	{
-		boolean ret = false;
+		var ret = false;
 		try
 		{
 			primeRefs.get(0).getPrimeBaseData().getMinPrimeBase(baseId);
@@ -233,6 +240,12 @@ public class PrimeSource implements PrimeSourceIntfc
 	public Iterator<PrimeRefIntfc> getPrimeRefIter()
 	{
 		return primeRefs.iterator();
+	}
+
+	@Override
+	public Stream<PrimeRefIntfc> getPrimeRefStream()
+	{
+		return primeRefs.parallelStream();
 	}
 
 	//
@@ -280,20 +293,20 @@ public class PrimeSource implements PrimeSourceIntfc
 	@Override
 	public Optional<PrimeRefIntfc> getPrimeRefWithinOffset(@Min(0) int idx, @NonNull BigInteger targetOffset)
 	{
-		var dir = targetOffset.signum();
+		final var dir = targetOffset.signum();
 
 		if (dir == 0)
 			return Optional.empty();
 
-		BigInteger tmpOffset = BigInteger.ZERO;
-		int tmpIdx = idx;
+		var tmpOffset = BigInteger.ZERO;
+		var tmpIdx = idx;
 		while (targetOffset.compareTo(tmpOffset) == dir && tmpIdx < this.getMaxIdx() && tmpIdx > 0)
 		{
 			tmpIdx += dir;
 			tmpOffset = tmpOffset.add( dir == -1 ?  distanceToNext.get(tmpIdx).negate() : distanceToNext.get(tmpIdx));
 		}
 
-		var ret = primeRefs.get(tmpIdx);
+		final var ret = primeRefs.get(tmpIdx);
 
 		log.info( String.format("get near primeref idx [%d] target-offset[%d] return [%d]", idx, targetOffset, ret.getPrime()));
 		return Optional.of(ret);
@@ -342,7 +355,9 @@ public class PrimeSource implements PrimeSourceIntfc
 		if (idx1 < 0 || idx2 < 0 || idx1 > getMaxIdx() || idx2 > getMaxIdx() )
 			return Optional.empty();
 
-		return  Optional.of( idx1 < idx2 ? this.getPrime(idx2).get().subtract(this.getPrime(idx1).get()) : this.getPrime(idx1).get().subtract(this.getPrime(idx2).get()));
+		return  Optional.of( idx1 < idx2 ?
+				this.getPrime(idx2).orElseThrow().subtract(this.getPrime(idx1).orElseThrow()) :
+					this.getPrime(idx1).orElseThrow().subtract(this.getPrime(idx2).orElseThrow()));
 	}
 
 	@Override
@@ -377,7 +392,7 @@ public class PrimeSource implements PrimeSourceIntfc
 
 	public long getNextLowPrime(@NonNull @Min(1) BigInteger val, @Min(0) int startIdx, @Min(0) int maxOffset)
 	{
-		var ret = Collections.binarySearch(primes, val);
+		final var ret = Collections.binarySearch(primes, val);
 		if (ret < startIdx || ret >= maxOffset)
 			return -1;
 		return (long)ret-1;
@@ -385,7 +400,7 @@ public class PrimeSource implements PrimeSourceIntfc
 
 	public long getNextHighPrime(@NonNull BigInteger val, @Min(0) int startIdx, @Min(0) int maxOffset)
 	{
-		var ret = Collections.binarySearch(primes, val);
+		final var ret = Collections.binarySearch(primes, val);
 		if (ret < startIdx || ret >= maxOffset)
 			return -1L;
 		return  (long)ret+1;
@@ -399,14 +414,14 @@ public class PrimeSource implements PrimeSourceIntfc
 	@Override
 	public int getNextLowPrimeIdx(@NonNull @Min(1) BigInteger val)
 	{
-		var ret = Collections.binarySearch(primes, val);
+		final var ret = Collections.binarySearch(primes, val);
 		return ret >= 0 ? Math.max(ret-1, 0) : (-ret-2);
 	}
 
 	@Override
 	public int getNextHighPrimeIdx(@NonNull @Min(1) BigInteger val)
 	{
-		var ret = Collections.binarySearch(primes, val);
+		final var ret = Collections.binarySearch(primes, val);
 		return ret >= 0 ? ret+1 : Math.max(-ret-1, 0);
 	}
 

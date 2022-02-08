@@ -12,7 +12,12 @@ import com.starcases.prime.intfc.PrimeRefIntfc;
  */
 abstract class AbstractPrimeRef implements PrimeRefIntfc
 {
-	public AbstractPrimeRef()
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 1L;
+
+	protected AbstractPrimeRef()
 	{}
 
 	public PrimeRefIntfc getPrimeRef()

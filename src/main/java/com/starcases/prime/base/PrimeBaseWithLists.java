@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import com.starcases.prime.intfc.BaseMetadataIntfc;
 import com.starcases.prime.intfc.PrimeBaseIntfc;
@@ -17,6 +16,11 @@ import lombok.NonNull;
 
 public class PrimeBaseWithLists implements PrimeBaseIntfc
 {
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 1L;
+
 	@NonNull
 	// Represents sets of base primes that sum to this prefixPrime. (index to primes)
 	private final Map<BaseTypes, List<Integer>> primeBaseIdxs = new EnumMap<>(BaseTypes.class);
@@ -65,7 +69,7 @@ public class PrimeBaseWithLists implements PrimeBaseIntfc
 
 	@Override
 	public List<BitSet> getPrimeBaseIdxs(@NonNull BaseTypes baseType) {
-		var b = new BitSet();
+		final var b = new BitSet();
 		primeBaseIdxs.getOrDefault(baseType, Collections.emptyList()).stream().forEach(b::set);
 		return List.of(b);
 	}
@@ -87,49 +91,41 @@ public class PrimeBaseWithLists implements PrimeBaseIntfc
 	@Override
 	public void addPrimeBase(@NonNull BitSet primeBase, @NonNull BaseTypes baseType)
 	{
-		this.primeBaseIdxs.merge(baseType, primeBase.stream().boxed().toList(), (a,b) -> b );
+		this.primeBaseIdxs.merge(baseType,
+				primeBase.stream().boxed().toList(),
+				(a,b) -> b );
 	}
 
 	@Override
 	public void addPrimeBase(@NonNull BaseTypes baseType, @NonNull BitSet primeBase, @NonNull BaseMetadataIntfc baseMetadata)
 	{
-		this.primeBaseIdxs.merge(baseType, primeBase.stream().boxed().toList(), (a,b) -> b );
+		this.primeBaseIdxs.merge(baseType,
+				primeBase.stream().boxed().toList(),
+				(a,b) -> b );
 		this.baseMetadata = baseMetadata;
 	}
 
 	@Override
 	public BigInteger getMinPrimeBase()
 	{
-		return primeBaseIdxs
-				.get(BaseTypes.DEFAULT)
-				.stream()
-				.map(i -> primeSrc.getPrime(i))
-				.filter(Optional::isPresent)
-				.map(Optional::get)
-				.min(bigIntComp)
-				.orElse(BigInteger.ZERO);
+		return getMinPrimeBase(BaseTypes.DEFAULT);
 	}
 
 	@Override
 	public BigInteger getMaxPrimeBase()
 	{
-		return primeBaseIdxs.get(BaseTypes.DEFAULT).stream().map(i -> primeSrc.getPrime(i).get()).max(bigIntComp).get();
+		return getMaxPrimeBase(BaseTypes.DEFAULT);
 	}
 
 	@Override
 	public BigInteger getMinPrimeBase(@NonNull BaseTypes baseType)
 	{
-		return primeBaseIdxs.get(baseType).stream().map(i -> primeSrc.getPrime(i).get()).min(bigIntComp).get();
+		return primeSrc.getPrime(primeBaseIdxs.get(baseType).stream().min((i1,i2) -> i1.compareTo(i2)).orElseThrow()).orElse(BigInteger.ZERO);
 	}
 
 	@Override
 	public BigInteger getMaxPrimeBase(@NonNull BaseTypes baseType)
 	{
-		return primeBaseIdxs
-				.get(baseType)
-				.stream()
-				.map(i -> primeSrc.getPrime(i).orElse(BigInteger.ZERO))
-				.max(bigIntComp)
-				.orElse(BigInteger.ZERO);
+		return primeSrc.getPrime(primeBaseIdxs.get(baseType).stream().max((i1, i2) -> i1.compareTo(i2)).orElseThrow()).orElse(BigInteger.ZERO);
 	}
 }

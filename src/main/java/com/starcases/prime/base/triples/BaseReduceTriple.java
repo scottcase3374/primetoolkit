@@ -3,10 +3,8 @@ package com.starcases.prime.base.triples;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
@@ -67,13 +65,13 @@ import lombok.extern.java.Log;
 public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 {
 	@NonNull
-	static final Comparator<String> nodeComparator = (o1,o2) -> Integer.decode(o1).compareTo(Integer.decode(o2));
+	private static final Comparator<String> nodeComparator = (o1,o2) -> Integer.decode(o1).compareTo(Integer.decode(o2));
 
 	@NonNull
-	BaseTypes activeBaseId;
+	private BaseTypes activeBaseId;
 
 	@Min(0)
-	static AtomicInteger good = new AtomicInteger(0);
+	private static final AtomicInteger good = new AtomicInteger(0);
 
 	/**
 	 * Constructor
@@ -94,7 +92,7 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 	 */
 	private void reducePrime(@NonNull PrimeRefIntfc prime)
 	{
-		AllTriples triple = new AllTriples(ps, prime);
+		final var triple = new AllTriples(ps, prime);
 		triple.process();
 	}
 
@@ -104,20 +102,20 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 	 */
 	public void genBases()
 	{
-		AtomicInteger counter = new AtomicInteger(0);
+		final var counter = new AtomicInteger(0);
 		if (doLog)
 		{
 			log.entering("BaseReduce3Triple", "genBases()");
 		}
 
-		BigInteger lastNonViablePrime = BigInteger.valueOf(7L);
+		final var lastNonViablePrime = BigInteger.valueOf(7L);
 
-		Iterator<PrimeRefIntfc> pRefIt = ps.getPrimeRefIter();
+		final var pRefIt = ps.getPrimeRefIter();
 
 		// handle Bootstrap values - can't really represent < 11 with a sum of 3 primes
 		while(pRefIt.hasNext())
 		{
-			var curPrime = pRefIt.next();
+			final var curPrime = pRefIt.next();
 
 			curPrime
 				.getPrimeBaseData()
@@ -129,21 +127,23 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 				break;
 		}
 
-		ExecutorService workStealingPool = Executors.newWorkStealingPool(100);
-		List<CompletableFuture<String>> futures = new ArrayList<>(100);
+		// some informal testing showed lowest run-times with a pool size of 6-7 for an 8-core system
+		final var poolSize = 6;
+		final var workStealingPool = Executors.newWorkStealingPool(poolSize);
+		final List<CompletableFuture<String>> futures = new ArrayList<>(poolSize);
 
 		// Process the values which can be represented by the sum of 3 primes.
 		while (pRefIt.hasNext())
 		{
-			var curPrime = pRefIt.next();
+			final var curPrime = pRefIt.next();
 
-			CompletableFuture<String> compFuture = new CompletableFuture<>();
+			final var compFuture = new CompletableFuture<String>();
 			futures.add(compFuture);
 
 			compFuture.completeAsync(() -> handlePrime(curPrime, counter.incrementAndGet()) , workStealingPool);
 		}
 
-		long [] c = {0};
+		final long [] c = {0};
 		futures.stream().map(CompletableFuture::join).forEach(x -> c[0]++ );
 
 		if (log.isLoggable(Level.INFO))
@@ -151,9 +151,9 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 	}
 
 
-	String handlePrime(PrimeRefIntfc curPrime, int counter)
+	private String handlePrime(PrimeRefIntfc curPrime, int counter)
 	{
-		var retVal = String.format("p[%d]idx[%d] good=", curPrime.getPrime(), counter);
+		final var retVal = String.format("p[%d]idx[%d] good=", curPrime.getPrime(), counter);
 		try
 		{
 			reducePrime(curPrime);

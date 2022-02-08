@@ -23,7 +23,7 @@ class TripleUnitTest
 	@BeforeEach
 	void init()
 	{
-		ps = new PrimeSource(120,100, null, PrimeRefBitSetIndexes::setPrimeSource, PrimeBaseWithBitsets::setPrimeSource);
+		ps = new PrimeSource(120, null, PrimeRefBitSetIndexes::setPrimeSource, PrimeBaseWithBitsets::setPrimeSource, 100);
 		ps.init();
 	}
 

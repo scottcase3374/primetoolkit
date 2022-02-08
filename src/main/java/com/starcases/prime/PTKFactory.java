@@ -30,35 +30,35 @@ public class PTKFactory
 {
 	@Getter
 	@Setter
-	static @Min(1) int maxCount;
+	private static @Min(1) int maxCount;
 
 	@Getter
 	@Setter
-	static @Max(3) int maxReduce;
+	private static @Max(3) int maxReduce;
 
 	@Getter
 	@Setter
-	static @Min(1) int confidenceLevel;
+	private static @Min(1) int confidenceLevel;
 
 	@Getter
 	@Setter
-	static @NonNull BaseTypes activeBaseId;
+	private static @NonNull BaseTypes activeBaseId;
 
 	@Getter
 	@Setter
-	static @NonNull BiFunction<Integer, BitSet, PrimeRefIntfc> primeRefCtor;
+	private static @NonNull BiFunction<Integer, BitSet, PrimeRefIntfc> primeRefCtor;
 
 	@Getter
 	@Setter
-	static @NonNull Consumer<PrimeSourceIntfc> primeRefSetPrimeSource;
+	private static @NonNull Consumer<PrimeSourceIntfc> primeRefSetPrimeSource;
 
 	@Getter
 	@Setter
-	static @NonNull Consumer<PrimeSourceIntfc> baseSetPrimeSource;
+	private static @NonNull Consumer<PrimeSourceIntfc> baseSetPrimeSource;
 
 	@Getter
 	@Setter
-	static @NonNull Supplier<PrimeBaseIntfc> primeBaseCtor;
+	private static @NonNull Supplier<PrimeBaseIntfc> primeBaseCtor;
 
 	private PTKFactory()
 	{}
@@ -105,6 +105,6 @@ public class PTKFactory
 			@NonNull Consumer<PrimeSourceIntfc> baseSetPrimeSource
 			)
 	{
-		return new PrimeSource(maxCount, confidenceLevel, primeRefCtor, consumerSetPrimeSource, baseSetPrimeSource);
+		return new PrimeSource(maxCount, primeRefCtor, consumerSetPrimeSource, baseSetPrimeSource, confidenceLevel);
 	}
 }

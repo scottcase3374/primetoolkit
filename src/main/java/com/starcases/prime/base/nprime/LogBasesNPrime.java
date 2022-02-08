@@ -28,7 +28,7 @@ public class LogBasesNPrime extends AbstractLogBase
 	@Command
 	public void log()
 	{
-		final int maxBasesInRow = 5;
+		final var maxBasesInRow = 5;
 
 		// Get desired data
 		ps.setActiveBaseId(BaseTypes.NPRIME);
@@ -65,13 +65,18 @@ public class LogBasesNPrime extends AbstractLogBase
 													// prefixPrime starting at index 0 and incrementing index by 1.
 													//
 													// Remember, the reduction is reducing to a "prefix" list of the primes.
+													//
+													// Index into counts
 													int [] primeIdxCntIdx = {0};
 
 													sb.append(
 													 	indexBitset
 													 	.stream()
 													 	.boxed()
-													 	.map(index -> String.format("base-prefixPrime-%d count:[%d]", ps.getPrime(primeIdxCntIdx[0]).get(), counts.get(primeIdxCntIdx[0]++)) )
+													 	.map(index ->
+													 		String.format("base-prefixPrime:[%s] count:[%s]",
+													 				ps.getPrime(primeIdxCntIdx[0]).get().toString(),
+													 				counts.get(primeIdxCntIdx[0]++).toString()))
 													 	.collect(Collectors.joining(",","[","]"))
 													 	);
 

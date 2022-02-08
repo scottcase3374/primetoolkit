@@ -25,6 +25,12 @@ import lombok.NonNull;
 
 public class PrimeRef extends AbstractPrimeRef
 {
+
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 1L;
+
 	@NonNull
 	private static PrimeSourceIntfc primeSrc;
 
@@ -38,10 +44,10 @@ public class PrimeRef extends AbstractPrimeRef
 	 *  index to bitsets or collections for this val
 	 */
 	@Min(0)
-	private int primeIdx;
+	private final int primeIdx;
 
 	@NonNull
-	private PrimeBaseIntfc primeBaseData;
+	private final PrimeBaseIntfc primeBaseData;
 
 	/**
 	 * Handle simple prefixPrime where the base is simply itself - i.e. 1, 2
@@ -89,7 +95,7 @@ public class PrimeRef extends AbstractPrimeRef
 
 	@Override
 	public BigInteger getPrime() {
-		return primeSrc.getPrime(primeIdx).get();
+		return primeSrc.getPrime(primeIdx).orElseThrow();
 	}
 
 	@Override

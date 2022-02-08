@@ -17,6 +17,11 @@ import lombok.NonNull;
 
 public class PrimeBaseWithBitsets implements PrimeBaseIntfc
 {
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public PrimeBaseWithBitsets()
 	{
 		// nothing to init here
@@ -82,27 +87,17 @@ public class PrimeBaseWithBitsets implements PrimeBaseIntfc
 	@Override
 	public void addPrimeBase(@NonNull BitSet primeBase)
 	{
-		addPrimeBase(primeBase, BaseTypes.DEFAULT);
+		addPrimeBase(BaseTypes.DEFAULT, primeBase, null);
 	}
 
 	@Override
 	public void addPrimeBase(@NonNull BitSet primeBase, @NonNull BaseTypes baseType)
 	{
-		this.primeBaseIdxs.compute(baseType,
-				(k, v) ->
-					{
-						if (v == null)
-						{
-							return new ArrayList<BitSet>(Arrays.asList(primeBase));
-						}
-
-						v.add(primeBase);
-						return v;
-					});
+		addPrimeBase(baseType, primeBase, null);
 	}
 
 	@Override
-	public void addPrimeBase(@NonNull BaseTypes baseType, @NonNull BitSet primeBase, @NonNull BaseMetadataIntfc baseMetadata)
+	public void addPrimeBase(@NonNull BaseTypes baseType, @NonNull BitSet primeBase, BaseMetadataIntfc baseMetadata)
 	{
 		this.primeBaseIdxs.compute(baseType,
 				(k, v) ->
@@ -132,12 +127,12 @@ public class PrimeBaseWithBitsets implements PrimeBaseIntfc
 	@Override
 	public BigInteger getMinPrimeBase(@NonNull BaseTypes baseType)
 	{
-		// TODO Need to redo this; the result of Optional<Optional<>> is just silly.
 		return primeBaseIdxs
 				.get(baseType)
 				.stream()
-				.map(bs -> bs.stream().boxed().map(i -> PrimeBaseWithBitsets.primeSrc.getPrimeRef(i).get().getPrime()).min(bigIntComp))
-				.findAny().get().get();
+
+				.map(bs -> primeSrc.getPrime(bs.nextSetBit(0)).orElseThrow())
+				.findAny().orElseThrow();
 	}
 
 	@Override
@@ -154,12 +149,11 @@ public class PrimeBaseWithBitsets implements PrimeBaseIntfc
 	@Override
 	public BigInteger getMaxPrimeBase(@NonNull BaseTypes baseType)
 	{
-		// Need to redo this; the result of Optional<Optional<>> is just silly.
 		return primeBaseIdxs
 				.get(baseType)
 				.stream()
-				.map(bs -> bs.stream().boxed().map(i -> PrimeBaseWithBitsets.primeSrc.getPrimeRef(i).get().getPrime()).max(bigIntComp))
-				.findAny().get().get();
+				.map(bs -> primeSrc.getPrime(bs.nextSetBit(0)).orElseThrow())
+				.findAny().orElseThrow();
 	}
 
 }

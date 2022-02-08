@@ -9,8 +9,13 @@ import lombok.NonNull;
 
 public class NPrimeBaseMetadata implements BaseMetadataIntfc
 {
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 1L;
+
 	@Getter
-	List<Integer> countForBaseIdx;
+	private final List<Integer> countForBaseIdx;
 
 	public NPrimeBaseMetadata(@NonNull List<Integer> countForBaseIdx)
 	{

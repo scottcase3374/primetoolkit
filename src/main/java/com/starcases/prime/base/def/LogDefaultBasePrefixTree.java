@@ -3,9 +3,12 @@ package com.starcases.prime.base.def;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import com.starcases.prime.intfc.PrimeSourceIntfc;
@@ -13,34 +16,30 @@ import com.starcases.prime.log.AbstractLogBase;
 
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Setter;
 import lombok.extern.java.Log;
 
 class Tree
 {
 	@Getter
-	@Setter
-	BigInteger prefixPrime;
+	private final AtomicReference<BigInteger> prefixPrime = new AtomicReference<>();
 
 	@Getter
-	@Setter
-	Map<BigInteger, Tree> next;
+	private final Map<BigInteger, Tree> next;
 
 	@Getter
-	@Setter
-	List<BigInteger> sourcePrimes = new ArrayList<>();
+	private final List<BigInteger> sourcePrimes = Collections.synchronizedList(new ArrayList<>());
 
-	Tree(BigInteger prefixPrime)
+	Tree(@NonNull final BigInteger prefixPrime, final Map<BigInteger, Tree> next )
 	{
-		this.prefixPrime = prefixPrime;
-		this.next = null;
+		this.prefixPrime.set(prefixPrime);
+		this.next = next;
 	}
 }
 
 @Log
 public class LogDefaultBasePrefixTree extends AbstractLogBase
 {
-	Map<BigInteger, Tree> prefixMap = new TreeMap<>();
+	final Map<BigInteger, Tree> prefixMap = new ConcurrentSkipListMap<>();
 
 	public LogDefaultBasePrefixTree(@NonNull PrimeSourceIntfc ps)
 	{
@@ -55,11 +54,12 @@ public class LogDefaultBasePrefixTree extends AbstractLogBase
 		logTree(prefixMap);
 	}
 
-	void logTree(Map<BigInteger, Tree> prefixMap)
+	void logTree(final Map<BigInteger, Tree> prefixMap)
 	{
 		prefixMap
 		.values()
 		.stream()
+		.parallel()
 		.forEach(treeNode ->
 					{
 						final var outputStrFinal = new StringBuilder();
@@ -68,16 +68,19 @@ public class LogDefaultBasePrefixTree extends AbstractLogBase
 				);
 	}
 
-	void logTree(Tree tree, StringBuilder outputStr)
+	void logTree(final Tree tree, final StringBuilder outputStr)
 	{
-		outputStr.append(tree.prefixPrime);
+		outputStr.append(tree.getPrefixPrime().get());
 
-		if (!tree.sourcePrimes.isEmpty())
+		if (!tree.getSourcePrimes().isEmpty())
 		{
-			System.out.println(String.format("Prefix[%s] count[%d] source-primes[%s]", outputStr.toString(), tree.sourcePrimes.size(), tree.sourcePrimes.stream().map(BigInteger::toString).collect(Collectors.joining(",", "[", "]"))));
+			System.out.println(String.format("Prefix[%s] count[%d] source-primes[%s]",
+					outputStr.toString(),
+					tree.getSourcePrimes().size(),
+					tree.getSourcePrimes().stream().map(BigInteger::toString).collect(Collectors.joining(",", "[", "]"))));
 		}
 
-		tree.next
+		tree.getNext()
 			.values()
 			.stream()
 			.forEach(treeNode ->
@@ -94,56 +97,54 @@ public class LogDefaultBasePrefixTree extends AbstractLogBase
 	{
 		System.out.println(String.format("%n"));
 
-		var curPrimeIt = ps.getPrimeRefIter();
-		while (curPrimeIt.hasNext())
-		{
-			var curPrime = curPrimeIt.next();
-			try
-			{
-				var origBaseIdxs = curPrime.getPrimeBaseData().getPrimeBaseIdxs().get(0);
-				var curPrimePrefixIdxs = (BitSet)origBaseIdxs.clone();
+		ps.getPrimeRefStream().forEach(
+				curPrime ->
+				{
+					try
+					{
+						final var origBaseIdxs = curPrime.getPrimeBaseData().getPrimeBaseIdxs().get(0);
+						final var curPrimePrefixIdxs = (BitSet)origBaseIdxs.clone();
 
-				// Prefixes don't include the Prime (n-1) item per the definition of "prefix" used.
-				if (!curPrimePrefixIdxs.isEmpty())
-					curPrimePrefixIdxs.clear(curPrimePrefixIdxs.length()-1);
+						// Prefixes don't include the Prime (n-1) item per the definition of "prefix" used.
+						if (!curPrimePrefixIdxs.isEmpty())
+							curPrimePrefixIdxs.clear(curPrimePrefixIdxs.length()-1);
 
-				var curPrefixIdxsIt = curPrimePrefixIdxs.stream().iterator();
-				var curPrefixMap = prefixMap;
-				if (curPrefixIdxsIt.hasNext())
-					do {
+						final var curPrefixIdxsIt = curPrimePrefixIdxs.stream().iterator();
+						var curPrefixMap = prefixMap;
+						if (curPrefixIdxsIt.hasNext())
+							do {
 
-						var curBaseIdx = curPrefixIdxsIt.next();
-						var curPrefixPrime = ps.getPrime(curBaseIdx).get();
+								final var curBaseIdx = curPrefixIdxsIt.next();
+								final var curPrefixPrime = ps.getPrime(curBaseIdx).get();
 
-						if (!curPrefixMap.containsKey(curPrefixPrime))
-						{
-							addNextPrefixPrime(curPrefixMap, curPrefixPrime);
-						}
+								if (!curPrefixMap.containsKey(curPrefixPrime))
+								{
+									addNextPrefixPrime(curPrefixMap, curPrefixPrime);
+								}
 
-						var curTree = curPrefixMap.get(curPrefixPrime);
-						if (!curPrefixIdxsIt.hasNext())
-						{
-							curTree.sourcePrimes.add(curPrime.getPrime());
-						}
+								final var curTree = curPrefixMap.get(curPrefixPrime);
+								if (!curPrefixIdxsIt.hasNext())
+								{
+									curTree.getSourcePrimes().add(curPrime.getPrime());
+								}
 
-						curPrefixMap = curTree.next;
+								curPrefixMap = curTree.getNext();
+							}
+							while (curPrefixIdxsIt.hasNext());
 					}
-					while (curPrefixIdxsIt.hasNext());
-			}
-			catch(Exception e)
-			{
-				log.severe(String.format("Can't show bases for: %d exception:", curPrime.getPrime()));
-				log.throwing(this.getClass().getName(), "log", e);
-				e.printStackTrace();
-			}
-		}
+					catch(Exception e)
+					{
+						log.severe(String.format("Can't show bases for: %d exception:", curPrime.getPrime()));
+						log.throwing(this.getClass().getName(), "log", e);
+						e.printStackTrace();
+					}
+				});
 	}
 
 	void addNextPrefixPrime(Map<BigInteger, Tree> curTree, BigInteger curPrefixPrime)
 	{
-		var newTree = new Tree(curPrefixPrime);
-		var nextMap = new TreeMap<BigInteger,Tree>();
-		newTree.next = nextMap;
+		final var nextMap = new TreeMap<BigInteger,Tree>();
+		final var newTree = new Tree(curPrefixPrime, nextMap);
 		curTree.put(curPrefixPrime, newTree);
 	}
 }

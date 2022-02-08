@@ -1,5 +1,6 @@
 package com.starcases.prime.intfc;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.Comparator;
 import java.util.Optional;
@@ -18,7 +19,7 @@ import lombok.NonNull;
  * class implementing this PrimeRefIntfc interface.
  *
  */
-public interface PrimeRefIntfc
+public interface PrimeRefIntfc extends Serializable
 {
 	static final Comparator<PrimeRefIntfc> primeRefComparator = (PrimeRefIntfc o1, PrimeRefIntfc o2) -> o1.getPrime().compareTo(o2.getPrime());
 

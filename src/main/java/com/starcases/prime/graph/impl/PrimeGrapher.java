@@ -28,19 +28,19 @@ public abstract class PrimeGrapher
 	protected static final Comparator<PrimeRefIntfc> nodeComparator = (PrimeRefIntfc o1, PrimeRefIntfc o2) -> o1.getPrime().compareTo(o2.getPrime());
 
 	@NonNull
-	protected PrimeSourceIntfc ps;
+	protected final PrimeSourceIntfc ps;
 
 	@NonNull
 	protected final GraphBuilder<PrimeRefIntfc, DefaultEdge, DefaultDirectedGraph<PrimeRefIntfc, DefaultEdge>> primeGraphBuilder = new GraphBuilder<>(new DefaultDirectedGraph<>(DefaultEdge.class));
 
 	@NonNull
-	protected Graph<PrimeRefIntfc,DefaultEdge> graph;
+	protected final Graph<PrimeRefIntfc,DefaultEdge> graph;
 
 	@NonNull
-	protected Logger log;
+	protected final Logger log;
 
 	@NonNull
-	protected BaseTypes baseType;
+	protected final BaseTypes baseType;
 
 	/**
 	 * General constructor
@@ -61,7 +61,7 @@ public abstract class PrimeGrapher
 		this.baseType = baseType;
 		this.ps.init();
 
-		var lgraph = new DefaultListenableGraph<PrimeRefIntfc, DefaultEdge>(primeGraphBuilder.build(), true);
+		final var lgraph = new DefaultListenableGraph<PrimeRefIntfc, DefaultEdge>(primeGraphBuilder.build(), true);
 		graphs.stream().forEach(lgraph::addGraphListener);
 		this.graph = lgraph;
 
@@ -84,7 +84,7 @@ public abstract class PrimeGrapher
 	void populateData()
 	{
 		// Start setting up the actual graph/data generations
-		var primeNodeGenerator = new PrimeNodeGenerator(ps, graph, baseType);
+		final var primeNodeGenerator = new PrimeNodeGenerator(ps, graph, baseType);
 		primeNodeGenerator.begin();
 
 		while (primeNodeGenerator.nextEvents());

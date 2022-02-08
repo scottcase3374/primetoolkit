@@ -13,10 +13,10 @@ import lombok.NonNull;
 public abstract class AbstractPrimeBaseGenerator implements PrimeBaseGenerateIntfc
 {
 	@NonNull
-	protected Logger log;
+	protected final Logger log;
 
 	@NonNull
-	protected PrimeSourceIntfc ps;
+	protected final PrimeSourceIntfc ps;
 
 	protected boolean doLog;
 

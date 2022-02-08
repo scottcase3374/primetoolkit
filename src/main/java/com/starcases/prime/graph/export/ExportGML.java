@@ -24,13 +24,13 @@ interface ElementIntfc
 public class ExportGML
 {
 	@NonNull
-	final Deque<ElementIntfc> stack = new ArrayDeque<>();
+	private final Deque<ElementIntfc> stack = new ArrayDeque<>();
 
 	@NonNull
-	PrimeSourceIntfc ps;
+	private final PrimeSourceIntfc ps;
 
 	@NonNull
-	PrintWriter pr;
+	private final PrintWriter pr;
 
 	public ExportGML(@NonNull PrimeSourceIntfc ps, @NonNull PrintWriter pr)
 	{
@@ -85,13 +85,13 @@ public class ExportGML
 class NodeElement implements ElementIntfc
 {
 	@NonNull
-	PrimeRefIntfc pRef;
+	private final PrimeRefIntfc pRef;
 
 	@NonNull
-	PrimeSourceIntfc ps;
+	private final PrimeSourceIntfc ps;
 
 	@NonNull
-	PrintWriter pr;
+	private final PrintWriter pr;
 
 	public NodeElement(@NonNull PrimeSourceIntfc ps, @NonNull PrintWriter pr, @NonNull PrimeRefIntfc prime)
 	{
@@ -114,10 +114,10 @@ class NodeElement implements ElementIntfc
 class EdgeElement implements ElementIntfc
 {
 	@NonNull
-	PrimeRefIntfc pRef;
+	private final PrimeRefIntfc pRef;
 
 	@NonNull
-	PrintWriter pr;
+	private final PrintWriter pr;
 
 	public EdgeElement(@NonNull PrimeRefIntfc prime, @NonNull PrintWriter pr)
 	{

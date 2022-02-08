@@ -33,20 +33,20 @@ public class LogBases3AllTriples  extends AbstractLogBase
 		// Get desired data
 		ps.setActiveBaseId(BaseTypes.THREETRIPLE);
 
-		int idx = 5;
+		var idx = 5;
 		var prIt = ps.getPrimeRefIter();
 
 		// Primes under 11 don't have a representation consisting of 3 primes summed.
 		while (prIt.hasNext() && !prIt.next().getPrime().equals(BigInteger.valueOf(7L)));
 
-		final int maxBasesInRow = 5;
+		final var maxBasesInRow = 5;
 
 		while (prIt.hasNext())
 		{
 			var pr = prIt.next();
 			try
 			{
-				long size = pr.getPrimeBaseData().getPrimeBaseIdxs(BaseTypes.THREETRIPLE).size();
+				var size = pr.getPrimeBaseData().getPrimeBaseIdxs(BaseTypes.THREETRIPLE).size();
 				System.out.println(String.format("%nPrime [%d] idx[%d] #-bases[%d]%n",
 						pr.getPrime(),
 						idx++,

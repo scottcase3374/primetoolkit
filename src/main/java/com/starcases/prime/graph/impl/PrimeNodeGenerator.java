@@ -27,18 +27,18 @@ import java.util.NoSuchElementException;
 @Log
 public class PrimeNodeGenerator
 {
-	int level = 0;
+	protected int level = 0;
 
-	PrimeRefIntfc primeRef = null;
-
-	@NonNull
-	PrimeSourceIntfc ps;
+	protected PrimeRefIntfc primeRef = null;
 
 	@NonNull
-	Graph<PrimeRefIntfc, DefaultEdge> graph;
+	protected final PrimeSourceIntfc ps;
 
 	@NonNull
-	BaseTypes baseType;
+	protected final Graph<PrimeRefIntfc, DefaultEdge> graph;
+
+	@NonNull
+	protected final BaseTypes baseType;
 
 	public PrimeNodeGenerator(@NonNull PrimeSourceIntfc ps, Graph<PrimeRefIntfc, DefaultEdge> graph, @NonNull BaseTypes baseType)
 	{

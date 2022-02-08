@@ -20,21 +20,22 @@ public class ParallelEdgeLayoutGraph extends JFrame
 {
 	private static final long serialVersionUID = 1L;
 
+	// Sonar complains about wanting jgxAdapter to be either serializable or transient
 	@NonNull
-	private transient JGraphXAdapter<String, DefaultEdge> jgxAdapter;
+	private final transient JGraphXAdapter<String, DefaultEdge> jgxAdapter;
 
     public ParallelEdgeLayoutGraph(@NonNull Graph<String,DefaultEdge> graph)
     {
         // create a visualization using JGraph, via an adapter
         jgxAdapter = new JGraphXAdapter<>(graph);
 
-        var component = new mxGraphComponent(jgxAdapter);
+        final var component = new mxGraphComponent(jgxAdapter);
         component.setConnectable(false);
         component.getGraph().setAllowDanglingEdges(false);
         getContentPane().add(component);
 
         //parallel edge layout - not useful at moment
-        var layout = new mxParallelEdgeLayout(jgxAdapter, 120);
+        final var layout = new mxParallelEdgeLayout(jgxAdapter, 120);
 
         layout.execute(jgxAdapter.getDefaultParent());
     }

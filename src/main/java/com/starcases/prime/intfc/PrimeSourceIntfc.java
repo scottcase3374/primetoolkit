@@ -1,9 +1,11 @@
 package com.starcases.prime.intfc;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import javax.validation.constraints.Min;
 
@@ -20,7 +22,7 @@ import lombok.NonNull;
  * and data for navigating amongst the primes.
  *
  */
-public interface PrimeSourceIntfc
+public interface PrimeSourceIntfc extends Serializable
 {
 	//
 	// initialization
@@ -46,6 +48,8 @@ public interface PrimeSourceIntfc
 	 * @return
 	 */
 	Iterator<PrimeRefIntfc> getPrimeRefIter();
+
+	Stream<PrimeRefIntfc> getPrimeRefStream();
 
 	//
 	// Search and retrieve - non-index apis

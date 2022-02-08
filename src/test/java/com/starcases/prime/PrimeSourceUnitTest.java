@@ -28,7 +28,7 @@ class PrimeSourceUnitTest
 	@BeforeEach
 	void init()
 	{
-		ps = new PrimeSource(120,100, null, PrimeRef::setPrimeSource, PrimeBaseWithLists::setPrimeSource);
+		ps = new PrimeSource(120, null, PrimeRef::setPrimeSource, PrimeBaseWithLists::setPrimeSource, 100);
 		ps.init();
 	}
 

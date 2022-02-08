@@ -1,5 +1,6 @@
 package com.starcases.prime.intfc;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.BitSet;
 import java.util.Comparator;
@@ -22,7 +23,7 @@ import lombok.NonNull;
  *
  *
  */
-public interface PrimeBaseIntfc
+public interface PrimeBaseIntfc extends Serializable
 {
 	@NonNull
 	static final Comparator<BigInteger> bigIntComp = (b1, b2) -> b1.compareTo(b2);

@@ -32,14 +32,14 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 	 */
 	private static final long serialVersionUID = 1L;
 
-	static final int PRIME_MAX_BASE_SIZE = 0;
-	static final int PRIME_MAX_DIST_PREV_PRIME = 1;
-	static final int AVG_BASE_SIZE = 2;
-	static final int AVG_DIST_PREV_PRIME = 3;
-	static final int MAX_PRIME_BASE = 4;
+	private static final int PRIME_MAX_BASE_SIZE = 0;
+	private static final int PRIME_MAX_DIST_PREV_PRIME = 1;
+	private static final int AVG_BASE_SIZE = 2;
+	private static final int AVG_DIST_PREV_PRIME = 3;
+	private static final int MAX_PRIME_BASE = 4;
 
 	@NonNull
-	static final String [] column = {
+	private static final String [] column = {
 			"prefixPrime / max num-bases (Default type)",
 			"prefixPrime / max dist to prev prefixPrime",
 			"avg base size",
@@ -48,15 +48,15 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 	};
 
 	@NonNull
-	String [][] data = { {"","","", "", ""}};
+	private String [][] data = { {"","","", "", ""}};
 
-	transient PrimeRefIntfc primeMaxBaseSize = null;
-	transient PrimeRefIntfc primeMaxDistToPrev = null;
-	transient BigDecimal totalBases = BigDecimal.ZERO;
-	transient PrimeRefIntfc highPrimeBase = null;
+	private PrimeRefIntfc primeMaxBaseSize;
+	private PrimeRefIntfc primeMaxDistToPrev;
+	private BigDecimal totalBases = BigDecimal.ZERO;
+	private PrimeRefIntfc highPrimeBase;
 
 	@NonNull
-	private JTable table;
+	private final JTable table;
 
 	/**
 	 * Create the frame.
@@ -65,7 +65,7 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 	{
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		table = new JTable(data, column);
-		var scrollPane = new JScrollPane(table);
+		final var scrollPane = new JScrollPane(table);
 		table.setFillsViewportHeight(true);
 		getContentPane().add(scrollPane);
 	}
@@ -91,8 +91,8 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 		}
 		else
 		{
-			var edist = e.getVertex().getDistToPrevPrime();
-			var pdist = primeMaxDistToPrev.getDistToPrevPrime();
+			final var edist = e.getVertex().getDistToPrevPrime();
+			final var pdist = primeMaxDistToPrev.getDistToPrevPrime();
 
 			if (pdist.isEmpty() || (edist.isPresent() && edist.get().abs().compareTo(pdist.get().abs()) > 0))
 			{

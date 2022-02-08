@@ -14,10 +14,10 @@ import java.util.logging.Logger;
 public abstract class AbstractLogBase implements LogGraphIntfc
 {
 	@NonNull
-	protected PrimeSourceIntfc ps;
+	protected final PrimeSourceIntfc ps;
 
 	@NonNull
-	protected Logger log;
+	protected final Logger log;
 
 	protected AbstractLogBase(@NonNull PrimeSourceIntfc ps, @NonNull Logger log)
 	{

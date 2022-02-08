@@ -25,21 +25,21 @@ public class LogNodeStructure extends AbstractLogBase
 	@Override
 	public void log()
 	{
-		int idx = 0;
-		var prIt = ps.getPrimeRefIter();
+		var idx = 0;
+		final var prIt = ps.getPrimeRefIter();
 		while (prIt.hasNext())
 		{
-			var pr = prIt.next();
+			final var pr = prIt.next();
 			try
 			{
-				long size = pr.getPrimeBaseData().getPrimeBaseIdxs().size();
+				final var size = pr.getPrimeBaseData().getPrimeBaseIdxs().size();
 				System.out.println(String.format("%nPrime [%d] idx[%d] %n",
 						pr.getPrime(),
 						idx++
 						));
 
-					long [] cnt = {0};
-					StringBuilder sb = new StringBuilder("\t");
+					final long [] cnt = {0};
+					final var sb = new StringBuilder("\t");
 
 					pr.getPrimeBaseData().getPrimeBaseIdxs()
 							.stream()

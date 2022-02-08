@@ -3,10 +3,7 @@ package com.starcases.prime.base.nprime;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.Comparator;
-import java.util.Deque;
 import java.util.logging.Level;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.validation.constraints.Max;
@@ -43,15 +40,13 @@ import lombok.extern.java.Log;
 @Log
 public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 {
-	static final Comparator<String> nodeComparator = (String o1, String o2) -> Integer.decode(o1).compareTo(Integer.decode(o2));
-
 	@Min(2)
 	@Max(3)
 	private int maxReduce;
 
 	public BaseReduceNPrime(@NonNull PrimeSourceIntfc ps)
 	{
-		super(ps,log);
+		super(ps, log);
 	}
 
 	public void setMaxReduce(@Min(2) @Max(3) int maxReduce)
@@ -66,7 +61,7 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 	 */
 	private void primeReduction(@NonNull PrimeRefIntfc primeRef, @NonNull List<Integer> outputCntALst)
 	{
-		Deque<Integer> q = new ArrayDeque<>();
+		final var q = new ArrayDeque<Integer>();
 
 		// want to process initial bases for prefixPrime
 		primeRef.getPrimeBaseData().getPrimeBaseIdxs(BaseTypes.DEFAULT).get(0).stream().boxed().forEach(q::add);
@@ -81,7 +76,7 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 				var i = integerIt.next();
 				integerIt.remove();
 
-				  ps.getPrimeRef(i).ifPresent( p->
+				ps.getPrimeRef(i).ifPresent( p->
 
 							   p.getPrimeBaseData()
 								.getPrimeBaseIdxs(BaseTypes.DEFAULT)
@@ -132,20 +127,21 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 			}
 		}
 
-		Iterator<PrimeRefIntfc> primeIt = ps.getPrimeRefIter();
+		var primeIt = ps.getPrimeRefIter();
 		while (primeIt.hasNext())
 		{
-			PrimeRefIntfc curPrime = primeIt.next();
+			var curPrime = primeIt.next();
 			try
 			{
-				ArrayList<Integer> countForBaseIdx = new ArrayList<>(maxReduce);
-				for (int i=0; i < maxReduce; i++)
+				var countForBaseIdx = new ArrayList<Integer>(maxReduce);
+				for (var i=0; i < maxReduce; i++)
 					countForBaseIdx.add(i, 0);
 
-				primeReduction(curPrime,countForBaseIdx);
+				primeReduction(curPrime, countForBaseIdx);
 
 				var bs = new BitSet();
-				countForBaseIdx.stream().forEach(bs::set);
+				for (var i=0; i < maxReduce; i++)
+					bs.set(i, countForBaseIdx.get(i) > 0);
 
 				curPrime.getPrimeBaseData().addPrimeBase(BaseTypes.NPRIME, bs, new NPrimeBaseMetadata(countForBaseIdx));
 			}

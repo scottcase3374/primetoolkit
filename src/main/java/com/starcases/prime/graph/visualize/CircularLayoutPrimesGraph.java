@@ -19,8 +19,9 @@ public class CircularLayoutPrimesGraph extends JFrame
 {
 	private static final long serialVersionUID = 1L;
 
+	// Sonar complains about wanting jgxAdapter to be either serializable or transient
 	@NonNull
-	private transient JGraphXAdapter<PrimeRefIntfc, DefaultEdge> jgxAdapter;
+	private final transient JGraphXAdapter<PrimeRefIntfc, DefaultEdge> jgxAdapter;
 
 	@NonNull
     private static final Dimension DEFAULT_SIZE = new Dimension(900,900);
@@ -36,8 +37,8 @@ public class CircularLayoutPrimesGraph extends JFrame
         getContentPane().add(component);
 
         // circle layout
-        var radius = 100;
-        var layout = new mxCircleLayout(jgxAdapter);
+        final var radius = 100;
+        final var layout = new mxCircleLayout(jgxAdapter);
         layout.setX0((DEFAULT_SIZE.width / 2.0) - radius);
         layout.setY0((DEFAULT_SIZE.height / 2.0) - radius);
         layout.setRadius(radius);

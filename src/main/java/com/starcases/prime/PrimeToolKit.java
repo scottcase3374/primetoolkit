@@ -22,10 +22,10 @@ public class PrimeToolKit
 
 	public static void main(@NonNull String [] args)
 	{
-		var ptk = new PrimeToolKit();
-		var cl = new CommandLine(ptk);
+		final var ptk = new PrimeToolKit();
+		final var cl = new CommandLine(ptk);
 		cl.registerConverter(java.util.logging.Level.class, Level::parse);
-		var exitCode = cl.execute(args);
+		final var exitCode = cl.execute(args);
 
 		System.exit(exitCode);
 		log.info("exited");
