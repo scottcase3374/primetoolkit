@@ -8,9 +8,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.base.PrimeBaseWithBitsets;
+import com.starcases.prime.base.PrimeBaseWithLists;
+import com.starcases.prime.impl.PrimeRef;
 import com.starcases.prime.impl.PrimeRefBitSetIndexes;
 import com.starcases.prime.impl.PrimeSource;
+import com.starcases.prime.intfc.FactoryIntfc;
+import com.starcases.prime.intfc.PrimeSourceIntfc;
 
 import lombok.NonNull;
 
@@ -18,13 +23,25 @@ import lombok.NonNull;
 class TripleUnitTest
 {
 	@NonNull
-	private PrimeSource ps;
+	private PrimeSourceIntfc ps;
 
 	@BeforeEach
 	void init()
 	{
-		ps = new PrimeSource(120, null, PrimeRefBitSetIndexes::setPrimeSource, PrimeBaseWithBitsets::setPrimeSource, 100);
+		PTKFactory.setMaxCount(100);
+		PTKFactory.setConfidenceLevel(100);
+
+		PTKFactory.setActiveBaseId(BaseTypes.DEFAULT);
+		PTKFactory.setBaseSetPrimeSource(PrimeRefBitSetIndexes::setPrimeSource);
+		PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
+
+		PTKFactory.setPrimeBaseCtor(PrimeBaseWithBitsets::new);
+		PTKFactory.setPrimeRefCtor( (i, base) -> new PrimeRef(i, base, PTKFactory.getPrimeBaseCtor()) );
+
+		FactoryIntfc factory = PTKFactory.getFactory();
+		ps = factory.getPrimeSource();
 		ps.init();
+
 	}
 
 	@Test
