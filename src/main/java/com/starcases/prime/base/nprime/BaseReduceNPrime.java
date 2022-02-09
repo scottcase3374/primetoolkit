@@ -1,10 +1,8 @@
 package com.starcases.prime.base.nprime;
 
 import java.util.BitSet;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -40,6 +38,8 @@ import lombok.extern.java.Log;
 @Log
 public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 {
+	static volatile byte[] intersectBytes;
+
 	@Min(2)
 	@Max(3)
 	private int maxReduce;
@@ -52,6 +52,12 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 	public void setMaxReduce(@Min(2) @Max(3) int maxReduce)
 	{
 		this.maxReduce = maxReduce;
+
+		// Normally wouldn't set a static like this but
+		// this call is only made once per jvm invocation
+		// as part of the initialization
+		intersectBytes = new byte[1];
+		intersectBytes[0] = (byte)Math.round(Math.pow(2.0d, (double)maxReduce)-1); // set to bit representing the range of indexes to reduce using.
 	}
 
 	/**
@@ -61,51 +67,44 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 	 */
 	private void primeReduction(@NonNull PrimeRefIntfc primeRef, @NonNull BitSet retBaseIdxs, @NonNull int [] retOutputIdxCount)
 	{
+		// Experimentation for this use case indicate that Concurrent... perform slightly better than LinkedBlocking.. varieties of the collections.
+		final var q = new ConcurrentLinkedQueue<BitSet>();
+
 		// want to process initial bases for prefixPrime
-		final var q = primeRef.getPrimeBaseData().getPrimeBaseIdxs(BaseTypes.DEFAULT).get(0).stream().boxed().collect(Collectors.toCollection(ConcurrentLinkedDeque::new));
+		final var bs = primeRef.getPrimeBaseData().getPrimeBaseIdxs(BaseTypes.DEFAULT).get(0);
+		q.add(bs);
 
-		while (true)
+		//  Method determined through experimentation between:
+		//   get(0,maxReduce) of static bitset
+		//   clone() of static bitset
+		//   static byte array with Bitset.valueOf()
+		// - Note the use of 'volatile' on intersectBytes, resulted in reduced run times. Appears reduced memory contention.
+		//		For this use, bytes are "read-only" once set so volatile ensures visibility between threads without
+		//      providing any mutual exclusion which is fine since we only need to read the value.
+		final BitSet intersect = BitSet.valueOf(intersectBytes);
+
+		while (!q.isEmpty())
 		{
-			var integerIt = q.iterator();
-			if (integerIt.hasNext())
+			final var bsCur = q.remove();
+			bsCur.stream().boxed().forEach(i ->
+				{
+					if (i >= maxReduce)
+					{
+						q.add(ps.getPrimeRef(i).get().getPrimeBaseData().getPrimeBaseIdxs(BaseTypes.DEFAULT).get(0));
+					}
+					else
+					{
+						retOutputIdxCount[i]++;
+					}
+				} );
+
+			// track which indexes were encountered (but only need to track "which one" on first encounter)
+			if (intersect.intersects(bsCur))
 			{
-				// Get next base to process it and remove from "queue"
-				// high bases of current base get added back to "queue"
-				var i = integerIt.next();
-				integerIt.remove();
-
-				ps.getPrimeRef(i).ifPresent( p->
-
-							   p.getPrimeBaseData()
-								.getPrimeBaseIdxs(BaseTypes.DEFAULT)
-								.get(0)
-								.stream()
-								.boxed() // index integers
-								.<Integer>mapMulti(
-										(ii, consumer) ->
-													{
-														if (ii < maxReduce)
-														{
-															// found a non-high base so process it
-															consumer.accept(ii);
-														}
-														else
-														{
-															// base is high so add it to deque for later processing
-															// by outer loop
-															q.add(ii);
-														}
-													}
-											)
-								.forEach(
-										idx ->
-												// Process the low-bases; Increment the appropriate target base count
-												{ retOutputIdxCount[idx]++; retBaseIdxs.set(idx); }
-										)
-						  );
+				final var tmpBS = bsCur.get(0, maxReduce);
+				retBaseIdxs.or(tmpBS);
+				intersect.andNot(tmpBS);
 			}
-			else
-				break;
 		}
 	}
 
