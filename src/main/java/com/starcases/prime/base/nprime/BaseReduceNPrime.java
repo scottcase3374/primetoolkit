@@ -57,7 +57,7 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 		// this call is only made once per jvm invocation
 		// as part of the initialization
 		intersectBytes = new byte[1];
-		intersectBytes[0] = (byte)Math.round(Math.pow(2.0d, (double)maxReduce)-1); // set to bit representing the range of indexes to reduce using.
+		intersectBytes[0] = (byte)Math.round(Math.pow(2.0d, maxReduce)-1); // set to bit representing the range of indexes to reduce using.
 	}
 
 	/**
