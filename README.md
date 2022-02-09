@@ -256,6 +256,10 @@ Prime [1583] idx[250]
 
 which is interpreted as: Prime value 1583 is represented by: 1 x 155 + 2 x 318 + 3 x 264
 
+## Design
+The current design is extensible and componentized to a decent degree which was very desirable.  Another idea crossed my mind though which is potentially a huge improvement in some ways.  Right now, Prime#'s are abstracted a bit through the PrimeRefIntfc and "bases" are abstracted via the PrimeBaseIntfc.  Primes can have bases generated via different methodologies, etc - such as where Prime N is the sum of Prime N-1 and some small set of primes in the range Prime 1 to N-2. So a base can be a set of primes.  The new idea fundamentally is - have the object representing a Prime implement both the PrimeRefIntfc AND PrimeBaseIntfc?  Where I would take this idea is - represent bases with effectively 2 parts such as:  (1) a set of "prefix" primes  (2) the N-1 prime.  This would promote sharing a single representation (prefix) out of a set of prefixes across many primes. The result is a trade-off between time (to calculate a BigInteger equivalent of a prime) versus being able to represent a much larger range of primes due to lower memory when representing very large primes.
+
+This could be combined with a type of caching - where a final prime is fully calculated and weak and/or soft references are used to enable access if needed for a period of time but then eventually the BigInteger would be reclaimable by the GC.  Before being reclaimed, it could be used to generate bases (or other types of bases) for other primes. Temporarily having the actual BigInteger representation allows simple diff calculations or finding the distance between items, etc. Hopefully this makes sense to a degree.  It needs a few good use cases or scenarios to help determine if it could truly work and be beneficial. It definitely is intended to enable more space vs time trade-offs to be possible.
 
 ## Implementation
 - Command line parsing is handled using the picocli library and the resulting options processed; resulting in
