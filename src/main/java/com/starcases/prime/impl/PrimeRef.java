@@ -23,7 +23,7 @@ import lombok.NonNull;
 *
 **/
 
-public class PrimeRef extends AbstractPrimeRef
+public class PrimeRef implements PrimeRefIntfc
 {
 	/**
 	 *
@@ -115,6 +115,31 @@ public class PrimeRef extends AbstractPrimeRef
 	public Optional<PrimeRefIntfc> getPrimeRefWithinOffset(@NonNull BigInteger targetOffset)
 	{
 		return primeSrc.getPrimeRefWithinOffset(this.primeIdx, targetOffset);
+	}
+
+
+	/**
+	 * absolute value of difference with next prefixPrime
+	 * if the next prefixPrime is known.
+	 *
+	 * empty optional if next prefixPrime is unknown/not calculated
+	 */
+	@Override
+	public Optional<BigInteger> getDistToNextPrime()
+	{
+		return  getNextPrimeRef().map(npr -> npr.getPrime().subtract(getPrime()));
+	}
+
+	/**
+	 * absolute value of difference with prev prefixPrime
+	 * if the prev prefixPrime is known/exists.
+	 *
+	 * empty optional if prev prefixPrime is unknown/doesn't exist
+	 */
+	@Override
+	public Optional<BigInteger> getDistToPrevPrime()
+	{
+		return getPrevPrimeRef().map(ppr -> ppr.getPrime().subtract(getPrime()));
 	}
 
 	@Override
