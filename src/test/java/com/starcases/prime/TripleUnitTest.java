@@ -30,7 +30,7 @@ class TripleUnitTest
 		PTKFactory.setConfidenceLevel(100);
 
 		PTKFactory.setActiveBaseId(BaseTypes.DEFAULT);
-		PTKFactory.setBaseSetPrimeSource(PrimeRefBitSetIndexes::setPrimeSource);
+		PTKFactory.setBaseSetPrimeSource(PrimeRef::setPrimeSource);
 		PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
 
 		PTKFactory.setPrimeBaseCtor(PrimeBaseWithBitsets::new);

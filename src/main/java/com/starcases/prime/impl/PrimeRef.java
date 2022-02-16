@@ -25,7 +25,6 @@ import lombok.NonNull;
 
 public class PrimeRef extends AbstractPrimeRef
 {
-
 	/**
 	 *
 	 */
@@ -63,11 +62,12 @@ public class PrimeRef extends AbstractPrimeRef
 		super();
 		this.primeIdx = primeIdx;
 		primeBaseData = primeBaseSupplier.get();
-		this.getPrimeBaseData().addPrimeBase(primeBaseIdxs);
+		getPrimeBaseData().addPrimeBase(primeBaseIdxs);
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(Object obj)
+	{
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -94,7 +94,8 @@ public class PrimeRef extends AbstractPrimeRef
 	}
 
 	@Override
-	public BigInteger getPrime() {
+	public BigInteger getPrime()
+	{
 		return primeSrc.getPrime(primeIdx).orElseThrow();
 	}
 
@@ -117,7 +118,8 @@ public class PrimeRef extends AbstractPrimeRef
 	}
 
 	@Override
-	public int hashCode() {
+	public int hashCode()
+	{
 		return Objects.hash(primeIdx);
 	}
 

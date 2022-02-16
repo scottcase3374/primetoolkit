@@ -207,10 +207,10 @@ public class Init implements Runnable
 
 			case THREETRIPLE:
 				PTKFactory.setActiveBaseId(BaseTypes.THREETRIPLE);
-				PTKFactory.setPrimeRefSetPrimeSource(PrimeRefBitSetIndexes::setPrimeSource);
+				PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
 				PTKFactory.setBaseSetPrimeSource( PrimeBaseWithBitsets::setPrimeSource);
 				PTKFactory.setPrimeBaseCtor(PrimeBaseWithBitsets::new);
-				PTKFactory.setPrimeRefCtor( (i, base) -> new PrimeRefBitSetIndexes(i, base, PTKFactory.getPrimeBaseCtor() ));
+				PTKFactory.setPrimeRefCtor( (i, base) -> new PrimeRef(i, base, PTKFactory.getPrimeBaseCtor() ));
 
 				actions.add(s ->
 								{

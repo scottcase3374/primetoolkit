@@ -1,12 +1,12 @@
 package com.starcases.prime.impl;
 
-import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.BitSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
 import com.starcases.prime.intfc.PrimeBaseIntfc;
@@ -24,7 +24,7 @@ import lombok.NonNull;
 *
 **/
 
-public class PrimeRefBitSetIndexes extends AbstractPrimeRef implements Serializable
+public class PrimeRefBitSetIndexes extends AbstractPrimeRef
 {
 	/**
 	 *
@@ -55,7 +55,7 @@ public class PrimeRefBitSetIndexes extends AbstractPrimeRef implements Serializa
 	 *
 	 * @param prefixPrime
 	 */
-	public PrimeRefBitSetIndexes(@Min(0) int primeIdx,
+	public PrimeRefBitSetIndexes(@Min(0) @Max(2) int primeIdx,
 									@NonNull BitSet primeBaseIdxs,
 									@NonNull Supplier<PrimeBaseIntfc> primeBaseSupplier
 									)
@@ -82,13 +82,16 @@ public class PrimeRefBitSetIndexes extends AbstractPrimeRef implements Serializa
 	@Override
 	public Optional<PrimeRefIntfc> getNextPrimeRef()
 	{
-		return primeSrc.getPrimeRef(primeIdx+1);
+		return primeSrc.getPrimeRef(primeIdx +1);
 	}
 
 	@Override
 	public Optional<PrimeRefIntfc> getPrevPrimeRef()
 	{
-		return primeSrc.getPrimeRef(primeIdx-1);
+		if (primeIdx == 0)
+			return Optional.empty();
+
+		return primeSrc.getPrimeRef(primeIdx -1);
 	}
 
 	@Override
@@ -119,5 +122,11 @@ public class PrimeRefBitSetIndexes extends AbstractPrimeRef implements Serializa
 	public int hashCode()
 	{
 		return Objects.hash(primeIdx);
+	}
+
+	@Override
+	public String toString()
+	{
+		return this.getPrime().toString();
 	}
 }
