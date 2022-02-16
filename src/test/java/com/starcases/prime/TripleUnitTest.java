@@ -11,7 +11,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.base.PrimeBaseWithBitsets;
 import com.starcases.prime.impl.PrimeRef;
-import com.starcases.prime.impl.PrimeRefBitSetIndexes;
 import com.starcases.prime.intfc.FactoryIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 

@@ -27,7 +27,6 @@ import com.starcases.prime.graph.log.LogGraphStructure;
 import com.starcases.prime.graph.visualize.MetaDataTable;
 import com.starcases.prime.graph.visualize.ViewDefault;
 import com.starcases.prime.impl.PrimeRef;
-import com.starcases.prime.impl.PrimeRefBitSetIndexes;
 import com.starcases.prime.intfc.FactoryIntfc;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
