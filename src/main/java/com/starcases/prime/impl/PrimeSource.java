@@ -1,13 +1,8 @@
 package com.starcases.prime.impl;
 
-import java.math.BigDecimal;
-
 import java.math.BigInteger;
-import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.BitSet;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -112,16 +107,6 @@ public class PrimeSource implements PrimeSourceIntfc
 		this.confidenceLevel = confidenceLevel;
 	}
 
-	public PrimeSource(
-			@Min(1) int maxCount,
-			@NonNull BiFunction<Integer, BitSet, PrimeRefIntfc> primeRefCtor,
-			@NonNull Consumer<PrimeSourceIntfc> consumerSetPrimeSrc,
-			@NonNull Consumer<PrimeSourceIntfc> baseSetPrimeSrc
-			)
-	{
-		this(maxCount, primeRefCtor, consumerSetPrimeSrc, baseSetPrimeSrc, 100);
-	}
-
 	@Override
 	public void init()
 	{
@@ -137,13 +122,13 @@ public class PrimeSource implements PrimeSourceIntfc
 		final var primeIndexMaxPermutation = new BitSet();
 		final var primeIndexPermutation = new BitSet();
 
-		// each iteration increases the #bits by 1; i.e. a new prefixPrime is determined per iteration
+		// each iteration increases the #bits by 1; i.e. a new Prime is determined per iteration
 		do
 		{
 			final var curPrimeIdx = nextIdx.get();
 			final var curPrime = getPrime(curPrimeIdx);
 
-			// Represents a X-bit search space of indexes for primes to add for next prefixPrime.
+			// Represents a X-bit search space of indexes for primes to add for next Prime.
 			final var numBitsForPrimeCount = primeRefs.size()-1;
 			primeIndexMaxPermutation.clear(numBitsForPrimeCount-1);
 			primeIndexMaxPermutation.set(numBitsForPrimeCount); // keep 'shifting' max bit left
@@ -166,7 +151,7 @@ public class PrimeSource implements PrimeSourceIntfc
 
 				if (permutationSum.compareTo(sumCeiling) > 0)
 				{
-					// limit useless work - if we exceed a known prefixPrime then we are
+					// limit useless work - if we exceed a known Prime then we are
 					// done with this iteration.
 					break;
 				}
@@ -201,40 +186,11 @@ public class PrimeSource implements PrimeSourceIntfc
 		while (nextIdx.get() < targetPrimeCount);
 	}
 
-	//
-	// non-navigation related / base selection
-	//
-
-	@Override
-	public BaseTypes getActiveBaseId()
-	{
-		return activeBaseId;
-	}
-
 	@Override
 	public void setActiveBaseId(@NonNull BaseTypes activeBaseId)
 	{
 		this.activeBaseId = activeBaseId;
 	}
-
-	@Override
-	public boolean baseExist(@NonNull BaseTypes baseId)
-	{
-		var ret = false;
-		try
-		{
-			primeRefs.get(0).getPrimeBaseData().getMinPrimeBase(baseId);
-			ret = true;
-		}
-		catch(Exception e)
-		{
-			// base doesn't exist
-		}
-		return ret;
-	}
-	//
-	// navigation - non-index based api
-	//
 
 	@Override
 	public Iterator<PrimeRefIntfc> getPrimeRefIter()
@@ -248,10 +204,6 @@ public class PrimeSource implements PrimeSourceIntfc
 		return preferParallel ? primeRefs.parallelStream() : primeRefs.stream();
 	}
 
-	//
-	// search and retrieve - non-index apis
-	//
-
 	@Override
 	public Optional<PrimeRefIntfc> getPrimeRef(@NonNull @Min(1) BigInteger val)
 	{
@@ -261,104 +213,6 @@ public class PrimeSource implements PrimeSourceIntfc
 		return getPrimeRef(idx);
 	}
 
-	@Override
-	public Optional<PrimeRefIntfc> getNearPrimeRef(@NonNull BigInteger val)
-	{
-		log.info(String.format("get near prefixPrime ref bigint %d", val));
-		var dir = val.signum() < 0 ? -2 : -1;
-
-		var ret = Collections.binarySearch(primes, val.abs());
-
-		if (ret < 0) // not found but have 'insertion idx' which is negative
-		{
-			ret = -ret + dir;  // fixup insertion idx  and adjust for searching downward/upward
-		}
-
-		if (ret > getMaxIdx())
-			 ret = getMaxIdx(); // if fixed up idx location past end then use end
-
-		var r = getPrimeRef(ret);
-		log.info( String.format("get near primeref big int [%d] return [%s]", val, r.isPresent() ? r.get().getPrime().toString() : "n/a"));
-		return r;
-	}
-
-	@Override
-	public Optional<PrimeRefIntfc> getNearPrimeRef(@NonNull BigDecimal val)
-	{
-		var tmpVal = val.setScale(0, RoundingMode.CEILING).toBigInteger();
-
-		return getNearPrimeRef(tmpVal);
-	}
-
-	@Override
-	public Optional<PrimeRefIntfc> getPrimeRefWithinOffset(@Min(0) int idx, @NonNull BigInteger targetOffset)
-	{
-		final var dir = targetOffset.signum();
-
-		if (dir == 0)
-			return Optional.empty();
-
-		var tmpOffset = BigInteger.ZERO;
-		var tmpIdx = idx;
-		while (targetOffset.compareTo(tmpOffset) == dir && tmpIdx < this.getMaxIdx() && tmpIdx > 0)
-		{
-			tmpIdx += dir;
-			tmpOffset = tmpOffset.add( dir == -1 ?  distanceToNext.get(tmpIdx).negate() : distanceToNext.get(tmpIdx));
-		}
-
-		final var ret = primeRefs.get(tmpIdx);
-
-		log.info( String.format("get near primeref idx [%d] target-offset[%d] return [%d]", idx, targetOffset, ret.getPrime()));
-		return Optional.of(ret);
-	}
-
-	@Override
-	public Optional<PrimeRefIntfc> getPrimeRefWithinOffset(@Min(0) int idx, @NonNull BigDecimal targetOffset)
-	{
-		return getPrimeRefWithinOffset(idx, targetOffset.toBigInteger());
-	}
-
-	@Override
-	public Optional<PrimeRefIntfc> getPrimeRef(@NonNull BigInteger val, @NonNull BigInteger exactOffset)
-	{
-		return getPrimeRef(val.add(exactOffset));
-	}
-
-	public Optional<BigInteger> getDistToNextPrime(@NonNull PrimeRefIntfc prime)
-	{
-		return prime.getDistToNextPrime();
-	}
-
-	public Optional<BigInteger> getDistToPrevPrime(@NonNull PrimeRefIntfc prime)
-	{
-		return prime.getDistToPrevPrime();
-	}
-
-	//
-	// navigation - index based apis
-	//
-
-	@Override
-	public BigInteger getDistToPrevPrime(@Min(0) int curIdx)
-	{
-		return  this.distanceToNext.get(curIdx-1).negate();
-	}
-
-	/**
-	 * Diff of primes at the 2 indexes; order of indexes affects whether result is +/-.
-	 * @param idx1
-	 * @param idx2
-	 * @return
-	 */
-	public Optional<BigInteger> getDistBetween(@Min(0) int idx1, @Min(0) int idx2)
-	{
-		if (idx1 < 0 || idx2 < 0 || idx1 > getMaxIdx() || idx2 > getMaxIdx() )
-			return Optional.empty();
-
-		return  Optional.of( idx1 < idx2 ?
-				this.getPrime(idx2).orElseThrow().subtract(this.getPrime(idx1).orElseThrow()) :
-					this.getPrime(idx1).orElseThrow().subtract(this.getPrime(idx2).orElseThrow()));
-	}
 
 	@Override
 	public int getPrimeIdx(@Min(1) BigInteger val)
@@ -385,67 +239,10 @@ public class PrimeSource implements PrimeSourceIntfc
 	}
 
 	@Override
-	public BigInteger getDistToNextPrime(@Min(0) int curIdx)
-	{
-		return this.distanceToNext.get(curIdx);
-	}
-
-	public long getNextLowPrime(@NonNull @Min(1) BigInteger val, @Min(0) int startIdx, @Min(0) int maxOffset)
-	{
-		final var ret = Collections.binarySearch(primes, val);
-		if (ret < startIdx || ret >= maxOffset)
-			return -1;
-		return (long)ret-1;
-	}
-
-	public long getNextHighPrime(@NonNull BigInteger val, @Min(0) int startIdx, @Min(0) int maxOffset)
-	{
-		final var ret = Collections.binarySearch(primes, val);
-		if (ret < startIdx || ret >= maxOffset)
-			return -1L;
-		return  (long)ret+1;
-	}
-
-	/**
-	 * return value matches java binarySearch() return foundidx-1 for any result > 0; otherwise returns -val
-	 * @param val
-	 * @return
-	 */
-	@Override
-	public int getNextLowPrimeIdx(@NonNull @Min(1) BigInteger val)
-	{
-		final var ret = Collections.binarySearch(primes, val);
-		return ret >= 0 ? Math.max(ret-1, 0) : (-ret-2);
-	}
-
-	@Override
-	public int getNextHighPrimeIdx(@NonNull @Min(1) BigInteger val)
-	{
-		final var ret = Collections.binarySearch(primes, val);
-		return ret >= 0 ? ret+1 : Math.max(-ret-1, 0);
-	}
-
-	@Override
-	public int getNextLowPrimeIdx(@NonNull @Min(1) BigDecimal val)
-	{
-		return getNextLowPrimeIdx(val.setScale(0, RoundingMode.CEILING).toBigInteger());
-	}
-
-	@Override
-	public int getNextHighPrimeIdx(@NonNull @Min(1) BigDecimal val)
-	{
-		return getNextHighPrimeIdx(val.setScale(0, RoundingMode.CEILING).toBigInteger());
-	}
-
-	@Override
 	public int getMaxIdx()
 	{
 		return primeRefs.size()-1;
 	}
-
-	//
-	// Private apis
-	//
 
 	private BigInteger calcSumCeiling(@NonNull @Min(3) BigInteger primeSum)
 	{
@@ -468,7 +265,7 @@ public class PrimeSource implements PrimeSourceIntfc
 	}
 
 	/**
-	 * Add new prefixPrime to shared set of all primes
+	 * Add new Prime to shared set of all primes
 	 * Base will be same as aPrime and using same index.
 	 * @param aPrime
 	 */
@@ -478,7 +275,7 @@ public class PrimeSource implements PrimeSourceIntfc
 	}
 
 	/**
-	 * Add new prefixPrime to shared set of all primes
+	 * Add new Prime to shared set of all primes
 	 *
 	 * @param aPrime
 	 */
@@ -497,17 +294,12 @@ public class PrimeSource implements PrimeSourceIntfc
 		getPrime(curPrimeIdx).ifPresent(p -> distanceToNext.set(curPrimeIdx, newPrime.subtract(p)));
 	}
 
-	public boolean distinct(@NonNull PrimeRefIntfc [] vals)
-	{
-		return Arrays.asList(vals).stream().distinct().count() == vals.length;
-	}
-
 	/**
 	 *
-	 * Weed out sums which cannot represent the next prefixPrime.
+	 * Weed out sums which cannot represent the next Prime.
 	 *
 	 * @param sumOfPrimeSet
-	 * @return true for sum that is viable prefixPrime; false otherwise
+	 * @return true for sum that is viable Prime; false otherwise
 	 */
 	private boolean viablePrime(@NonNull @Min(1) BigInteger primeSum, @Min(1) BigInteger lastMaxPrime)
 	{
@@ -515,19 +307,19 @@ public class PrimeSource implements PrimeSourceIntfc
 
 		do
 		{
-			// Part of "non-cheating" prefixPrime checks.
+			// Part of "non-cheating" Prime checks.
 			// only want sets summing to greater than the current
-			// max prefixPrime.
+			// max Prime.
 			if (primeSum.compareTo(lastMaxPrime) <= 0)
 				break;
 
-			// Part of "non-cheating" prefixPrime checks.
+			// Part of "non-cheating" Prime checks.
 			// Not a prefixPrime if is even.
 			if (!primeSum.testBit(0))
 				break;
 
-			// This was bootstrap logic while getting the general framework working.
-			// This block should be removed and allow the remaining blocks to determine next prefixPrime.
+			// This is bootstrap logic.
+			// If possible, this block should be removed and allow the remaining blocks to determine next Prime.
 			if (!primeSum.isProbablePrime(confidenceLevel))
 				break;
 

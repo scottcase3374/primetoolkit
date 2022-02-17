@@ -22,11 +22,6 @@ public class PrimeBaseWithBitsets implements PrimeBaseIntfc
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public PrimeBaseWithBitsets()
-	{
-		// nothing to init here
-	}
-
 	@NonNull
 	private static PrimeSourceIntfc primeSrc;
 
@@ -38,8 +33,7 @@ public class PrimeBaseWithBitsets implements PrimeBaseIntfc
 	/**
 	 * Represents sets of base primes that sum to this prefixPrime. (index to primes)
 	 *
-	 * NOTE: This supports multiple alternative bases per base type - the PrimeBaseWithLists only supports 1 base
-	 *       per base type.
+	 * NOTE: This supports multiple alternative bases per base type.
 	 */
 	@NonNull
 	private final Map<BaseTypes, List<BitSet>> primeBaseIdxs = new EnumMap<>(BaseTypes.class);
@@ -47,53 +41,9 @@ public class PrimeBaseWithBitsets implements PrimeBaseIntfc
 	@Getter
 	private BaseMetadataIntfc baseMetadata;
 
-	/**
-	 * size for DEFAULT base type
-	 */
-	@Override
-	public int getBaseSize()
+	public PrimeBaseWithBitsets()
 	{
-		 return primeBaseIdxs.get(BaseTypes.DEFAULT).size();
-	}
-
-	/**
-	 * size for DEFAULT base type
-	 */
-	@Override
-	public int getBaseSize(@NonNull BaseTypes baseType)
-	{
-		 return primeBaseIdxs.get(baseType).size();
-	}
-
-	/**
-	 * For DEFAULT base type
-	 */
-	@Override
-	public List<BitSet> getPrimeBaseIdxs()
-	{
-		return getPrimeBaseIdxs(BaseTypes.DEFAULT);
-	}
-
-	@Override
-	public List<BitSet> getPrimeBaseIdxs(@NonNull BaseTypes baseType)
-	{
-		return primeBaseIdxs.get(baseType);
-	}
-
-	/**
-	 * Include a set of primes in the set of prefixPrime bases for the current prefixPrime.
-	 * @param primeBase
-	 */
-	@Override
-	public void addPrimeBase(@NonNull BitSet primeBase)
-	{
-		addPrimeBase(BaseTypes.DEFAULT, primeBase, null);
-	}
-
-	@Override
-	public void addPrimeBase(@NonNull BitSet primeBase, @NonNull BaseTypes baseType)
-	{
-		addPrimeBase(baseType, primeBase, null);
+		// nothing to init here
 	}
 
 	@Override
@@ -113,26 +63,29 @@ public class PrimeBaseWithBitsets implements PrimeBaseIntfc
 		this.baseMetadata = baseMetadata;
 	}
 
+	/**
+	 * Include a set of primes in the set of prefixPrime bases for the current prefixPrime.
+	 * @param primeBase
+	 */
 	@Override
-	public BigInteger getMinPrimeBase()
+	public void addPrimeBase(@NonNull BitSet primeBase)
 	{
-		return getMinPrimeBase(BaseTypes.DEFAULT);
+		addPrimeBase(BaseTypes.DEFAULT, primeBase, null);
+	}
+
+	@Override
+	public void addPrimeBase(@NonNull BitSet primeBase, @NonNull BaseTypes baseType)
+	{
+		addPrimeBase(baseType, primeBase, null);
 	}
 
 	/**
-	 * Need to think about how to handle multiple sets of bases for a single prefixPrime.  In that
-	 * scenario, which base set should be used to determine the min prefixPrime base.  The
-	 * current usage is just general reporting but the results should be consistent.
+	 * size for DEFAULT base type
 	 */
 	@Override
-	public BigInteger getMinPrimeBase(@NonNull BaseTypes baseType)
+	public int getBaseSize()
 	{
-		return primeBaseIdxs
-				.get(baseType)
-				.stream()
-
-				.map(bs -> primeSrc.getPrime(bs.nextSetBit(0)).orElseThrow())
-				.findAny().orElseThrow();
+		 return primeBaseIdxs.get(BaseTypes.DEFAULT).size();
 	}
 
 	@Override
@@ -152,8 +105,25 @@ public class PrimeBaseWithBitsets implements PrimeBaseIntfc
 		return primeBaseIdxs
 				.get(baseType)
 				.stream()
-				.map(bs -> primeSrc.getPrime(bs.nextSetBit(0)).orElseThrow())
-				.findAny().orElseThrow();
+				.map(bs -> primeSrc
+							.getPrime(bs.nextSetBit(0))
+							.orElseThrow())
+				.findAny()
+				.orElseThrow();
 	}
 
+	/**
+	 * For DEFAULT base type
+	 */
+	@Override
+	public List<BitSet> getPrimeBaseIdxs()
+	{
+		return getPrimeBaseIdxs(BaseTypes.DEFAULT);
+	}
+
+	@Override
+	public List<BitSet> getPrimeBaseIdxs(@NonNull BaseTypes baseType)
+	{
+		return primeBaseIdxs.get(baseType);
+	}
 }

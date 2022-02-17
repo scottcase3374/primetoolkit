@@ -111,13 +111,6 @@ public class PrimeRef implements PrimeRefIntfc
 		return this.primeIdx;
 	}
 
-	@Override
-	public Optional<PrimeRefIntfc> getPrimeRefWithinOffset(@NonNull BigInteger targetOffset)
-	{
-		return primeSrc.getPrimeRefWithinOffset(this.primeIdx, targetOffset);
-	}
-
-
 	/**
 	 * absolute value of difference with next prefixPrime
 	 * if the next prefixPrime is known.

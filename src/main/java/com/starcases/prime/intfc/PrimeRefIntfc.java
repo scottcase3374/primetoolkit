@@ -5,8 +5,6 @@ import java.math.BigInteger;
 import java.util.Comparator;
 import java.util.Optional;
 
-import lombok.NonNull;
-
 /**
  *
  * Main interface for working with the primes and accessing the info on bases.
@@ -23,27 +21,15 @@ public interface PrimeRefIntfc extends Serializable
 {
 	static final Comparator<PrimeRefIntfc> primeRefComparator = (PrimeRefIntfc o1, PrimeRefIntfc o2) -> o1.getPrime().compareTo(o2.getPrime());
 
-	//
-	// prefixPrime reference related
-	//
-
-	BigInteger getPrime();
-	Optional<PrimeRefIntfc> getPrimeRefWithinOffset(@NonNull BigInteger targetOffset);
+	Optional<BigInteger> getDistToNextPrime();
+	Optional<BigInteger> getDistToPrevPrime();
 
 	Optional<PrimeRefIntfc> getNextPrimeRef();
 	Optional<PrimeRefIntfc> getPrevPrimeRef();
 
-	Optional<BigInteger> getDistToNextPrime();
-	Optional<BigInteger> getDistToPrevPrime();
+	BigInteger getPrime();
 
-	//
-	// Base related info
-	//
 	PrimeBaseIntfc getPrimeBaseData();
-
-	//
-	// Index related info
-	//
 
 	/**
 	 *
