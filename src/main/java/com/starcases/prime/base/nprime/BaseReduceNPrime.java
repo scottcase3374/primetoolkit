@@ -16,10 +16,10 @@ import lombok.NonNull;
 import lombok.extern.java.Log;
 
 /**
- * Given a prefixPrime and a maximum number of primes; reduce default bases to multiples
- * of the bases <= maximum prefixPrime provided.
+ * Given a Prime and a maximum number of primes; reduce default bases to multiples
+ * of the bases <= maximum Prime provided.
  *
- * Example: For max base-prefixPrime of 2.
+ * Example: For max base-Prime of 2.
  *  Prime 43 -> bases 7,            17												 ,19
  *                   /\			 /--/------\					 					  /\----------------------\
  *                  2  5	    1  5        11                                       1  5          				13
@@ -63,14 +63,14 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 	/**
 	 * Non-recursive algo to go through bases of bases to count those that we want counts for.
 	 *
-	 * @param primeRef cur prefixPrime being reduced
+	 * @param primeRef cur Prime being reduced
 	 */
 	private void primeReduction(@NonNull PrimeRefIntfc primeRef, @NonNull BitSet retBaseIdxs, @NonNull int [] retOutputIdxCount)
 	{
 		// Experimentation for this use case indicate that Concurrent... perform slightly better than LinkedBlocking.. varieties of the collections.
 		final var q = new ConcurrentLinkedQueue<BitSet>();
 
-		// want to process initial bases for prefixPrime
+		// want to process initial bases for Prime
 		final var bs = primeRef.getPrimeBaseData().getPrimeBaseIdxs(BaseTypes.DEFAULT).get(0);
 		q.add(bs);
 

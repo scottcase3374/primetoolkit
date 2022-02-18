@@ -43,13 +43,13 @@ class PrimeSourceUnitTest
 		ps.init();
 	}
 
-	@Test
-	void testGetPrimeIdx() {
-		Assertions.assertEquals(1, ps.getPrimeIdx(BigInteger.TWO));
-
-		var bi101 = BigInteger.valueOf(101L);
-		Assertions.assertEquals(26, ps.getPrimeIdx(bi101));
-	}
+//	@Test
+//	void testGetPrimeIdx() {
+//		Assertions.assertEquals(1, ps.getPrimeIdx(BigInteger.TWO));
+//
+//		var bi101 = BigInteger.valueOf(101L);
+//		Assertions.assertEquals(26, ps.getPrimeIdx(bi101));
+//	}
 
 	// @ Test
 	void testGetNextLowPrimeBigInteger() {

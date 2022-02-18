@@ -36,18 +36,6 @@ public interface PrimeSourceIntfc extends Serializable
 
 	Stream<PrimeRefIntfc> getPrimeRefStream(boolean preferParallel);
 
-	/**
-	 * Get exact Prime ref instance for value if it is a Prime and was previously identified and a Prime ref was created.
-	 *
-	 * @param val Must be positive value.
-
-	 * @return
-	 */
-	Optional<PrimeRefIntfc> getPrimeRef(@NonNull @Min(1) BigInteger val);
-
-	int getMaxIdx();
-
 	Optional<PrimeRefIntfc> getPrimeRef(@Min(0) int primeIdx);
 	Optional<BigInteger> getPrime(@Min(0) int primeIdx);
-	int getPrimeIdx(@NonNull @Min(1) BigInteger val);
 }

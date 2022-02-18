@@ -57,7 +57,7 @@ public interface PrimeBaseIntfc extends Serializable
 
 	/**
 	 *
-	 * Not every use case needs multiple bases per prefixPrime - only the
+	 * Not every use case needs multiple bases per Prime - only the
 	 * list of bitsets implementation supports multiples.
 	 *
 	 *
@@ -66,7 +66,7 @@ public interface PrimeBaseIntfc extends Serializable
 	List<BitSet> getPrimeBaseIdxs();
 
 	/**
-	 * Not every use case needs multiple bases per prefixPrime - only the
+	 * Not every use case needs multiple bases per Prime - only the
 	 * list of bitsets implementation supports multiples.
 	 * @return
 	 */

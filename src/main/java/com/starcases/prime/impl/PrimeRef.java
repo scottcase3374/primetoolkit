@@ -16,9 +16,9 @@ import com.starcases.prime.intfc.PrimeSourceIntfc;
 import lombok.NonNull;
 
 /**
- * Default prefixPrime representation.
+ * Default Prime representation.
  *
-* The general algorithm idea is that the next prefixPrime is derived from
+* The general algorithm idea is that the next Prime is derived from
 * the sum of some subset of previous primes.
 *
 **/
@@ -39,20 +39,20 @@ public class PrimeRef implements PrimeRefIntfc
 	}
 
 	/*
-	 *  Index for this instance of a prefixPrime.
+	 *  Index for this instance of a Prime.
 	 *  index to bitsets or collections for this val
 	 */
 	@Min(0)
-	private final int primeIdx;
+	private final Integer primeIdx;
 
 	@NonNull
 	private final PrimeBaseIntfc primeBaseData;
 
 	/**
-	 * Handle simple prefixPrime where the base is simply itself - i.e. 1, 2
+	 * Handle simple Prime where the base is simply itself - i.e. 1, 2
 	 * Simplifies bootstrapping
 	 *
-	 * @param prefixPrime
+	 * @param Prime
 	 */
 	public PrimeRef(@Min(0) @Max(2) int primeIdx,
 					@NonNull BitSet primeBaseIdxs,
@@ -96,7 +96,8 @@ public class PrimeRef implements PrimeRefIntfc
 	@Override
 	public BigInteger getPrime()
 	{
-		return primeSrc.getPrime(primeIdx).orElseThrow();
+		return primeSrc.getPrime(primeIdx)
+				.orElseThrow();
 	}
 
 	@Override
@@ -112,10 +113,10 @@ public class PrimeRef implements PrimeRefIntfc
 	}
 
 	/**
-	 * absolute value of difference with next prefixPrime
-	 * if the next prefixPrime is known.
+	 * absolute value of difference with next Prime
+	 * if the next Prime is known.
 	 *
-	 * empty optional if next prefixPrime is unknown/not calculated
+	 * empty optional if next Prime is unknown/not calculated
 	 */
 	@Override
 	public Optional<BigInteger> getDistToNextPrime()
@@ -124,10 +125,10 @@ public class PrimeRef implements PrimeRefIntfc
 	}
 
 	/**
-	 * absolute value of difference with prev prefixPrime
-	 * if the prev prefixPrime is known/exists.
+	 * absolute value of difference with prev Prime
+	 * if the prev Prime is known/exists.
 	 *
-	 * empty optional if prev prefixPrime is unknown/doesn't exist
+	 * empty optional if prev Prime is unknown/doesn't exist
 	 */
 	@Override
 	public Optional<BigInteger> getDistToPrevPrime()

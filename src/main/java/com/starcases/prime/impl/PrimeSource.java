@@ -3,7 +3,9 @@ package com.starcases.prime.impl;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
@@ -41,13 +43,10 @@ public class PrimeSource implements PrimeSourceIntfc
 	private final AtomicInteger nextIdx = new AtomicInteger(-1);
 
 	@NonNull
-	private final List<BigInteger> primes;
+	private final Map<Integer, BigInteger> primes;
 
 	@NonNull
 	private final List<PrimeRefIntfc> primeRefs;
-
-	@NonNull
-	private final List<BigInteger> distanceToNext;
 
 	@Min(1)
 	private final int targetPrimeCount;
@@ -87,9 +86,8 @@ public class PrimeSource implements PrimeSourceIntfc
 			@Min(1) int confidenceLevel
 			)
 	{
-		primes = new ArrayList<>(maxCount);
+		primes = new HashMap<>(maxCount);
 		primeRefs = new ArrayList<>(maxCount);
-		distanceToNext = new ArrayList<>(maxCount);
 		targetPrimeCount = maxCount;
 
 		this.primeRefCtor = primeRefCtor;
@@ -147,7 +145,7 @@ public class PrimeSource implements PrimeSourceIntfc
 						.mapToObj(this::getPrime)
 						.filter(Optional::isPresent)
 						.map(Optional::get)
-						.reduce(curPrime.orElseThrow(), BigInteger::add);
+						.reduce(curPrime.orElse(BigInteger.ZERO), BigInteger::add);
 
 				if (permutationSum.compareTo(sumCeiling) > 0)
 				{
@@ -162,7 +160,7 @@ public class PrimeSource implements PrimeSourceIntfc
 					final var sumBaseIdxs = primeIndexPermutation.get(0, numBitsForPrimeCount);
 					sumBaseIdxs.set(curPrimeIdx); // sum of primes from these indexes should match 'sum'
 					final var cachedBases = sumBaseIdxs;
-					addPrimeRef(cachedSum, cachedBases, curPrimeIdx);
+					addPrimeRef(cachedSum, cachedBases);
 					break;
 				}
 				else
@@ -205,25 +203,9 @@ public class PrimeSource implements PrimeSourceIntfc
 	}
 
 	@Override
-	public Optional<PrimeRefIntfc> getPrimeRef(@NonNull @Min(1) BigInteger val)
-	{
-		var idx = getPrimeIdx(val);
-		if (idx < 0 || idx > this.getMaxIdx())
-			return Optional.empty();
-		return getPrimeRef(idx);
-	}
-
-
-	@Override
-	public int getPrimeIdx(@Min(1) BigInteger val)
-	{
-		return this.primes.indexOf(val);
-	}
-
-	@Override
 	public Optional<BigInteger> getPrime(@Min(0) int primeIdx)
 	{
-		if (primeIdx > getMaxIdx() || primeIdx < 0)
+		if (!primes.containsKey(primeIdx))
 			return Optional.empty();
 
 		return Optional.of(primes.get(primeIdx));
@@ -232,16 +214,10 @@ public class PrimeSource implements PrimeSourceIntfc
 	@Override
 	public Optional<PrimeRefIntfc> getPrimeRef(@Min(0) int primeIdx)
 	{
-		if (primeIdx > getMaxIdx() || primeIdx < 0)
+		if (primeIdx < 0 || primeIdx >= primeRefs.size())
 			return Optional.empty();
 
 		return   Optional.of(primeRefs.get(primeIdx));
-	}
-
-	@Override
-	public int getMaxIdx()
-	{
-		return primeRefs.size()-1;
 	}
 
 	private BigInteger calcSumCeiling(@NonNull @Min(3) BigInteger primeSum)
@@ -266,32 +242,19 @@ public class PrimeSource implements PrimeSourceIntfc
 
 	/**
 	 * Add new Prime to shared set of all primes
-	 * Base will be same as aPrime and using same index.
-	 * @param aPrime
-	 */
-	private void addPrimeRef(@NonNull @Min(1) BigInteger nextPrime, @NonNull BitSet baseIdx)
-	{
-		addPrimeRef(nextPrime, baseIdx, nextIdx.get()+1);
-	}
-
-	/**
-	 * Add new Prime to shared set of all primes
 	 *
 	 * @param aPrime
 	 */
 	private void addPrimeRef(
 			@NonNull @Min(1) BigInteger newPrime,
-			@NonNull BitSet base, @Min(0)
-			int curPrimeIdx)
+			@NonNull BitSet base
+			)
 	{
 		var idx = nextIdx.incrementAndGet();
 
-		primes.add(idx, newPrime);
+		primes.put(idx, newPrime);
 		PrimeRefIntfc ret = primeRefCtor.apply(idx, base);
 		primeRefs.add(idx, ret);
-
-		distanceToNext.add(null);
-		getPrime(curPrimeIdx).ifPresent(p -> distanceToNext.set(curPrimeIdx, newPrime.subtract(p)));
 	}
 
 	/**
@@ -314,7 +277,7 @@ public class PrimeSource implements PrimeSourceIntfc
 				break;
 
 			// Part of "non-cheating" Prime checks.
-			// Not a prefixPrime if is even.
+			// Not a Prime if is even.
 			if (!primeSum.testBit(0))
 				break;
 

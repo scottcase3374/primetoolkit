@@ -30,7 +30,7 @@ public class PrimeBaseWithLists implements PrimeBaseIntfc
 	}
 
 	/**
-	 * Represents sets of base primes that sum to this prefixPrime. (index to primes)
+	 * Represents sets of base primes that sum to this Prime. (index to primes)
 	 *
 	 * NOTE: This supports ONE base per base type.
 	 */
@@ -55,7 +55,7 @@ public class PrimeBaseWithLists implements PrimeBaseIntfc
 	}
 
 	/**
-	 * Include a set of primes in the set of prefixPrime bases for the current prefixPrime.
+	 * Include a set of primes in the set of Prime bases for the current Prime.
 	 * @param primeBase
 	 */
 	@Override

@@ -13,8 +13,8 @@ import picocli.CommandLine.Command;
 
 /**
  *
- * Intent was to log the base type that consisted specifically of 3 prefixPrime bases
- * that sum to each prefixPrime#. Not much differentiation between this and LogBaseNPrime
+ * Intent was to log the base type that consisted specifically of 3 Prime bases
+ * that sum to each Prime#. Not much differentiation between this and LogBaseNPrime
  * after a refactor.
  *
  */

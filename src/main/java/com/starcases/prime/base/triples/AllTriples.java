@@ -31,37 +31,37 @@ enum TripleIdx
 
 /**
  *
- * Indicator to relationship between current sum of triple values vs the target prefixPrime.
+ * Indicator to relationship between current sum of triple values vs the target Prime.
  *
  */
 enum SumConstraintState
 {
 	/**
-	 * Indicate sum is not a prefixPrime value and/or doesn't match the prefixPrime. Usable as a default in most cases.
+	 * Indicate sum is not a Prime value and/or doesn't match the Prime. Usable as a default in most cases.
 	 */
 	NONMATCH(null)
 	{},
 
 	/**
-	 * indicate sum is lower than target prefixPrime
+	 * indicate sum is lower than target Prime
 	 *
-	 * (prefixPrime - sum).signNum
+	 * (Prime - sum).signNum
 	 */
 	INCREMENT_SUM(1)
 	{},
 
 	/**
-	 * indicate sum is higher than target prefixPrime
+	 * indicate sum is higher than target Prime
 	 *
-	 * (prefixPrime - sum).signNum
+	 * (Prime - sum).signNum
 	 */
 	DECREMENT_SUM(-1)
 	{},
 
 	/**
-	 * indicate sum matches target prefixPrime
+	 * indicate sum matches target Prime
 	 *
-	 * (prefixPrime - sum).signNum
+	 * (Prime - sum).signNum
 	 */
 	MATCH(0)
 	{};
@@ -84,7 +84,7 @@ enum SumConstraintState
 			BigInteger [] vals,
 			TripleIdx [] idxs)
 	{
-		// sum the current prefixPrime refs except for item indexed by array idxs
+		// sum the current Prime refs except for item indexed by array idxs
 		final var sum1 = Arrays.
 						stream(TripleIdx.values())
 						.filter(i ->  idxs == null || (idxs != null && Arrays.stream(idxs).allMatch(ii -> ii != i)) )
@@ -95,7 +95,7 @@ enum SumConstraintState
 						.map(PrimeRefIntfc::getPrime)
 						.reduce(BigInteger.ZERO, BigInteger::add);
 
-		// sum the items in array vals [which should equate to overrides of the prefixPrime refs specified by array idxs.
+		// sum the items in array vals [which should equate to overrides of the Prime refs specified by array idxs.
 		final var sum2 = vals == null ? BigInteger.ZERO :
 				Arrays.
 				stream(vals).
@@ -105,7 +105,7 @@ enum SumConstraintState
 		// Create total sum from both sets which should be sourced from 3 items in one or the other of primeRefs or vals.
 		final var finalSum = sum1.add(sum2);
 
-		// determine if sum is higher than prefixPrime, equal to prefixPrime, less than prefixPrime or just doesn't match for some reason.
+		// determine if sum is higher than Prime, equal to Prime, less than Prime or just doesn't match for some reason.
 		final var sumComptoPrime = targetPrime.getPrime().compareTo(finalSum);
 
 		return SumConstraintState.getEnum(sumComptoPrime);
@@ -126,7 +126,7 @@ enum ConditionConstraintState
 	MISSING_BASE,
 
 	/**
-	 * 2 bases have the same prefixPrime value
+	 * 2 bases have the same Prime value
 	 */
 	DUPE,
 
@@ -271,7 +271,7 @@ public class AllTriples
 	}
 
 	/**
-	 * Move to next prefixPrime ref (of specified component of triple) and manage tracking the resulting sum/condition state.
+	 * Move to next Prime ref (of specified component of triple) and manage tracking the resulting sum/condition state.
 	 *
 	 * @param idx
 	 * @param triple
@@ -290,21 +290,21 @@ public class AllTriples
 	}
 
 	/**
-	 * Main entry point to this processsing - which processes a single prefixPrime to produce a list of all viable triples
-	 * which individually sum to the prefixPrime.
+	 * Main entry point to this processsing - which processes a single Prime to produce a list of all viable triples
+	 * which individually sum to the Prime.
 	 *
 	 * This is a "mostly brute force" method which is shown by pretty slow performance.
 	 *
 	 * Note: Some enhancements are possible to reduce the size of the data range/domain which would speed things up a bit.
-	 *       Note that simply processing each prefixPrime in a thread does cause a speedup but without implementing the prior
+	 *       Note that simply processing each Prime in a thread does cause a speedup but without implementing the prior
 	 *       statement, the runtime for anything other than small datasets is very slow.
 	 */
 	void process()
 	{
 		final Map<TripleIdx, Optional<PrimeRefIntfc>> triple = new TreeMap<>();
-		triple.put(TripleIdx.TOP, ps.getPrimeRef(4) );  // prefixPrime 7
-		triple.put(TripleIdx.MID, ps.getPrimeRef(2) );  // prefixPrime 3
-		triple.put(TripleIdx.BOT,  ps.getPrimeRef(0) ); // prefixPrime 1
+		triple.put(TripleIdx.TOP, ps.getPrimeRef(4) );  // Prime 7
+		triple.put(TripleIdx.MID, ps.getPrimeRef(2) );  // Prime 3
+		triple.put(TripleIdx.BOT,  ps.getPrimeRef(0) ); // Prime 1
 
 		assert(triple.size() == 3);
 		assert(!triple.containsValue(null));

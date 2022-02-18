@@ -20,10 +20,10 @@ import lombok.NonNull;
 import lombok.extern.java.Log;
 
 /*
- *  Given a prefixPrime, find every set of 3 pre-existing primes that sum to the prefixPrime.
+ *  Given a Prime, find every set of 3 pre-existing primes that sum to the Prime.
  *
  *
- *  A few examples of a single triple (or 2) per prefixPrime.
+ *  A few examples of a single triple (or 2) per Prime.
  *     P     B
  *	   R     A
  *  I  I     S
@@ -87,8 +87,8 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 	}
 
 	/**
-	 * Main method responsible for producing the triples for a single prefixPrime.
-	 * @param prefixPrime
+	 * Main method responsible for producing the triples for a single Prime.
+	 * @param Prime
 	 */
 	private void reducePrime(@NonNull PrimeRefIntfc prime)
 	{
@@ -97,7 +97,7 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 	}
 
 	/**
-	 * top-level function; iterate over entire dataset to reduce every prefixPrime
+	 * top-level function; iterate over entire dataset to reduce every Prime
 	 * @param maxReduce
 	 */
 	public void genBases()
@@ -147,7 +147,7 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 		futures.stream().map(CompletableFuture::join).forEach(x -> c[0]++ );
 
 		if (log.isLoggable(Level.INFO))
-			log.info(String.format("Total valid entries: %d out of %d; completed(%d)",  + good.get(), ps.getMaxIdx(),c[0]));
+			log.info(String.format("Total entries: %d; completed(%d)",  + good.get(), c[0]));
 	}
 
 
@@ -161,7 +161,7 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 		}
 		catch(Exception e)
 		{
-			log.severe(String.format("BaseReduce3Triple generation => idx[%d] prefixPrime [%d] error: %s", counter, curPrime.getPrime(), e.toString()));
+			log.severe(String.format("BaseReduce3Triple generation => idx[%d] Prime [%d] error: %s", counter, curPrime.getPrime(), e.toString()));
 			e.printStackTrace();
 		}
 		return retVal + "false";
