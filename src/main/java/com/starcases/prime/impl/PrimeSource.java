@@ -1,16 +1,14 @@
 package com.starcases.prime.impl;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.starcases.prime.base.BaseTypes;
@@ -46,7 +44,7 @@ public class PrimeSource implements PrimeSourceIntfc
 	private final Map<Integer, BigInteger> primes;
 
 	@NonNull
-	private final List<PrimeRefIntfc> primeRefs;
+	private final Map<Integer,PrimeRefIntfc> primeRefs;
 
 	@Min(1)
 	private final int targetPrimeCount;
@@ -86,8 +84,8 @@ public class PrimeSource implements PrimeSourceIntfc
 			@Min(1) int confidenceLevel
 			)
 	{
-		primes = new HashMap<>(maxCount);
-		primeRefs = new ArrayList<>(maxCount);
+		primes = new ConcurrentHashMap<>(maxCount);
+		primeRefs = new ConcurrentHashMap<>(maxCount);
 		targetPrimeCount = maxCount;
 
 		this.primeRefCtor = primeRefCtor;
@@ -193,13 +191,13 @@ public class PrimeSource implements PrimeSourceIntfc
 	@Override
 	public Iterator<PrimeRefIntfc> getPrimeRefIter()
 	{
-		return primeRefs.iterator();
+		return primeRefs.values().iterator();
 	}
 
 	@Override
 	public Stream<PrimeRefIntfc> getPrimeRefStream(boolean preferParallel)
 	{
-		return preferParallel ? primeRefs.parallelStream() : primeRefs.stream();
+		return preferParallel ? primeRefs.values().parallelStream() : primeRefs.values().stream();
 	}
 
 	@Override
@@ -254,7 +252,7 @@ public class PrimeSource implements PrimeSourceIntfc
 
 		primes.put(idx, newPrime);
 		PrimeRefIntfc ret = primeRefCtor.apply(idx, base);
-		primeRefs.add(idx, ret);
+		primeRefs.put(idx, ret);
 	}
 
 	/**

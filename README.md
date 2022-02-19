@@ -80,6 +80,7 @@ The run times when changing the prefer-parallel boolean were.
 
 That flag applies to several base-logging and base-generation methods now. It generally drives either the use of parallel streams or aspects of the use of completableFutures.
 
+After removing a number of unused data items and methods, converting the primes collection from a list to a map and running without output to a file instead of console window in eclipse - runtime went from 1m 5s to 53s. The list to map conversion is part of some research into alternative data structs and also some checking into the use of soft/weak references in one or 2 places.
 
 ## Observations
 - When logging 3 million node structs with other settings set to default - meaning you get a target prime # and a set of bases which includes the previous prime plus some subset of lower primes that sum to the target prime. The largest value in the subset of small primes in each base is usually less than 23 from a quick look at the data.  Example output: Prime 49979681 bases [[1,2,3,5,7,49979663]]  <dist[6], nextPrime[49979687]> idx[2999999]
@@ -260,6 +261,12 @@ which is interpreted as: Prime value 1583 is represented by: 1 x 155 + 2 x 318 +
 The current design is extensible and componentized to a decent degree which was very desirable.  Another idea crossed my mind though which is potentially a huge improvement in some ways.  Right now, Prime#'s are abstracted a bit through the PrimeRefIntfc and "bases" are abstracted via the PrimeBaseIntfc.  Primes can have bases generated via different methodologies, etc - such as where Prime N is the sum of Prime N-1 and some small set of primes in the range Prime 1 to N-2. So a base can be a set of primes.  The new idea fundamentally is - have the object representing a Prime implement both the PrimeRefIntfc AND PrimeBaseIntfc?  Where I would take this idea is - represent bases with effectively 2 parts such as:  (1) a set of "prefix" primes  (2) the N-1 prime.  This would promote sharing a single representation (prefix) out of a set of prefixes across many primes. The result is a trade-off between time (to calculate a BigInteger equivalent of a prime) versus being able to represent a much larger range of primes due to lower memory when representing very large primes.
 
 This could be combined with a type of caching - where a final prime is fully calculated and weak and/or soft references are used to enable access if needed for a period of time but then eventually the BigInteger would be reclaimable by the GC.  Before being reclaimed, it could be used to generate bases (or other types of bases) for other primes. Temporarily having the actual BigInteger representation allows simple diff calculations or finding the distance between items, etc. Hopefully this makes sense to a degree.  It needs a few good use cases or scenarios to help determine if it could truly work and be beneficial. It definitely is intended to enable more space vs time trade-offs to be possible.
+
+As the initial design used sequential processes; when I started to add in support for more parallel/concurrent processing I should have
+immediately reviewed my data structures to identify any potential issues. Interestingly, even though some of my
+initial choices needed to change, I didn't see actual issues with my results before moving to some of the 
+concurrent collections.
+
 
 ## Implementation
 - Command line parsing is handled using the picocli library and the resulting options processed; resulting in
