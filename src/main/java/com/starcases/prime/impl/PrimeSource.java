@@ -1,6 +1,7 @@
 package com.starcases.prime.impl;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Map;
 import java.util.Optional;
@@ -15,6 +16,7 @@ import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import java.util.Iterator;
+import java.util.List;
 
 import lombok.NonNull;
 import lombok.extern.java.Log;
@@ -67,7 +69,7 @@ public class PrimeSource implements PrimeSourceIntfc
 	//
 	// This does seem a bit hacky - may revisit later.
 	@NonNull
-	private final BiFunction<Integer, BitSet, PrimeRefIntfc> primeRefCtor;
+	private final BiFunction<Integer, List<Integer>, PrimeRefIntfc> primeRefCtor;
 
 	// Used for informative purposes - like a progress meter.
 	long primesProcessed1k = 0;
@@ -78,7 +80,7 @@ public class PrimeSource implements PrimeSourceIntfc
 
 	public PrimeSource(
 			@Min(1) int maxCount,
-			@NonNull BiFunction<Integer, BitSet, PrimeRefIntfc> primeRefCtor,
+			@NonNull BiFunction<Integer, List<Integer>, PrimeRefIntfc> primeRefCtor,
 			@NonNull Consumer<PrimeSourceIntfc> consumerSetPrimeSrc,
 			@NonNull Consumer<PrimeSourceIntfc> baseSetPrimeSrc,
 			@Min(1) int confidenceLevel
@@ -92,13 +94,13 @@ public class PrimeSource implements PrimeSourceIntfc
 		consumerSetPrimeSrc.accept(this);
 		baseSetPrimeSrc.accept(this);
 
-		var tmpBitSet = new BitSet(2);
-		tmpBitSet.set(0);
-		addPrimeRef(BigInteger.valueOf(1L), tmpBitSet.get(0, 1));
+		var tmpBitSet = new ArrayList<Integer>(2);
+		tmpBitSet.add(1);
+		addPrimeRef(BigInteger.valueOf(1L), tmpBitSet);
 
-		tmpBitSet.clear();
-		tmpBitSet.set(1);
-		addPrimeRef(BigInteger.valueOf(2L), tmpBitSet.get(0, 2));
+		tmpBitSet = new ArrayList<Integer>(2);
+		tmpBitSet.add(2);
+		addPrimeRef(BigInteger.valueOf(2L), tmpBitSet);
 
 		this.confidenceLevel = confidenceLevel;
 	}
@@ -118,7 +120,7 @@ public class PrimeSource implements PrimeSourceIntfc
 		final var primeIndexMaxPermutation = new BitSet();
 		final var primeIndexPermutation = new BitSet();
 
-		// each iteration increases the #bits by 1; i.e. a new Prime is determined per iteration
+		// each iteration increases the #bits by 1; a new Prime is determined per iteration
 		do
 		{
 			final var curPrimeIdx = nextIdx.get();
@@ -155,10 +157,10 @@ public class PrimeSource implements PrimeSourceIntfc
 				if (curPrime.isPresent() && viablePrime(permutationSum, curPrime.get()))
 				{
 					final var cachedSum = permutationSum;
-					final var sumBaseIdxs = primeIndexPermutation.get(0, numBitsForPrimeCount);
-					sumBaseIdxs.set(curPrimeIdx); // sum of primes from these indexes should match 'sum'
-					final var cachedBases = sumBaseIdxs;
-					addPrimeRef(cachedSum, cachedBases);
+					final var sumBaseIdxs = primeIndexPermutation.get(0, numBitsForPrimeCount).stream().boxed().toList();
+
+
+					addPrimeRef(cachedSum, sumBaseIdxs);
 					break;
 				}
 				else
@@ -245,7 +247,7 @@ public class PrimeSource implements PrimeSourceIntfc
 	 */
 	private void addPrimeRef(
 			@NonNull @Min(1) BigInteger newPrime,
-			@NonNull BitSet base
+			@NonNull List<Integer> base
 			)
 	{
 		var idx = nextIdx.incrementAndGet();

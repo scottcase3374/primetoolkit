@@ -72,7 +72,6 @@ public class LogBasesNPrime extends AbstractLogBase
 													sb.append(
 													 	indexBitset
 													 	.stream()
-													 	.boxed()
 													 	.map(index ->
 													 		String.format("base-Prime:[%s] count:[%s]",
 													 				ps.getPrime(primeIdxCntIdx[0]).get().toString(),

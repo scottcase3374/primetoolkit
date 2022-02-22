@@ -5,7 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.starcases.prime.base.BaseTypes;
-import com.starcases.prime.base.PrimeBaseWithBitsets;
+import com.starcases.prime.base.PrimeBaseWithLists;
 import com.starcases.prime.impl.PrimeRef;
 import com.starcases.prime.intfc.FactoryIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
@@ -28,7 +28,7 @@ class TripleUnitTest
 		PTKFactory.setBaseSetPrimeSource(PrimeRef::setPrimeSource);
 		PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
 
-		PTKFactory.setPrimeBaseCtor(PrimeBaseWithBitsets::new);
+		PTKFactory.setPrimeBaseCtor(PrimeBaseWithLists::new);
 		PTKFactory.setPrimeRefCtor( (i, base) -> new PrimeRef(i, base, PTKFactory.getPrimeBaseCtor()) );
 
 		FactoryIntfc factory = PTKFactory.getFactory();

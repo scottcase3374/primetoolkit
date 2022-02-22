@@ -2,7 +2,6 @@ package com.starcases.prime.base.triples;
 
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Map;
@@ -89,10 +88,8 @@ enum SumConstraintState
 						stream(TripleIdx.values())
 						.filter(i ->  idxs == null || (idxs != null && Arrays.stream(idxs).allMatch(ii -> ii != i)) )
 						.map(primeRefs::get)
-						.filter(Objects::nonNull)
-						.filter(Optional::isPresent)
-						.map(Optional::get)
-						.map(PrimeRefIntfc::getPrime)
+						.filter(i -> Objects.nonNull(i) && i.isPresent())
+						.map(i -> i.get().getPrime())
 						.reduce(BigInteger.ZERO, BigInteger::add);
 
 		// sum the items in array vals [which should equate to overrides of the Prime refs specified by array idxs.
@@ -263,10 +260,8 @@ public class AllTriples
 		return triple
 				.values()
 				.stream()
-				.filter(Objects::nonNull)
-				.filter(Optional::isPresent)
-				.map(Optional::get)
-				.map(PrimeRefIntfc::getPrime)
+				.filter(i -> Objects.nonNull(i) && i.isPresent())
+				.map(i -> i.get().getPrime())
 				.reduce(BigInteger.ZERO, BigInteger::add);
 	}
 
@@ -350,13 +345,10 @@ public class AllTriples
 		assert(!vals.containsValue(null));
 		assert(!vals.values().contains(null));
 
-		var bs = new BitSet();
-		vals.values().stream()
-			.filter(Objects::nonNull)
-			.filter(Optional::isPresent)
-			.map(Optional::get)
-			.map(PrimeRefIntfc::getPrimeRefIdx)
-			.forEach(bs::set);
+		var bs = vals.values().stream()
+			.filter(i -> Objects.nonNull(i) && i.isPresent())
+			.map(i -> i.get().getPrimeRefIdx())
+			.toList();
 
 		prime.getPrimeBaseData().addPrimeBase(bs, BaseTypes.THREETRIPLE);
 	}

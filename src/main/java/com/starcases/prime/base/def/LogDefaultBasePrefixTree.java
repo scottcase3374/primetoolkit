@@ -2,7 +2,6 @@ package com.starcases.prime.base.def;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -103,11 +102,11 @@ public class LogDefaultBasePrefixTree extends AbstractLogBase
 					try
 					{
 						final var origBaseIdxs = curPrime.getPrimeBaseData().getPrimeBaseIdxs().get(0);
-						final var curPrimePrefixIdxs = (BitSet)origBaseIdxs.clone();
+						final var curPrimePrefixIdxs = new ArrayList<Integer>(origBaseIdxs);
 
 						// Prefixes don't include the Prime (n-1) item per the definition of "prefix" used.
 						if (!curPrimePrefixIdxs.isEmpty())
-							curPrimePrefixIdxs.clear(curPrimePrefixIdxs.length()-1);
+							curPrimePrefixIdxs.remove(curPrimePrefixIdxs.size()-1);
 
 						final var curPrefixIdxsIt = curPrimePrefixIdxs.stream().iterator();
 						var curPrefixMap = prefixMap;

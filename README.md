@@ -69,7 +69,14 @@ You may need the following Java VM arguments depending on JDK version and setup/
 
 
 ## Performance
-I made some improvements when performance was so poor as to prevent running default base creation for any meaningful number of primes. I'm more interested in improvements at the data structure selection level than anything else this moment so that will be the focus for now. The creation of triples does use CompletableFuture (1 per target prime) which does help with that process - running for 500 primes still takes 1+ minutes though. The logging to console out is probably one of the largest time consumers (especially when running in an IDE such as Eclipse) - I may switch to file output and see what difference it makes. If that simple change produces a reasonable speedup then it allows faster turn-around times for other changes I want to make.
+I made some improvements when performance was so poor as to prevent running default base creation for any meaningful number of primes. I'm more interested in improvements at the data structure selection level than anything else this moment so that will be the focus for now.
+
+The initial design of triples used CompletableFuture (1 per target prime) which did reduce runtimes - running for 500 primes still took ~1m 30s minutes though. The logging to console out is a large time consumers (especially when running in an IDE such as Eclipse) - I implemented a CLI arg to redirect stdout to a file which helps.
+
+A bit later, I switched the CompletableFuture for the use of a parallel stream which seems better able to self tune.  A few other changes were made - running triples with args of:
+- init --max-count 750 --base=THREETRIPLE --log-generate --log=BASES --output-file=/home/scott/ptk-demo/triples-750.log
+tool 7m 17s and produced an output log file of 75,289,288 bytes. The last record processed was: Prime [5693] idx[750] #-bases[17144]
+
 
 For a command line of:
 - init --max-count=25000 --log=BASES --base=NPRIME --max-reduce=3 --prefer-parallel=true
@@ -263,9 +270,7 @@ The current design is extensible and componentized to a decent degree which was 
 This could be combined with a type of caching - where a final prime is fully calculated and weak and/or soft references are used to enable access if needed for a period of time but then eventually the BigInteger would be reclaimable by the GC.  Before being reclaimed, it could be used to generate bases (or other types of bases) for other primes. Temporarily having the actual BigInteger representation allows simple diff calculations or finding the distance between items, etc. Hopefully this makes sense to a degree.  It needs a few good use cases or scenarios to help determine if it could truly work and be beneficial. It definitely is intended to enable more space vs time trade-offs to be possible.
 
 As the initial design used sequential processes; when I started to add in support for more parallel/concurrent processing I should have
-immediately reviewed my data structures to identify any potential issues. Interestingly, even though some of my
-initial choices needed to change, I didn't see actual issues with my results before moving to some of the 
-concurrent collections.
+immediately reviewed my data structures to identify any potential issues. Interestingly, when using HashMap, I didn't see actual issues with my results before moving to some of the concurrent collections.
 
 
 ## Implementation

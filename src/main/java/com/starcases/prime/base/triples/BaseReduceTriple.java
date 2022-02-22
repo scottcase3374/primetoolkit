@@ -1,11 +1,5 @@
 package com.starcases.prime.base.triples;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
@@ -65,9 +59,6 @@ import lombok.extern.java.Log;
 public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 {
 	@NonNull
-	private static final Comparator<String> nodeComparator = (o1,o2) -> Integer.decode(o1).compareTo(Integer.decode(o2));
-
-	@NonNull
 	private BaseTypes activeBaseId;
 
 	@Min(0)
@@ -106,48 +97,23 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 		if (doLog)
 		{
 			log.entering("BaseReduce3Triple", "genBases()");
+			log.info("BaseReduce3Triple genBases()");
 		}
-
-		final var lastNonViablePrime = BigInteger.valueOf(7L);
-
-		final var pRefIt = ps.getPrimeRefIter();
 
 		// handle Bootstrap values - can't really represent < 11 with a sum of 3 primes
-		while(pRefIt.hasNext())
-		{
-			final var curPrime = pRefIt.next();
+		ps
+		.getPrimeRefStream(false)
+		.limit(5) // primes 1,2,3,5,7
+		.forEach(curPrime ->
+					curPrime
+					.getPrimeBaseData()
+					.addPrimeBase(curPrime.getPrimeBaseData().getPrimeBaseIdxs(BaseTypes.DEFAULT).get(0), BaseTypes.THREETRIPLE)
+		);
 
-			curPrime
-				.getPrimeBaseData()
-				.addPrimeBase(
-							curPrime.getPrimeBaseData().getPrimeBaseIdxs(BaseTypes.DEFAULT).get(0),
-							BaseTypes.THREETRIPLE);
-
-			if (curPrime.getPrime().equals(lastNonViablePrime))
-				break;
-		}
-
-		// some informal testing showed lowest run-times with a pool size of 6-7 for an 8-core system
-		final var poolSize = 6;
-		final var workStealingPool = Executors.newWorkStealingPool(poolSize);
-		final List<CompletableFuture<String>> futures = new ArrayList<>(poolSize);
-
-		// Process the values which can be represented by the sum of 3 primes.
-		while (pRefIt.hasNext())
-		{
-			final var curPrime = pRefIt.next();
-
-			final var compFuture = new CompletableFuture<String>();
-			futures.add(compFuture);
-
-			compFuture.completeAsync(() -> handlePrime(curPrime, counter.incrementAndGet()) , workStealingPool);
-		}
-
-		final long [] c = {0};
-		futures.stream().map(CompletableFuture::join).forEach(x -> c[0]++ );
+		ps.getPrimeRefStream(true).forEach(curPrime -> handlePrime(curPrime, counter.incrementAndGet()));
 
 		if (log.isLoggable(Level.INFO))
-			log.info(String.format("Total entries: %d; completed(%d)",  + good.get(), c[0]));
+			log.info(String.format("Total entries: %d;", counter.get()));
 	}
 
 

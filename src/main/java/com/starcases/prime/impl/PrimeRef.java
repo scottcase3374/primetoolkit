@@ -1,7 +1,7 @@
 package com.starcases.prime.impl;
 
 import java.math.BigInteger;
-import java.util.BitSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -55,7 +55,7 @@ public class PrimeRef implements PrimeRefIntfc
 	 * @param Prime
 	 */
 	public PrimeRef(@Min(0) @Max(2) int primeIdx,
-					@NonNull BitSet primeBaseIdxs,
+					@NonNull List<Integer> primeBaseIdxs,
 					@NonNull Supplier<PrimeBaseIntfc> primeBaseSupplier
 					)
 	{

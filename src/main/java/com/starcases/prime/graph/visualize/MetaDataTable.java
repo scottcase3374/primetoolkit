@@ -32,11 +32,10 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private static final int PRIME_MAX_BASE_SIZE = 0;
 	private static final int PRIME_MAX_DIST_PREV_PRIME = 1;
 	private static final int AVG_BASE_SIZE = 2;
 	private static final int AVG_DIST_PREV_PRIME = 3;
-	private static final int MAX_PRIME_BASE = 4;
+	//private static final int MAX_PRIME_BASE = 4;
 
 	@NonNull
 	private static final String [] column = {
@@ -50,7 +49,7 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 	@NonNull
 	private String [][] data = { {"","","", "", ""}};
 
-	private PrimeRefIntfc primeMaxBaseSize;
+
 	private PrimeRefIntfc primeMaxDistToPrev;
 	private BigDecimal totalBases = BigDecimal.ZERO;
 	private PrimeRefIntfc highPrimeBase;
@@ -72,15 +71,15 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 
 	protected void handlePrimeMaxBaseSize(@NonNull GraphVertexChangeEvent<PrimeRefIntfc> e)
 	{
-		if (primeMaxBaseSize == null || e.getVertex().getPrimeBaseData().getBaseSize() > primeMaxBaseSize.getPrimeBaseData().getBaseSize())
-		{
-			primeMaxBaseSize = e.getVertex();
-		}
-
-		data[0][PRIME_MAX_BASE_SIZE] =
-				String.format("Prime [%d] / Base# [%d] ",
-						primeMaxBaseSize.getPrime(),
-						primeMaxBaseSize.getPrimeBaseData().getBaseSize());
+//		if (primeMaxBaseSize == null || e.getVertex().getPrimeBaseData().getBaseSize() > primeMaxBaseSize.getPrimeBaseData().getBaseSize())
+//		{
+//			primeMaxBaseSize = e.getVertex();
+//		}
+//
+//		data[0][PRIME_MAX_BASE_SIZE] =
+//				String.format("Prime [%d] / Base# [%d] ",
+//						primeMaxBaseSize.getPrime(),
+//						primeMaxBaseSize.getPrimeBaseData().getBaseSize());
 	}
 
 	protected void handlePrimeMaxDistToPrevPrime(@NonNull GraphVertexChangeEvent<PrimeRefIntfc> e)
@@ -104,7 +103,7 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 
 	protected void handleAvgBaseSize(@NonNull GraphVertexChangeEvent<PrimeRefIntfc> e)
 	{
-		totalBases = totalBases.add(BigDecimal.valueOf(e.getVertex().getPrimeBaseData().getBaseSize()));
+		//totalBases = totalBases.add(BigDecimal.valueOf(e.getVertex().getPrimeBaseData().getBaseSize()));
 		data[0][AVG_BASE_SIZE] = String.format("# primes [%d], total-bases[%d] avg-bases[%f]", primeMaxDistToPrev.getPrimeRefIdx(), totalBases.longValue(), ((double)totalBases.longValue() / (primeMaxDistToPrev.getPrimeRefIdx()+1)));
 	}
 
@@ -115,11 +114,11 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 
 	protected void handleHighPrimeBase(@NonNull GraphVertexChangeEvent<PrimeRefIntfc> e)
 	{
-		if (highPrimeBase == null || e.getVertex().getPrimeBaseData().getPrimeBaseIdxs().get(0).length() > highPrimeBase.getPrimeBaseData().getPrimeBaseIdxs().get(0).length())
+		if (highPrimeBase == null || e.getVertex().getPrimeBaseData().getPrimeBaseIdxs().get(0).size() > highPrimeBase.getPrimeBaseData().getPrimeBaseIdxs().get(0).size())
 		{
 			highPrimeBase = e.getVertex();
 		}
-		data[0][MAX_PRIME_BASE] = String.format("Prime[%d], Highest base[%d]", highPrimeBase.getPrime(), highPrimeBase.getPrimeBaseData().getMaxPrimeBase());
+		//data[0][MAX_PRIME_BASE] = String.format("Prime[%d], Highest base[%d]", highPrimeBase.getPrime(), highPrimeBase.getPrimeBaseData().getMaxPrimeBase());
 	}
 
 	@Override
@@ -132,6 +131,48 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 		handleHighPrimeBase(e);
 	}
 
+//	@Override
+//	public BigInteger getMaxPrimeBase()
+//	{
+//		return getMaxPrimeBase(BaseTypes.DEFAULT);
+//	}
+//
+//	@Override
+//	public BigInteger getMaxPrimeBase(@NonNull BaseTypes baseType)
+//	{
+//		return primeSrc
+//				.getPrime(primeBaseIdxs
+//						.get(baseType)
+//						.stream()
+//						.max((i1, i2) -> i1.compareTo(i2))
+//						.orElseThrow())
+//				.orElse(BigInteger.ZERO);
+//	}
+
+//
+//	@Override
+//	public BigInteger getMaxPrimeBase()
+//	{
+//		return getMaxPrimeBase(BaseTypes.DEFAULT);
+//	}
+
+	/**
+	 * Need to think about how to handle multiple sets of bases for a single Prime.  In that
+	 * scenario, which base set should be used to determine the max Prime base.  The
+	 * current usage is just general reporting but the results should be consistent.
+	 */
+//	@Override
+//	public BigInteger getMaxPrimeBase(@NonNull BaseTypes baseType)
+//	{
+//		return primeBaseIdxs
+//				.get(baseType)
+//				.stream()
+//				.map(bs -> primeSrc
+//							.getPrime(bs.nextSetBit(0))
+//							.orElseThrow())
+//				.findAny()
+//				.orElseThrow();
+//	}
 	@Override
 	public void edgeAdded(GraphEdgeChangeEvent<PrimeRefIntfc, DefaultEdge> e)
 	{

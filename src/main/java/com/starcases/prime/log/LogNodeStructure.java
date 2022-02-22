@@ -49,7 +49,6 @@ public class LogNodeStructure extends AbstractLogBase
 													sb.append(
 													 	bs
 													 	.stream()
-													 	.boxed()
 													 	.map(i -> ps.getPrime(i).get().toString())
 													 	.collect(Collectors.joining(",","[","]"))
 													 	);

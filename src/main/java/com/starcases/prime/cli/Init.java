@@ -14,7 +14,6 @@ import org.jgrapht.graph.DefaultEdge;
 
 import com.starcases.prime.PTKFactory;
 import com.starcases.prime.base.BaseTypes;
-import com.starcases.prime.base.PrimeBaseWithBitsets;
 import com.starcases.prime.base.PrimeBaseWithLists;
 import com.starcases.prime.base.def.LogDefaultBasePrefixTree;
 import com.starcases.prime.base.def.LogDefaultBasePrefixes;
@@ -207,8 +206,8 @@ public class Init implements Runnable
 			case THREETRIPLE:
 				PTKFactory.setActiveBaseId(BaseTypes.THREETRIPLE);
 				PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
-				PTKFactory.setBaseSetPrimeSource( PrimeBaseWithBitsets::setPrimeSource);
-				PTKFactory.setPrimeBaseCtor(PrimeBaseWithBitsets::new);
+				PTKFactory.setBaseSetPrimeSource( PrimeBaseWithLists::setPrimeSource);
+				PTKFactory.setPrimeBaseCtor(PrimeBaseWithLists::new);
 				PTKFactory.setPrimeRefCtor( (i, base) -> new PrimeRef(i, base, PTKFactory.getPrimeBaseCtor() ));
 
 				actions.add(s ->

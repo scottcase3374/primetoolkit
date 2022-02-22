@@ -1,8 +1,10 @@
 package com.starcases.prime.base.nprime;
 
-import java.util.BitSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
+import java.util.stream.IntStream;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -38,8 +40,6 @@ import lombok.extern.java.Log;
 @Log
 public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 {
-	static volatile byte[] intersectBytes;
-
 	@Min(2)
 	@Max(3)
 	private int maxReduce;
@@ -52,12 +52,6 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 	public void setMaxReduce(@Min(2) @Max(3) int maxReduce)
 	{
 		this.maxReduce = maxReduce;
-
-		// Normally wouldn't set a static like this but
-		// this call is only made once per jvm invocation
-		// as part of the initialization
-		intersectBytes = new byte[1];
-		intersectBytes[0] = (byte)Math.round(Math.pow(2.0d, maxReduce)-1); // set to bit representing the range of indexes to reduce using.
 	}
 
 	/**
@@ -65,28 +59,21 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 	 *
 	 * @param primeRef cur Prime being reduced
 	 */
-	private void primeReduction(@NonNull PrimeRefIntfc primeRef, @NonNull BitSet retBaseIdxs, @NonNull int [] retOutputIdxCount)
+	private void primeReduction(@NonNull PrimeRefIntfc primeRef, @NonNull ArrayList<Integer> retBaseIdxs, @NonNull int [] retOutputIdxCount)
 	{
 		// Experimentation for this use case indicate that Concurrent... perform slightly better than LinkedBlocking.. varieties of the collections.
-		final var q = new ConcurrentLinkedQueue<BitSet>();
+		final var q = new ConcurrentLinkedQueue<List<Integer>>();
 
 		// want to process initial bases for Prime
 		final var bs = primeRef.getPrimeBaseData().getPrimeBaseIdxs(BaseTypes.DEFAULT).get(0);
 		q.add(bs);
 
-		//  Method determined through experimentation between:
-		//   get(0,maxReduce) of static bitset
-		//   clone() of static bitset
-		//   static byte array with Bitset.valueOf()
-		// - Note the use of 'volatile' on intersectBytes, resulted in reduced run times. Appears reduced memory contention.
-		//		For this use, bytes are "read-only" once set so volatile ensures visibility between threads without
-		//      providing any mutual exclusion which is fine since we only need to read the value.
-		final BitSet intersect = BitSet.valueOf(intersectBytes);
+		final List<Integer> intersect = IntStream.range(0, maxReduce).boxed().toList();
 
 		while (!q.isEmpty())
 		{
 			final var bsCur = q.remove();
-			bsCur.stream().boxed().forEach(i ->
+			bsCur.stream().forEach(i ->
 				{
 					if (i >= maxReduce)
 					{
@@ -99,11 +86,10 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 				} );
 
 			// track which indexes were encountered (but only need to track "which one" on first encounter)
-			if (intersect.intersects(bsCur))
+			if (intersect.removeAll(bsCur))
 			{
-				final var tmpBS = bsCur.get(0, maxReduce);
-				retBaseIdxs.or(tmpBS);
-				intersect.andNot(tmpBS);
+				final var tmpBS = bsCur.subList(0, maxReduce);
+				retBaseIdxs.addAll(tmpBS);
 			}
 		}
 	}
@@ -130,7 +116,7 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 			try
 			{
 				int [] retCountForBaseIdx = new int[maxReduce];
-				var retBaseIdxs = new BitSet();
+				var retBaseIdxs = new ArrayList<Integer>();
 				primeReduction(curPrime, retBaseIdxs, retCountForBaseIdx);
 
 				curPrime.getPrimeBaseData().addPrimeBase(BaseTypes.NPRIME, retBaseIdxs, new NPrimeBaseMetadata(retCountForBaseIdx));
