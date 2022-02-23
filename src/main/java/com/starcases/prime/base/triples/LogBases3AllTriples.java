@@ -50,7 +50,7 @@ public class LogBases3AllTriples  extends AbstractLogBase
 										));
 
 									long [] cnt = {0};
-									StringBuilder sb = new StringBuilder(size * 500);
+									StringBuilder sb = new StringBuilder(150);
 									sb.append("\t");
 									pr.getPrimeBaseData().getPrimeBaseIdxs(BaseTypes.THREETRIPLE)
 											.stream()

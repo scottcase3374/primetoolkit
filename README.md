@@ -69,13 +69,15 @@ You may need the following Java VM arguments depending on JDK version and setup/
 
 
 ## Performance
-I made some improvements when performance was so poor as to prevent running default base creation for any meaningful number of primes. I'm more interested in improvements at the data structure selection level than anything else this moment so that will be the focus for now.
+I made some improvements when performance was so poor as to prevent running default base creation for any meaningful number of primes. I'm very interested in improvements at the data structure selection level so that will be the focus for now.
 
-The initial design of triples used CompletableFuture (1 per target prime) which did reduce runtimes - running for 500 primes still took ~1m 30s minutes though. The logging to console out is a large time consumers (especially when running in an IDE such as Eclipse) - I implemented a CLI arg to redirect stdout to a file which helps.
+The initial design of triples used CompletableFuture (1 per target prime) which did reduce run times - running for 500 primes still took ~1m 30s minutes though. The logging to console out is a large time consumers (especially when running in an IDE such as Eclipse) - I implemented a CLI arg to redirect stdout to a file which helps.
 
-A bit later, I switched the CompletableFuture for the use of a parallel stream which seems better able to self tune.  A few other changes were made - running triples with args of:
+I switched from CompletableFuture to a parallel stream which appeared to self tune better.  A few other changes were made - running triples with args of:
 - init --max-count 750 --base=THREETRIPLE --log-generate --log=BASES --output-file=/home/scott/ptk-demo/triples-750.log
 tool 7m 17s and produced an output log file of 75,289,288 bytes. The last record processed was: Prime [5693] idx[750] #-bases[17144]
+
+The most recent changes reduced the run time for 750 triples to 6m 46s - with most of the changes related to reducing dynamic memory allocations and using more ints vs Integer/BigInteger and removing extraneous code which was no longer needed/used.
 
 
 For a command line of:
@@ -88,6 +90,12 @@ The run times when changing the prefer-parallel boolean were.
 That flag applies to several base-logging and base-generation methods now. It generally drives either the use of parallel streams or aspects of the use of completableFutures.
 
 After removing a number of unused data items and methods, converting the primes collection from a list to a map and running without output to a file instead of console window in eclipse - runtime went from 1m 5s to 53s. The list to map conversion is part of some research into alternative data structs and also some checking into the use of soft/weak references in one or 2 places.
+
+One very interesting performance observation is related to a "simple" difference.
+- static final int TOP = 0;
+- static volatile int TOP = 0;
+- final int TOP = 0;
+It isn't really a performance difference that was noted but the effect on the system was quite different with volatile. The process kept each core at nearly 100% of user-cpu where as without volatile my system still had roughly the same total usage but it was listed under 'nice' when looking at the Unix 'top' command output. The priority of the process was different (higher priority) when volatile was used as above.  This data member was simply a fixed integer used as an index into some arrays.
 
 ## Observations
 - When logging 3 million node structs with other settings set to default - meaning you get a target prime # and a set of bases which includes the previous prime plus some subset of lower primes that sum to the target prime. The largest value in the subset of small primes in each base is usually less than 23 from a quick look at the data.  Example output: Prime 49979681 bases [[1,2,3,5,7,49979663]]  <dist[6], nextPrime[49979687]> idx[2999999]

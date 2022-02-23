@@ -14,18 +14,6 @@ import lombok.NonNull;
 
 /**
  *
- * Track specific item as part of a triple.
- *
- */
-enum TripleIdx
-{
-	BOT,
-	MID,
-	TOP
-}
-
-/**
- *
  * Indicator to relationship between current sum of triple values vs the target Prime.
  *
  */
@@ -137,41 +125,33 @@ enum ConditionConstraintState
 		// TripleIdx - BOT,MID,TOP
 		var cs = ConditionConstraintState.OK;
 		var baseCount = 0;
-		int [] bases = { 1, 2, 3 };
-		BigInteger tmpPrime = null;
-		for (var idx : TripleIdx.values())
-		{
-			var pr = primeRefs[idx.ordinal()];
-			if (pr != null)
-			{
-				if (tmpPrime == null || tmpPrime.compareTo(pr.getPrime()) < 0)
-				{
-					tmpPrime = pr.getPrime();
-				}
-				else
-				{
-					cs = ConditionConstraintState.RANGE_ERROR;
-				}
+		int [] bases = { -1, -1, -1 }; // dummy values
 
-				final var index = baseCount;
-				bases[index] = pr.getPrimeRefIdx();
-				baseCount++;
+		for (var pr : primeRefs)
+		{
+			bases[baseCount] = pr.getPrimeRefIdx();
+			if (bases[baseCount++] > pr.getPrimeRefIdx())
+			{
+				cs = ConditionConstraintState.RANGE_ERROR;
+				break;
 			}
 		}
 
-		final var baseCountOk = baseCount == 3;
-		if (!baseCountOk)
+		if (ConditionConstraintState.OK.equals(cs))
 		{
-			cs = ConditionConstraintState.MISSING_BASE;
-		}
-		else
-		{
-			if (Arrays.stream(bases).distinct().count() != 3)
+			final var baseCountOk = baseCount == bases.length;
+			if (!baseCountOk)
 			{
-				cs = ConditionConstraintState.DUPE;
+				cs = ConditionConstraintState.MISSING_BASE;
+			}
+			else
+			{
+				if (Arrays.stream(bases).distinct().count() != bases.length)
+				{
+					cs = ConditionConstraintState.DUPE;
+				}
 			}
 		}
-
 		return cs;
 	}
 }
@@ -192,6 +172,10 @@ public class AllTriples
 	static final EnumSet<SumConstraintState> GOOD_SUM_STATE =
 			EnumSet.of(SumConstraintState.MATCH,
 					SumConstraintState.INCREMENT_SUM);
+
+	private final int BOT = 0;
+    private final int MID = 1;
+	private final int TOP = 2;
 
 	@NonNull
 	private  PrimeRefIntfc targetPrime;
@@ -214,21 +198,21 @@ public class AllTriples
 	 * @param conditionConstraint
 	 */
 	void nextPrimeRef(
-						@NonNull TripleIdx idx,
+						int idx,
 						@NonNull PrimeRefIntfc [] triple,
 						@NonNull SumConstraintState [] sumConstraint,
 						@NonNull ConditionConstraintState [] conditionConstraint)
 	{
-		if (triple[idx.ordinal()] != null)
+		if (triple[idx] != null)
 		{
-			triple[idx.ordinal()].getNextPrimeRef().ifPresent( pr ->  triple[idx.ordinal()] = pr);
+			triple[idx].getNextPrimeRef().ifPresent( pr ->  triple[idx] = pr);
 		}
 		sumConstraint[0] = SumConstraintState.checkSumConstraints(triple, targetPrime);
 		conditionConstraint[0] = ConditionConstraintState.checkConditionConstraints(triple);
 	}
 
 	/**
-	 * Main entry point to this processsing - which processes a single Prime to produce a list of all viable triples
+	 * Main entry point to this processing - which processes a single Prime to produce a list of all viable triples
 	 * which individually sum to the Prime.
 	 *
 	 * This is a "mostly brute force" method which is shown by pretty slow performance.
@@ -260,29 +244,29 @@ public class AllTriples
 						addPrimeBases(targetPrime, triple);
 						break;
 					}
-					this.nextPrimeRef(TripleIdx.BOT, triple, sumConstraint, conditionConstraint);
+					this.nextPrimeRef(BOT, triple, sumConstraint, conditionConstraint);
 				}
 				while(GOOD_SUM_STATE.contains(sumConstraint[0]) && !BAD_CONDITION_STATE.contains(conditionConstraint[0]));
 
 				// reset inner loop
-				triple[TripleIdx.BOT.ordinal()] =  ps.getPrimeRef(0).orElse(null);
+				triple[BOT] =  ps.getPrimeRef(0).orElse(null);
 
-				this.nextPrimeRef(TripleIdx.MID, triple, sumConstraint, conditionConstraint);
+				this.nextPrimeRef(MID, triple, sumConstraint, conditionConstraint);
 			}
 			while(GOOD_SUM_STATE.contains(sumConstraint[0]) && !BAD_CONDITION_STATE.contains(conditionConstraint[0]));
 
 			// reset inner loops
-			triple[TripleIdx.MID.ordinal()] = ps.getPrimeRef(1).orElse(null);
-			triple[TripleIdx.BOT.ordinal()] = ps.getPrimeRef(0).orElse(null);
+			triple[MID] = ps.getPrimeRef(1).orElse(null);
+			triple[BOT] = ps.getPrimeRef(0).orElse(null);
 
-			this.nextPrimeRef(TripleIdx.TOP, triple, sumConstraint, conditionConstraint);
+			this.nextPrimeRef(TOP, triple, sumConstraint, conditionConstraint);
 		}
 		while(GOOD_SUM_STATE.contains(sumConstraint[0]) && !BAD_CONDITION_STATE.contains(conditionConstraint[0]));
 	}
 
 	private void addPrimeBases(@NonNull PrimeRefIntfc prime, @NonNull PrimeRefIntfc [] vals)
 	{
-		var bs = Arrays.stream(vals)
+		final var bs = Arrays.stream(vals)
 			.filter(Objects::nonNull)
 			.map(PrimeRefIntfc::getPrimeRefIdx)
 			.toList();
