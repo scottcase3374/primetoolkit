@@ -119,7 +119,9 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 				var retBaseIdxs = new ArrayList<Integer>();
 				primeReduction(curPrime, retBaseIdxs, retCountForBaseIdx);
 
-				curPrime.getPrimeBaseData().addPrimeBase(BaseTypes.NPRIME, retBaseIdxs, new NPrimeBaseMetadata(retCountForBaseIdx));
+				curPrime
+					.getPrimeBaseData()
+					.addPrimeBase(BaseTypes.NPRIME, retBaseIdxs, new NPrimeBaseMetadata(retCountForBaseIdx));
 			}
 			catch(Exception e)
 			{

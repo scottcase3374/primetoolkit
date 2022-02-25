@@ -13,23 +13,12 @@ enum LogOper
 	NODESTRUCT,
 
 	/**
-	 * Logs prefixes when multiple bases exist which may have a prefix of items; i.e. default bases
-	 */
-	PREFIX,
-
-	/**
-	 * Logs prefixes as a tree when multiple bases exist which may have a prefix of items; i.e. default bases
-	 */
-	PREFIXTREE,
-
-
-	/**
 	 * logs the dataset from the graph structure used in visualizations
 	 */
 	GRAPHSTRUCT,
 
 	/**
-	 * Logs bases if nprime or triples generation is used.
+	 * Logs bases if nprime, triples or prefix/prefix_tree generation is used.
 	 */
 	BASES
 }

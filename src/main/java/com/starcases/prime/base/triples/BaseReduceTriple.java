@@ -14,7 +14,7 @@ import lombok.NonNull;
 import lombok.extern.java.Log;
 
 /*
- *  Given a Prime, find every set of 3 pre-existing primes that sum to the Prime.
+ *  Given a Prime, find EVERY set of 3 pre-existing primes that sum to the Prime.
  *
  *
  *  A few examples of a single triple (or 2) per Prime.
@@ -91,6 +91,7 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 	 * top-level function; iterate over entire dataset to reduce every Prime
 	 * @param maxReduce
 	 */
+	@Override
 	public void genBases()
 	{
 		final var counter = new AtomicInteger(0);

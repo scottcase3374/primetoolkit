@@ -25,6 +25,7 @@ public class LogNodeStructure extends AbstractLogBase
 	@Override
 	public void log()
 	{
+		log.info("LogNodeStructure log()");
 		var idx = 0;
 		final var prIt = ps.getPrimeRefIter();
 		while (prIt.hasNext())
@@ -33,9 +34,11 @@ public class LogNodeStructure extends AbstractLogBase
 			try
 			{
 				final var size = pr.getPrimeBaseData().getPrimeBaseIdxs().size();
-				System.out.println(String.format("%nPrime [%d] idx[%d] %n",
+				System.out.println(String.format("%nPrime [%d] idx[%d] base-counts[%d] base0-size[%d] %n",
 						pr.getPrime(),
-						idx++
+						idx++,
+						size,
+						pr.getPrimeBaseData().getPrimeBaseIdxs().get(0).size()
 						));
 
 					final long [] cnt = {0};
@@ -43,11 +46,11 @@ public class LogNodeStructure extends AbstractLogBase
 
 					pr.getPrimeBaseData().getPrimeBaseIdxs()
 							.stream()
-							.<String>mapMulti((bs, consumer) ->
+							.<String>mapMulti((idxs, consumer) ->
 												{
-													cnt[0]++;
+
 													sb.append(
-													 	bs
+													 	idxs
 													 	.stream()
 													 	.map(i -> ps.getPrime(i).get().toString())
 													 	.collect(Collectors.joining(",","[","]"))
@@ -56,12 +59,13 @@ public class LogNodeStructure extends AbstractLogBase
 													if (cnt[0] < size)
 														sb.append(", ");
 
-													if (cnt[0] % 5 == 0 || cnt[0] >= size)
+													if (cnt[0] % 5 == 0 || cnt[0] >= pr.getPrimeBaseData().getPrimeBaseIdxs().get(0).size())
 													{
 														consumer.accept(sb.toString());
 														sb.setLength(0);
 														sb.append("\t");
 													}
+													cnt[0]++;
 												}
 									)
 							.forEach(System.out::println);

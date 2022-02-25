@@ -15,10 +15,10 @@ import org.jgrapht.graph.DefaultEdge;
 import com.starcases.prime.PTKFactory;
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.base.PrimeBaseWithLists;
-import com.starcases.prime.base.def.LogDefaultBasePrefixTree;
-import com.starcases.prime.base.def.LogDefaultBasePrefixes;
 import com.starcases.prime.base.nprime.BaseReduceNPrime;
 import com.starcases.prime.base.nprime.LogBasesNPrime;
+import com.starcases.prime.base.prefix.BasePrefixes;
+import com.starcases.prime.base.prefix.LogBasePrefixes;
 import com.starcases.prime.base.triples.BaseReduceTriple;
 import com.starcases.prime.base.triples.LogBases3AllTriples;
 import com.starcases.prime.graph.export.ExportGML;
@@ -219,6 +219,22 @@ public class Init implements Runnable
 								});
 				break;
 
+			case PREFIX:
+				PTKFactory.setActiveBaseId(BaseTypes.PREFIX);
+				PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
+				PTKFactory.setBaseSetPrimeSource( PrimeBaseWithLists::setPrimeSource);
+				PTKFactory.setPrimeBaseCtor(PrimeBaseWithLists::new);
+				PTKFactory.setPrimeRefCtor( (i, base) -> new PrimeRef(i, base, PTKFactory.getPrimeBaseCtor() ));
+
+				actions.add(s ->
+								{
+									var base = new BasePrefixes(ps);
+									base.doPreferParallel(initOpts.preferParallel);
+									base.setLogBaseGeneration(baseOpts.logGenerate);
+									base.genBases();
+								});
+				break;
+
 			default:
 				break;
 			}
@@ -248,14 +264,14 @@ public class Init implements Runnable
 				{
 					actions.add(s -> (new LogBasesNPrime(ps)).doPreferParallel(initOpts.preferParallel).log() );
 				}
-				break;
-
-			case PREFIX:
-				actions.add(s ->  (new LogDefaultBasePrefixes(ps)).doPreferParallel(initOpts.preferParallel).log() );
-				break;
-
-			case PREFIXTREE:
-				actions.add(s ->  (new LogDefaultBasePrefixTree(ps)).doPreferParallel(initOpts.preferParallel).log() );
+				else if (PTKFactory.getActiveBaseId() == BaseTypes.PREFIX)
+				{
+					actions.add(s -> (new LogBasePrefixes(ps)).doPreferParallel(false).log() );
+				}
+				else if (PTKFactory.getActiveBaseId() == BaseTypes.DEFAULT)
+				{
+					actions.add(s -> (new LogNodeStructure(ps)).doPreferParallel(initOpts.preferParallel).log() );
+				}
 				break;
 			}
 		}

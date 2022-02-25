@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -94,13 +95,13 @@ public class PrimeSource implements PrimeSourceIntfc
 		consumerSetPrimeSrc.accept(this);
 		baseSetPrimeSrc.accept(this);
 
-		var tmpBitSet = new ArrayList<Integer>(2);
-		tmpBitSet.add(1);
-		addPrimeRef(BigInteger.valueOf(1L), tmpBitSet);
+		var tmpIndexSet = new ArrayList<Integer>(1);
+		tmpIndexSet.add(0);
+		addPrimeRef(BigInteger.valueOf(1L), tmpIndexSet);
 
-		tmpBitSet = new ArrayList<Integer>(2);
-		tmpBitSet.add(2);
-		addPrimeRef(BigInteger.valueOf(2L), tmpBitSet);
+		tmpIndexSet = new ArrayList<Integer>(1);
+		tmpIndexSet.add(1);
+		addPrimeRef(BigInteger.valueOf(2L), tmpIndexSet);
 
 		this.confidenceLevel = confidenceLevel;
 	}
@@ -156,11 +157,10 @@ public class PrimeSource implements PrimeSourceIntfc
 
 				if (curPrime.isPresent() && viablePrime(permutationSum, curPrime.get()))
 				{
-					final var cachedSum = permutationSum;
-					final var sumBaseIdxs = primeIndexPermutation.get(0, numBitsForPrimeCount).stream().boxed().toList();
+					final var sumBaseIdxs = primeIndexPermutation.get(0, numBitsForPrimeCount);
+					sumBaseIdxs.set(nextIdx.get());
 
-
-					addPrimeRef(cachedSum, sumBaseIdxs);
+					addPrimeRef(permutationSum, sumBaseIdxs.stream().boxed().toList());
 					break;
 				}
 				else
