@@ -22,6 +22,7 @@
 		<picocli.version>4.6.2</picocli.version>
 		<jgrapht.version>1.5.1</jgrapht.version>
 		<jgraphx.version>4.2.2</jgraphx.version>
+		<infinispan.version>13.0.6.Final</infinispan.version>
 		<junit.jupiter.version>5.3.1</junit.jupiter.version>
 		<mockito.version>2.23.0</mockito.version>
 		<maven.surefire.version>2.19.1</maven.surefire.version>
@@ -52,6 +53,12 @@
 			<artifactId>picocli</artifactId>
 			<version>${picocli.version}</version>
 		</dependency>
+
+     <dependency>
+          <groupId>org.infinispan</groupId>
+          <artifactId>infinispan-core</artifactId>
+          <version>${infinispan.version}</version>
+        </dependency>
 
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -142,7 +149,7 @@
 				<configuration>
 					<release>${java.version}</release>
 					<compilerArgs>--enable-preview</compilerArgs>
-					<jvmArguments>--enable-preview</jvmArguments>
+
 				</configuration>
 			</plugin>
 			<plugin>
@@ -191,8 +198,8 @@
 						</executions>
 						<configuration>
 							<mainClass>com.starcases.prime.PrimeToolKit</mainClass>
-							<compilerArgs>-J--enable-preview -J--allow-incomplete-classpath</compilerArgs>
-							<jvmArguments>-J--enable-preview -J--allow-incomplete-classpath</jvmArguments>
+
+
 						</configuration>
 					</plugin>
 				</plugins>

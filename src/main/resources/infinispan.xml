@@ -1,0 +1,72 @@
+<infinispan>
+<cache-container  shutdown-hook="REGISTER">
+	<local-cache name="primes" >
+		  <encoding media-type="application/x-protostream"/>
+		  <persistence passivation="true">
+		     <file-store shared="false">
+		        <data path="data"/>
+		        <index path="index"/>
+		        <write-behind modification-queue-size="2048" />
+		     </file-store>
+		  </persistence>
+	</local-cache>
+
+	<local-cache name="DEFAULT" >
+		  <encoding media-type="application/x-protostream"/>
+		  <persistence passivation="true">
+		     <file-store shared="false">
+		        <data path="data"/>
+		        <index path="index"/>
+		        <write-behind modification-queue-size="2048" />
+		     </file-store>
+		  </persistence>
+	</local-cache>
+
+	<local-cache name="PREFIX" >
+		  <encoding media-type="application/x-protostream"/>
+		  <persistence passivation="true">
+		     <file-store shared="false">
+		        <data path="data"/>
+		        <index path="index"/>
+		        <write-behind modification-queue-size="2048" />
+		     </file-store>
+		  </persistence>
+	</local-cache>
+
+	<local-cache name="PREFIX_TREE" >
+		  <encoding media-type="application/x-protostream"/>
+		  <persistence passivation="true">
+		     <file-store shared="false">
+		        <data path="data"/>
+		        <index path="index"/>
+		        <write-behind modification-queue-size="2048" />
+		     </file-store>
+		  </persistence>
+	</local-cache>
+
+	<local-cache name="NPRIME" >
+		  <encoding media-type="application/x-protostream"/>
+		  <persistence passivation="true">
+		     <file-store shared="false">
+		        <data path="data"/>
+		        <index path="index"/>
+		        <write-behind modification-queue-size="2048" />
+		     </file-store>
+		  </persistence>
+	</local-cache>
+
+	<local-cache name="THREETRIPLE" >
+		  <encoding media-type="application/x-protostream"/>
+		  <persistence passivation="true">
+		     <file-store shared="false">
+		        <data path="data"/>
+		        <index path="index"/>
+		        <write-behind modification-queue-size="2048" />
+		     </file-store>
+		  </persistence>
+	</local-cache>
+
+
+</cache-container>
+
+</infinispan>

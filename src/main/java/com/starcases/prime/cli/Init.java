@@ -171,10 +171,18 @@ public class Init implements Runnable
 
 	void actionInitDefaultPrimeContent()
 	{
+		final var load = initOpts != null && initOpts.loadPrimes != null;
+		final var store = initOpts != null && initOpts.storePrimes != null;
+
 		actions.add(s -> {
 			FactoryIntfc factory = PTKFactory.getFactory();
 			ps = factory.getPrimeSource();
+			if (load)
+				ps.load(initOpts.loadPrimes);
 			ps.init();
+			if (store)
+				ps.store(initOpts.storePrimes);
+
 			ps.setActiveBaseId(PTKFactory.getActiveBaseId());
 		});
 	}

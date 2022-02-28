@@ -3,12 +3,12 @@ package com.starcases.prime.impl;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -23,6 +23,8 @@ import lombok.NonNull;
 import lombok.extern.java.Log;
 import javax.validation.constraints.Min;
 
+import org.infinispan.manager.EmbeddedCacheManager;
+
 /**
  * Provides data structure holding the core data and objects that provide access to the data from the
  * "public interface for primes". Also some utility support to support alternative algs for
@@ -36,6 +38,8 @@ public class PrimeSource implements PrimeSourceIntfc
 	 *
 	 */
 	private static final long serialVersionUID = 1L;
+
+	private final EmbeddedCacheManager cacheMgr;
 
 	@Min(1)
 	private final int confidenceLevel;
@@ -72,9 +76,6 @@ public class PrimeSource implements PrimeSourceIntfc
 	@NonNull
 	private final BiFunction<Integer, List<Integer>, PrimeRefIntfc> primeRefCtor;
 
-	// Used for informative purposes - like a progress meter.
-	long primesProcessed1k = 0;
-
 	//
 	// initialization
 	//
@@ -84,9 +85,11 @@ public class PrimeSource implements PrimeSourceIntfc
 			@NonNull BiFunction<Integer, List<Integer>, PrimeRefIntfc> primeRefCtor,
 			@NonNull Consumer<PrimeSourceIntfc> consumerSetPrimeSrc,
 			@NonNull Consumer<PrimeSourceIntfc> baseSetPrimeSrc,
-			@Min(1) int confidenceLevel
+			@Min(1) int confidenceLevel,
+			EmbeddedCacheManager cacheMgr
 			)
 	{
+		this.cacheMgr = cacheMgr;
 		primes = new ConcurrentHashMap<>(maxCount);
 		primeRefs = new ConcurrentHashMap<>(maxCount);
 		targetPrimeCount = maxCount;
@@ -113,13 +116,16 @@ public class PrimeSource implements PrimeSourceIntfc
 		{
 			return;
 		}
-		else
-		{
-			log.entering("PrimeSource", "init()");
-		}
+
+		log.entering("PrimeSource", "init()");
 
 		final var primeIndexMaxPermutation = new BitSet();
 		final var primeIndexPermutation = new BitSet();
+
+		// Used for informative purposes - like a progress meter.
+		long primesProcessed1k = 0;
+
+		var allPrimesProcessed = false;
 
 		// each iteration increases the #bits by 1; a new Prime is determined per iteration
 		do
@@ -139,7 +145,8 @@ public class PrimeSource implements PrimeSourceIntfc
 
 			final var sumCeiling = curPrime.stream().map(this::calcSumCeiling).reduce(BigInteger.ZERO, BigInteger::add);
 
-			while (!primeIndexPermutation.equals(primeIndexMaxPermutation))
+			var doLoop = !(primeIndexPermutation.equals(primeIndexMaxPermutation));
+			while (doLoop)
 			{
 				final var permutationSum = primeIndexPermutation
 						.stream()
@@ -148,24 +155,23 @@ public class PrimeSource implements PrimeSourceIntfc
 						.map(Optional::get)
 						.reduce(curPrime.orElse(BigInteger.ZERO), BigInteger::add);
 
-				if (permutationSum.compareTo(sumCeiling) > 0)
+				// exceed known prime then iteration is done - limit useless work
+				doLoop = permutationSum.compareTo(sumCeiling) <= 0;
+				if (doLoop)
 				{
-					// limit useless work - if we exceed a known Prime then we are
-					// done with this iteration.
-					break;
-				}
+					if (curPrime.isPresent() && viablePrime(permutationSum, curPrime.get()))
+					{
+						final var sumBaseIdxs = primeIndexPermutation.get(0, numBitsForPrimeCount);
+						sumBaseIdxs.set(nextIdx.get());
 
-				if (curPrime.isPresent() && viablePrime(permutationSum, curPrime.get()))
-				{
-					final var sumBaseIdxs = primeIndexPermutation.get(0, numBitsForPrimeCount);
-					sumBaseIdxs.set(nextIdx.get());
-
-					addPrimeRef(permutationSum, sumBaseIdxs.stream().boxed().toList());
-					break;
+						addPrimeRef(permutationSum, sumBaseIdxs.stream().boxed().toList());
+						doLoop = false;
+					}
+					else
+						incrementPermutation(primeIndexPermutation);
 				}
-				else
-					incrementPermutation(primeIndexPermutation);
 			}
+
 
 			// display some progress info
 			if (nextIdx.get() % 1000 == 0)
@@ -180,8 +186,40 @@ public class PrimeSource implements PrimeSourceIntfc
 					System.out.print("K");
 				}
 			}
+			allPrimesProcessed = nextIdx.get() >= targetPrimeCount;
+
 		}
-		while (nextIdx.get() < targetPrimeCount);
+		while (!allPrimesProcessed);
+	}
+
+	@Override
+	public void store(BaseTypes ... baseTypes)
+	{
+		cacheMgr.getCache("primes").putAll(primes);
+		//if (baseTypes != null)
+		//	cacheMgr.getCache(BaseTypes.DEFAULT.name()).putAll(primeRefs.get(BaseTypes.DEFAULT));
+	}
+
+	@Override
+	public void load(BaseTypes ... baseTypes)
+	{
+		if (doInit.getPlain())
+		{
+			return;
+		}
+
+		Map<Integer, BigInteger>  prCache = cacheMgr.getCache("primes");
+		if (!prCache.isEmpty())
+		{
+			primes.putAll(prCache);
+			primes.forEach((k, v) -> addPrimeRef(v, Collections.emptyList()));
+
+			log.info(String.format("cached entries loaded: %d ", primes.size()));
+		}
+		else
+		{
+			log.info("cache empty");
+		}
 	}
 
 	@Override
@@ -266,30 +304,18 @@ public class PrimeSource implements PrimeSourceIntfc
 	 */
 	private boolean viablePrime(@NonNull @Min(1) BigInteger primeSum, @Min(1) BigInteger lastMaxPrime)
 	{
-		var isPrimeSum = false;
-
-		do
-		{
+		return
 			// Part of "non-cheating" Prime checks.
 			// only want sets summing to greater than the current
 			// max Prime.
-			if (primeSum.compareTo(lastMaxPrime) <= 0)
-				break;
-
+				primeSum.compareTo(lastMaxPrime) > 0
+			&&
 			// Part of "non-cheating" Prime checks.
 			// Not a Prime if is even.
-			if (!primeSum.testBit(0))
-				break;
-
-			// This is bootstrap logic.
-			// If possible, this block should be removed and allow the remaining blocks to determine next Prime.
-			if (!primeSum.isProbablePrime(confidenceLevel))
-				break;
-
-			isPrimeSum =  true;
-		}
-		while (false);
-
-		return isPrimeSum;
+				primeSum.testBit(0)
+			&&
+				// This is bootstrap logic.
+				// If possible, this block should be removed and allow the remaining blocks to determine next Prime.
+				primeSum.isProbablePrime(confidenceLevel);
 	}
 }

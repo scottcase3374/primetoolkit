@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import javax.validation.constraints.Max;
@@ -59,21 +60,21 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 	 *
 	 * @param primeRef cur Prime being reduced
 	 */
-	private void primeReduction(@NonNull PrimeRefIntfc primeRef, @NonNull ArrayList<Integer> retBaseIdxs, @NonNull int [] retOutputIdxCount)
+	private void primeReduction(@NonNull PrimeRefIntfc primeRef, @NonNull List<Integer> retBaseIdxs, @NonNull int [] retOutputIdxCount)
 	{
 		// Experimentation for this use case indicate that Concurrent... perform slightly better than LinkedBlocking.. varieties of the collections.
 		final var q = new ConcurrentLinkedQueue<List<Integer>>();
 
 		// want to process initial bases for Prime
-		final var bs = primeRef.getPrimeBaseData().getPrimeBaseIdxs(BaseTypes.DEFAULT).get(0);
-		q.add(bs);
+		final var initialIdxs = primeRef.getPrimeBaseData().getPrimeBaseIdxs(BaseTypes.DEFAULT).get(0);
+		q.add(initialIdxs);
 
-		final List<Integer> intersect = IntStream.range(0, maxReduce).boxed().toList();
+		final List<Integer> remainTargetIdxs = IntStream.range(0, maxReduce).boxed().collect(Collectors.toList());
 
 		while (!q.isEmpty())
 		{
-			final var bsCur = q.remove();
-			bsCur.stream().forEach(i ->
+			final var curIdxs = q.remove();
+			curIdxs.stream().forEach(i ->
 				{
 					if (i >= maxReduce)
 					{
@@ -86,9 +87,9 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 				} );
 
 			// track which indexes were encountered (but only need to track "which one" on first encounter)
-			if (intersect.removeAll(bsCur))
+			if (remainTargetIdxs.removeAll(curIdxs))
 			{
-				final var tmpBS = bsCur.subList(0, maxReduce);
+				final var tmpBS = curIdxs.subList(0, Math.min(curIdxs.size(), maxReduce));
 				retBaseIdxs.addAll(tmpBS);
 			}
 		}

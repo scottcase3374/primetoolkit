@@ -25,6 +25,9 @@ public interface PrimeSourceIntfc extends Serializable
 {
 	void init();
 
+	void store(BaseTypes ... baseTypes);
+	void load(BaseTypes ... baseTypes);
+
 	void setActiveBaseId(@NonNull BaseTypes activeBaseId);
 
 	/**

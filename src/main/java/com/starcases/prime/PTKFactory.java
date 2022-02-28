@@ -1,5 +1,6 @@
 package com.starcases.prime;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -7,6 +8,9 @@ import java.util.function.Supplier;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+
+import org.infinispan.manager.DefaultCacheManager;
+import org.infinispan.manager.EmbeddedCacheManager;
 
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.impl.PrimeSource;
@@ -28,6 +32,23 @@ import com.starcases.prime.intfc.PrimeRefIntfc;
 
 public class PTKFactory
 {
+	@Getter
+	private static EmbeddedCacheManager cacheMgr;
+
+	static
+	{
+		try
+		{
+			cacheMgr = new DefaultCacheManager("infinispan.xml");
+			cacheMgr.startCaches("primes");
+			// "PREFIX", "PREFIX_TREE", "NPRIME", "THREETRIPLE" , "DEFAULT"
+		}
+		catch(IOException e)
+		{
+			System.out.println("couldn't create cache mgr from classpath:infinispan.xm");
+		}
+	}
+
 	@Getter
 	@Setter
 	private static @Min(1) int maxCount;
@@ -105,6 +126,11 @@ public class PTKFactory
 			@NonNull Consumer<PrimeSourceIntfc> baseSetPrimeSource
 			)
 	{
-		return new PrimeSource(maxCount, primeRefCtor, consumerSetPrimeSource, baseSetPrimeSource, confidenceLevel);
+		return new PrimeSource(maxCount
+								,primeRefCtor
+								, consumerSetPrimeSource
+								, baseSetPrimeSource
+								, confidenceLevel
+								, cacheMgr);
 	}
 }

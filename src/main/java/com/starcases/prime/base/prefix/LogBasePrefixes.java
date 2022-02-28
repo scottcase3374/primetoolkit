@@ -40,10 +40,6 @@ public class LogBasePrefixes extends AbstractLogBase
 								 	.collect(Collectors.joining(",","[","]"))
 								 	);
 
-								//sb.append(
-								//		String.format(
-								//			" Primes %s",
-								//			primes.get(itemIdx[0]).stream().map(i2 -> ps.getPrime(i2).get().toString()).collect(Collectors.joining(",", "[", "]")) ));
 								sb.append(String.format("%n"));
 								consumer.accept(sb.toString());
 								sb.setLength(0);

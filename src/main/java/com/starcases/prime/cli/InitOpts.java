@@ -3,6 +3,8 @@ package com.starcases.prime.cli;
 import java.io.File;
 import java.util.logging.Level;
 
+import com.starcases.prime.base.BaseTypes;
+
 import picocli.CommandLine.Option;
 
 /**
@@ -29,4 +31,11 @@ class InitOpts
 
 	@Option(names = {"--prefer-parallel"}, description = "Prefer parallel streams when possible", defaultValue = "true", required = false)
 	boolean preferParallel;
+
+	@Option(names = {"--store-primes"}, arity = "0..4", description = "Store types: ${COMPLETION-CANDIDATES}", required = false)
+	BaseTypes storePrimes;
+
+	@Option(names = {"--load-primes"}, arity = "0..4", description = "Load types: ${COMPLETION-CANDIDATES}", required = false)
+	BaseTypes loadPrimes;
+
 }

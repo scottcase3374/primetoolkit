@@ -33,7 +33,7 @@ public class LogBasesNPrime extends AbstractLogBase
 		// Get desired data
 		ps.setActiveBaseId(BaseTypes.NPRIME);
 
-		var prIt = ps.getPrimeRefIter();
+		var prIt = ps.getPrimeRefStream(false).skip(5).iterator();
 		while (prIt.hasNext())
 		{
 			var pr = prIt.next();
@@ -75,7 +75,7 @@ public class LogBasesNPrime extends AbstractLogBase
 													 	.map(index ->
 													 		String.format("base-Prime:[%s] count:[%s]",
 													 				ps.getPrime(primeIdxCntIdx[0]).get().toString(),
-													 				counts.get(primeIdxCntIdx[0]++).toString()))
+													 				counts.size() > primeIdxCntIdx[0] ? counts.get(primeIdxCntIdx[0]).toString() : 0   ))
 													 	.collect(Collectors.joining(",","[","]"))
 													 	);
 
