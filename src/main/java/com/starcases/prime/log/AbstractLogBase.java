@@ -5,7 +5,6 @@ import com.starcases.prime.intfc.PrimeSourceIntfc;
 
 import lombok.NonNull;
 
-import java.util.logging.Logger;
 
 /**
  * Base for algorithms that just log info (which it may just calculate).
@@ -16,9 +15,6 @@ public abstract class AbstractLogBase implements LogGraphIntfc
 	@NonNull
 	protected final PrimeSourceIntfc ps;
 
-	@NonNull
-	protected final Logger log;
-
 	protected boolean preferParallel;
 
 	public LogGraphIntfc doPreferParallel(boolean preferParallel)
@@ -27,9 +23,8 @@ public abstract class AbstractLogBase implements LogGraphIntfc
 		return this;
 	}
 
-	protected AbstractLogBase(@NonNull PrimeSourceIntfc ps, @NonNull Logger log)
+	protected AbstractLogBase(@NonNull PrimeSourceIntfc ps)
 	{
 		this.ps = ps;
-		this.log = log;
 	}
 }

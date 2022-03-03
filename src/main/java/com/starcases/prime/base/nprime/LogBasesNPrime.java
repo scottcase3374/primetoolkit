@@ -2,13 +2,13 @@ package com.starcases.prime.base.nprime;
 
 import java.util.Collections;
 import java.util.stream.Collectors;
+import java.util.logging.Logger;
 
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import com.starcases.prime.log.AbstractLogBase;
 
 import lombok.NonNull;
-import lombok.extern.java.Log;
 import picocli.CommandLine.Command;
 
 /*
@@ -16,17 +16,18 @@ import picocli.CommandLine.Command;
 * is all generated during creation of the n-Prime bases and not here. Need to refactor base handling
 * to accomplish this well.
 */
-@Log
 public class LogBasesNPrime extends AbstractLogBase
 {
+	private static final Logger log = Logger.getLogger(LogBasesNPrime.class.getName());
+
 	public LogBasesNPrime(@NonNull PrimeSourceIntfc ps)
 	{
-		super(ps, log);
+		super(ps);
 	}
 
 	@Override
 	@Command
-	public void log()
+	public void l()
 	{
 		final var maxBasesInRow = 5;
 

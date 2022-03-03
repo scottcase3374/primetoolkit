@@ -1,5 +1,7 @@
 package com.starcases.prime.base.triples;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.starcases.prime.base.BaseTypes;
@@ -7,7 +9,6 @@ import com.starcases.prime.intfc.PrimeSourceIntfc;
 import com.starcases.prime.log.AbstractLogBase;
 
 import lombok.NonNull;
-import lombok.extern.java.Log;
 import picocli.CommandLine.Command;
 
 /**
@@ -17,19 +18,22 @@ import picocli.CommandLine.Command;
  * after a refactor.
  *
  */
-@Log
 public class LogBases3AllTriples  extends AbstractLogBase
 {
+	private static final Logger log = Logger.getLogger(LogBases3AllTriples.class.getName());
+
 	public LogBases3AllTriples(@NonNull PrimeSourceIntfc ps)
 	{
-		super(ps, log);
+		super(ps);
 	}
 
 	@Override
 	@Command
-	public void log()
+	public void l()
 	{
-		log.info(String.format("%nLogging triples%n"));
+		if (log.isLoggable(Level.INFO))
+			log.info(String.format("%nLogging triples%n"));
+
 		// Get desired data
 		ps.setActiveBaseId(BaseTypes.THREETRIPLE);
 

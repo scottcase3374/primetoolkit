@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.logging.Logger;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -16,7 +17,6 @@ import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
 import lombok.NonNull;
-import lombok.extern.java.Log;
 
 /**
  * Given a Prime and a maximum number of primes; reduce default bases to multiples
@@ -38,16 +38,17 @@ import lombok.extern.java.Log;
  * so result would be: 2(x3) 1(x1),  1(x5) 2(x6),      1(x5) 2(x7)
  *          which reduces to:  1(x11), 2(x16)   =>  1x11 + 2x16 = 43
  */
-@Log
 public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 {
+	private static final Logger log = Logger.getLogger(BaseReduceNPrime.class.getName());
+
 	@Min(2)
 	@Max(3)
 	private int maxReduce;
 
 	public BaseReduceNPrime(@NonNull PrimeSourceIntfc ps)
 	{
-		super(ps, log);
+		super(ps);
 	}
 
 	public void setMaxReduce(@Min(2) @Max(3) int maxReduce)

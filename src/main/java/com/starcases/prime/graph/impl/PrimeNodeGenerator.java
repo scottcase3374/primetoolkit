@@ -9,7 +9,6 @@ import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
 import lombok.NonNull;
-import lombok.extern.java.Log;
 
 import java.util.NoSuchElementException;
 
@@ -24,7 +23,6 @@ import java.util.NoSuchElementException;
  *
  *
  */
-@Log
 public class PrimeNodeGenerator
 {
 	protected int level = 0;

@@ -36,7 +36,7 @@ class PrimeSourceUnitTest
 		PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
 
 		PTKFactory.setPrimeBaseCtor(PrimeBaseWithLists::new);
-		PTKFactory.setPrimeRefCtor( (i, base) -> new PrimeRef(i, base, PTKFactory.getPrimeBaseCtor()) );
+		PTKFactory.setPrimeRefCtor( (i, base) -> (new PrimeRef(i)).init( base, PTKFactory.getPrimeBaseCtor() ));
 
 		FactoryIntfc factory = PTKFactory.getFactory();
 		ps = factory.getPrimeSource();

@@ -40,7 +40,7 @@ public class PTKFactory
 		try
 		{
 			cacheMgr = new DefaultCacheManager("infinispan.xml");
-			cacheMgr.startCaches("primes");
+			cacheMgr.startCaches("primes", "primerefs");
 			// "PREFIX", "PREFIX_TREE", "NPRIME", "THREETRIPLE" , "DEFAULT"
 		}
 		catch(IOException e)

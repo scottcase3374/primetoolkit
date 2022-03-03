@@ -6,6 +6,6 @@ package com.starcases.prime.intfc;
  */
 public interface LogGraphIntfc
 {
-	void log();
+	void l();
 	LogGraphIntfc doPreferParallel(boolean preferParallel);
 }

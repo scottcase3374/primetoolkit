@@ -1,11 +1,11 @@
 package com.starcases.prime.log;
 
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
 import lombok.NonNull;
-import lombok.extern.java.Log;
 
 /**
  *
@@ -14,16 +14,17 @@ import lombok.extern.java.Log;
  * can be provided.
  *
  */
-@Log
 public class LogNodeStructure extends AbstractLogBase
 {
+	private static final Logger log = Logger.getLogger(LogNodeStructure.class.getName());
+
 	public LogNodeStructure(@NonNull PrimeSourceIntfc ps)
 	{
-		super(ps, log);
+		super(ps);
 	}
 
 	@Override
-	public void log()
+	public void l()
 	{
 		log.info("LogNodeStructure log()");
 		var idx = 0;

@@ -1,18 +1,20 @@
 package com.starcases.prime.base.prefix;
 
+import java.util.logging.Logger;
+
 import com.starcases.prime.base.AbstractPrimeBaseGenerator;
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
 import lombok.NonNull;
-import lombok.extern.java.Log;
 
-@Log
 public class BasePrefixes extends AbstractPrimeBaseGenerator
 {
+	private static final Logger log = Logger.getLogger(BasePrefixes.class.getName());
+
 	public BasePrefixes(@NonNull PrimeSourceIntfc ps)
 	{
-		super(ps, log);
+		super(ps);
 	}
 
 	@Override

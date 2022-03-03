@@ -4,7 +4,8 @@ import java.io.PrintWriter;
 import java.math.BigInteger;
 import java.util.ArrayDeque;
 import java.util.Deque;
-import lombok.extern.java.Log;
+import java.util.logging.Logger;
+
 import lombok.NonNull;
 import javax.validation.constraints.Min;
 import com.starcases.prime.intfc.PrimeRefIntfc;
@@ -20,9 +21,10 @@ interface ElementIntfc
 	void output();
 }
 
-@Log
 public class ExportGML
 {
+	private static final Logger log = Logger.getLogger(ExportGML.class.getName());
+
 	@NonNull
 	private final Deque<ElementIntfc> stack = new ArrayDeque<>();
 

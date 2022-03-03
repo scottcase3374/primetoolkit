@@ -2,8 +2,10 @@ package com.starcases.prime.base.triples;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.validation.constraints.Min;
+
 
 import com.starcases.prime.base.AbstractPrimeBaseGenerator;
 import com.starcases.prime.base.BaseTypes;
@@ -11,7 +13,6 @@ import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
 import lombok.NonNull;
-import lombok.extern.java.Log;
 
 /*
  *  Given a Prime, find EVERY set of 3 pre-existing primes that sum to the Prime.
@@ -55,9 +56,11 @@ import lombok.extern.java.Log;
  * 28 107->
  * 29 109-> 31,37,41 *
  */
-@Log
+
 public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 {
+	private static final Logger log = Logger.getLogger(BaseReduceTriple.class.getName());
+
 	@NonNull
 	private BaseTypes activeBaseId;
 
@@ -71,7 +74,7 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 	 */
 	public BaseReduceTriple(@NonNull PrimeSourceIntfc ps)
 	{
-		super(ps, log);
+		super(ps);
 
 		activeBaseId = BaseTypes.THREETRIPLE;
 		ps.setActiveBaseId(activeBaseId);

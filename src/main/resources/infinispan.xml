@@ -1,7 +1,24 @@
 <infinispan>
-<cache-container  shutdown-hook="REGISTER">
-	<local-cache name="primes" >
-		  <encoding media-type="application/x-protostream"/>
+<cache-container  statistics="true" shutdown-hook="REGISTER">
+
+	<local-cache-configuration name="local-cache-soft-idx-template">
+		  <persistence passivation="true">
+		     <soft-index-file-store xmlns="urn:infinispan:config:store:soft-index:13.0" shared="false" >
+		        <data path="data"/>
+		        <index path="index"/>
+		        <write-behind modification-queue-size="2048" />
+		     </soft-index-file-store>
+		  </persistence>
+	</local-cache-configuration>
+
+
+	<local-cache-configuration name="local-cache-file-template">
+	<!--	 <encoding media-type="application/x-protostream"/> -->
+		<encoding>
+			<key media-type="application/x-java-object"/>
+			<value media-type="application/x-protostream" />
+		</encoding>
+		 <memory><object size="10000000"/></memory>
 		  <persistence passivation="true">
 		     <file-store shared="false">
 		        <data path="data"/>
@@ -9,61 +26,27 @@
 		        <write-behind modification-queue-size="2048" />
 		     </file-store>
 		  </persistence>
+	</local-cache-configuration>
+
+	<local-cache name="primes" configuration="local-cache-soft-idx-template" >
 	</local-cache>
 
-	<local-cache name="DEFAULT" >
-		  <encoding media-type="application/x-protostream"/>
-		  <persistence passivation="true">
-		     <file-store shared="false">
-		        <data path="data"/>
-		        <index path="index"/>
-		        <write-behind modification-queue-size="2048" />
-		     </file-store>
-		  </persistence>
+	<local-cache name="primerefs" configuration="local-cache-file-template">
 	</local-cache>
 
-	<local-cache name="PREFIX" >
-		  <encoding media-type="application/x-protostream"/>
-		  <persistence passivation="true">
-		     <file-store shared="false">
-		        <data path="data"/>
-		        <index path="index"/>
-		        <write-behind modification-queue-size="2048" />
-		     </file-store>
-		  </persistence>
+	<local-cache name="DEFAULT"  configuration="local-cache-soft-idx-template">
 	</local-cache>
 
-	<local-cache name="PREFIX_TREE" >
-		  <encoding media-type="application/x-protostream"/>
-		  <persistence passivation="true">
-		     <file-store shared="false">
-		        <data path="data"/>
-		        <index path="index"/>
-		        <write-behind modification-queue-size="2048" />
-		     </file-store>
-		  </persistence>
+	<local-cache name="PREFIX"  configuration="local-cache-soft-idx-template">
 	</local-cache>
 
-	<local-cache name="NPRIME" >
-		  <encoding media-type="application/x-protostream"/>
-		  <persistence passivation="true">
-		     <file-store shared="false">
-		        <data path="data"/>
-		        <index path="index"/>
-		        <write-behind modification-queue-size="2048" />
-		     </file-store>
-		  </persistence>
+	<local-cache name="PREFIX_TREE"  configuration="local-cache-soft-idx-template">
 	</local-cache>
 
-	<local-cache name="THREETRIPLE" >
-		  <encoding media-type="application/x-protostream"/>
-		  <persistence passivation="true">
-		     <file-store shared="false">
-		        <data path="data"/>
-		        <index path="index"/>
-		        <write-behind modification-queue-size="2048" />
-		     </file-store>
-		  </persistence>
+	<local-cache name="NPRIME"  configuration="local-cache-soft-idx-template">
+	</local-cache>
+
+	<local-cache name="THREETRIPLE"  configuration="local-cache-soft-idx-template">
 	</local-cache>
 
 

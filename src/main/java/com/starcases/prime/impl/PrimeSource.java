@@ -3,12 +3,13 @@ package com.starcases.prime.impl;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -20,7 +21,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import lombok.NonNull;
-import lombok.extern.java.Log;
 import javax.validation.constraints.Min;
 
 import org.infinispan.manager.EmbeddedCacheManager;
@@ -31,15 +31,15 @@ import org.infinispan.manager.EmbeddedCacheManager;
  * finding primes, working with bases of the primes, and general information/access.
  *
  */
-@Log
 public class PrimeSource implements PrimeSourceIntfc
 {
+	private static final Logger log = Logger.getLogger(PrimeSource.class.getName());
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private final EmbeddedCacheManager cacheMgr;
+	private transient EmbeddedCacheManager cacheMgr;
 
 	@Min(1)
 	private final int confidenceLevel;
@@ -48,10 +48,14 @@ public class PrimeSource implements PrimeSourceIntfc
 	private final AtomicInteger nextIdx = new AtomicInteger(-1);
 
 	@NonNull
+	private final List<List<Integer>> prefixes = new ArrayList<>();
+
+	@NonNull
 	private final Map<Integer, BigInteger> primes;
 
 	@NonNull
 	private final Map<Integer,PrimeRefIntfc> primeRefs;
+
 
 	@Min(1)
 	private final int targetPrimeCount;
@@ -74,7 +78,8 @@ public class PrimeSource implements PrimeSourceIntfc
 	//
 	// This does seem a bit hacky - may revisit later.
 	@NonNull
-	private final BiFunction<Integer, List<Integer>, PrimeRefIntfc> primeRefCtor;
+	private transient BiFunction<Integer, List<Integer>, PrimeRefIntfc> primeRefCtor;
+	private transient Consumer<PrimeSourceIntfc> baseSetPrimeSrc;
 
 	//
 	// initialization
@@ -89,6 +94,7 @@ public class PrimeSource implements PrimeSourceIntfc
 			EmbeddedCacheManager cacheMgr
 			)
 	{
+
 		this.cacheMgr = cacheMgr;
 		primes = new ConcurrentHashMap<>(maxCount);
 		primeRefs = new ConcurrentHashMap<>(maxCount);
@@ -96,6 +102,7 @@ public class PrimeSource implements PrimeSourceIntfc
 
 		this.primeRefCtor = primeRefCtor;
 		consumerSetPrimeSrc.accept(this);
+		this.baseSetPrimeSrc = baseSetPrimeSrc;
 		baseSetPrimeSrc.accept(this);
 
 		var tmpIndexSet = new ArrayList<Integer>(1);
@@ -195,7 +202,15 @@ public class PrimeSource implements PrimeSourceIntfc
 	@Override
 	public void store(BaseTypes ... baseTypes)
 	{
-		cacheMgr.getCache("primes").putAll(primes);
+
+		Map<Integer, BigInteger> primeCache = cacheMgr.getCache("primes");
+		primeCache.putAll(primes);
+
+		Map<Integer, PrimeRefIntfc> primeRefCache = cacheMgr.getCache("primerefs");
+		primeRefCache.putAll(primeRefs);
+
+		if (log.isLoggable(Level.INFO))
+			log.info(String.format("Stored [%d] primes, [%d] PrimeRefs", primeCache.size(), primeRefCache.size()));
 		//if (baseTypes != null)
 		//	cacheMgr.getCache(BaseTypes.DEFAULT.name()).putAll(primeRefs.get(BaseTypes.DEFAULT));
 	}
@@ -207,18 +222,33 @@ public class PrimeSource implements PrimeSourceIntfc
 		{
 			return;
 		}
-
 		Map<Integer, BigInteger>  prCache = cacheMgr.getCache("primes");
 		if (!prCache.isEmpty())
 		{
 			primes.putAll(prCache);
-			primes.forEach((k, v) -> addPrimeRef(v, Collections.emptyList()));
 
-			log.info(String.format("cached entries loaded: %d ", primes.size()));
+			if (log.isLoggable(Level.INFO))
+				log.info(String.format("cached prime entries loaded: %d ", primes.size()));
 		}
 		else
 		{
-			log.info("cache empty");
+			if (log.isLoggable(Level.INFO))
+				log.info("prime cache empty");
+		}
+
+		Map<Integer, PrimeRef>  prRefCache = cacheMgr.getCache("primerefs");
+		if (!prRefCache.isEmpty())
+		{
+			//prRefCache.forEach((k,v) -> {v.init(null, baseSetPrimeSrc); primeRefs.put(k, v); });
+			primeRefs.putAll(prRefCache);
+
+			if (log.isLoggable(Level.INFO))
+				log.info(String.format("cached prime ref entries loaded: %d ", primeRefs.size()));
+		}
+		else
+		{
+			if (log.isLoggable(Level.INFO))
+				log.info("prime refs cache empty");
 		}
 	}
 

@@ -9,7 +9,6 @@ import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
-import lombok.extern.java.Log;
 import lombok.NonNull;
 
 /**
@@ -88,7 +87,7 @@ enum SumConstraintState
  * A condition status - indicate specific issues or lack of issues with/between values.
  *
  */
-@Log
+
 enum ConditionConstraintState
 {
 	/**
@@ -161,7 +160,6 @@ enum ConditionConstraintState
  * Class implementing the logic for finding all viable triples.
  *
  */
-@Log
 public class AllTriples
 {
 	static final EnumSet<ConditionConstraintState> BAD_CONDITION_STATE =
@@ -173,9 +171,9 @@ public class AllTriples
 			EnumSet.of(SumConstraintState.MATCH,
 					SumConstraintState.INCREMENT_SUM);
 
-	private final int BOT = 0;
-    private final int MID = 1;
-	private final int TOP = 2;
+	private static final  int BOT = 0;
+    private static final  int MID = 1;
+	private static final  int TOP = 2;
 
 	@NonNull
 	private  PrimeRefIntfc targetPrime;

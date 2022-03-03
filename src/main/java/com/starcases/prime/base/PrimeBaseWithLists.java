@@ -7,6 +7,8 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
+import org.infinispan.protostream.annotations.ProtoFactory;
+
 import com.starcases.prime.intfc.BaseMetadataIntfc;
 import com.starcases.prime.intfc.PrimeBaseIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
@@ -22,7 +24,7 @@ public class PrimeBaseWithLists implements PrimeBaseIntfc
 	private static final long serialVersionUID = 1L;
 
 	@NonNull
-	private static PrimeSourceIntfc primeSrc;
+	private static transient PrimeSourceIntfc primeSrc;
 
 	public static void setPrimeSource(@NonNull PrimeSourceIntfc primeSrcIntfc)
 	{
@@ -39,6 +41,7 @@ public class PrimeBaseWithLists implements PrimeBaseIntfc
 	@Getter
 	private BaseMetadataIntfc baseMetadata;
 
+	@ProtoFactory
 	public PrimeBaseWithLists()
 	{
 		// nothing to init here
