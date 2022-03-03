@@ -1,8 +1,9 @@
 package com.starcases.prime;
 
 import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.starcases.prime.cli.Init;
-import lombok.extern.java.Log;
 import lombok.NonNull;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -14,10 +15,11 @@ import picocli.CommandLine.Model.CommandSpec;
  * CLI Driver
  *
  */
-@Log
 @Command(name = "ptk", subcommands = { Init.class, CommandLine.HelpCommand.class }  , description="Prime Tool Kit")
 public class PrimeToolKit
 {
+	private static final Logger log = Logger.getLogger(PrimeToolKit.class.getName());
+
 	@Spec CommandSpec spec;
 
 	public static void main(@NonNull String [] args)

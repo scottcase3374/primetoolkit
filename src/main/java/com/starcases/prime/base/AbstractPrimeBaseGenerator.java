@@ -1,7 +1,5 @@
 package com.starcases.prime.base;
 
-import java.util.logging.Logger;
-
 import com.starcases.prime.intfc.PrimeBaseGenerateIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import lombok.NonNull;
@@ -13,9 +11,6 @@ import lombok.NonNull;
  */
 public abstract class AbstractPrimeBaseGenerator implements PrimeBaseGenerateIntfc
 {
-	@NonNull
-	protected final Logger log;
-
 	@NonNull
 	protected final PrimeSourceIntfc ps;
 
@@ -31,9 +26,8 @@ public abstract class AbstractPrimeBaseGenerator implements PrimeBaseGenerateInt
 		return this;
 	}
 
-	protected AbstractPrimeBaseGenerator(@NonNull PrimeSourceIntfc ps, @NonNull Logger log)
+	protected AbstractPrimeBaseGenerator(@NonNull PrimeSourceIntfc ps)
 	{
-		this.log = log;
 		this.ps = ps;
 		this.ps.init();
 	}

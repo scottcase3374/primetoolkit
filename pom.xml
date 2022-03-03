@@ -57,8 +57,32 @@
      <dependency>
           <groupId>org.infinispan</groupId>
           <artifactId>infinispan-core</artifactId>
-          <version>${infinispan.version}</version>
         </dependency>
+
+<dependency>
+    <groupId>org.infinispan</groupId>
+    <artifactId>infinispan-tree</artifactId>
+  <version>9.4.24.Final</version>
+</dependency>
+
+<dependency>
+    <groupId>org.infinispan</groupId>
+    <artifactId>infinispan-persistence-soft-index</artifactId>
+   <version>12.1.11.Final</version>
+</dependency>
+
+
+<dependency>
+  <groupId>org.infinispan</groupId>
+  <artifactId>infinispan-marshaller-protostuff</artifactId>
+</dependency>
+
+  <dependency>
+    <groupId>org.infinispan.protostream</groupId>
+    <artifactId>protostream-processor</artifactId>
+    <scope>provided</scope>
+  </dependency>
+
 
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -123,6 +147,13 @@
 
 	<dependencyManagement>
 		<dependencies>
+		    <dependency>
+		      <groupId>org.infinispan</groupId>
+		      <artifactId>infinispan-bom</artifactId>
+		      <version>${infinispan.version}</version>
+		      <type>pom</type>
+		        <scope>import</scope>
+		    </dependency>
 			<dependency>
 				<groupId>org.jgrapht</groupId>
 				<artifactId>jgrapht</artifactId>

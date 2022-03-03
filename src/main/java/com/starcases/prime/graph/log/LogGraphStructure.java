@@ -1,5 +1,6 @@
 package com.starcases.prime.graph.log;
 
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.starcases.prime.base.BaseTypes;
@@ -8,7 +9,6 @@ import com.starcases.prime.intfc.LogGraphIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
 import lombok.NonNull;
-import lombok.extern.java.Log;
 import picocli.CommandLine.Command;
 
 /**
@@ -17,12 +17,13 @@ import picocli.CommandLine.Command;
  * the main data.
  *
  */
-@Log
 public class LogGraphStructure extends PrimeGrapher implements LogGraphIntfc
 {
+	private static final Logger log = Logger.getLogger(LogGraphStructure.class.getName());
+
 	public LogGraphStructure(@NonNull PrimeSourceIntfc ps, @NonNull BaseTypes baseType)
 	{
-		super(ps, log, baseType);
+		super(ps, baseType);
 	}
 
 	private boolean preferParallel;
@@ -34,7 +35,7 @@ public class LogGraphStructure extends PrimeGrapher implements LogGraphIntfc
 
 	@Override
 	@Command
-	public void log()
+	public void l()
 	{
 		log.entering("LogGraphStructure", "log()");
 			graph

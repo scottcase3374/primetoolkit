@@ -8,6 +8,8 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jgrapht.event.GraphListener;
 import org.jgrapht.graph.DefaultEdge;
@@ -32,7 +34,6 @@ import com.starcases.prime.intfc.PrimeSourceIntfc;
 import com.starcases.prime.log.LogNodeStructure;
 
 import lombok.NonNull;
-import lombok.extern.java.Log;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 
@@ -48,11 +49,11 @@ import picocli.CommandLine.Command;
  * of the static PTKFactory data members are used. The parameter to the consumer interface function is just a dummy value - not used.
  *
  */
-
-@Log
 @Command(name = "init", description = "initial setup")
 public class Init implements Runnable
 {
+	private static final Logger log = Logger.getLogger(Init.class.getName());
+
 	PrimeSourceIntfc ps;
 
 	@ArgGroup(exclusive = false, validate = false)
@@ -134,7 +135,7 @@ public class Init implements Runnable
 		PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
 
 		PTKFactory.setPrimeBaseCtor(PrimeBaseWithLists::new);
-		PTKFactory.setPrimeRefCtor( (i, base) -> new PrimeRef(i, base, PTKFactory.getPrimeBaseCtor()) );
+		PTKFactory.setPrimeRefCtor( (i, base) -> (new PrimeRef(i)).init(base, PTKFactory.getPrimeBaseCtor()) );
 	}
 
 	void stdOutRedirect()
@@ -148,15 +149,20 @@ public class Init implements Runnable
 					File ren = File.createTempFile("ptk", ".old", new File(initOpts.outputFile.getParent()));
 					if (initOpts.outputFile.renameTo(ren))
 					{
-						log.info("Renamed output file: " + initOpts.outputFile + " to " + ren.getCanonicalPath());
+						if (log.isLoggable(Level.INFO))
+							log.info(String.format("Renamed output file: %s"  + " to " ,  initOpts.outputFile, ren.getCanonicalPath()));
 					}
 					else
 					{
-						log.severe("FAILED: Rename output file: " + initOpts.outputFile + " to " + ren.getCanonicalPath());
+						if (log.isLoggable(Level.SEVERE))
+							log.severe(String.format("FAILED: Rename output file: %s to %s",  initOpts.outputFile,  ren.getCanonicalPath()));
 					}
 				}
 				else
-					log.info("Created outputfile: " + initOpts.outputFile.getCanonicalPath() + " :" +    initOpts.outputFile.createNewFile());
+				{
+					if (log.isLoggable(Level.INFO))
+						log.info("Created outputfile: " + initOpts.outputFile.getCanonicalPath() + " :" +    initOpts.outputFile.createNewFile());
+				}
 
 				// Point standard out to our selected output file.
 				System.setOut(new PrintStream(initOpts.outputFile));
@@ -177,9 +183,12 @@ public class Init implements Runnable
 		actions.add(s -> {
 			FactoryIntfc factory = PTKFactory.getFactory();
 			ps = factory.getPrimeSource();
+
 			if (load)
 				ps.load(initOpts.loadPrimes);
+
 			ps.init();
+
 			if (store)
 				ps.store(initOpts.storePrimes);
 
@@ -199,7 +208,7 @@ public class Init implements Runnable
 				PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
 				PTKFactory.setBaseSetPrimeSource(PrimeBaseWithLists::setPrimeSource);
 				PTKFactory.setPrimeBaseCtor(PrimeBaseWithLists::new);
-				PTKFactory.setPrimeRefCtor( (i, base) -> new PrimeRef(i, base, PTKFactory.getPrimeBaseCtor()) );
+				PTKFactory.setPrimeRefCtor( (i, base) -> (new PrimeRef(i)).init(base, PTKFactory.getPrimeBaseCtor()) );
 
 				actions.add(s ->
 								{
@@ -216,7 +225,7 @@ public class Init implements Runnable
 				PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
 				PTKFactory.setBaseSetPrimeSource( PrimeBaseWithLists::setPrimeSource);
 				PTKFactory.setPrimeBaseCtor(PrimeBaseWithLists::new);
-				PTKFactory.setPrimeRefCtor( (i, base) -> new PrimeRef(i, base, PTKFactory.getPrimeBaseCtor() ));
+				PTKFactory.setPrimeRefCtor( (i, base) -> (new PrimeRef(i)).init(base, PTKFactory.getPrimeBaseCtor() ) );
 
 				actions.add(s ->
 								{
@@ -232,7 +241,7 @@ public class Init implements Runnable
 				PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
 				PTKFactory.setBaseSetPrimeSource( PrimeBaseWithLists::setPrimeSource);
 				PTKFactory.setPrimeBaseCtor(PrimeBaseWithLists::new);
-				PTKFactory.setPrimeRefCtor( (i, base) -> new PrimeRef(i, base, PTKFactory.getPrimeBaseCtor() ));
+				PTKFactory.setPrimeRefCtor( (i, base) -> (new PrimeRef(i)).init(base, PTKFactory.getPrimeBaseCtor())  );
 
 				actions.add(s ->
 								{
@@ -256,29 +265,29 @@ public class Init implements Runnable
 			switch (logOpts.logOper)
 			{
 			case NODESTRUCT:
-				actions.add(s -> (new LogNodeStructure(ps)).doPreferParallel(initOpts.preferParallel).log() );
+				actions.add(s -> (new LogNodeStructure(ps)).doPreferParallel(initOpts.preferParallel).l() );
 				break;
 
 			case GRAPHSTRUCT:
-				actions.add(s -> (new LogGraphStructure(ps, PTKFactory.getActiveBaseId() )).doPreferParallel(initOpts.preferParallel).log() );
+				actions.add(s -> (new LogGraphStructure(ps, PTKFactory.getActiveBaseId() )).doPreferParallel(initOpts.preferParallel).l() );
 				break;
 
 			case BASES:
 				if (PTKFactory.getActiveBaseId() == BaseTypes.THREETRIPLE)
 				{
-					actions.add(s -> (new LogBases3AllTriples(ps)).doPreferParallel(initOpts.preferParallel).log() );
+					actions.add(s -> (new LogBases3AllTriples(ps)).doPreferParallel(initOpts.preferParallel).l() );
 				}
 				else if (PTKFactory.getActiveBaseId() == BaseTypes.NPRIME)
 				{
-					actions.add(s -> (new LogBasesNPrime(ps)).doPreferParallel(initOpts.preferParallel).log() );
+					actions.add(s -> (new LogBasesNPrime(ps)).doPreferParallel(initOpts.preferParallel).l() );
 				}
 				else if (PTKFactory.getActiveBaseId() == BaseTypes.PREFIX)
 				{
-					actions.add(s -> (new LogBasePrefixes(ps)).doPreferParallel(false).log() );
+					actions.add(s -> (new LogBasePrefixes(ps)).doPreferParallel(false).l() );
 				}
 				else if (PTKFactory.getActiveBaseId() == BaseTypes.DEFAULT)
 				{
-					actions.add(s -> (new LogNodeStructure(ps)).doPreferParallel(initOpts.preferParallel).log() );
+					actions.add(s -> (new LogNodeStructure(ps)).doPreferParallel(initOpts.preferParallel).l() );
 				}
 				break;
 			}

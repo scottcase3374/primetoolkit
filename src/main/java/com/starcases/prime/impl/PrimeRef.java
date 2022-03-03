@@ -6,14 +6,16 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
+import org.infinispan.protostream.annotations.ProtoFactory;
+import org.infinispan.protostream.annotations.ProtoField;
 
 import com.starcases.prime.intfc.PrimeBaseIntfc;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 
 /**
  * Default Prime representation.
@@ -31,7 +33,7 @@ public class PrimeRef implements PrimeRefIntfc
 	private static final long serialVersionUID = 1L;
 
 	@NonNull
-	private static PrimeSourceIntfc primeSrc;
+	private static transient PrimeSourceIntfc primeSrc;
 
 	public static void setPrimeSource(@NonNull PrimeSourceIntfc primeSrcIntfc)
 	{
@@ -42,11 +44,13 @@ public class PrimeRef implements PrimeRefIntfc
 	 *  Index for this instance of a Prime.
 	 *  index to bitsets or collections for this val
 	 */
-	@Min(0)
-	private final Integer primeIdx;
+	@Setter
+	@Getter
+	@ProtoField(number=1, defaultValue="0")
+	public int primeIdx;
 
-	@NonNull
-	private final PrimeBaseIntfc primeBaseData;
+
+	private PrimeBaseIntfc primeBaseData = null;
 
 	/**
 	 * Handle simple Prime where the base is simply itself - i.e. 1, 2
@@ -54,15 +58,19 @@ public class PrimeRef implements PrimeRefIntfc
 	 *
 	 * @param Prime
 	 */
-	public PrimeRef(@Min(0) @Max(2) int primeIdx,
-					@NonNull List<Integer> primeBaseIdxs,
-					@NonNull Supplier<PrimeBaseIntfc> primeBaseSupplier
-					)
+	@ProtoFactory()
+	public PrimeRef(int primeIdx)
 	{
-		super();
 		this.primeIdx = primeIdx;
+	}
+
+	public PrimeRef init(
+					@NonNull List<Integer> primeBaseIdxs,
+					@NonNull Supplier<PrimeBaseIntfc> primeBaseSupplier)
+	{
 		primeBaseData = primeBaseSupplier.get();
 		getPrimeBaseData().addPrimeBase(primeBaseIdxs);
+		return this;
 	}
 
 	@Override

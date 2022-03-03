@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Comparator;
-import java.util.logging.Logger;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.event.GraphListener;
@@ -37,26 +36,22 @@ public abstract class PrimeGrapher
 	protected final Graph<PrimeRefIntfc,DefaultEdge> graph;
 
 	@NonNull
-	protected final Logger log;
-
-	@NonNull
 	protected final BaseTypes baseType;
 
 	/**
 	 * General constructor
 	 *
 	 */
-	protected PrimeGrapher(@NonNull PrimeSourceIntfc ps, @NonNull Logger log, @NonNull BaseTypes baseType)
+	protected PrimeGrapher(@NonNull PrimeSourceIntfc ps, @NonNull BaseTypes baseType)
 	{
-		this(ps, log, baseType, Collections.emptyList());
+		this(ps, baseType, Collections.emptyList());
 	}
 
 	/**
 	 * Provide support for visual output related to graphs
 	 */
-	protected PrimeGrapher(@NonNull PrimeSourceIntfc ps, @NonNull Logger log, @NonNull BaseTypes baseType, @NonNull List<GraphListener<PrimeRefIntfc, DefaultEdge>> graphs)
+	protected PrimeGrapher(@NonNull PrimeSourceIntfc ps, @NonNull BaseTypes baseType, @NonNull List<GraphListener<PrimeRefIntfc, DefaultEdge>> graphs)
 	{
-		this.log = log;
 		this.ps = ps;
 		this.baseType = baseType;
 		this.ps.init();

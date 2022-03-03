@@ -8,20 +8,18 @@ import com.starcases.prime.intfc.PrimeSourceIntfc;
 import com.starcases.prime.log.AbstractLogBase;
 
 import lombok.NonNull;
-import lombok.extern.java.Log;
 
-@Log
 public class LogBasePrefixTree extends AbstractLogBase
 {
 
 
 	public LogBasePrefixTree(@NonNull PrimeSourceIntfc ps)
 	{
-		super(ps, log);
+		super(ps);
 	}
 
 	@Override
-	public void log()
+	public void l()
 	{
 		//logTree(prefixMap);
 	}

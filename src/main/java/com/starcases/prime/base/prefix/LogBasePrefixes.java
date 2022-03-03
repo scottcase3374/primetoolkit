@@ -1,6 +1,7 @@
 package com.starcases.prime.base.prefix;
 
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.starcases.prime.base.BaseTypes;
@@ -8,18 +9,18 @@ import com.starcases.prime.intfc.PrimeSourceIntfc;
 import com.starcases.prime.log.AbstractLogBase;
 
 import lombok.NonNull;
-import lombok.extern.java.Log;
 
-@Log
 public class LogBasePrefixes extends AbstractLogBase
 {
+	private static final Logger log = Logger.getLogger(LogBasePrefixes.class.getName());
+
 	public LogBasePrefixes(@NonNull PrimeSourceIntfc ps)
 	{
-		super(ps, log);
+		super(ps);
 	}
 
 	@Override
-	public void log()
+	public void l()
 	{
 		log.info(String.format("LogBasePrefixes log()%n"));
 
