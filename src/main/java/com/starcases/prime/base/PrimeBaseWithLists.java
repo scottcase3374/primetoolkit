@@ -54,7 +54,7 @@ public class PrimeBaseWithLists implements PrimeBaseIntfc
 					{
 						if (v == null)
 						{
-							return /* new ArrayList<Set<Integer>>(List.of(primeBase));*/ List.of(primeBase);
+							return List.of(primeBase);
 						}
 
 						v.add(primeBase);
