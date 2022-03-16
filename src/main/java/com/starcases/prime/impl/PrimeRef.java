@@ -1,9 +1,9 @@
 package com.starcases.prime.impl;
 
 import java.math.BigInteger;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import org.infinispan.protostream.annotations.ProtoFactory;
@@ -65,7 +65,7 @@ public class PrimeRef implements PrimeRefIntfc
 	}
 
 	public PrimeRef init(
-					@NonNull List<Integer> primeBaseIdxs,
+					@NonNull Set<Integer> primeBaseIdxs,
 					@NonNull Supplier<PrimeBaseIntfc> primeBaseSupplier)
 	{
 		primeBaseData = primeBaseSupplier.get();

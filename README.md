@@ -91,7 +91,9 @@ That flag applies to several base-logging and base-generation methods now. It ge
 
 After removing a number of unused data items and methods, converting the primes collection from a list to a map and running without output to a file instead of console window in eclipse - runtime went from 1m 5s to 53s. The list to map conversion is part of some research into alternative data structs and also some checking into the use of soft/weak references in one or 2 places.
 
-One very interesting performance observation is related to a "simple" difference.
+After some further work where I switched from using Lists to Sets for managing the collection of bases - the run time went from 53s down to 19s.
+
+On a different note, one very interesting performance observation is related to a "simple" difference.
 - static final int TOP = 0;
 - static volatile int TOP = 0;
 - final int TOP = 0;

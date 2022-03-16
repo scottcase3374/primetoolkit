@@ -4,6 +4,8 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Objects;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
@@ -267,7 +269,7 @@ public class AllTriples
 		final var bs = Arrays.stream(vals)
 			.filter(Objects::nonNull)
 			.map(PrimeRefIntfc::getPrimeRefIdx)
-			.toList();
+			.collect(Collectors.toCollection(TreeSet::new));
 
 		prime.getPrimeBaseData().addPrimeBase(bs, BaseTypes.THREETRIPLE);
 	}

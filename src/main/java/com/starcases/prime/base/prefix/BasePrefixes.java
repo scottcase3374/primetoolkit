@@ -1,5 +1,6 @@
 package com.starcases.prime.base.prefix;
 
+import java.util.TreeSet;
 import java.util.logging.Logger;
 
 import com.starcases.prime.base.AbstractPrimeBaseGenerator;
@@ -30,7 +31,10 @@ public class BasePrefixes extends AbstractPrimeBaseGenerator
 						final var origIdxs = pr.getPrimeBaseData().getPrimeBaseIdxs().get(0);
 
 						// We don't include the Pn-1 idx in prefix list
-						pr.getPrimeBaseData().addPrimeBase(origIdxs.subList(0, origIdxs.size()-1), BaseTypes.PREFIX);
+						final var last = ((TreeSet<Integer>)origIdxs).pollLast();
+						var tmpSet = new TreeSet<Integer>(origIdxs);
+						tmpSet.remove(last);
+						pr.getPrimeBaseData().addPrimeBase(tmpSet, BaseTypes.PREFIX);
 					}
 					catch(Exception e)
 					{

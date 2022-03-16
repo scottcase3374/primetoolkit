@@ -1,7 +1,7 @@
 package com.starcases.prime;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -67,7 +67,7 @@ public class PTKFactory
 
 	@Getter
 	@Setter
-	private static @NonNull BiFunction<Integer, List<Integer>, PrimeRefIntfc> primeRefCtor;
+	private static @NonNull BiFunction<Integer, Set<Integer>, PrimeRefIntfc> primeRefCtor;
 
 	@Getter
 	@Setter
@@ -101,7 +101,7 @@ public class PTKFactory
 					}
 
 					@Override
-					public BiFunction<Integer, List<Integer>, PrimeRefIntfc> getPrimeRefConstructor()
+					public BiFunction<Integer, Set<Integer>, PrimeRefIntfc> getPrimeRefConstructor()
 					{
 						return primeRefCtor;
 					}
@@ -121,7 +121,7 @@ public class PTKFactory
 	static PrimeSourceIntfc primeSource(
 			@Min(1) int maxCount,
 			@Min(1) int confidenceLevel,
-			@NonNull BiFunction<Integer, List<Integer>, PrimeRefIntfc> primeRefCtor,
+			@NonNull BiFunction<Integer, Set<Integer>, PrimeRefIntfc> primeRefCtor,
 			@NonNull Consumer<PrimeSourceIntfc> consumerSetPrimeSource,
 			@NonNull Consumer<PrimeSourceIntfc> baseSetPrimeSource
 			)

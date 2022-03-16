@@ -5,11 +5,14 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -78,7 +81,7 @@ public class PrimeSource implements PrimeSourceIntfc
 	//
 	// This does seem a bit hacky - may revisit later.
 	@NonNull
-	private transient BiFunction<Integer, List<Integer>, PrimeRefIntfc> primeRefCtor;
+	private transient BiFunction<Integer, Set<Integer>, PrimeRefIntfc> primeRefCtor;
 	private transient Consumer<PrimeSourceIntfc> baseSetPrimeSrc;
 
 	//
@@ -87,7 +90,7 @@ public class PrimeSource implements PrimeSourceIntfc
 
 	public PrimeSource(
 			@Min(1) int maxCount,
-			@NonNull BiFunction<Integer, List<Integer>, PrimeRefIntfc> primeRefCtor,
+			@NonNull BiFunction<Integer, Set<Integer>, PrimeRefIntfc> primeRefCtor,
 			@NonNull Consumer<PrimeSourceIntfc> consumerSetPrimeSrc,
 			@NonNull Consumer<PrimeSourceIntfc> baseSetPrimeSrc,
 			@Min(1) int confidenceLevel,
@@ -105,11 +108,11 @@ public class PrimeSource implements PrimeSourceIntfc
 		this.baseSetPrimeSrc = baseSetPrimeSrc;
 		baseSetPrimeSrc.accept(this);
 
-		var tmpIndexSet = new ArrayList<Integer>(1);
+		var tmpIndexSet = new TreeSet<Integer>();
 		tmpIndexSet.add(0);
 		addPrimeRef(BigInteger.valueOf(1L), tmpIndexSet);
 
-		tmpIndexSet = new ArrayList<Integer>(1);
+		tmpIndexSet = new TreeSet<Integer>();
 		tmpIndexSet.add(1);
 		addPrimeRef(BigInteger.valueOf(2L), tmpIndexSet);
 
@@ -171,7 +174,7 @@ public class PrimeSource implements PrimeSourceIntfc
 						final var sumBaseIdxs = primeIndexPermutation.get(0, numBitsForPrimeCount);
 						sumBaseIdxs.set(nextIdx.get());
 
-						addPrimeRef(permutationSum, sumBaseIdxs.stream().boxed().toList());
+						addPrimeRef(permutationSum, sumBaseIdxs.stream().boxed().collect(Collectors.toCollection(TreeSet::new)));
 						doLoop = false;
 					}
 					else
@@ -315,7 +318,7 @@ public class PrimeSource implements PrimeSourceIntfc
 	 */
 	private void addPrimeRef(
 			@NonNull @Min(1) BigInteger newPrime,
-			@NonNull List<Integer> base
+			@NonNull Set<Integer> base
 			)
 	{
 		var idx = nextIdx.incrementAndGet();

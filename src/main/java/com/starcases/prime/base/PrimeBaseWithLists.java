@@ -1,11 +1,10 @@
 package com.starcases.prime.base;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.infinispan.protostream.annotations.ProtoFactory;
 
@@ -36,7 +35,7 @@ public class PrimeBaseWithLists implements PrimeBaseIntfc
 	 *
 	 */
 	@NonNull
-	private final Map<BaseTypes, List<List<Integer>>> primeBaseIdxs = new EnumMap<>(BaseTypes.class);
+	private final Map<BaseTypes, List<Set<Integer>>> primeBaseIdxs = new EnumMap<>(BaseTypes.class);
 
 	@Getter
 	private BaseMetadataIntfc baseMetadata;
@@ -48,14 +47,14 @@ public class PrimeBaseWithLists implements PrimeBaseIntfc
 	}
 
 	@Override
-	public void addPrimeBase(@NonNull BaseTypes baseType, @NonNull List<Integer> primeBase, BaseMetadataIntfc baseMetadata)
+	public void addPrimeBase(@NonNull BaseTypes baseType, @NonNull Set<Integer> primeBase, BaseMetadataIntfc baseMetadata)
 	{
 		this.primeBaseIdxs.compute(baseType,
 				(k, v) ->
 					{
 						if (v == null)
 						{
-							return new ArrayList<List<Integer>>(Arrays.asList(primeBase));
+							return /* new ArrayList<Set<Integer>>(List.of(primeBase));*/ List.of(primeBase);
 						}
 
 						v.add(primeBase);
@@ -69,13 +68,13 @@ public class PrimeBaseWithLists implements PrimeBaseIntfc
 	 * @param primeBase
 	 */
 	@Override
-	public void addPrimeBase(@NonNull List<Integer> primeBase)
+	public void addPrimeBase(@NonNull Set<Integer> primeBase)
 	{
 		addPrimeBase(BaseTypes.DEFAULT, primeBase, null);
 	}
 
 	@Override
-	public void addPrimeBase(@NonNull List<Integer> primeBase, @NonNull BaseTypes baseType)
+	public void addPrimeBase(@NonNull Set<Integer> primeBase, @NonNull BaseTypes baseType)
 	{
 		addPrimeBase(baseType, primeBase, null);
 	}
@@ -84,13 +83,13 @@ public class PrimeBaseWithLists implements PrimeBaseIntfc
 	 * For DEFAULT base type
 	 */
 	@Override
-	public List<List<Integer>> getPrimeBaseIdxs()
+	public List<Set<Integer>> getPrimeBaseIdxs()
 	{
 		return getPrimeBaseIdxs(BaseTypes.DEFAULT);
 	}
 
 	@Override
-	public List<List<Integer>> getPrimeBaseIdxs(@NonNull BaseTypes baseType)
+	public List<Set<Integer>> getPrimeBaseIdxs(@NonNull BaseTypes baseType)
 	{
 		return primeBaseIdxs.getOrDefault(baseType, Collections.emptyList());
 	}

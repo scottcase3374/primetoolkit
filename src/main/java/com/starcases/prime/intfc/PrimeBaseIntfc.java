@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import com.starcases.prime.base.BaseTypes;
 
@@ -28,16 +29,16 @@ public interface PrimeBaseIntfc extends Serializable
 	static final Comparator<BigInteger> bigIntComp = (b1, b2) -> b1.compareTo(b2);
 
 
-	void addPrimeBase(@NonNull BaseTypes baseType, @NonNull List<Integer> primeBase, @NonNull BaseMetadataIntfc metadata);
+	void addPrimeBase(@NonNull BaseTypes baseType, @NonNull Set<Integer> primeBase, @NonNull BaseMetadataIntfc metadata);
 
 	/**
 	 * No baseTypes arg version; so this returns data for Bases.DEFAULT
 	 *
 	 * @param primeBase
 	 */
-	void addPrimeBase(@NonNull List<Integer> primeBase);
+	void addPrimeBase(@NonNull Set<Integer> primeBase);
 
-	void addPrimeBase(@NonNull List<Integer> primeBase, @NonNull BaseTypes baseType);
+	void addPrimeBase(@NonNull Set<Integer> primeBase, @NonNull BaseTypes baseType);
 
 	BaseMetadataIntfc getBaseMetadata();
 
@@ -48,11 +49,11 @@ public interface PrimeBaseIntfc extends Serializable
 	 *
 	 * @return No-arg version; so this returns data for Bases.DEFAULT
 	 */
-	List<List<Integer>> getPrimeBaseIdxs();
+	List<Set<Integer>> getPrimeBaseIdxs();
 
 	/**
 	 * Not every use case needs multiple bases per Prime
 	 * @return
 	 */
-	List<List<Integer>> getPrimeBaseIdxs(@NonNull BaseTypes baseType);
+	List<Set<Integer>> getPrimeBaseIdxs(@NonNull BaseTypes baseType);
 }

@@ -11,11 +11,6 @@ import com.starcases.prime.log.AbstractLogBase;
 import lombok.NonNull;
 import picocli.CommandLine.Command;
 
-/*
-* Need to actually save the n-Prime bases so logging actually pulls the content - current output
-* is all generated during creation of the n-Prime bases and not here. Need to refactor base handling
-* to accomplish this well.
-*/
 public class LogBasesNPrime extends AbstractLogBase
 {
 	private static final Logger log = Logger.getLogger(LogBasesNPrime.class.getName());
@@ -74,9 +69,13 @@ public class LogBasesNPrime extends AbstractLogBase
 													 	indexBitset
 													 	.stream()
 													 	.map(index ->
-													 		String.format("base-Prime:[%s] count:[%s]",
+													 	{
+													 			String s = String.format("base-Prime:[%s] count:[%s]",
 													 				ps.getPrime(primeIdxCntIdx[0]).get().toString(),
-													 				counts.size() > primeIdxCntIdx[0] ? counts.get(primeIdxCntIdx[0]).toString() : 0   ))
+													 				counts.size() > primeIdxCntIdx[0] ? counts.get(primeIdxCntIdx[0]).toString() : 0 );
+													 			primeIdxCntIdx[0]++;
+													 			return s;
+													 	})
 													 	.collect(Collectors.joining(",","[","]"))
 													 	);
 

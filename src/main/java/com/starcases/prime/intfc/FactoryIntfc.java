@@ -1,6 +1,6 @@
 package com.starcases.prime.intfc;
 
-import java.util.List;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
@@ -14,5 +14,5 @@ public interface FactoryIntfc
 {
 	PrimeSourceIntfc getPrimeSource();
 	Supplier<PrimeBaseIntfc> getPrimeBaseConstructor();
-	BiFunction<Integer, List<Integer>, PrimeRefIntfc> getPrimeRefConstructor();
+	BiFunction<Integer, Set<Integer>, PrimeRefIntfc> getPrimeRefConstructor();
 }

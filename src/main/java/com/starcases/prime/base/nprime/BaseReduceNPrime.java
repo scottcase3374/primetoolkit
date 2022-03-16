@@ -1,7 +1,8 @@
 package com.starcases.prime.base.nprime;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -61,10 +62,10 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 	 *
 	 * @param primeRef cur Prime being reduced
 	 */
-	private void primeReduction(@NonNull PrimeRefIntfc primeRef, @NonNull List<Integer> retBaseIdxs, @NonNull int [] retOutputIdxCount)
+	private void primeReduction(@NonNull PrimeRefIntfc primeRef, @NonNull HashSet<Integer> retBaseIdxs, @NonNull int [] retOutputIdxCount)
 	{
 		// Experimentation for this use case indicate that Concurrent... perform slightly better than LinkedBlocking.. varieties of the collections.
-		final var q = new ConcurrentLinkedQueue<List<Integer>>();
+		final var q = new ConcurrentLinkedQueue<Set<Integer>>();
 
 		// want to process initial bases for Prime
 		final var initialIdxs = primeRef.getPrimeBaseData().getPrimeBaseIdxs(BaseTypes.DEFAULT).get(0);
@@ -90,7 +91,7 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 			// track which indexes were encountered (but only need to track "which one" on first encounter)
 			if (remainTargetIdxs.removeAll(curIdxs))
 			{
-				final var tmpBS = curIdxs.subList(0, Math.min(curIdxs.size(), maxReduce));
+				final var tmpBS = curIdxs.stream().filter(i -> i < maxReduce).toList();
 				retBaseIdxs.addAll(tmpBS);
 			}
 		}
@@ -118,7 +119,7 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 			try
 			{
 				int [] retCountForBaseIdx = new int[maxReduce];
-				var retBaseIdxs = new ArrayList<Integer>();
+				var retBaseIdxs = new HashSet<Integer>();
 				primeReduction(curPrime, retBaseIdxs, retCountForBaseIdx);
 
 				curPrime
