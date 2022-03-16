@@ -82,6 +82,7 @@ public class PrimeSource implements PrimeSourceIntfc
 	// This does seem a bit hacky - may revisit later.
 	@NonNull
 	private transient BiFunction<Integer, Set<Integer>, PrimeRefIntfc> primeRefCtor;
+
 	private transient Consumer<PrimeSourceIntfc> baseSetPrimeSrc;
 
 	//
