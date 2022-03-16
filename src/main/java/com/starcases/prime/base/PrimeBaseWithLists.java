@@ -1,5 +1,6 @@
 package com.starcases.prime.base;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
@@ -54,7 +55,7 @@ public class PrimeBaseWithLists implements PrimeBaseIntfc
 					{
 						if (v == null)
 						{
-							return List.of(primeBase);
+							v = new ArrayList<Set<Integer>>(1);
 						}
 
 						v.add(primeBase);
