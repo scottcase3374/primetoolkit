@@ -1,5 +1,6 @@
 package com.starcases.prime.intfc;
 
+import java.math.BigInteger;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
@@ -15,4 +16,5 @@ public interface FactoryIntfc
 	PrimeSourceIntfc getPrimeSource();
 	Supplier<PrimeBaseIntfc> getPrimeBaseConstructor();
 	BiFunction<Integer, Set<Integer>, PrimeRefIntfc> getPrimeRefConstructor();
+	BiFunction<Integer, Set<BigInteger>, PrimeRefIntfc> getPrimeRefRawConstructor();
 }

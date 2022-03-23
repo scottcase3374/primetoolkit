@@ -81,6 +81,20 @@ public class PrimeSource implements PrimeSourceIntfc
 	//
 	// This does seem a bit hacky - may revisit later.
 	@NonNull
+	private transient BiFunction<Integer, Set<BigInteger>, PrimeRefIntfc> primeRefRawCtor;
+
+	// Default PrimeRef implementation to use for this PrimeSource.
+	//
+	// This is non-static because it currently can be overridden by passing
+	// an appropriate "new" function ptr into the PrimeSource
+	// constructor  -> param primeRefCtor
+	//
+	// Currently no plan to allow changing primeRefCtor after initial PrimeSource
+	// creation - should have a static setter if I want to move the override
+	// of this out of the constructor.
+	//
+	// This does seem a bit hacky - may revisit later.
+	@NonNull
 	private transient BiFunction<Integer, Set<Integer>, PrimeRefIntfc> primeRefCtor;
 
 	private transient Consumer<PrimeSourceIntfc> baseSetPrimeSrc;
@@ -120,15 +134,55 @@ public class PrimeSource implements PrimeSourceIntfc
 		this.confidenceLevel = confidenceLevel;
 	}
 
+	public PrimeSource(
+			@Min(1) int maxCount,
+			@NonNull Consumer<PrimeSourceIntfc> consumerSetPrimeSrc,
+			@NonNull Consumer<PrimeSourceIntfc> baseSetPrimeSrc,
+			@Min(1) int confidenceLevel,
+			@NonNull BiFunction<Integer, Set<BigInteger>, PrimeRefIntfc> primeRefRawCtor,
+			EmbeddedCacheManager cacheMgr
+			)
+	{
+
+		this.cacheMgr = cacheMgr;
+		primes = new ConcurrentHashMap<>(maxCount);
+		primeRefs = new ConcurrentHashMap<>(maxCount);
+		targetPrimeCount = maxCount;
+
+		this.primeRefRawCtor = primeRefRawCtor;
+		consumerSetPrimeSrc.accept(this);
+		this.baseSetPrimeSrc = baseSetPrimeSrc;
+		baseSetPrimeSrc.accept(this);
+
+		var tmpIndexSet = new TreeSet<Integer>();
+		tmpIndexSet.add(0);
+		addPrimeRef(BigInteger.valueOf(1L), tmpIndexSet);
+
+		tmpIndexSet = new TreeSet<Integer>();
+		tmpIndexSet.add(1);
+		addPrimeRef(BigInteger.valueOf(2L), tmpIndexSet);
+
+		this.confidenceLevel = confidenceLevel;
+	}
+	/**
+	 * This is the "prime" logic so to speak..  the "innovative" side of this isn't
+	 * the initial identification of primes but the data that is created related
+	 * to each prime - the "bases".  The question to ask is - if given some
+	 * items representing each prime; is there an identifiable pattern over
+	 * any range of primes that provides insights into faster identification
+	 * of much larger primes? Can something new be learned with regard to factors
+	 * of numbers created from large primes?
+	 */
 	@Override
 	public void init()
 	{
+		log.info("PrimeSource::init()");
+
 		if (doInit.compareAndExchangeAcquire(false, true))
 		{
+			log.info("PrimeSource::init() - already called; returning now");
 			return;
 		}
-
-		log.entering("PrimeSource", "init()");
 
 		final var primeIndexMaxPermutation = new BitSet();
 		final var primeIndexPermutation = new BitSet();
@@ -281,6 +335,15 @@ public class PrimeSource implements PrimeSourceIntfc
 			return Optional.empty();
 
 		return Optional.of(primes.get(primeIdx));
+	}
+
+	@Override
+	public Optional<BigInteger> getPrime(@Min(0) BigInteger prime)
+	{
+		if (!primes.containsValue(prime))
+			return Optional.empty();
+
+		return primes.values().parallelStream().filter(b -> b.equals(prime)).findAny();
 	}
 
 	@Override

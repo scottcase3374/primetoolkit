@@ -1,22 +1,25 @@
 package com.starcases.prime.base.prefixtree;
 
 import java.math.BigInteger;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 import lombok.Getter;
+import lombok.Setter;
 
-class PrefixTreeNode {
+class PrefixTreeNode
+{
 	@Getter
-	public AtomicReference<BigInteger> prefixPrime = new AtomicReference<>();
+	private AtomicReference<BigInteger> prefixPrime = new AtomicReference<>();
 
 	@Getter
-	public Map<BigInteger, PrefixTreeNode> next = new ConcurrentHashMap<>();
+	private Map<BigInteger, PrefixTreeNode> next = new ConcurrentHashMap<>();
 
 	@Getter
-	public List<BigInteger> sourcePrimes;
+	@Setter
+	private Set<BigInteger> sourcePrimes;
 
 	public PrefixTreeNode(BigInteger curPrime, Map<BigInteger, PrefixTreeNode> prefix)
 	{

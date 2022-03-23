@@ -41,4 +41,5 @@ public interface PrimeSourceIntfc extends Serializable
 
 	Optional<PrimeRefIntfc> getPrimeRef(@Min(0) int primeIdx);
 	Optional<BigInteger> getPrime(@Min(0) int primeIdx);
+	Optional<BigInteger> getPrime(@Min(0) BigInteger prime);
 }

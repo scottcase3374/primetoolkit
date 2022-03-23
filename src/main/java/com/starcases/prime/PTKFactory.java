@@ -1,6 +1,6 @@
 package com.starcases.prime;
 
-import java.io.IOException;
+import java.math.BigInteger;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -35,19 +35,19 @@ public class PTKFactory
 	@Getter
 	private static EmbeddedCacheManager cacheMgr;
 
-	static
-	{
-		try
-		{
-			cacheMgr = new DefaultCacheManager("infinispan.xml");
-			cacheMgr.startCaches("primes", "primerefs");
+//	static
+//	{
+		//try
+	//	{
+			//cacheMgr = new DefaultCacheManager("infinispan.xml");
+			//cacheMgr.startCaches("primes", "primerefs");
 			// "PREFIX", "PREFIX_TREE", "NPRIME", "THREETRIPLE" , "DEFAULT"
-		}
-		catch(IOException e)
-		{
-			System.out.println("couldn't create cache mgr from classpath:infinispan.xm");
-		}
-	}
+	//	}
+	//	catch(IOException e)
+	//	{
+	//		System.out.println("couldn't create cache mgr from classpath:infinispan.xm");
+	//	}
+//	}
 
 	@Getter
 	@Setter
@@ -68,6 +68,10 @@ public class PTKFactory
 	@Getter
 	@Setter
 	private static @NonNull BiFunction<Integer, Set<Integer>, PrimeRefIntfc> primeRefCtor;
+
+	@Getter
+	@Setter
+	private static @NonNull BiFunction<Integer, Set<BigInteger>, PrimeRefIntfc> primeRefRawCtor;
 
 	@Getter
 	@Setter
@@ -105,6 +109,12 @@ public class PTKFactory
 					{
 						return primeRefCtor;
 					}
+
+					@Override
+					public BiFunction<Integer, Set<BigInteger>, PrimeRefIntfc> getPrimeRefRawConstructor()
+					{
+						return primeRefRawCtor;
+					}
 				};
 	}
 
@@ -113,9 +123,9 @@ public class PTKFactory
 	 *
 	 * @param maxCount
 	 * @param confidenceLevel
-	 * @param activeBaseId
 	 * @param primeRefCtor
 	 * @param primeRefSetPrimeSource
+	 * @param baseSetPrimeSource
 	 * @return
 	 */
 	static PrimeSourceIntfc primeSource(

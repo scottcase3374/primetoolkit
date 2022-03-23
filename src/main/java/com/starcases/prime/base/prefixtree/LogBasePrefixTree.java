@@ -2,8 +2,11 @@ package com.starcases.prime.base.prefixtree;
 
 import java.math.BigInteger;
 import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import com.starcases.prime.log.AbstractLogBase;
 
@@ -11,7 +14,7 @@ import lombok.NonNull;
 
 public class LogBasePrefixTree extends AbstractLogBase
 {
-
+	private static final Logger log = Logger.getLogger(LogBasePrefixTree.class.getName());
 
 	public LogBasePrefixTree(@NonNull PrimeSourceIntfc ps)
 	{
@@ -21,46 +24,37 @@ public class LogBasePrefixTree extends AbstractLogBase
 	@Override
 	public void l()
 	{
-		//logTree(prefixMap);
-	}
+		log.info(String.format("LogBasePrefixTree log()%n"));
 
-	void logTree(final Map<BigInteger, PrefixTreeNode> prefixMap)
-	{
-		prefixMap
-		.values()
-		.stream()
-		.parallel()
-		.forEach(treeNode ->
-					{
-						final var outputStrFinal = new StringBuilder();
-						logTree(treeNode, outputStrFinal);
-					}
-				);
-	}
+		final var sb = new StringBuilder();
 
-	void logTree(final PrefixTreeNode prefixTreeNode, final StringBuilder outputStr)
-	{
-		outputStr.append(prefixTreeNode.getPrefixPrime().get());
+		final int [] itemIdx = {0};
 
-		if (!prefixTreeNode.getSourcePrimes().isEmpty())
-		{
-			System.out.println(String.format("Prefix[%s] count[%d] source-primes[%s]",
-					outputStr.toString(),
-					prefixTreeNode.getSourcePrimes().size(),
-					prefixTreeNode.getSourcePrimes().stream().map(BigInteger::toString).collect(Collectors.joining(",", "[", "]"))));
-		}
+		ps.getPrimeRefStream(false)
+		.<String>mapMulti((pr, consumer) ->
+							{
+								pr
+									.getPrimeBaseData()
+									.getPrimeBases(BaseTypes.PREFIX_TREE)
+									.iterator()
+									.forEachRemaining( primeBases ->
+														{
+															sb.append(String.format("Prime [%d] Prefix: ", pr.getPrime()));
+															sb.append(
+																primeBases
+															 	.stream()
+															 	.map(i -> i.toString())
+															 	.collect(Collectors.joining(",","[","]"))
+															 	);
 
-		prefixTreeNode.getNext()
-			.values()
-			.stream()
-			.forEach(treeNode ->
-						{
-							final var outputStrFinal = new StringBuilder(outputStr);
-							outputStrFinal.append(",");
-
-							logTree(treeNode, outputStrFinal);
-						}
-					);
+															sb.append(String.format("%n"));
+															consumer.accept(sb.toString());
+															sb.setLength(0);
+															itemIdx[0]++;
+														});
+							}
+				)
+		.forEach(System.out::println);
 	}
 }
 

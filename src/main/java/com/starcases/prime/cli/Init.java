@@ -21,6 +21,8 @@ import com.starcases.prime.base.nprime.BaseReduceNPrime;
 import com.starcases.prime.base.nprime.LogBasesNPrime;
 import com.starcases.prime.base.prefix.BasePrefixes;
 import com.starcases.prime.base.prefix.LogBasePrefixes;
+import com.starcases.prime.base.prefixtree.BasePrefixTree;
+import com.starcases.prime.base.prefixtree.LogBasePrefixTree;
 import com.starcases.prime.base.triples.BaseReduceTriple;
 import com.starcases.prime.base.triples.LogBases3AllTriples;
 import com.starcases.prime.graph.export.ExportGML;
@@ -184,13 +186,14 @@ public class Init implements Runnable
 			FactoryIntfc factory = PTKFactory.getFactory();
 			ps = factory.getPrimeSource();
 
-			if (load)
-				ps.load(initOpts.loadPrimes);
+			////if (load)
+			//	ps.load(initOpts.loadPrimes);
 
+			log.info("Init::actionInitDefaultPrimeContent - primeSource init");
 			ps.init();
 
-			if (store)
-				ps.store(initOpts.storePrimes);
+			//if (store)
+			//	ps.store(initOpts.storePrimes);
 
 			ps.setActiveBaseId(PTKFactory.getActiveBaseId());
 		});
@@ -198,6 +201,8 @@ public class Init implements Runnable
 
 	void actionHandleAdditionalBases()
 	{
+		final var method = "Init::actionHandleAdditionalBases - base ";
+
 		if (baseOpts != null && baseOpts.bases != null)
 		{
 
@@ -212,6 +217,7 @@ public class Init implements Runnable
 
 				actions.add(s ->
 								{
+									log.info(method + baseOpts.bases);
 									var base = new BaseReduceNPrime(ps);
 									base.doPreferParallel(initOpts.preferParallel);
 									base.setLogBaseGeneration(baseOpts.logGenerate);
@@ -229,6 +235,7 @@ public class Init implements Runnable
 
 				actions.add(s ->
 								{
+									log.info(method + baseOpts.bases);
 									var base = new BaseReduceTriple(ps);
 									base.doPreferParallel(initOpts.preferParallel);
 									base.setLogBaseGeneration(baseOpts.logGenerate);
@@ -245,6 +252,7 @@ public class Init implements Runnable
 
 				actions.add(s ->
 								{
+									log.info(method + baseOpts.bases);
 									var base = new BasePrefixes(ps);
 									base.doPreferParallel(initOpts.preferParallel);
 									base.setLogBaseGeneration(baseOpts.logGenerate);
@@ -252,7 +260,25 @@ public class Init implements Runnable
 								});
 				break;
 
+			case PREFIX_TREE:
+				PTKFactory.setActiveBaseId(BaseTypes.PREFIX_TREE);
+				PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
+				PTKFactory.setBaseSetPrimeSource( PrimeBaseWithLists::setPrimeSource);
+				PTKFactory.setPrimeBaseCtor(PrimeBaseWithLists::new);
+				PTKFactory.setPrimeRefRawCtor( (i, base) -> (new PrimeRef(i)).init(PTKFactory.getPrimeBaseCtor(), base)  );
+
+				actions.add(s ->
+								{
+									log.info(method + baseOpts.bases);
+									var base = new BasePrefixTree(ps);
+									base.doPreferParallel(initOpts.preferParallel);
+									base.setLogBaseGeneration(baseOpts.logGenerate);
+									base.genBases();
+								});
+				break;
+
 			default:
+				log.info(method + baseOpts.bases);
 				break;
 			}
 		}
@@ -260,8 +286,11 @@ public class Init implements Runnable
 
 	void actionHandleLogging()
 	{
+		final var method = "Init::actionHandleLogging - logOper ";
+
 		if (logOpts != null && logOpts.logOper != null)
 		{
+			log.info(method + logOpts.logOper);
 			switch (logOpts.logOper)
 			{
 			case NODESTRUCT:
@@ -273,21 +302,27 @@ public class Init implements Runnable
 				break;
 
 			case BASES:
-				if (PTKFactory.getActiveBaseId() == BaseTypes.THREETRIPLE)
+				switch(PTKFactory.getActiveBaseId())
 				{
-					actions.add(s -> (new LogBases3AllTriples(ps)).doPreferParallel(initOpts.preferParallel).l() );
-				}
-				else if (PTKFactory.getActiveBaseId() == BaseTypes.NPRIME)
-				{
-					actions.add(s -> (new LogBasesNPrime(ps)).doPreferParallel(initOpts.preferParallel).l() );
-				}
-				else if (PTKFactory.getActiveBaseId() == BaseTypes.PREFIX)
-				{
-					actions.add(s -> (new LogBasePrefixes(ps)).doPreferParallel(false).l() );
-				}
-				else if (PTKFactory.getActiveBaseId() == BaseTypes.DEFAULT)
-				{
-					actions.add(s -> (new LogNodeStructure(ps)).doPreferParallel(initOpts.preferParallel).l() );
+					case THREETRIPLE:
+						actions.add(s -> (new LogBases3AllTriples(ps)).doPreferParallel(initOpts.preferParallel).l() );
+						break;
+
+					case NPRIME:
+						actions.add(s -> (new LogBasesNPrime(ps)).doPreferParallel(initOpts.preferParallel).l() );
+						break;
+
+					case PREFIX:
+						actions.add(s -> (new LogBasePrefixes(ps)).doPreferParallel(false).l() );
+						break;
+
+					case PREFIX_TREE:
+						actions.add(s -> (new LogBasePrefixTree(ps)).doPreferParallel(false).l() );
+						break;
+
+					case  DEFAULT:
+						actions.add(s -> (new LogNodeStructure(ps)).doPreferParallel(initOpts.preferParallel).l() );
+						break;
 				}
 				break;
 			}

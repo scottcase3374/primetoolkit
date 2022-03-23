@@ -271,6 +271,6 @@ public class AllTriples
 			.map(PrimeRefIntfc::getPrimeRefIdx)
 			.collect(Collectors.toCollection(TreeSet::new));
 
-		prime.getPrimeBaseData().addPrimeBase(bs, BaseTypes.THREETRIPLE);
+		prime.getPrimeBaseData().addPrimeBaseIndexes(bs, BaseTypes.THREETRIPLE);
 	}
 }

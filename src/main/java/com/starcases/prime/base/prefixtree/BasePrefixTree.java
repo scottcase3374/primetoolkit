@@ -2,7 +2,6 @@ package com.starcases.prime.base.prefixtree;
 
 import java.math.BigInteger;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.logging.Logger;
@@ -20,12 +19,14 @@ public class BasePrefixTree extends AbstractPrimeBaseGenerator
 
 	final Map<BigInteger, PrefixTreeNode> prefixMap = new ConcurrentSkipListMap<>();
 
-	@NonNull
-	private BaseTypes activeBaseId = BaseTypes.PREFIX_TREE;
-
 	public BasePrefixTree(@NonNull PrimeSourceIntfc ps)
 	{
 		super(ps);
+	}
+
+	public PrefixIteratorIntfc iterator()
+	{
+		return new PrefixIterator(this);
 	}
 
 	/**
@@ -36,55 +37,37 @@ public class BasePrefixTree extends AbstractPrimeBaseGenerator
 	public void genBases()
 	{
 		System.out.println(String.format("%n"));
+		log.info("BasePrefixTree genBases()");
 
-		ps.getPrimeRefStream(preferParallel).forEach(
+		final var prStream = ps.getPrimeRefStream(false).skip(2);
+		prStream.forEach(
 				curPrime ->
 				{
-					try
-					{
-						final var origBaseIdxs = curPrime.getPrimeBaseData().getPrimeBaseIdxs().get(0);
-						final var curPrimePrefixIdxs = new ConcurrentLinkedDeque<Integer>(origBaseIdxs);
+					if (this.doLog)
+						log.info("genBases() - prime " + curPrime.getPrime());
 
-						// Prefixes don't include the Prime (n-1) item per the definition of "prefix" used.
-						if (!curPrimePrefixIdxs.isEmpty())
-							curPrimePrefixIdxs.removeLast();
+					final var origBaseIdxs = curPrime.getPrimeBaseData().getPrimeBaseIdxs().get(0);
+					final var curPrimePrefixIdxs = new ConcurrentLinkedDeque<Integer>(origBaseIdxs);
 
-						final var curPrefixIdxsIt = curPrimePrefixIdxs.stream().iterator();
-						var curPrefixMap = prefixMap;
-						if (curPrefixIdxsIt.hasNext())
-							do {
+					// Prefixes don't include the Prime (n-1) item per the definition of "prefix" used.
+					if (!curPrimePrefixIdxs.isEmpty())
+						curPrimePrefixIdxs.removeLast();
 
-								final var curBaseIdx = curPrefixIdxsIt.next();
-								final var curPrefixPrime = ps.getPrime(curBaseIdx).get();
+					final var curPrefixIdxsIt = curPrimePrefixIdxs.stream().iterator();
+					var curPrefixIt = this.iterator();
+					PrefixTreeNode [] tn = {null};
+					curPrefixIdxsIt.forEachRemaining(i ->
+						{
+							final var bi = ps.getPrime(i).get();
+							if (this.doLog)
+								log.info(String.format("handling prime[%d] base-index [%d] base-prime [%d]", curPrime.getPrime(), i, bi));
 
-								if (!curPrefixMap.containsKey(curPrefixPrime))
-								{
-									addNextPrefixPrime(curPrefixMap, curPrefixPrime);
-								}
+							tn[0] = curPrefixIt.add(bi);
+						});
 
-								final var curTree = curPrefixMap.get(curPrefixPrime);
-								if (!curPrefixIdxsIt.hasNext())
-								{
-									curTree.getSourcePrimes().add(curPrime.getPrime());
-								}
 
-								curPrefixMap = curTree.getNext();
-							}
-							while (curPrefixIdxsIt.hasNext());
-					}
-					catch(Exception e)
-					{
-						log.severe(String.format("Can't show bases for: %d exception:", curPrime.getPrime()));
-						log.throwing(this.getClass().getName(), "log", e);
-						e.printStackTrace();
-					}
+					tn[0].setSourcePrimes(curPrefixIt.toSet());
+					curPrime.getPrimeBaseData().addPrimeBases(tn[0].getSourcePrimes(), BaseTypes.PREFIX_TREE);
 				});
-	}
-
-	void addNextPrefixPrime(Map<BigInteger, PrefixTreeNode> curTree, BigInteger curPrefixPrime)
-	{
-		final var nextMap = new TreeMap<BigInteger,PrefixTreeNode>();
-		final var newTree = new PrefixTreeNode(curPrefixPrime, nextMap);
-		curTree.put(curPrefixPrime, newTree);
 	}
 }

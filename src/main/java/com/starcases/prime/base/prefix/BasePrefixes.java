@@ -34,7 +34,7 @@ public class BasePrefixes extends AbstractPrimeBaseGenerator
 						final var last = ((TreeSet<Integer>)origIdxs).pollLast();
 						var tmpSet = new TreeSet<Integer>(origIdxs);
 						tmpSet.remove(last);
-						pr.getPrimeBaseData().addPrimeBase(tmpSet, BaseTypes.PREFIX);
+						pr.getPrimeBaseData().addPrimeBaseIndexes(tmpSet, BaseTypes.PREFIX);
 					}
 					catch(Exception e)
 					{

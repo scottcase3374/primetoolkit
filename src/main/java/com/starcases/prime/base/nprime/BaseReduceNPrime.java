@@ -124,7 +124,7 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 
 				curPrime
 					.getPrimeBaseData()
-					.addPrimeBase(BaseTypes.NPRIME, retBaseIdxs, new NPrimeBaseMetadata(retCountForBaseIdx));
+					.addPrimeBaseIndexes(BaseTypes.NPRIME, retBaseIdxs, new NPrimeBaseMetadata(retCountForBaseIdx));
 			}
 			catch(Exception e)
 			{

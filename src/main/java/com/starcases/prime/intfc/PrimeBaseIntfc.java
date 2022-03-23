@@ -2,7 +2,6 @@ package com.starcases.prime.intfc;
 
 import java.io.Serializable;
 import java.math.BigInteger;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -25,20 +24,19 @@ import lombok.NonNull;
  */
 public interface PrimeBaseIntfc extends Serializable
 {
-	@NonNull
-	static final Comparator<BigInteger> bigIntComp = (b1, b2) -> b1.compareTo(b2);
+	void addPrimeBaseIndexes(@NonNull BaseTypes baseType, @NonNull Set<Integer> primeBase, @NonNull BaseMetadataIntfc metadata);
+
+	void addPrimeBaseIndexes(@NonNull Set<Integer> primeBase);
+
+	void addPrimeBaseIndexes(@NonNull Set<Integer> primeBase, @NonNull BaseTypes baseType);
 
 
-	void addPrimeBase(@NonNull BaseTypes baseType, @NonNull Set<Integer> primeBase, @NonNull BaseMetadataIntfc metadata);
+	void addPrimeBases(@NonNull BaseTypes baseType, @NonNull Set<BigInteger> primeBase, @NonNull BaseMetadataIntfc metadata);
 
-	/**
-	 * No baseTypes arg version; so this returns data for Bases.DEFAULT
-	 *
-	 * @param primeBase
-	 */
-	void addPrimeBase(@NonNull Set<Integer> primeBase);
+	void addPrimeBases(@NonNull Set<BigInteger> primeBase);
 
-	void addPrimeBase(@NonNull Set<Integer> primeBase, @NonNull BaseTypes baseType);
+	void addPrimeBases(@NonNull Set<BigInteger> primeBase, @NonNull BaseTypes baseType);
+
 
 	BaseMetadataIntfc getBaseMetadata();
 
@@ -56,4 +54,19 @@ public interface PrimeBaseIntfc extends Serializable
 	 * @return
 	 */
 	List<Set<Integer>> getPrimeBaseIdxs(@NonNull BaseTypes baseType);
+
+	/**
+	 *
+	 * Not every use case needs multiple bases per Prime
+	 *
+	 *
+	 * @return No-arg version; so this returns data for Bases.DEFAULT
+	 */
+	List<Set<BigInteger>> getPrimeBases();
+
+	/**
+	 * Not every use case needs multiple bases per Prime
+	 * @return
+	 */
+	List<Set<BigInteger>> getPrimeBases(@NonNull BaseTypes baseType);
 }

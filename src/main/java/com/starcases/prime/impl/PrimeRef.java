@@ -69,7 +69,16 @@ public class PrimeRef implements PrimeRefIntfc
 					@NonNull Supplier<PrimeBaseIntfc> primeBaseSupplier)
 	{
 		primeBaseData = primeBaseSupplier.get();
-		getPrimeBaseData().addPrimeBase(primeBaseIdxs);
+		getPrimeBaseData().addPrimeBaseIndexes(primeBaseIdxs);
+		return this;
+	}
+
+	public PrimeRef init(
+			@NonNull Supplier<PrimeBaseIntfc> primeBaseSupplier,
+			@NonNull Set<BigInteger> primeBases)
+	{
+		primeBaseData = primeBaseSupplier.get();
+		getPrimeBaseData().addPrimeBases(primeBases);
 		return this;
 	}
 
