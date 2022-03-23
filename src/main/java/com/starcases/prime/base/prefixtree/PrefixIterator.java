@@ -6,12 +6,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class PrefixIterator implements PrefixIteratorIntfc
 {
-	private static final Logger log = Logger.getLogger(PrefixIterator.class.getName());
 	private BasePrefixTree tree;
 	private Map<BigInteger, PrefixTreeNode> treeNodeMap = null;
 	private Set<PrefixTreeNode> sourceTreeNodes = new HashSet<>();
