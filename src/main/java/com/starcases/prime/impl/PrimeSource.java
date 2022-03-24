@@ -50,12 +50,6 @@ public class PrimeSource implements PrimeSourceIntfc
 
 	//private final BasePrefixTree prefixTree = new BasePrefixTree(this);
 
-//	@NonNull
-//	private final Map<Integer, BigInteger> primes;
-//
-//	@NonNull
-//	private final Map<Integer,PrimeRefIntfc> primeRefs;
-
 	@NonNull
 	private final Map<Integer,PrimeMapEntry> primeMaps;
 
@@ -113,8 +107,7 @@ public class PrimeSource implements PrimeSourceIntfc
 	{
 
 		this.cacheMgr = cacheMgr;
-//		primes = new ConcurrentHashMap<>(maxCount);
-//		primeRefs = new ConcurrentHashMap<>(maxCount);
+
 		primeMaps = new ConcurrentHashMap<>(maxCount);
 		targetPrimeCount = maxCount;
 
@@ -143,10 +136,8 @@ public class PrimeSource implements PrimeSourceIntfc
 			EmbeddedCacheManager cacheMgr
 			)
 	{
-
 		this.cacheMgr = cacheMgr;
-//		primes = new ConcurrentHashMap<>(maxCount);
-//		primeRefs = new ConcurrentHashMap<>(maxCount);
+
 		primeMaps = new ConcurrentHashMap<>(maxCount);
 		targetPrimeCount = maxCount;
 
@@ -237,7 +228,6 @@ public class PrimeSource implements PrimeSourceIntfc
 						incrementPermutation(primeIndexPermutation);
 				}
 			}
-
 
 			// display some progress info
 			if (nextIdx.get() % 1000 == 0)

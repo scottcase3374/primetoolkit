@@ -1,6 +1,5 @@
 package com.starcases.prime.impl;
 
-import java.lang.ref.WeakReference;
 import java.math.BigInteger;
 
 import com.starcases.prime.intfc.PrimeRefIntfc;
