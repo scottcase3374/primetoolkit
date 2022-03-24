@@ -1,7 +1,6 @@
 package com.starcases.prime.impl;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Map;
 import java.util.Optional;
@@ -10,7 +9,6 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -18,10 +16,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.starcases.prime.base.BaseTypes;
+import com.starcases.prime.base.prefixtree.BasePrefixTree;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import java.util.Iterator;
-import java.util.List;
 
 import lombok.NonNull;
 import javax.validation.constraints.Min;
@@ -50,15 +48,16 @@ public class PrimeSource implements PrimeSourceIntfc
 	@Min(-1)
 	private final AtomicInteger nextIdx = new AtomicInteger(-1);
 
-	@NonNull
-	private final List<List<Integer>> prefixes = new ArrayList<>();
+	//private final BasePrefixTree prefixTree = new BasePrefixTree(this);
+
+//	@NonNull
+//	private final Map<Integer, BigInteger> primes;
+//
+//	@NonNull
+//	private final Map<Integer,PrimeRefIntfc> primeRefs;
 
 	@NonNull
-	private final Map<Integer, BigInteger> primes;
-
-	@NonNull
-	private final Map<Integer,PrimeRefIntfc> primeRefs;
-
+	private final Map<Integer,PrimeMapEntry> primeMaps;
 
 	@Min(1)
 	private final int targetPrimeCount;
@@ -114,8 +113,9 @@ public class PrimeSource implements PrimeSourceIntfc
 	{
 
 		this.cacheMgr = cacheMgr;
-		primes = new ConcurrentHashMap<>(maxCount);
-		primeRefs = new ConcurrentHashMap<>(maxCount);
+//		primes = new ConcurrentHashMap<>(maxCount);
+//		primeRefs = new ConcurrentHashMap<>(maxCount);
+		primeMaps = new ConcurrentHashMap<>(maxCount);
 		targetPrimeCount = maxCount;
 
 		this.primeRefCtor = primeRefCtor;
@@ -145,8 +145,9 @@ public class PrimeSource implements PrimeSourceIntfc
 	{
 
 		this.cacheMgr = cacheMgr;
-		primes = new ConcurrentHashMap<>(maxCount);
-		primeRefs = new ConcurrentHashMap<>(maxCount);
+//		primes = new ConcurrentHashMap<>(maxCount);
+//		primeRefs = new ConcurrentHashMap<>(maxCount);
+		primeMaps = new ConcurrentHashMap<>(maxCount);
 		targetPrimeCount = maxCount;
 
 		this.primeRefRawCtor = primeRefRawCtor;
@@ -199,7 +200,7 @@ public class PrimeSource implements PrimeSourceIntfc
 			final var curPrime = getPrime(curPrimeIdx);
 
 			// Represents a X-bit search space of indexes for primes to add for next Prime.
-			final var numBitsForPrimeCount = primeRefs.size()-1;
+			final var numBitsForPrimeCount = primeMaps.size()-1;
 			primeIndexMaxPermutation.clear(numBitsForPrimeCount-1);
 			primeIndexMaxPermutation.set(numBitsForPrimeCount); // keep 'shifting' max bit left
 
@@ -261,14 +262,14 @@ public class PrimeSource implements PrimeSourceIntfc
 	public void store(BaseTypes ... baseTypes)
 	{
 
-		Map<Integer, BigInteger> primeCache = cacheMgr.getCache("primes");
-		primeCache.putAll(primes);
+//		Map<Integer, BigInteger> primeCache = cacheMgr.getCache("primes");
+//		primeCache.putAll(primes);
 
-		Map<Integer, PrimeRefIntfc> primeRefCache = cacheMgr.getCache("primerefs");
-		primeRefCache.putAll(primeRefs);
+//		Map<Integer, PrimeRefIntfc> primeRefCache = cacheMgr.getCache("primerefs");
+//		primeRefCache.putAll(primeRefs);
 
-		if (log.isLoggable(Level.INFO))
-			log.info(String.format("Stored [%d] primes, [%d] PrimeRefs", primeCache.size(), primeRefCache.size()));
+//		if (log.isLoggable(Level.INFO))
+//			log.info(String.format("Stored [%d] primes, [%d] PrimeRefs", primeCache.size(), primeRefCache.size()));
 		//if (baseTypes != null)
 		//	cacheMgr.getCache(BaseTypes.DEFAULT.name()).putAll(primeRefs.get(BaseTypes.DEFAULT));
 	}
@@ -276,38 +277,38 @@ public class PrimeSource implements PrimeSourceIntfc
 	@Override
 	public void load(BaseTypes ... baseTypes)
 	{
-		if (doInit.getPlain())
-		{
-			return;
-		}
-		Map<Integer, BigInteger>  prCache = cacheMgr.getCache("primes");
-		if (!prCache.isEmpty())
-		{
-			primes.putAll(prCache);
-
-			if (log.isLoggable(Level.INFO))
-				log.info(String.format("cached prime entries loaded: %d ", primes.size()));
-		}
-		else
-		{
-			if (log.isLoggable(Level.INFO))
-				log.info("prime cache empty");
-		}
-
-		Map<Integer, PrimeRef>  prRefCache = cacheMgr.getCache("primerefs");
-		if (!prRefCache.isEmpty())
-		{
-			//prRefCache.forEach((k,v) -> {v.init(null, baseSetPrimeSrc); primeRefs.put(k, v); });
-			primeRefs.putAll(prRefCache);
-
-			if (log.isLoggable(Level.INFO))
-				log.info(String.format("cached prime ref entries loaded: %d ", primeRefs.size()));
-		}
-		else
-		{
-			if (log.isLoggable(Level.INFO))
-				log.info("prime refs cache empty");
-		}
+//		if (doInit.getPlain())
+//		{
+//			return;
+//		}
+//		Map<Integer, BigInteger>  prCache = cacheMgr.getCache("primes");
+//		if (!prCache.isEmpty())
+//		{
+//			primes.putAll(prCache);
+//
+//			if (log.isLoggable(Level.INFO))
+//				log.info(String.format("cached prime entries loaded: %d ", primes.size()));
+//		}
+//		else
+//		{
+//			if (log.isLoggable(Level.INFO))
+//				log.info("prime cache empty");
+//		}
+//
+//		Map<Integer, PrimeRef>  prRefCache = cacheMgr.getCache("primerefs");
+//		if (!prRefCache.isEmpty())
+//		{
+//			//prRefCache.forEach((k,v) -> {v.init(null, baseSetPrimeSrc); primeRefs.put(k, v); });
+//			primeRefs.putAll(prRefCache);
+//
+//			if (log.isLoggable(Level.INFO))
+//				log.info(String.format("cached prime ref entries loaded: %d ", primeRefs.size()));
+//		}
+//		else
+//		{
+//			if (log.isLoggable(Level.INFO))
+//				log.info("prime refs cache empty");
+//		}
 	}
 
 	@Override
@@ -319,40 +320,43 @@ public class PrimeSource implements PrimeSourceIntfc
 	@Override
 	public Iterator<PrimeRefIntfc> getPrimeRefIter()
 	{
-		return primeRefs.values().iterator();
+		return new PrimeMapIterator(primeMaps.values().iterator());
 	}
 
 	@Override
 	public Stream<PrimeRefIntfc> getPrimeRefStream(boolean preferParallel)
 	{
-		return preferParallel ? primeRefs.values().parallelStream() : primeRefs.values().stream();
+		return (preferParallel ? primeMaps.values().parallelStream() : primeMaps.values().stream()).map(PrimeMapEntry::getPrimeRef);
 	}
 
 	@Override
 	public Optional<BigInteger> getPrime(@Min(0) int primeIdx)
 	{
-		if (!primes.containsKey(primeIdx))
+		if (!primeMaps.containsKey(primeIdx))
 			return Optional.empty();
 
-		return Optional.of(primes.get(primeIdx));
+		return Optional.of(primeMaps.get(primeIdx).getPrime());
 	}
 
 	@Override
 	public Optional<BigInteger> getPrime(@Min(0) BigInteger prime)
 	{
-		if (!primes.containsValue(prime))
-			return Optional.empty();
-
-		return primes.values().parallelStream().filter(b -> b.equals(prime)).findAny();
+		return primeMaps.values().parallelStream().map(PrimeMapEntry::getPrime).filter(b -> b.equals(prime)).findAny();
 	}
 
 	@Override
 	public Optional<PrimeRefIntfc> getPrimeRef(@Min(0) int primeIdx)
 	{
-		if (primeIdx < 0 || primeIdx >= primeRefs.size())
+		if (primeIdx < 0 || primeIdx >= primeMaps.size())
 			return Optional.empty();
 
-		return   Optional.of(primeRefs.get(primeIdx));
+		return   Optional.of(primeMaps.get(primeIdx).getPrimeRef());
+	}
+
+	@Override
+	public Optional<PrimeRefIntfc> getPrimeRef(@Min(0) BigInteger prime, boolean dummyFlag)
+	{
+		return primeMaps.values().stream().filter(me -> me.getPrime().equals(prime)).map(entry -> entry.getPrimeRef() ).findAny();
 	}
 
 	private BigInteger calcSumCeiling(@NonNull @Min(3) BigInteger primeSum)
@@ -387,9 +391,8 @@ public class PrimeSource implements PrimeSourceIntfc
 	{
 		var idx = nextIdx.incrementAndGet();
 
-		primes.put(idx, newPrime);
 		PrimeRefIntfc ret = primeRefCtor.apply(idx, base);
-		primeRefs.put(idx, ret);
+		primeMaps.put(idx, new PrimeMapEntry(newPrime, ret));
 	}
 
 	/**

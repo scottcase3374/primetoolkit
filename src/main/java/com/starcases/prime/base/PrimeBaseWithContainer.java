@@ -17,7 +17,7 @@ import com.starcases.prime.intfc.PrimeSourceIntfc;
 import lombok.Getter;
 import lombok.NonNull;
 
-public class PrimeBaseWithLists implements PrimeBaseIntfc
+public class PrimeBaseWithContainer implements PrimeBaseIntfc
 {
 	/**
 	 *
@@ -51,7 +51,7 @@ public class PrimeBaseWithLists implements PrimeBaseIntfc
 	private BaseMetadataIntfc baseMetadata;
 
 	@ProtoFactory
-	public PrimeBaseWithLists()
+	public PrimeBaseWithContainer()
 	{
 		// nothing to init here
 	}

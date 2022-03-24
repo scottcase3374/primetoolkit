@@ -12,7 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.starcases.prime.base.BaseTypes;
-import com.starcases.prime.base.PrimeBaseWithLists;
+import com.starcases.prime.base.PrimeBaseWithContainer;
 import com.starcases.prime.impl.PrimeRef;
 import com.starcases.prime.intfc.FactoryIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
@@ -32,10 +32,10 @@ class PrimeSourceUnitTest
 		PTKFactory.setConfidenceLevel(100);
 
 		PTKFactory.setActiveBaseId(BaseTypes.DEFAULT);
-		PTKFactory.setBaseSetPrimeSource(PrimeBaseWithLists::setPrimeSource);
+		PTKFactory.setBaseSetPrimeSource(PrimeBaseWithContainer::setPrimeSource);
 		PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
 
-		PTKFactory.setPrimeBaseCtor(PrimeBaseWithLists::new);
+		PTKFactory.setPrimeBaseCtor(PrimeBaseWithContainer::new);
 		PTKFactory.setPrimeRefCtor( (i, base) -> (new PrimeRef(i)).init( base, PTKFactory.getPrimeBaseCtor() ));
 
 		FactoryIntfc factory = PTKFactory.getFactory();

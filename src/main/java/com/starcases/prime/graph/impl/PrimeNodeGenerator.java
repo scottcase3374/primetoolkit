@@ -10,6 +10,7 @@ import com.starcases.prime.intfc.PrimeSourceIntfc;
 
 import lombok.NonNull;
 
+import java.math.BigInteger;
 import java.util.NoSuchElementException;
 
 /**
@@ -65,7 +66,7 @@ public class PrimeNodeGenerator
 		try
 		{
 			primeRef = ps.getPrimeRef(level).orElseThrow();
-			addNode();
+			addNodeRawBase();
 			return true;
 		}
 		catch(NoSuchElementException | IndexOutOfBoundsException | NullPointerException e)
@@ -93,6 +94,20 @@ public class PrimeNodeGenerator
 		level++;
 	}
 
+	protected void addNodeRawBase()
+	{
+		// Link from Prime node to Prime bases (i.e. unique set of smaller primes that sums to this Prime).
+		primeRef.getPrimeBaseData().getPrimeBases(baseType)
+							.get(0)
+							.stream()
+							.forEach(
+									base -> {
+											addVertext(primeRef);
+											addBaseEdge(base, primeRef);
+										});
+		level++;
+	}
+
 	protected void addVertext(PrimeRefIntfc primeRef)
 	{
 		graph.addVertex(primeRef);
@@ -101,5 +116,11 @@ public class PrimeNodeGenerator
 	protected void addBaseEdge(PrimeRefIntfc primeRef, int baseIdx)
 	{
 		ps.getPrimeRef(baseIdx).ifPresent( p -> graph.addEdge(p , primeRef));
+	}
+
+
+	protected void addBaseEdge(BigInteger base, PrimeRefIntfc primeRef)
+	{
+		ps.getPrimeRef(base, false).ifPresent( p -> graph.addEdge(p , primeRef));
 	}
 }

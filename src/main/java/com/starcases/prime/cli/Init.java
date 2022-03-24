@@ -16,7 +16,7 @@ import org.jgrapht.graph.DefaultEdge;
 
 import com.starcases.prime.PTKFactory;
 import com.starcases.prime.base.BaseTypes;
-import com.starcases.prime.base.PrimeBaseWithLists;
+import com.starcases.prime.base.PrimeBaseWithContainer;
 import com.starcases.prime.base.nprime.BaseReduceNPrime;
 import com.starcases.prime.base.nprime.LogBasesNPrime;
 import com.starcases.prime.base.prefix.BasePrefixes;
@@ -133,10 +133,10 @@ public class Init implements Runnable
 		PTKFactory.setConfidenceLevel(initOpts.confidenceLevel);
 
 		PTKFactory.setActiveBaseId(BaseTypes.DEFAULT);
-		PTKFactory.setBaseSetPrimeSource(PrimeBaseWithLists::setPrimeSource);
+		PTKFactory.setBaseSetPrimeSource(PrimeBaseWithContainer::setPrimeSource);
 		PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
 
-		PTKFactory.setPrimeBaseCtor(PrimeBaseWithLists::new);
+		PTKFactory.setPrimeBaseCtor(PrimeBaseWithContainer::new);
 		PTKFactory.setPrimeRefCtor( (i, base) -> (new PrimeRef(i)).init(base, PTKFactory.getPrimeBaseCtor()) );
 	}
 
@@ -211,8 +211,8 @@ public class Init implements Runnable
 			case NPRIME:
 				PTKFactory.setActiveBaseId(BaseTypes.NPRIME);
 				PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
-				PTKFactory.setBaseSetPrimeSource(PrimeBaseWithLists::setPrimeSource);
-				PTKFactory.setPrimeBaseCtor(PrimeBaseWithLists::new);
+				PTKFactory.setBaseSetPrimeSource(PrimeBaseWithContainer::setPrimeSource);
+				PTKFactory.setPrimeBaseCtor(PrimeBaseWithContainer::new);
 				PTKFactory.setPrimeRefCtor( (i, base) -> (new PrimeRef(i)).init(base, PTKFactory.getPrimeBaseCtor()) );
 
 				actions.add(s ->
@@ -229,8 +229,8 @@ public class Init implements Runnable
 			case THREETRIPLE:
 				PTKFactory.setActiveBaseId(BaseTypes.THREETRIPLE);
 				PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
-				PTKFactory.setBaseSetPrimeSource( PrimeBaseWithLists::setPrimeSource);
-				PTKFactory.setPrimeBaseCtor(PrimeBaseWithLists::new);
+				PTKFactory.setBaseSetPrimeSource( PrimeBaseWithContainer::setPrimeSource);
+				PTKFactory.setPrimeBaseCtor(PrimeBaseWithContainer::new);
 				PTKFactory.setPrimeRefCtor( (i, base) -> (new PrimeRef(i)).init(base, PTKFactory.getPrimeBaseCtor() ) );
 
 				actions.add(s ->
@@ -246,8 +246,8 @@ public class Init implements Runnable
 			case PREFIX:
 				PTKFactory.setActiveBaseId(BaseTypes.PREFIX);
 				PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
-				PTKFactory.setBaseSetPrimeSource( PrimeBaseWithLists::setPrimeSource);
-				PTKFactory.setPrimeBaseCtor(PrimeBaseWithLists::new);
+				PTKFactory.setBaseSetPrimeSource( PrimeBaseWithContainer::setPrimeSource);
+				PTKFactory.setPrimeBaseCtor(PrimeBaseWithContainer::new);
 				PTKFactory.setPrimeRefCtor( (i, base) -> (new PrimeRef(i)).init(base, PTKFactory.getPrimeBaseCtor())  );
 
 				actions.add(s ->
@@ -263,8 +263,8 @@ public class Init implements Runnable
 			case PREFIX_TREE:
 				PTKFactory.setActiveBaseId(BaseTypes.PREFIX_TREE);
 				PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
-				PTKFactory.setBaseSetPrimeSource( PrimeBaseWithLists::setPrimeSource);
-				PTKFactory.setPrimeBaseCtor(PrimeBaseWithLists::new);
+				PTKFactory.setBaseSetPrimeSource( PrimeBaseWithContainer::setPrimeSource);
+				PTKFactory.setPrimeBaseCtor(PrimeBaseWithContainer::new);
 				PTKFactory.setPrimeRefRawCtor( (i, base) -> (new PrimeRef(i)).init(PTKFactory.getPrimeBaseCtor(), base)  );
 
 				actions.add(s ->
