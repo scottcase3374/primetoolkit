@@ -95,7 +95,8 @@ public class PTKFactory
 					@Override
 					public PrimeSourceIntfc getPrimeSource()
 					{
-						return primeSource(maxCount, confidenceLevel, getPrimeRefConstructor(), primeRefSetPrimeSource, baseSetPrimeSource);
+						//return primeSource(maxCount, confidenceLevel, getPrimeRefConstructor(), primeRefSetPrimeSource, baseSetPrimeSource);
+						return primeSource(maxCount, confidenceLevel, getPrimeRefConstructor(),  getPrimeRefRawConstructor(), primeRefSetPrimeSource, baseSetPrimeSource);
 					}
 
 					@Override
@@ -132,15 +133,16 @@ public class PTKFactory
 			@Min(1) int maxCount,
 			@Min(1) int confidenceLevel,
 			@NonNull BiFunction<Integer, Set<Integer>, PrimeRefIntfc> primeRefCtor,
+			@NonNull BiFunction<Integer, Set<BigInteger>, PrimeRefIntfc> primeRefRawCtor,
 			@NonNull Consumer<PrimeSourceIntfc> consumerSetPrimeSource,
 			@NonNull Consumer<PrimeSourceIntfc> baseSetPrimeSource
 			)
 	{
 		return new PrimeSource(maxCount
-								,primeRefCtor
 								, consumerSetPrimeSource
 								, baseSetPrimeSource
 								, confidenceLevel
+								,primeRefRawCtor
 								, cacheMgr);
 	}
 }

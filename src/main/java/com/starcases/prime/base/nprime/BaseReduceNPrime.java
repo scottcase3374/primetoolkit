@@ -114,6 +114,7 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 		}
 
 		ps.getPrimeRefStream(this.preferParallel)
+			.filter(pr -> pr.getPrimeBaseData().getPrimeBaseIdxs() != null && !pr.getPrimeBaseData().getPrimeBaseIdxs().isEmpty())
 				.forEach( curPrime ->
 		{
 			try
@@ -129,6 +130,7 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 			catch(Exception e)
 			{
 				log.severe("Error: " + e);
+				e.printStackTrace();
 
 			}
 		});

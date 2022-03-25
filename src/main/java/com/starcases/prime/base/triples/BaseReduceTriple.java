@@ -111,7 +111,7 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 		.forEach(curPrime ->
 					curPrime
 					.getPrimeBaseData()
-					.addPrimeBaseIndexes(curPrime.getPrimeBaseData().getPrimeBaseIdxs(BaseTypes.DEFAULT).get(0), BaseTypes.THREETRIPLE)
+					.addPrimeBases(curPrime.getPrimeBaseData().getPrimeBases(BaseTypes.DEFAULT).get(0), BaseTypes.THREETRIPLE)
 		);
 
 		ps.getPrimeRefStream(true).forEach(curPrime -> handlePrime(curPrime, counter.incrementAndGet()));

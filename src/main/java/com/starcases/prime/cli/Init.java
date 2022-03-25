@@ -138,6 +138,7 @@ public class Init implements Runnable
 
 		PTKFactory.setPrimeBaseCtor(PrimeBaseWithContainer::new);
 		PTKFactory.setPrimeRefCtor( (i, base) -> (new PrimeRef(i)).init(base, PTKFactory.getPrimeBaseCtor()) );
+		PTKFactory.setPrimeRefRawCtor( (i, base) -> (new PrimeRef(i)).init(PTKFactory.getPrimeBaseCtor(), base) );
 	}
 
 	void stdOutRedirect()
@@ -214,6 +215,7 @@ public class Init implements Runnable
 				PTKFactory.setBaseSetPrimeSource(PrimeBaseWithContainer::setPrimeSource);
 				PTKFactory.setPrimeBaseCtor(PrimeBaseWithContainer::new);
 				PTKFactory.setPrimeRefCtor( (i, base) -> (new PrimeRef(i)).init(base, PTKFactory.getPrimeBaseCtor()) );
+				PTKFactory.setPrimeRefRawCtor( (i, base) -> (new PrimeRef(i)).init(PTKFactory.getPrimeBaseCtor(), base) );
 
 				actions.add(s ->
 								{
@@ -232,7 +234,8 @@ public class Init implements Runnable
 				PTKFactory.setBaseSetPrimeSource( PrimeBaseWithContainer::setPrimeSource);
 				PTKFactory.setPrimeBaseCtor(PrimeBaseWithContainer::new);
 				PTKFactory.setPrimeRefCtor( (i, base) -> (new PrimeRef(i)).init(base, PTKFactory.getPrimeBaseCtor() ) );
-
+				PTKFactory.setPrimeRefRawCtor( (i, base) -> (new PrimeRef(i)).init(PTKFactory.getPrimeBaseCtor(), base) );
+				
 				actions.add(s ->
 								{
 									log.info(method + baseOpts.bases);
@@ -249,6 +252,7 @@ public class Init implements Runnable
 				PTKFactory.setBaseSetPrimeSource( PrimeBaseWithContainer::setPrimeSource);
 				PTKFactory.setPrimeBaseCtor(PrimeBaseWithContainer::new);
 				PTKFactory.setPrimeRefCtor( (i, base) -> (new PrimeRef(i)).init(base, PTKFactory.getPrimeBaseCtor())  );
+				PTKFactory.setPrimeRefRawCtor( (i, base) -> (new PrimeRef(i)).init(PTKFactory.getPrimeBaseCtor(), base) );
 
 				actions.add(s ->
 								{
@@ -265,7 +269,9 @@ public class Init implements Runnable
 				PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
 				PTKFactory.setBaseSetPrimeSource( PrimeBaseWithContainer::setPrimeSource);
 				PTKFactory.setPrimeBaseCtor(PrimeBaseWithContainer::new);
-				PTKFactory.setPrimeRefRawCtor( (i, base) -> (new PrimeRef(i)).init(PTKFactory.getPrimeBaseCtor(), base)  );
+				PTKFactory.setPrimeRefCtor( (i, base) -> (new PrimeRef(i)).init(base, PTKFactory.getPrimeBaseCtor())  );
+				PTKFactory.setPrimeRefRawCtor( (i, base) -> (new PrimeRef(i)).init(PTKFactory.getPrimeBaseCtor(), base));
+				
 
 				actions.add(s ->
 								{

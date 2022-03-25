@@ -10,7 +10,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -40,6 +39,9 @@ public class PrimeSource implements PrimeSourceIntfc
 	 */
 	private static final long serialVersionUID = 1L;
 
+	@NonNull
+	private final AtomicBoolean doInit = new AtomicBoolean(false);
+
 	private transient EmbeddedCacheManager cacheMgr;
 
 	@Min(1)
@@ -48,10 +50,8 @@ public class PrimeSource implements PrimeSourceIntfc
 	@Min(-1)
 	private final AtomicInteger nextIdx = new AtomicInteger(-1);
 
-	//private final BasePrefixTree prefixTree = new BasePrefixTree(this);
-
 	@NonNull
-	private final Map<Integer,PrimeMapEntry> primeMaps;
+	private final Map<BigInteger,PrimeMapEntry> primeMaps;
 
 	@Min(1)
 	private final int targetPrimeCount;
@@ -59,9 +59,7 @@ public class PrimeSource implements PrimeSourceIntfc
 	@NonNull
 	private BaseTypes activeBaseId = BaseTypes.DEFAULT;
 
-	@NonNull
-	private final AtomicBoolean doInit = new AtomicBoolean(false);
-
+	// for when using BigInteger primes directly instead of indirectly referencing them through integer indices.
 	// Default PrimeRef implementation to use for this PrimeSource.
 	//
 	// This is non-static because it currently can be overridden by passing
@@ -76,6 +74,7 @@ public class PrimeSource implements PrimeSourceIntfc
 	@NonNull
 	private transient BiFunction<Integer, Set<BigInteger>, PrimeRefIntfc> primeRefRawCtor;
 
+	// for when using referring to BigInteger primes indirectly through integer indices.
 	// Default PrimeRef implementation to use for this PrimeSource.
 	//
 	// This is non-static because it currently can be overridden by passing
@@ -92,6 +91,8 @@ public class PrimeSource implements PrimeSourceIntfc
 
 	private transient Consumer<PrimeSourceIntfc> baseSetPrimeSrc;
 
+	private BasePrefixTree prefixTree;
+
 	//
 	// initialization
 	//
@@ -105,7 +106,6 @@ public class PrimeSource implements PrimeSourceIntfc
 			EmbeddedCacheManager cacheMgr
 			)
 	{
-
 		this.cacheMgr = cacheMgr;
 
 		primeMaps = new ConcurrentHashMap<>(maxCount);
@@ -146,13 +146,13 @@ public class PrimeSource implements PrimeSourceIntfc
 		this.baseSetPrimeSrc = baseSetPrimeSrc;
 		baseSetPrimeSrc.accept(this);
 
-		var tmpIndexSet = new TreeSet<Integer>();
-		tmpIndexSet.add(0);
-		addPrimeRef(BigInteger.valueOf(1L), tmpIndexSet);
+		var tmpIndexSet = new TreeSet<BigInteger>();
+		tmpIndexSet.add(BigInteger.ZERO);
+		addPrimeRef(tmpIndexSet, BigInteger.valueOf(1L));
 
-		tmpIndexSet = new TreeSet<Integer>();
-		tmpIndexSet.add(1);
-		addPrimeRef(BigInteger.valueOf(2L), tmpIndexSet);
+		tmpIndexSet = new TreeSet<BigInteger>();
+		tmpIndexSet.add(BigInteger.ONE);
+		addPrimeRef(tmpIndexSet, BigInteger.valueOf(2L));
 
 		this.confidenceLevel = confidenceLevel;
 	}
@@ -168,13 +168,15 @@ public class PrimeSource implements PrimeSourceIntfc
 	@Override
 	public void init()
 	{
-		log.info("PrimeSource::init()");
-
 		if (doInit.compareAndExchangeAcquire(false, true))
 		{
-			log.info("PrimeSource::init() - already called; returning now");
+			// Prevent double init - various valid combinations of code can attempt that.
 			return;
 		}
+
+		log.info("PrimeSource::init()");
+
+		prefixTree = new BasePrefixTree(this);
 
 		final var primeIndexMaxPermutation = new BitSet();
 		final var primeIndexPermutation = new BitSet();
@@ -218,10 +220,12 @@ public class PrimeSource implements PrimeSourceIntfc
 				{
 					if (curPrime.isPresent() && viablePrime(permutationSum, curPrime.get()))
 					{
-						final var sumBaseIdxs = primeIndexPermutation.get(0, numBitsForPrimeCount);
-						sumBaseIdxs.set(nextIdx.get());
-
-						addPrimeRef(permutationSum, sumBaseIdxs.stream().boxed().collect(Collectors.toCollection(TreeSet::new)));
+						//final var sumBaseIdxs = primeIndexPermutation.get(0, numBitsForPrimeCount);
+						//sumBaseIdxs.set(nextIdx.get());
+						var pt = prefixTree.iterator();
+						//addPrimeRef(permutationSum, sumBaseIdxs.stream().boxed().collect(Collectors.toCollection(TreeSet::new)));
+						primeIndexPermutation.stream().forEach(i -> pt.add(BigInteger.valueOf(i)));
+						addPrimeRef(pt.toSet(), permutationSum);
 						doLoop = false;
 					}
 					else
@@ -322,10 +326,10 @@ public class PrimeSource implements PrimeSourceIntfc
 	@Override
 	public Optional<BigInteger> getPrime(@Min(0) int primeIdx)
 	{
-		if (!primeMaps.containsKey(primeIdx))
+		if (!primeMaps.containsKey(BigInteger.valueOf(primeIdx)))
 			return Optional.empty();
 
-		return Optional.of(primeMaps.get(primeIdx).getPrime());
+		return Optional.of(primeMaps.get(BigInteger.valueOf(primeIdx)).getPrime());
 	}
 
 	@Override
@@ -340,7 +344,7 @@ public class PrimeSource implements PrimeSourceIntfc
 		if (primeIdx < 0 || primeIdx >= primeMaps.size())
 			return Optional.empty();
 
-		return   Optional.of(primeMaps.get(primeIdx).getPrimeRef());
+		return   Optional.of(primeMaps.get(BigInteger.valueOf(primeIdx)).getPrimeRef());
 	}
 
 	@Override
@@ -382,7 +386,22 @@ public class PrimeSource implements PrimeSourceIntfc
 		var idx = nextIdx.incrementAndGet();
 
 		PrimeRefIntfc ret = primeRefCtor.apply(idx, base);
-		primeMaps.put(idx, new PrimeMapEntry(newPrime, ret));
+		primeMaps.put(BigInteger.valueOf(idx), new PrimeMapEntry(newPrime, ret));
+	}
+
+	/**
+	 * Add new Prime to shared set of all primes
+	 *
+	 * @param aPrime
+	 */
+	private void addPrimeRef(
+			@NonNull Set<BigInteger> base,
+			@NonNull @Min(1) BigInteger newPrime
+			)
+	{
+		var idx = nextIdx.incrementAndGet();
+		PrimeRefIntfc ret = primeRefRawCtor.apply(idx, base);
+		primeMaps.put(BigInteger.valueOf(idx), new PrimeMapEntry(newPrime, ret));
 	}
 
 	/**

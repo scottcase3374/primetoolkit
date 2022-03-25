@@ -4,7 +4,7 @@ import java.util.Iterator;
 
 import com.starcases.prime.intfc.PrimeRefIntfc;
 
-public class PrimeMapIterator implements Iterator<PrimeRefIntfc>
+class PrimeMapIterator implements Iterator<PrimeRefIntfc>
 {
 	private Iterator<PrimeMapEntry> entry;
 
