@@ -1,6 +1,7 @@
 package com.starcases.prime.base.prefix;
 
 
+import java.math.BigInteger;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -32,13 +33,13 @@ public class LogBasePrefixes extends AbstractLogBase
 		ps.getPrimeRefStream(preferParallel)
 		.<String>mapMulti((pr, consumer) ->
 							{
-								Set<Integer> primeIndexes = pr.getPrimeBaseData().getPrimeBaseIdxs(BaseTypes.PREFIX).get(0);
+								Set<BigInteger> primeBases = pr.getPrimeBaseData().getPrimeBases(BaseTypes.PREFIX).get(0);
 
 								sb.append(String.format("Prime [%d] Prefix: ", pr.getPrime()));
 								sb.append(
-									primeIndexes
+									primeBases
 								 	.stream()
-								 	.map(i -> ps.getPrime(i).get().toString())
+								 	.map(i -> i.toString())
 								 	.collect(Collectors.joining(",","[","]"))
 								 	);
 

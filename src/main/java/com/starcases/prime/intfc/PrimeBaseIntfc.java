@@ -24,36 +24,13 @@ import lombok.NonNull;
  */
 public interface PrimeBaseIntfc extends Serializable
 {
-	void addPrimeBaseIndexes(@NonNull BaseTypes baseType, @NonNull Set<Integer> primeBase, @NonNull BaseMetadataIntfc metadata);
-
-	void addPrimeBaseIndexes(@NonNull Set<Integer> primeBase);
-
-	void addPrimeBaseIndexes(@NonNull Set<Integer> primeBase, @NonNull BaseTypes baseType);
-
-
 	void addPrimeBases(@NonNull BaseTypes baseType, @NonNull Set<BigInteger> primeBase, @NonNull BaseMetadataIntfc metadata);
 
 	void addPrimeBases(@NonNull Set<BigInteger> primeBase);
 
 	void addPrimeBases(@NonNull Set<BigInteger> primeBase, @NonNull BaseTypes baseType);
 
-
 	BaseMetadataIntfc getBaseMetadata();
-
-	/**
-	 *
-	 * Not every use case needs multiple bases per Prime
-	 *
-	 *
-	 * @return No-arg version; so this returns data for Bases.DEFAULT
-	 */
-	List<Set<Integer>> getPrimeBaseIdxs();
-
-	/**
-	 * Not every use case needs multiple bases per Prime
-	 * @return
-	 */
-	List<Set<Integer>> getPrimeBaseIdxs(@NonNull BaseTypes baseType);
 
 	/**
 	 *

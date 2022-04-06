@@ -126,7 +126,7 @@ enum ConditionConstraintState
 		// TripleIdx - BOT,MID,TOP
 		var cs = ConditionConstraintState.OK;
 		var baseCount = 0;
-		int [] bases = { -1, -1, -1 }; // dummy values
+		long [] bases = { -1, -1, -1 }; // dummy values
 
 		for (var pr : primeRefs)
 		{
@@ -268,9 +268,9 @@ public class AllTriples
 	{
 		final var bs = Arrays.stream(vals)
 			.filter(Objects::nonNull)
-			.map(PrimeRefIntfc::getPrimeRefIdx)
+			.map(PrimeRefIntfc::getPrime)
 			.collect(Collectors.toCollection(TreeSet::new));
 
-		prime.getPrimeBaseData().addPrimeBaseIndexes(bs, BaseTypes.THREETRIPLE);
+		prime.getPrimeBaseData().addPrimeBases(bs, BaseTypes.THREETRIPLE);
 	}
 }

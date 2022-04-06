@@ -1,12 +1,12 @@
 package com.starcases.prime.base.nprime;
 
+import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.logging.Logger;
 
 import javax.validation.constraints.Max;
@@ -45,7 +45,7 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 
 	@Min(2)
 	@Max(3)
-	private int maxReduce;
+	private BigInteger maxReduce;
 
 	public BaseReduceNPrime(@NonNull PrimeSourceIntfc ps)
 	{
@@ -54,7 +54,7 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 
 	public void setMaxReduce(@Min(2) @Max(3) int maxReduce)
 	{
-		this.maxReduce = maxReduce;
+		this.maxReduce = BigInteger.valueOf(maxReduce);
 	}
 
 	/**
@@ -62,37 +62,44 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 	 *
 	 * @param primeRef cur Prime being reduced
 	 */
-	private void primeReduction(@NonNull PrimeRefIntfc primeRef, @NonNull HashSet<Integer> retBaseIdxs, @NonNull int [] retOutputIdxCount)
+	private void primeReduction(@NonNull PrimeRefIntfc primeRef, @NonNull HashSet<BigInteger> retBases, @NonNull int [] retOutputIdxCount)
 	{
 		// Experimentation for this use case indicate that Concurrent... perform slightly better than LinkedBlocking.. varieties of the collections.
-		final var q = new ConcurrentLinkedQueue<Set<Integer>>();
+		final var q = new ConcurrentLinkedQueue<Set<BigInteger>>();
 
 		// want to process initial bases for Prime
-		final var initialIdxs = primeRef.getPrimeBaseData().getPrimeBaseIdxs(BaseTypes.DEFAULT).get(0);
-		q.add(initialIdxs);
+		final var initialBases = primeRef.getPrimeBaseData().getPrimeBases(BaseTypes.DEFAULT).get(0);
+		q.add(initialBases);
 
-		final List<Integer> remainTargetIdxs = IntStream.range(0, maxReduce).boxed().collect(Collectors.toList());
+		final List<BigInteger> remainTargetBases = ps.getPrimeRefStream(false).map(PrimeRefIntfc::getPrime).takeWhile(bi -> bi.compareTo(maxReduce) < 0).collect(Collectors.toList());
 
 		while (!q.isEmpty())
 		{
-			final var curIdxs = q.remove();
-			curIdxs.stream().forEach(i ->
+			final var curBases = q.remove();
+			curBases.stream().forEach(bi ->
 				{
-					if (i >= maxReduce)
+					if (bi.compareTo(maxReduce) >= 0)
 					{
-						q.add(ps.getPrimeRef(i).get().getPrimeBaseData().getPrimeBaseIdxs(BaseTypes.DEFAULT).get(0));
+						ps
+						.getPrimeRef(bi)
+						.ifPresent(ii ->
+							q.add(
+									ii.getPrimeBaseData()
+									.getPrimeBases(BaseTypes.DEFAULT)
+									.get(0)
+								));
 					}
 					else
 					{
-						retOutputIdxCount[i]++;
+						retOutputIdxCount[bi.intValue()]++;
 					}
 				} );
 
-			// track which indexes were encountered (but only need to track "which one" on first encounter)
-			if (remainTargetIdxs.removeAll(curIdxs))
+			// track which bases were encountered (but only need to track "which one" on first encounter)
+			if (remainTargetBases.removeAll(curBases))
 			{
-				final var tmpBS = curIdxs.stream().filter(i -> i < maxReduce).toList();
-				retBaseIdxs.addAll(tmpBS);
+				final var tmpBS = curBases.stream().filter(i -> i.compareTo(maxReduce) < 0).toList();
+				retBases.addAll(tmpBS);
 			}
 		}
 	}
@@ -114,18 +121,18 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 		}
 
 		ps.getPrimeRefStream(this.preferParallel)
-			.filter(pr -> pr.getPrimeBaseData().getPrimeBaseIdxs() != null && !pr.getPrimeBaseData().getPrimeBaseIdxs().isEmpty())
+			.filter(pr -> pr.getPrimeBaseData().getPrimeBases() != null && !pr.getPrimeBaseData().getPrimeBases().isEmpty())
 				.forEach( curPrime ->
 		{
 			try
 			{
-				int [] retCountForBaseIdx = new int[maxReduce];
-				var retBaseIdxs = new HashSet<Integer>();
-				primeReduction(curPrime, retBaseIdxs, retCountForBaseIdx);
+				int [] retCountForBases = new int[maxReduce.intValue() +1];
+				var retBases = new HashSet<BigInteger>();
+				primeReduction(curPrime, retBases, retCountForBases);
 
 				curPrime
 					.getPrimeBaseData()
-					.addPrimeBaseIndexes(BaseTypes.NPRIME, retBaseIdxs, new NPrimeBaseMetadata(retCountForBaseIdx));
+					.addPrimeBases(BaseTypes.NPRIME, retBases, new NPrimeBaseMetadata(retCountForBases));
 			}
 			catch(Exception e)
 			{

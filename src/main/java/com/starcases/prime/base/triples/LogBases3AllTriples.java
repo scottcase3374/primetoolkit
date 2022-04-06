@@ -46,7 +46,7 @@ public class LogBases3AllTriples  extends AbstractLogBase
 						{
 							try
 							{
-								var size = pr.getPrimeBaseData().getPrimeBaseIdxs(BaseTypes.THREETRIPLE).size();
+								var size = pr.getPrimeBaseData().getPrimeBases(BaseTypes.THREETRIPLE).size();
 								System.out.println(String.format("%nPrime [%d] idx[%d] #-bases[%d]%n",
 										pr.getPrime(),
 										idx[0]++,
@@ -56,7 +56,7 @@ public class LogBases3AllTriples  extends AbstractLogBase
 									long [] cnt = {0};
 									StringBuilder sb = new StringBuilder(150);
 									sb.append("\t");
-									pr.getPrimeBaseData().getPrimeBaseIdxs(BaseTypes.THREETRIPLE)
+									pr.getPrimeBaseData().getPrimeBases(BaseTypes.THREETRIPLE)
 											.stream()
 											.<String>mapMulti((bs, consumer) ->
 																{
@@ -64,7 +64,7 @@ public class LogBases3AllTriples  extends AbstractLogBase
 																	sb.append(
 																	 	bs
 																	 	.stream()
-																	 	.map(i -> ps.getPrime(i).get().toString())
+																	 	.map(i -> i.toString())
 																	 	.collect(Collectors.joining(",","[","]"))
 																	 	);
 

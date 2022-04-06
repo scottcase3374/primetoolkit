@@ -46,23 +46,23 @@ public class BasePrefixTree extends AbstractPrimeBaseGenerator
 					if (this.doLog)
 						log.info("genBases() - prime " + curPrime.getPrime());
 
-					final var origBaseIdxs = curPrime.getPrimeBaseData().getPrimeBaseIdxs().get(0);
-					final var curPrimePrefixIdxs = new ConcurrentLinkedDeque<Integer>(origBaseIdxs);
+					final var origBaseBases = curPrime.getPrimeBaseData().getPrimeBases().get(0);
+					final var curPrimePrefixBases = new ConcurrentLinkedDeque<BigInteger>(origBaseBases);
 
 					// Prefixes don't include the Prime (n-1) item per the definition of "prefix" used.
-					if (!curPrimePrefixIdxs.isEmpty())
-						curPrimePrefixIdxs.removeLast();
+					if (!curPrimePrefixBases.isEmpty())
+						curPrimePrefixBases.removeLast();
 
-					final var curPrefixIdxsIt = curPrimePrefixIdxs.stream().iterator();
+					final var curPrefixBasesIt = curPrimePrefixBases.stream().iterator();
 					var curPrefixIt = this.iterator();
 					PrefixTreeNode [] tn = {null};
-					curPrefixIdxsIt.forEachRemaining(i ->
+					curPrefixBasesIt.forEachRemaining(basePrime ->
 						{
-							final var bi = ps.getPrime(i).get();
+							final var prime = basePrime;
 							if (this.doLog)
-								log.info(String.format("handling prime[%d] base-index [%d] base-prime [%d]", curPrime.getPrime(), i, bi));
+								log.info(String.format("handling prime[%d] base-index [%d] base-prime [%d]", curPrime.getPrime(), basePrime, prime));
 
-							tn[0] = curPrefixIt.add(bi);
+							tn[0] = curPrefixIt.add(prime);
 						});
 
 

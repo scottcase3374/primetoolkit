@@ -52,7 +52,7 @@ public class LogBasesNPrime extends AbstractLogBase
 							};
 
 					pr.getPrimeBaseData()
-							.getPrimeBaseIdxs(BaseTypes.NPRIME)
+							.getPrimeBases(BaseTypes.NPRIME)
 							.stream()
 							.<String>mapMulti((indexBitset, consumer) ->
 									{

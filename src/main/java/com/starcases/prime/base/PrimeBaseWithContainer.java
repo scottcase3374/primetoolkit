@@ -37,13 +37,6 @@ public class PrimeBaseWithContainer implements PrimeBaseIntfc
 	 *
 	 */
 	@NonNull
-	private final Map<BaseTypes, List<Set<Integer>>> primeBaseIdxs = new EnumMap<>(BaseTypes.class);
-
-	/**
-	 * Represents sets of base primes that sum to this Prime. (index to primes)
-	 *
-	 */
-	@NonNull
 	private final Map<BaseTypes, List<Set<BigInteger>>> primeBases = new EnumMap<>(BaseTypes.class);
 
 
@@ -56,39 +49,10 @@ public class PrimeBaseWithContainer implements PrimeBaseIntfc
 		// nothing to init here
 	}
 
-	@Override
-	public void addPrimeBaseIndexes(@NonNull BaseTypes baseType, @NonNull Set<Integer> primeBase, BaseMetadataIntfc baseMetadata)
-	{
-		this.primeBaseIdxs.compute(baseType,
-				(k, v) ->
-					{
-						if (v == null)
-						{
-							v = new ArrayList<Set<Integer>>(1);
-						}
-
-						v.add(primeBase);
-						return v;
-					});
-		this.baseMetadata = baseMetadata;
-	}
-
 	/**
 	 * Include a set of primes in the set of Prime bases for the current Prime.
 	 * @param primeBase
 	 */
-	@Override
-	public void addPrimeBaseIndexes(@NonNull Set<Integer> primeBase)
-	{
-		addPrimeBaseIndexes(BaseTypes.DEFAULT, primeBase, null);
-	}
-
-	@Override
-	public void addPrimeBaseIndexes(@NonNull Set<Integer> primeBase, @NonNull BaseTypes baseType)
-	{
-		addPrimeBaseIndexes(baseType, primeBase, null);
-	}
-
 	@Override
 	public void addPrimeBases(@NonNull BaseTypes baseType, @NonNull Set<BigInteger> primeBase, BaseMetadataIntfc baseMetadata)
 	{
@@ -120,20 +84,6 @@ public class PrimeBaseWithContainer implements PrimeBaseIntfc
 	public void addPrimeBases(@NonNull Set<BigInteger> primeBase, @NonNull BaseTypes baseType)
 	{
 		addPrimeBases(baseType, primeBase, null);
-	}
-	/**
-	 * For DEFAULT base type
-	 */
-	@Override
-	public List<Set<Integer>> getPrimeBaseIdxs()
-	{
-		return getPrimeBaseIdxs(BaseTypes.DEFAULT);
-	}
-
-	@Override
-	public List<Set<Integer>> getPrimeBaseIdxs(@NonNull BaseTypes baseType)
-	{
-		return primeBaseIdxs.getOrDefault(baseType, Collections.emptyList());
 	}
 
 	/**

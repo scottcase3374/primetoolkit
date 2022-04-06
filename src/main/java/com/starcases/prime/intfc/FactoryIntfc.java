@@ -15,6 +15,5 @@ public interface FactoryIntfc
 {
 	PrimeSourceIntfc getPrimeSource();
 	Supplier<PrimeBaseIntfc> getPrimeBaseConstructor();
-	BiFunction<Integer, Set<Integer>, PrimeRefIntfc> getPrimeRefConstructor();
-	BiFunction<Integer, Set<BigInteger>, PrimeRefIntfc> getPrimeRefRawConstructor();
+	BiFunction<Long, Set<BigInteger>, PrimeRefIntfc> getPrimeRefRawConstructor();
 }

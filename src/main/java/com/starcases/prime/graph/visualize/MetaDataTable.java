@@ -114,7 +114,7 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 
 	protected void handleHighPrimeBase(@NonNull GraphVertexChangeEvent<PrimeRefIntfc> e)
 	{
-		if (highPrimeBase == null || e.getVertex().getPrimeBaseData().getPrimeBaseIdxs().get(0).size() > highPrimeBase.getPrimeBaseData().getPrimeBaseIdxs().get(0).size())
+		if (highPrimeBase == null || e.getVertex().getPrimeBaseData().getPrimeBases().get(0).size() > highPrimeBase.getPrimeBaseData().getPrimeBases().get(0).size())
 		{
 			highPrimeBase = e.getVertex();
 		}

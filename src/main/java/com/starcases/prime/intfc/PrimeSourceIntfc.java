@@ -39,8 +39,7 @@ public interface PrimeSourceIntfc extends Serializable
 
 	Stream<PrimeRefIntfc> getPrimeRefStream(boolean preferParallel);
 
-	Optional<PrimeRefIntfc> getPrimeRef(@Min(0) int primeIdx);
-	Optional<PrimeRefIntfc> getPrimeRef(@Min(0) BigInteger prime, boolean dummyFlag);
-	Optional<BigInteger> getPrime(@Min(0) int primeIdx);
-	Optional<BigInteger> getPrime(@Min(0) BigInteger prime);
+	Optional<PrimeRefIntfc> getPrimeRef(@Min(0) long primeIdx);
+	Optional<PrimeRefIntfc> getPrimeRef(@Min(0) BigInteger prime);
+	Optional<BigInteger> getPrime(@Min(0) long primeIdx);
 }

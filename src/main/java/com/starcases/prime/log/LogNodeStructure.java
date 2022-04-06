@@ -34,33 +34,26 @@ public class LogNodeStructure extends AbstractLogBase
 			final var pr = prIt.next();
 			try
 			{
-				final var size = pr.getPrimeBaseData().getPrimeBaseIdxs().size();
-				System.out.println(String.format("%nPrime [%d] idx[%d] base-counts[%d] base0-size[%d] %n",
+				System.out.println(String.format("%nPrime [%d] idx[%d]  %n",
 						pr.getPrime(),
-						idx++,
-						size,
-						pr.getPrimeBaseData().getPrimeBaseIdxs().get(0).size()
+						idx++
 						));
 
 					final long [] cnt = {0};
 					final var sb = new StringBuilder("\t");
 
-					pr.getPrimeBaseData().getPrimeBaseIdxs()
+					pr.getPrimeBaseData().getPrimeBases()
 							.stream()
-							.<String>mapMulti((idxs, consumer) ->
+							.<String>mapMulti((basePrimes, consumer) ->
 												{
-
 													sb.append(
-													 	idxs
+													 	basePrimes
 													 	.stream()
-													 	.map(i -> ps.getPrime(i).get().toString())
+													 	.map(basePrime -> basePrime.toString())
 													 	.collect(Collectors.joining(",","[","]"))
 													 	);
 
-													if (cnt[0] < size)
-														sb.append(", ");
-
-													if (cnt[0] % 5 == 0 || cnt[0] >= pr.getPrimeBaseData().getPrimeBaseIdxs().get(0).size())
+													if (cnt[0] % 5 == 0 || cnt[0] >= pr.getPrimeBaseData().getPrimeBases().get(0).size())
 													{
 														consumer.accept(sb.toString());
 														sb.setLength(0);

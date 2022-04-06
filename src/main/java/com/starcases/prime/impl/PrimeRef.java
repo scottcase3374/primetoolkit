@@ -47,7 +47,7 @@ public class PrimeRef implements PrimeRefIntfc
 	@Setter
 	@Getter
 	@ProtoField(number=1, defaultValue="0")
-	public int primeIdx;
+	public long primeIdx;
 
 
 	private PrimeBaseIntfc primeBaseData = null;
@@ -59,18 +59,9 @@ public class PrimeRef implements PrimeRefIntfc
 	 * @param Prime
 	 */
 	@ProtoFactory()
-	public PrimeRef(int primeIdx)
+	public PrimeRef(long primeIdx)
 	{
 		this.primeIdx = primeIdx;
-	}
-
-	public PrimeRef init(
-					@NonNull Set<Integer> primeBaseIdxs,
-					@NonNull Supplier<PrimeBaseIntfc> primeBaseSupplier)
-	{
-		primeBaseData = primeBaseSupplier.get();
-		getPrimeBaseData().addPrimeBaseIndexes(primeBaseIdxs);
-		return this;
 	}
 
 	public PrimeRef init(
@@ -124,7 +115,7 @@ public class PrimeRef implements PrimeRefIntfc
 	}
 
 	@Override
-	public int getPrimeRefIdx()
+	public long getPrimeRefIdx()
 	{
 		return this.primeIdx;
 	}

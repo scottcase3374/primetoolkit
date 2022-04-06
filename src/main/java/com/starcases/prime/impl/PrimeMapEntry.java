@@ -9,7 +9,8 @@ import lombok.Setter;
 
 class PrimeMapEntry
 {
-	//private WeakReference<BigInteger> prime;
+	@Getter
+	@Setter
 	private BigInteger prime;
 
 	@Getter
@@ -18,17 +19,7 @@ class PrimeMapEntry
 
 	public PrimeMapEntry(BigInteger prime, PrimeRefIntfc primeRef)
 	{
-		this.prime = prime; //new WeakReference<BigInteger>(prime);
+		this.prime = prime;
 		this.primeRef = primeRef;
-	}
-
-	public BigInteger getPrime()
-	{
-		return prime; //prime.get();
-	}
-
-	public void setPrime(BigInteger prime)
-	{
-		this.prime = prime; // new WeakReference<BigInteger>(prime);
 	}
 }

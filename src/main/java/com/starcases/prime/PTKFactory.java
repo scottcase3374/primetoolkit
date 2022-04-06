@@ -1,6 +1,7 @@
 package com.starcases.prime;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -51,7 +52,7 @@ public class PTKFactory
 
 	@Getter
 	@Setter
-	private static @Min(1) int maxCount;
+	private static @Min(1) long maxCount;
 
 	@Getter
 	@Setter
@@ -67,11 +68,7 @@ public class PTKFactory
 
 	@Getter
 	@Setter
-	private static @NonNull BiFunction<Integer, Set<Integer>, PrimeRefIntfc> primeRefCtor;
-
-	@Getter
-	@Setter
-	private static @NonNull BiFunction<Integer, Set<BigInteger>, PrimeRefIntfc> primeRefRawCtor;
+	private static @NonNull BiFunction<Long, Set<BigInteger>, PrimeRefIntfc> primeRefRawCtor;
 
 	@Getter
 	@Setter
@@ -95,8 +92,10 @@ public class PTKFactory
 					@Override
 					public PrimeSourceIntfc getPrimeSource()
 					{
-						//return primeSource(maxCount, confidenceLevel, getPrimeRefConstructor(), primeRefSetPrimeSource, baseSetPrimeSource);
-						return primeSource(maxCount, confidenceLevel, getPrimeRefConstructor(),  getPrimeRefRawConstructor(), primeRefSetPrimeSource, baseSetPrimeSource);
+						return primeSource(	maxCount,
+											confidenceLevel,
+											getPrimeRefRawConstructor(),
+											List.of(primeRefSetPrimeSource, baseSetPrimeSource));
 					}
 
 					@Override
@@ -106,13 +105,7 @@ public class PTKFactory
 					}
 
 					@Override
-					public BiFunction<Integer, Set<Integer>, PrimeRefIntfc> getPrimeRefConstructor()
-					{
-						return primeRefCtor;
-					}
-
-					@Override
-					public BiFunction<Integer, Set<BigInteger>, PrimeRefIntfc> getPrimeRefRawConstructor()
+					public BiFunction<Long, Set<BigInteger>, PrimeRefIntfc> getPrimeRefRawConstructor()
 					{
 						return primeRefRawCtor;
 					}
@@ -130,17 +123,14 @@ public class PTKFactory
 	 * @return
 	 */
 	static PrimeSourceIntfc primeSource(
-			@Min(1) int maxCount,
+			@Min(1) long maxCount,
 			@Min(1) int confidenceLevel,
-			@NonNull BiFunction<Integer, Set<Integer>, PrimeRefIntfc> primeRefCtor,
-			@NonNull BiFunction<Integer, Set<BigInteger>, PrimeRefIntfc> primeRefRawCtor,
-			@NonNull Consumer<PrimeSourceIntfc> consumerSetPrimeSource,
-			@NonNull Consumer<PrimeSourceIntfc> baseSetPrimeSource
+			@NonNull BiFunction<Long, Set<BigInteger>, PrimeRefIntfc> primeRefRawCtor,
+			@NonNull List<Consumer<PrimeSourceIntfc>> consumersSetPrimeSource
 			)
 	{
 		return new PrimeSource(maxCount
-								, consumerSetPrimeSource
-								, baseSetPrimeSource
+								, consumersSetPrimeSource
 								, confidenceLevel
 								,primeRefRawCtor
 								, cacheMgr);

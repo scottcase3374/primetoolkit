@@ -36,5 +36,5 @@ public interface PrimeRefIntfc extends Serializable
 	 * @return int representing representing index in
 	 * overall list of primes.
 	 */
-	int getPrimeRefIdx();
+	long getPrimeRefIdx();
 }

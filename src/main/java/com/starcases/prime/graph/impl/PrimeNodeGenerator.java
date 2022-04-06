@@ -80,20 +80,6 @@ public class PrimeNodeGenerator
 	 * get a primeRef and add to graph.
 	 * Create edges from Prime node to primes from the base sets representing the Prime.
 	 */
-	protected void addNode()
-	{
-		// Link from Prime node to Prime bases (i.e. unique set of smaller primes that sums to this Prime).
-		primeRef.getPrimeBaseData().getPrimeBaseIdxs(baseType)
-							.get(0)
-							.stream()
-							.forEach(
-									baseIdx -> {
-											addVertext(primeRef);
-											addBaseEdge(primeRef, baseIdx);
-										});
-		level++;
-	}
-
 	protected void addNodeRawBase()
 	{
 		// Link from Prime node to Prime bases (i.e. unique set of smaller primes that sums to this Prime).
@@ -113,14 +99,8 @@ public class PrimeNodeGenerator
 		graph.addVertex(primeRef);
 	}
 
-	protected void addBaseEdge(PrimeRefIntfc primeRef, int baseIdx)
-	{
-		ps.getPrimeRef(baseIdx).ifPresent( p -> graph.addEdge(p , primeRef));
-	}
-
-
 	protected void addBaseEdge(BigInteger base, PrimeRefIntfc primeRef)
 	{
-		ps.getPrimeRef(base, false).ifPresent( p -> graph.addEdge(p , primeRef));
+		ps.getPrimeRef(base).ifPresent( p -> graph.addEdge(p , primeRef));
 	}
 }

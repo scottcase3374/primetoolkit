@@ -77,7 +77,9 @@ I switched from CompletableFuture to a parallel stream which appeared to self tu
 - init --max-count 750 --base=THREETRIPLE --log-generate --log=BASES --output-file=/home/scott/ptk-demo/triples-750.log
 tool 7m 17s and produced an output log file of 75,289,288 bytes. The last record processed was: Prime [5693] idx[750] #-bases[17144]
 
-The most recent changes reduced the run time for 750 triples to 6m 46s - with most of the changes related to reducing dynamic memory allocations and using more ints vs Integer/BigInteger and removing extraneous code which was no longer needed/used.
+The recent changes reduced the run time for 750 triples to 6m 46s - with most of the changes related to reducing dynamic memory allocations and using more ints vs Integer/BigInteger and removing extraneous code which was no longer needed/used.
+
+Time for 750 triples went down to 6m 17s after switching to using Eclipse collections instead of JDK for some primary data.
 
 
 For a command line of:
@@ -91,7 +93,7 @@ That flag applies to several base-logging and base-generation methods now. It ge
 
 After removing a number of unused data items and methods, converting the primes collection from a list to a map and running without output to a file instead of console window in eclipse - runtime went from 1m 5s to 53s. The list to map conversion is part of some research into alternative data structs and also some checking into the use of soft/weak references in one or 2 places.
 
-After some further work where I switched from using Lists to Sets for managing the collection of bases - the run time went from 53s down to 19s.
+After some further work where I switched from using Lists to Sets for managing the collection of bases - the run time went from 53s down to 19s.  Initial run with Eclipse collections instead of JDK for primary data - time rose to 25s.
 
 On a different note, one very interesting performance observation is related to a "simple" difference.
 - static final int TOP = 0;
