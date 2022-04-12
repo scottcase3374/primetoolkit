@@ -38,6 +38,7 @@ public interface PrimeSourceIntfc extends Serializable
 	Iterator<PrimeRefIntfc> getPrimeRefIter();
 
 	Stream<PrimeRefIntfc> getPrimeRefStream(boolean preferParallel);
+	Stream<PrimeRefIntfc> getPrimeRefStream(long skipCount, boolean preferParallel);
 
 	Optional<PrimeRefIntfc> getPrimeRef(@Min(0) long primeIdx);
 	Optional<PrimeRefIntfc> getPrimeRef(@Min(0) BigInteger prime);

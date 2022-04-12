@@ -1,10 +1,12 @@
 package com.starcases.prime.base.prefixtree;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.logging.Logger;
+
+import org.eclipse.collections.impl.list.mutable.MultiReaderFastList;
+import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 
 import com.starcases.prime.base.AbstractPrimeBaseGenerator;
 import com.starcases.prime.base.BaseTypes;
@@ -17,7 +19,7 @@ public class BasePrefixTree extends AbstractPrimeBaseGenerator
 {
 	private static final Logger log = Logger.getLogger(BasePrefixTree.class.getName());
 
-	final Map<BigInteger, PrefixTreeNode> prefixMap = new ConcurrentSkipListMap<>();
+	final Map<BigInteger, PrefixTreeNode> prefixMap = new ConcurrentHashMap<>();
 
 	public BasePrefixTree(@NonNull PrimeSourceIntfc ps)
 	{
@@ -26,7 +28,7 @@ public class BasePrefixTree extends AbstractPrimeBaseGenerator
 
 	public PrefixIteratorIntfc iterator()
 	{
-		return new PrefixIterator(this);
+		return new PrefixIterator(this, true);
 	}
 
 	/**
@@ -34,12 +36,15 @@ public class BasePrefixTree extends AbstractPrimeBaseGenerator
 	 * @param maxReduce
 	 */
 	@Override
-	public void genBases()
+	public void genBases(boolean trackGenTime)
 	{
 		System.out.println(String.format("%n"));
 		log.info("BasePrefixTree genBases()");
 
-		final var prStream = ps.getPrimeRefStream(false).skip(2);
+		final var prStream = ps.getPrimeRefStream(2L, false);
+		if (trackGenTime)
+			event(true);
+
 		prStream.forEach(
 				curPrime ->
 				{
@@ -47,16 +52,15 @@ public class BasePrefixTree extends AbstractPrimeBaseGenerator
 						log.info("genBases() - prime " + curPrime.getPrime());
 
 					final var origBaseBases = curPrime.getPrimeBaseData().getPrimeBases().get(0);
-					final var curPrimePrefixBases = new ConcurrentLinkedDeque<BigInteger>(origBaseBases);
+					final List<BigInteger> curPrimePrefixBases = MultiReaderFastList.newList(origBaseBases);
 
 					// Prefixes don't include the Prime (n-1) item per the definition of "prefix" used.
 					if (!curPrimePrefixBases.isEmpty())
-						curPrimePrefixBases.removeLast();
+						curPrimePrefixBases.remove(curPrimePrefixBases.size()-1);
 
-					final var curPrefixBasesIt = curPrimePrefixBases.stream().iterator();
 					var curPrefixIt = this.iterator();
 					PrefixTreeNode [] tn = {null};
-					curPrefixBasesIt.forEachRemaining(basePrime ->
+					curPrimePrefixBases.forEach(basePrime ->
 						{
 							final var prime = basePrime;
 							if (this.doLog)
@@ -69,5 +73,8 @@ public class BasePrefixTree extends AbstractPrimeBaseGenerator
 					tn[0].setSourcePrimes(curPrefixIt.toSet());
 					curPrime.getPrimeBaseData().addPrimeBases(tn[0].getSourcePrimes(), BaseTypes.PREFIX_TREE);
 				});
+
+		if (trackGenTime)
+			event(false);
 	}
 }

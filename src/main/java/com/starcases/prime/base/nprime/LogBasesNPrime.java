@@ -1,7 +1,10 @@
 package com.starcases.prime.base.nprime;
 
-import java.util.Collections;
+import java.math.BigInteger;
 import java.util.stream.Collectors;
+
+import org.eclipse.collections.api.bag.sorted.MutableSortedBag;
+
 import java.util.logging.Logger;
 
 import com.starcases.prime.base.BaseTypes;
@@ -24,73 +27,54 @@ public class LogBasesNPrime extends AbstractLogBase
 	@Command
 	public void l()
 	{
-		final var maxBasesInRow = 5;
-
 		// Get desired data
 		ps.setActiveBaseId(BaseTypes.NPRIME);
 
-		var prIt = ps.getPrimeRefStream(false).skip(5).iterator();
+		var prIt = ps.getPrimeRefStream(5L, false).iterator();
 		while (prIt.hasNext())
 		{
 			var pr = prIt.next();
 			try
 			{
 				// Handle "header" info for the current Prime - Prime value and the index of the Prime.
-				System.out.println(String.format("%nPrime [%d] idx[%d]%n",
-													pr.getPrime(),
-													pr.getPrimeRefIdx()
+				System.out.println(String.format("%nPrime [%d] %n",
+													pr.getPrime()
 													));
 
-					final var sb = new StringBuilder("\t");
+				MutableSortedBag<BigInteger> counts;
+				var bmd = pr.getPrimeBaseData().getBaseMetadata();
+				if (bmd instanceof NPrimeBaseMetadata)
+				{
+					var nprimemd = (NPrimeBaseMetadata)bmd;
+					counts = nprimemd.getCountForBaseIdx();
+				}
+				else
+				{
+					throw new IllegalArgumentException("Unexpected value: " + bmd);
+				}
 
-					// get list of counts for the target Prime indexes that we reduced to.
-					final var counts =
-							switch(pr.getPrimeBaseData().getBaseMetadata())
-							{
-							case NPrimeBaseMetadata npbmd -> npbmd.getCountForBaseIdx();
-							default -> Collections.emptyList();
-							};
+//              // Java 17 / 18 Preview feature
+//				// get list of counts for the target Prime indexes that we reduced to.
+//				final MutableSortedBag<BigInteger> counts =
+//						switch(pr.getPrimeBaseData().getBaseMetadata())
+//						{
+//						case NPrimeBaseMetadata npbmd -> npbmd.getCountForBaseIdx();
+//						default -> throw new IllegalArgumentException("Unexpected value: " + pr.getPrimeBaseData().getBaseMetadata());
+//						};
 
-					pr.getPrimeBaseData()
-							.getPrimeBases(BaseTypes.NPRIME)
-							.stream()
-							.<String>mapMulti((indexBitset, consumer) ->
-									{
-													// No direct correlation between index bit set 'index' value in the map() below
-													// and the list of counts. Each item in the count-list is simply associated with the next
-													// Prime starting at index 0 and incrementing index by 1.
-													//
-													// Remember, the reduction is reducing to a "prefix" list of the primes.
-													//
-													// Index into counts
-													int [] primeIdxCntIdx = {0};
+				String s =
+					counts
+					.distinct()
+					.stream()
+					.map(base ->
+							// the reduction is reducing to a "prefix" list of the primes.
+							 String.format("base-Prime:[%d] count:[%d] ",
+						 				base,
+						 				counts.occurrencesOf(base))
+							)
+					.collect(Collectors.joining(",","[","]"));
 
-													sb.append(
-													 	indexBitset
-													 	.stream()
-													 	.map(index ->
-													 	{
-													 			String s = String.format("base-Prime:[%s] count:[%s]",
-													 				ps.getPrime(primeIdxCntIdx[0]).get().toString(),
-													 				counts.size() > primeIdxCntIdx[0] ? counts.get(primeIdxCntIdx[0]).toString() : 0 );
-													 			primeIdxCntIdx[0]++;
-													 			return s;
-													 	})
-													 	.collect(Collectors.joining(",","[","]"))
-													 	);
-
-													if (primeIdxCntIdx[0] < counts.size())
-														sb.append(", ");
-
-													if (primeIdxCntIdx[0] % maxBasesInRow == 0 || primeIdxCntIdx[0] >= counts.size())
-													{
-														consumer.accept(sb.toString());
-														sb.setLength(0);
-														sb.append("\t");
-													}
-												}
-									)
-							.forEach(System.out::println);
+				System.out.println(s);
 			}
 			catch(Exception e)
 			{

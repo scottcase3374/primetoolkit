@@ -3,8 +3,9 @@ package com.starcases.prime.base.prefixtree;
 import java.math.BigInteger;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
+
+import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 
 import lombok.Getter;
 import lombok.Setter;

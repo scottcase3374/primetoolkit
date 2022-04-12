@@ -4,8 +4,9 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Objects;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
+
+import org.eclipse.collections.impl.set.sorted.mutable.TreeSortedSet;
 
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
@@ -60,8 +61,7 @@ enum SumConstraintState
 	static SumConstraintState getEnum(Integer compToResult)
 	{
 		return Arrays.stream(SumConstraintState.values())
-				.filter(e -> Objects.nonNull(e.compToResult))
-				.filter(e -> e.compToResult.equals(compToResult))
+				.filter(e -> Objects.nonNull(e.compToResult) && e.compToResult.equals(compToResult))
 				.findAny()
 				.orElse(NONMATCH);
 	}
@@ -70,7 +70,6 @@ enum SumConstraintState
 			@NonNull PrimeRefIntfc [] primeRefs,
 			@NonNull PrimeRefIntfc targetPrime)
 	{
-		// sum the current Prime refs except for item indexed by array idxs
 		final var sum = Arrays.
 						stream(primeRefs)
 						.filter(Objects::nonNull)
@@ -269,7 +268,7 @@ public class AllTriples
 		final var bs = Arrays.stream(vals)
 			.filter(Objects::nonNull)
 			.map(PrimeRefIntfc::getPrime)
-			.collect(Collectors.toCollection(TreeSet::new));
+			.collect(Collectors.toCollection(TreeSortedSet::newSet));
 
 		prime.getPrimeBaseData().addPrimeBases(bs, BaseTypes.THREETRIPLE);
 	}

@@ -79,7 +79,8 @@ tool 7m 17s and produced an output log file of 75,289,288 bytes. The last record
 
 The recent changes reduced the run time for 750 triples to 6m 46s - with most of the changes related to reducing dynamic memory allocations and using more ints vs Integer/BigInteger and removing extraneous code which was no longer needed/used.
 
-Time for 750 triples went down to 6m 17s after switching to using Eclipse collections instead of JDK for some primary data.
+Time for 750 triples went down to 6m 17s after switching to using Eclipse collections instead of JDK for some primary data. After almost
+exclusive use of Eclipse Collections the time went down to 6m 2s. This is with JDK 18 ea and not JDK 17/GraalVM - I wouldn't mind trying a conversion to Quarkus and a native image.  Quarkus supports Picocli which would be a small headache to handle otherwise (due to reflection) for a native image.
 
 
 For a command line of:

@@ -40,8 +40,7 @@ public class LogBases3AllTriples  extends AbstractLogBase
 		final var maxBasesInRow = 5;
 		int [] idx = {5};
 		ps
-			.getPrimeRefStream(false)
-			.skip(5)
+			.getPrimeRefStream(5L, false)
 			.forEach( pr ->
 						{
 							try

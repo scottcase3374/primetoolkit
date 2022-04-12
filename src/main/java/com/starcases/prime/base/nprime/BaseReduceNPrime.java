@@ -1,16 +1,17 @@
 package com.starcases.prime.base.nprime;
 
 import java.math.BigInteger;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 import java.util.logging.Logger;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+
+import org.eclipse.collections.api.bag.sorted.MutableSortedBag;
+import org.eclipse.collections.impl.bag.sorted.mutable.TreeBag;
+import org.eclipse.collections.impl.list.mutable.MultiReaderFastList;
 
 import com.starcases.prime.base.AbstractPrimeBaseGenerator;
 import com.starcases.prime.base.BaseTypes;
@@ -62,28 +63,24 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 	 *
 	 * @param primeRef cur Prime being reduced
 	 */
-	private void primeReduction(@NonNull PrimeRefIntfc primeRef, @NonNull HashSet<BigInteger> retBases, @NonNull int [] retOutputIdxCount)
+	private void primeReduction(@NonNull PrimeRefIntfc primeRef, @NonNull MutableSortedBag<BigInteger> retBases)
 	{
-		// Experimentation for this use case indicate that Concurrent... perform slightly better than LinkedBlocking.. varieties of the collections.
-		final var q = new ConcurrentLinkedQueue<Set<BigInteger>>();
-
 		// want to process initial bases for Prime
 		final var initialBases = primeRef.getPrimeBaseData().getPrimeBases(BaseTypes.DEFAULT).get(0);
-		q.add(initialBases);
+		final List<Set<BigInteger>> bases = MultiReaderFastList.newList();
+		bases.add(initialBases);
 
-		final List<BigInteger> remainTargetBases = ps.getPrimeRefStream(false).map(PrimeRefIntfc::getPrime).takeWhile(bi -> bi.compareTo(maxReduce) < 0).collect(Collectors.toList());
-
-		while (!q.isEmpty())
+		while (!bases.isEmpty())
 		{
-			final var curBases = q.remove();
-			curBases.stream().forEach(bi ->
+			final var curBases = bases.remove(bases.size()-1);
+			curBases.forEach(bi ->
 				{
 					if (bi.compareTo(maxReduce) >= 0)
 					{
 						ps
 						.getPrimeRef(bi)
 						.ifPresent(ii ->
-							q.add(
+							bases.add(
 									ii.getPrimeBaseData()
 									.getPrimeBases(BaseTypes.DEFAULT)
 									.get(0)
@@ -91,16 +88,9 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 					}
 					else
 					{
-						retOutputIdxCount[bi.intValue()]++;
+						retBases.add(bi);
 					}
 				} );
-
-			// track which bases were encountered (but only need to track "which one" on first encounter)
-			if (remainTargetBases.removeAll(curBases))
-			{
-				final var tmpBS = curBases.stream().filter(i -> i.compareTo(maxReduce) < 0).toList();
-				retBases.addAll(tmpBS);
-			}
 		}
 	}
 
@@ -108,7 +98,7 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 	 * top-level function; iterate over entire dataset to reduce every item
 	 * @param maxReduce
 	 */
-	public void genBases()
+	public void genBases(boolean trackGenTime)
 	{
 		if (doLog)
 		{
@@ -120,19 +110,21 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 			}
 		}
 
+		if (trackGenTime)
+			event(true);
+
 		ps.getPrimeRefStream(this.preferParallel)
 			.filter(pr -> pr.getPrimeBaseData().getPrimeBases() != null && !pr.getPrimeBaseData().getPrimeBases().isEmpty())
 				.forEach( curPrime ->
 		{
 			try
 			{
-				int [] retCountForBases = new int[maxReduce.intValue() +1];
-				var retBases = new HashSet<BigInteger>();
-				primeReduction(curPrime, retBases, retCountForBases);
+				MutableSortedBag<BigInteger> retBases = TreeBag.newBag();
+				primeReduction(curPrime, retBases);
 
 				curPrime
 					.getPrimeBaseData()
-					.addPrimeBases(BaseTypes.NPRIME, retBases, new NPrimeBaseMetadata(retCountForBases));
+					.addPrimeBases(BaseTypes.NPRIME, retBases.toSortedSet(), new NPrimeBaseMetadata(retBases));
 			}
 			catch(Exception e)
 			{
@@ -141,5 +133,8 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 
 			}
 		});
+
+		if (trackGenTime)
+			event(false);
 	}
 }

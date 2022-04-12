@@ -1,7 +1,8 @@
 package com.starcases.prime.base.nprime;
 
-import java.util.Arrays;
-import java.util.List;
+import java.math.BigInteger;
+
+import org.eclipse.collections.api.bag.sorted.MutableSortedBag;
 
 import com.starcases.prime.intfc.BaseMetadataIntfc;
 
@@ -16,10 +17,10 @@ public class NPrimeBaseMetadata implements BaseMetadataIntfc
 	private static final long serialVersionUID = 1L;
 
 	@Getter
-	private final List<Integer> countForBaseIdx;
+	private final MutableSortedBag<BigInteger> countForBaseIdx;
 
-	public NPrimeBaseMetadata(@NonNull int [] countForBaseIdx)
+	public NPrimeBaseMetadata(@NonNull MutableSortedBag<BigInteger> countForBaseIdx)
 	{
-		this.countForBaseIdx = Arrays.stream(countForBaseIdx).boxed().toList();
+		this.countForBaseIdx = countForBaseIdx;
 	}
 }

@@ -1,13 +1,13 @@
 package com.starcases.prime.base;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.collections.impl.list.mutable.FastList;
 import org.infinispan.protostream.annotations.ProtoFactory;
 
 import com.starcases.prime.intfc.BaseMetadataIntfc;
@@ -17,7 +17,7 @@ import com.starcases.prime.intfc.PrimeSourceIntfc;
 import lombok.Getter;
 import lombok.NonNull;
 
-public class PrimeBaseWithContainer implements PrimeBaseIntfc
+public class PrimeBaseContainer implements PrimeBaseIntfc
 {
 	/**
 	 *
@@ -44,7 +44,7 @@ public class PrimeBaseWithContainer implements PrimeBaseIntfc
 	private BaseMetadataIntfc baseMetadata;
 
 	@ProtoFactory
-	public PrimeBaseWithContainer()
+	public PrimeBaseContainer()
 	{
 		// nothing to init here
 	}
@@ -61,7 +61,7 @@ public class PrimeBaseWithContainer implements PrimeBaseIntfc
 					{
 						if (v == null)
 						{
-							v = new ArrayList<Set<BigInteger>>(1);
+							v = new FastList<Set<BigInteger>>(1);
 						}
 
 						v.add(primeBase);

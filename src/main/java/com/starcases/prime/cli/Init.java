@@ -11,12 +11,13 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.collections.impl.list.mutable.FastList;
 import org.jgrapht.event.GraphListener;
 import org.jgrapht.graph.DefaultEdge;
 
 import com.starcases.prime.PTKFactory;
 import com.starcases.prime.base.BaseTypes;
-import com.starcases.prime.base.PrimeBaseWithContainer;
+import com.starcases.prime.base.PrimeBaseContainer;
 import com.starcases.prime.base.nprime.BaseReduceNPrime;
 import com.starcases.prime.base.nprime.LogBasesNPrime;
 import com.starcases.prime.base.prefix.BasePrefixes;
@@ -74,7 +75,7 @@ public class Init implements Runnable
 	ExportOpts exportOpts;
 
 	@NonNull
-	List<Consumer<String>> actions = new ArrayList<>();
+	List<Consumer<String>> actions = new FastList<>();
 
 	@Override
 	public void run()
@@ -133,10 +134,10 @@ public class Init implements Runnable
 		PTKFactory.setConfidenceLevel(initOpts.confidenceLevel);
 
 		PTKFactory.setActiveBaseId(BaseTypes.DEFAULT);
-		PTKFactory.setBaseSetPrimeSource(PrimeBaseWithContainer::setPrimeSource);
+		PTKFactory.setBaseSetPrimeSource(PrimeBaseContainer::setPrimeSource);
 		PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
 
-		PTKFactory.setPrimeBaseCtor(PrimeBaseWithContainer::new);
+		PTKFactory.setPrimeBaseCtor(PrimeBaseContainer::new);
 		PTKFactory.setPrimeRefRawCtor( (i, base) -> (new PrimeRef(i)).init(PTKFactory.getPrimeBaseCtor(), base) );
 	}
 
@@ -203,6 +204,8 @@ public class Init implements Runnable
 	{
 		final var method = "Init::actionHandleAdditionalBases - base ";
 
+		final var trackGenTime = true;
+
 		if (baseOpts != null && baseOpts.bases != null)
 		{
 
@@ -211,8 +214,8 @@ public class Init implements Runnable
 			case NPRIME:
 				PTKFactory.setActiveBaseId(BaseTypes.NPRIME);
 				PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
-				PTKFactory.setBaseSetPrimeSource(PrimeBaseWithContainer::setPrimeSource);
-				PTKFactory.setPrimeBaseCtor(PrimeBaseWithContainer::new);
+				PTKFactory.setBaseSetPrimeSource(PrimeBaseContainer::setPrimeSource);
+				PTKFactory.setPrimeBaseCtor(PrimeBaseContainer::new);
 				PTKFactory.setPrimeRefRawCtor( (i, base) -> (new PrimeRef(i)).init(PTKFactory.getPrimeBaseCtor(), base) );
 
 				actions.add(s ->
@@ -222,15 +225,15 @@ public class Init implements Runnable
 									base.doPreferParallel(initOpts.preferParallel);
 									base.setLogBaseGeneration(baseOpts.logGenerate);
 									base.setMaxReduce(baseOpts.maxReduce);
-									base.genBases();
+									base.genBases(trackGenTime);
 								});
 				break;
 
 			case THREETRIPLE:
 				PTKFactory.setActiveBaseId(BaseTypes.THREETRIPLE);
 				PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
-				PTKFactory.setBaseSetPrimeSource( PrimeBaseWithContainer::setPrimeSource);
-				PTKFactory.setPrimeBaseCtor(PrimeBaseWithContainer::new);
+				PTKFactory.setBaseSetPrimeSource( PrimeBaseContainer::setPrimeSource);
+				PTKFactory.setPrimeBaseCtor(PrimeBaseContainer::new);
 				PTKFactory.setPrimeRefRawCtor( (i, base) -> (new PrimeRef(i)).init(PTKFactory.getPrimeBaseCtor(), base) );
 
 				actions.add(s ->
@@ -239,15 +242,15 @@ public class Init implements Runnable
 									var base = new BaseReduceTriple(ps);
 									base.doPreferParallel(initOpts.preferParallel);
 									base.setLogBaseGeneration(baseOpts.logGenerate);
-									base.genBases();
+									base.genBases(trackGenTime);
 								});
 				break;
 
 			case PREFIX:
 				PTKFactory.setActiveBaseId(BaseTypes.PREFIX);
 				PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
-				PTKFactory.setBaseSetPrimeSource( PrimeBaseWithContainer::setPrimeSource);
-				PTKFactory.setPrimeBaseCtor(PrimeBaseWithContainer::new);
+				PTKFactory.setBaseSetPrimeSource( PrimeBaseContainer::setPrimeSource);
+				PTKFactory.setPrimeBaseCtor(PrimeBaseContainer::new);
 				PTKFactory.setPrimeRefRawCtor( (i, base) -> (new PrimeRef(i)).init(PTKFactory.getPrimeBaseCtor(), base) );
 
 				actions.add(s ->
@@ -256,15 +259,15 @@ public class Init implements Runnable
 									var base = new BasePrefixes(ps);
 									base.doPreferParallel(initOpts.preferParallel);
 									base.setLogBaseGeneration(baseOpts.logGenerate);
-									base.genBases();
+									base.genBases(trackGenTime);
 								});
 				break;
 
 			case PREFIX_TREE:
 				PTKFactory.setActiveBaseId(BaseTypes.PREFIX_TREE);
 				PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
-				PTKFactory.setBaseSetPrimeSource( PrimeBaseWithContainer::setPrimeSource);
-				PTKFactory.setPrimeBaseCtor(PrimeBaseWithContainer::new);
+				PTKFactory.setBaseSetPrimeSource( PrimeBaseContainer::setPrimeSource);
+				PTKFactory.setPrimeBaseCtor(PrimeBaseContainer::new);
 				PTKFactory.setPrimeRefRawCtor( (i, base) -> (new PrimeRef(i)).init(PTKFactory.getPrimeBaseCtor(), base));
 
 
@@ -274,7 +277,7 @@ public class Init implements Runnable
 									var base = new BasePrefixTree(ps);
 									base.doPreferParallel(initOpts.preferParallel);
 									base.setLogBaseGeneration(baseOpts.logGenerate);
-									base.genBases();
+									base.genBases(trackGenTime);
 								});
 				break;
 

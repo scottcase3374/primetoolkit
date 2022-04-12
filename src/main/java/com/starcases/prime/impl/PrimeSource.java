@@ -1,10 +1,12 @@
 package com.starcases.prime.impl;
 
 import java.math.BigInteger;
+import java.text.DecimalFormat;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.BitSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -23,8 +25,10 @@ import lombok.NonNull;
 import javax.validation.constraints.Min;
 import org.eclipse.collections.api.map.primitive.MutableLongObjectMap;
 import org.eclipse.collections.api.map.primitive.MutableObjectLongMap;
+import org.eclipse.collections.api.set.sorted.MutableSortedSet;
 import org.eclipse.collections.impl.map.mutable.primitive.LongObjectHashMap;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectLongHashMap;
+import org.eclipse.collections.impl.set.sorted.mutable.TreeSortedSet;
 import org.infinispan.manager.EmbeddedCacheManager;
 
 /**
@@ -53,6 +57,9 @@ public class PrimeSource implements PrimeSourceIntfc
 
 	@NonNull
 	private BaseTypes activeBaseId = BaseTypes.DEFAULT;
+
+	private Instant start;
+	static final DecimalFormat timeDisplayFmt = new DecimalFormat("###,###");
 
 	// This is non-static because it currently can be overridden by passing
 	// an appropriate "new" function ptr into the PrimeSource
@@ -84,19 +91,19 @@ public class PrimeSource implements PrimeSourceIntfc
 			)
 	{
 		final int capacity = (int)(maxCount*1.25);
-		idxToPrimeMap = new LongObjectHashMap<PrimeMapEntry>(capacity); // LongObjectHashMap.newMap();
-		primeToIdx = new ObjectLongHashMap<BigInteger>(capacity); // ObjectLongHashMap.newMap();
+		idxToPrimeMap = new LongObjectHashMap<>(capacity);
+		primeToIdx = new ObjectLongHashMap<>(capacity);
 
 		targetPrimeCount = maxCount;
 
 		this.primeRefRawCtor = primeRefRawCtor;
 		consumersSetPrimeSrc.forEach(c -> c.accept(this));
 
-		var tmpBases = new TreeSet<BigInteger>();
+		MutableSortedSet<BigInteger> tmpBases = TreeSortedSet.newSet();
 		tmpBases.add(BigInteger.ONE);
 		addPrimeRef(tmpBases, BigInteger.ONE);
 
-		tmpBases = new TreeSet<BigInteger>();
+		tmpBases = TreeSortedSet.newSet();
 		tmpBases.add(BigInteger.TWO);
 		addPrimeRef(tmpBases, BigInteger.TWO);
 
@@ -121,6 +128,7 @@ public class PrimeSource implements PrimeSourceIntfc
 		}
 
 		log.info("PrimeSource::init()");
+		event(true);
 
 		prefixTree = new BasePrefixTree(this);
 
@@ -200,6 +208,8 @@ public class PrimeSource implements PrimeSourceIntfc
 
 		}
 		while (!allPrimesProcessed);
+
+		event(false);
 	}
 
 	@Override
@@ -271,6 +281,12 @@ public class PrimeSource implements PrimeSourceIntfc
 	public Stream<PrimeRefIntfc> getPrimeRefStream(boolean preferParallel)
 	{
 		return (preferParallel ? idxToPrimeMap.values().parallelStream() : idxToPrimeMap.values().stream()).map(PrimeMapEntry::getPrimeRef);
+	}
+
+	@Override
+	public Stream<PrimeRefIntfc> getPrimeRefStream(long skipCount, boolean preferParallel)
+	{
+		return (preferParallel ? idxToPrimeMap.values().stream().skip(skipCount).parallel() : idxToPrimeMap.values().stream().skip(skipCount)).map(PrimeMapEntry::getPrimeRef);
 	}
 
 	@Override
@@ -376,5 +392,32 @@ public class PrimeSource implements PrimeSourceIntfc
 	private PrimeRefIntfc getPrimeToPrimeRef(BigInteger prime)
 	{
 		return getIdxToPrimeRef(getPrimeToIdx(prime));
+	}
+
+	/** set start instance if startTime=true; display diff from start to now in milli-seconds if startTime=false
+	 *
+	 * @param startTime
+	 * @return
+	 */
+	private void event(boolean startTime)
+	{
+		long diff = 0;
+		if (startTime)
+		{
+			this.start = Instant.now();
+		}
+		else
+		{
+			diff = ChronoUnit.MILLIS.between(start, Instant.now());
+			long m = diff % 1000;
+			long s = diff / 1000 % 60;
+			long mim = diff / 60000 % 60;
+
+			log.info(String.format("Init prime generation: %s min %s sec %s milli",
+					timeDisplayFmt.format(mim),
+					timeDisplayFmt.format(s),
+					timeDisplayFmt.format(m)));
+		}
+
 	}
 }

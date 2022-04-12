@@ -17,7 +17,7 @@ class BaseOpts
 	BaseTypes bases;
 
 	@Min(2)
-	@Option(names = {"--max-reduce"}, description = "Max bases [0-max) to use for NPrime.", defaultValue="2", required = false)
+	@Option(names = {"--max-reduce"}, description = "Max base value [1-max) to use for NPrime.", defaultValue="4", required = false)
 	int maxReduce;
 
 	@Option(names = {"--active-base-id"}, description = "Valid vals: ${COMPLETION-CANDIDATES}", defaultValue = "DEFAULT", required = false)
