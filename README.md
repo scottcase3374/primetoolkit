@@ -44,12 +44,12 @@ The codebase uses Java 17 with Java 17 preview features enabled. This is mostly 
     - Logs data from node structure and renders some graphs/data
 - init --max-count=500 --log=BASES --base=THREETRIPLE
     - Logs the prime, index, #bases(triples) and each triple
-- init --max-count=250 --log=BASES --base=NPRIME --max-reduce=2
-    - Logs the prime, index, and a base-prime/count for each prime associated to "max-reduce" indexes (i.e. primes 1 and 2)
-- init --max-count=250 --LOG=BASES --base=NPRIME --max-reduce=4
-    - Logs the prime, index, and a base-prime/count for each prime associated to "max-reduce" indexes  (i.e. primes, 1,2,3,5)
-- init --max-count=25000 --log=BASES --base=NPRIME --max-reduce=3 --prefer-parallel=true
-    - Generates in parallel then logs the prime, index, and a base-prime/count for each prime associated to "max-reduce" indexes (i.e. primes 1,2,3)
+- init --max-count=250 --log=BASES --base=NPRIME --max-reduce=3
+    - Logs the prime, index, and a base-prime/count for primes under the "max-reduce" value (i.e. primes 1 and 2)
+- init --max-count=250 --LOG=BASES --base=NPRIME --max-reduce=6
+    - Logs the prime, index, and a base-prime/count for primes under the "max-reduce" value  (i.e. primes, 1,2,3,5)
+- init --max-count=25000 --log=BASES --base=NPRIME --max-reduce=4 --prefer-parallel=true
+    - Generates in parallel then logs the prime, index, and a base-prime/count for primes under the "max-reduce" value (i.e. primes 1,2,3)
 
 Adding option:
 
@@ -84,7 +84,7 @@ exclusive use of Eclipse Collections the time went down to 6m 2s. This is with J
 
 
 For a command line of:
-- init --max-count=25000 --log=BASES --base=NPRIME --max-reduce=3 --prefer-parallel=true
+- init --max-count=25000 --log=BASES --base=NPRIME --max-reduce=4 --prefer-parallel=true
 
 The run times when changing the prefer-parallel boolean were.
 - false: 4m 8s
