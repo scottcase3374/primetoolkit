@@ -3,11 +3,13 @@ package com.starcases.prime.base;
 import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.starcases.prime.intfc.PrimeBaseGenerateIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import lombok.NonNull;
+import lombok.Setter;
 
 /**
  *
@@ -16,11 +18,10 @@ import lombok.NonNull;
  */
 public abstract class AbstractPrimeBaseGenerator implements PrimeBaseGenerateIntfc
 {
-	final static Logger log = Logger.getLogger(AbstractPrimeBaseGenerator.class.getName());
-	final static DecimalFormat timeDisplayFmt = new DecimalFormat("###,###");
+	static final Logger log = Logger.getLogger(AbstractPrimeBaseGenerator.class.getName());
+	static final  DecimalFormat timeDisplayFmt = new DecimalFormat("###,###");
 
-	@NonNull
-	protected final PrimeSourceIntfc ps;
+	protected PrimeSourceIntfc ps;
 
 	protected boolean doLog;
 
@@ -28,6 +29,8 @@ public abstract class AbstractPrimeBaseGenerator implements PrimeBaseGenerateInt
 
 	protected boolean preferParallel;
 
+	@Setter
+	protected boolean trackTime;
 	protected Instant start;
 
 	public PrimeBaseGenerateIntfc doPreferParallel(boolean preferParallel)
@@ -36,10 +39,15 @@ public abstract class AbstractPrimeBaseGenerator implements PrimeBaseGenerateInt
 		return this;
 	}
 
+	protected AbstractPrimeBaseGenerator()
+	{
+		// subclass responsible for setting PrimeSourceIntfc
+		//  The reason is that the subclass should implements the interface.
+	}
+
 	protected AbstractPrimeBaseGenerator(@NonNull PrimeSourceIntfc ps)
 	{
 		this.ps = ps;
-		this.ps.init();
 	}
 
 	@Override
@@ -48,6 +56,20 @@ public abstract class AbstractPrimeBaseGenerator implements PrimeBaseGenerateInt
 		this.doLog = doLog;
 	}
 
+	@Override
+	public void genBases()
+	{
+		if (trackTime)
+			event(true);
+
+		genBasesImpl();
+
+		if (trackTime)
+			event(false);
+	}
+
+	protected abstract void genBasesImpl();
+
 	/** set start instance if startTime=true; display diff from start to now in milli-seconds if startTime=false
 	 *
 	 * @param startTime
@@ -55,6 +77,9 @@ public abstract class AbstractPrimeBaseGenerator implements PrimeBaseGenerateInt
 	 */
 	protected void event(boolean startTime)
 	{
+		if (!doLog)
+			return;
+
 		long diff = 0;
 		if (startTime)
 		{
@@ -67,10 +92,13 @@ public abstract class AbstractPrimeBaseGenerator implements PrimeBaseGenerateInt
 			long s = diff / 1000 % 60;
 			long mim = diff / 60000 % 60;
 
-			log.info(String.format("Base generation: %s min %s sec %s milli",
-					timeDisplayFmt.format(mim),
-					timeDisplayFmt.format(s),
-					timeDisplayFmt.format(m)));
+			if (log.isLoggable(Level.INFO))
+			{
+				log.info(String.format("Base generation: %s min %s sec %s milli",
+						timeDisplayFmt.format(mim),
+						timeDisplayFmt.format(s),
+						timeDisplayFmt.format(m)));
+			}
 		}
 
 	}

@@ -22,14 +22,11 @@ public class BasePrefixes extends AbstractPrimeBaseGenerator
 	}
 
 	@Override
-	public void genBases(boolean trackGenTime)
+	protected void genBasesImpl()
 	{
 		log.info("BasePrefixes genBases()");
 
 		final var prStream = ps.getPrimeRefStream(preferParallel);
-		if (trackGenTime)
-			event(true);
-
 		prStream.forEach(pr ->
 				{
 					try
@@ -39,7 +36,7 @@ public class BasePrefixes extends AbstractPrimeBaseGenerator
 						// We don't include the Pn-1 idx in prefix list
 						final var last = ((MutableSortedSet<BigInteger>)origBases).getLastOptional();
 						MutableSortedSet<BigInteger> tmpSet = TreeSortedSet.newSet(origBases);
-						last.ifPresent(l -> tmpSet.remove(l));
+						last.ifPresent(tmpSet::remove);
 						pr.getPrimeBaseData().addPrimeBases(tmpSet, BaseTypes.PREFIX);
 					}
 					catch(Exception e)
@@ -49,8 +46,5 @@ public class BasePrefixes extends AbstractPrimeBaseGenerator
 						e.printStackTrace();
 					}
 				});
-
-		if (trackGenTime)
-			event(false);
 	}
 }

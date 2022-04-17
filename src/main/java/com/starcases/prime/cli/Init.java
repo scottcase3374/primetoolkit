@@ -222,10 +222,11 @@ public class Init implements Runnable
 								{
 									log.info(method + baseOpts.bases);
 									var base = new BaseReduceNPrime(ps);
+									base.setTrackTime(trackGenTime);
 									base.doPreferParallel(initOpts.preferParallel);
 									base.setLogBaseGeneration(baseOpts.logGenerate);
 									base.setMaxReduce(baseOpts.maxReduce);
-									base.genBases(trackGenTime);
+									base.genBases();
 								});
 				break;
 
@@ -240,9 +241,10 @@ public class Init implements Runnable
 								{
 									log.info(method + baseOpts.bases);
 									var base = new BaseReduceTriple(ps);
+									base.setTrackTime(trackGenTime);
 									base.doPreferParallel(initOpts.preferParallel);
 									base.setLogBaseGeneration(baseOpts.logGenerate);
-									base.genBases(trackGenTime);
+									base.genBases();
 								});
 				break;
 
@@ -257,9 +259,10 @@ public class Init implements Runnable
 								{
 									log.info(method + baseOpts.bases);
 									var base = new BasePrefixes(ps);
+									base.setTrackTime(trackGenTime);
 									base.doPreferParallel(initOpts.preferParallel);
 									base.setLogBaseGeneration(baseOpts.logGenerate);
-									base.genBases(trackGenTime);
+									base.genBases();
 								});
 				break;
 
@@ -275,9 +278,10 @@ public class Init implements Runnable
 								{
 									log.info(method + baseOpts.bases);
 									var base = new BasePrefixTree(ps);
+									base.setTrackTime(trackGenTime);
 									base.doPreferParallel(initOpts.preferParallel);
 									base.setLogBaseGeneration(baseOpts.logGenerate);
-									base.genBases(trackGenTime);
+									base.genBases();
 								});
 				break;
 

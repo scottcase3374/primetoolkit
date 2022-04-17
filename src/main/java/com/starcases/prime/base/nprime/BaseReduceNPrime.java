@@ -98,7 +98,8 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 	 * top-level function; iterate over entire dataset to reduce every item
 	 * @param maxReduce
 	 */
-	public void genBases(boolean trackGenTime)
+	@Override
+	protected void genBasesImpl()
 	{
 		if (doLog)
 		{
@@ -109,9 +110,6 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 				log.info(String.format("genBases(): maxReduce[%d]", maxReduce));
 			}
 		}
-
-		if (trackGenTime)
-			event(true);
 
 		ps.getPrimeRefStream(this.preferParallel)
 			.filter(pr -> pr.getPrimeBaseData().getPrimeBases() != null && !pr.getPrimeBaseData().getPrimeBases().isEmpty())
@@ -133,8 +131,5 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 
 			}
 		});
-
-		if (trackGenTime)
-			event(false);
 	}
 }

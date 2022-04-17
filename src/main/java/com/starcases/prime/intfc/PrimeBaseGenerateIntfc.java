@@ -8,6 +8,6 @@ package com.starcases.prime.intfc;
  */
 public interface PrimeBaseGenerateIntfc
 {
-	void genBases(boolean trackGenTime);
+	void genBases();
 	void setLogBaseGeneration(boolean doLog);
 }

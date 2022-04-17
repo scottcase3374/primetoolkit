@@ -36,14 +36,12 @@ public class BasePrefixTree extends AbstractPrimeBaseGenerator
 	 * @param maxReduce
 	 */
 	@Override
-	public void genBases(boolean trackGenTime)
+	protected void genBasesImpl()
 	{
 		System.out.println(String.format("%n"));
 		log.info("BasePrefixTree genBases()");
 
-		final var prStream = ps.getPrimeRefStream(2L, false);
-		if (trackGenTime)
-			event(true);
+		final var prStream = ps.getPrimeRefStream(2L, this.preferParallel);
 
 		prStream.forEach(
 				curPrime ->
@@ -56,7 +54,9 @@ public class BasePrefixTree extends AbstractPrimeBaseGenerator
 
 					// Prefixes don't include the Prime (n-1) item per the definition of "prefix" used.
 					if (!curPrimePrefixBases.isEmpty())
-						curPrimePrefixBases.remove(curPrimePrefixBases.size()-1);
+					{
+						curPrimePrefixBases.subList(0, curPrimePrefixBases.size()-1);
+					}
 
 					var curPrefixIt = this.iterator();
 					PrefixTreeNode [] tn = {null};
@@ -73,8 +73,5 @@ public class BasePrefixTree extends AbstractPrimeBaseGenerator
 					tn[0].setSourcePrimes(curPrefixIt.toSet());
 					curPrime.getPrimeBaseData().addPrimeBases(tn[0].getSourcePrimes(), BaseTypes.PREFIX_TREE);
 				});
-
-		if (trackGenTime)
-			event(false);
 	}
 }

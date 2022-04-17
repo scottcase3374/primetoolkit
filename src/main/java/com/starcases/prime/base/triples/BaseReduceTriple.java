@@ -95,7 +95,7 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 	 * @param maxReduce
 	 */
 	@Override
-	public void genBases(boolean trackGenTime)
+	protected void genBasesImpl()
 	{
 		final var counter = new AtomicInteger(0);
 		if (doLog)
@@ -114,12 +114,8 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 					.addPrimeBases(curPrime.getPrimeBaseData().getPrimeBases(BaseTypes.DEFAULT).get(0), BaseTypes.THREETRIPLE)
 		);
 
-		if (trackGenTime)
-			event(true);
-		ps.getPrimeRefStream(5L, true).forEach(curPrime -> handlePrime(curPrime, counter.incrementAndGet()));
 
-		if (trackGenTime)
-			event(false);
+		ps.getPrimeRefStream(5L, true).forEach(curPrime -> handlePrime(curPrime, counter.incrementAndGet()));
 
 		if (log.isLoggable(Level.INFO))
 			log.info(String.format("Total entries: %d;", counter.get()));

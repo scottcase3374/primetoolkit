@@ -2,8 +2,6 @@ package com.starcases.prime.impl;
 
 import java.math.BigInteger;
 import java.text.DecimalFormat;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.BitSet;
 import java.util.Optional;
 import java.util.Set;
@@ -14,6 +12,7 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.starcases.prime.base.AbstractPrimeBaseGenerator;
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.base.prefixtree.BasePrefixTree;
 import com.starcases.prime.intfc.PrimeRefIntfc;
@@ -37,7 +36,7 @@ import org.infinispan.manager.EmbeddedCacheManager;
  * finding primes, working with bases of the primes, and general information/access.
  *
  */
-public class PrimeSource implements PrimeSourceIntfc
+public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSourceIntfc
 {
 	private static final Logger log = Logger.getLogger(PrimeSource.class.getName());
 
@@ -58,7 +57,6 @@ public class PrimeSource implements PrimeSourceIntfc
 	@NonNull
 	private BaseTypes activeBaseId = BaseTypes.DEFAULT;
 
-	private Instant start;
 	static final DecimalFormat timeDisplayFmt = new DecimalFormat("###,###");
 
 	// This is non-static because it currently can be overridden by passing
@@ -90,6 +88,8 @@ public class PrimeSource implements PrimeSourceIntfc
 			EmbeddedCacheManager cacheMgr
 			)
 	{
+		super.ps = this;
+
 		final int capacity = (int)(maxCount*1.25);
 		idxToPrimeMap = new LongObjectHashMap<>(capacity);
 		primeToIdx = new ObjectLongHashMap<>(capacity);
@@ -109,6 +109,14 @@ public class PrimeSource implements PrimeSourceIntfc
 
 		this.confidenceLevel = confidenceLevel;
 	}
+
+	@Override
+	public void init()
+	{
+		this.setTrackTime(true);
+		genBases();
+	}
+
 	/**
 	 * This is the "prime" logic so to speak..  the "innovative" side of this isn't
 	 * the initial identification of primes but the data that is created related
@@ -119,7 +127,7 @@ public class PrimeSource implements PrimeSourceIntfc
 	 * of numbers created from large primes?
 	 */
 	@Override
-	public void init()
+	protected void genBasesImpl()
 	{
 		if (doInit.compareAndExchangeAcquire(false, true))
 		{
@@ -127,16 +135,12 @@ public class PrimeSource implements PrimeSourceIntfc
 			return;
 		}
 
-		log.info("PrimeSource::init()");
-		event(true);
+		log.info("PrimeSource::genBasesImpl()");
 
 		prefixTree = new BasePrefixTree(this);
 
 		final var primeIndexMaxPermutation = new BitSet();
 		final var primeIndexPermutation = new BitSet();
-
-		// Used for informative purposes - like a progress meter.
-		long primesProcessed1k = 0;
 
 		var allPrimesProcessed = false;
 
@@ -191,26 +195,28 @@ public class PrimeSource implements PrimeSourceIntfc
 				}
 			}
 
-			// display some progress info
-			if (nextIdx.get() % 1000 == 0)
-			{
-				primesProcessed1k++;
-				if (primesProcessed1k % 100 == 0)
-				{
-					System.out.println(String.format("%n %d00k primes", (int)(primesProcessed1k / 100)));
-				}
-				else
-				{
-					System.out.print("K");
-				}
-			}
-			allPrimesProcessed = nextIdx.get() >= targetPrimeCount;
+			displayProgress(curPrimeIdx);
+			allPrimesProcessed = curPrimeIdx >= targetPrimeCount;
 
 		}
 		while (!allPrimesProcessed);
-
-		event(false);
 	}
+
+	private void displayProgress(long curIndex)
+	{
+		final String [] units = { "%n[%s x 1024k] ", "%n [%s x 128k] ", "%n [%s x 16k] ", "K"};
+		final long [] mask = {(1 << 20) -1, (1 << 17) -1 , (1 << 14) -1, (1 << 10) -1};
+
+		// display some progress info
+		var primesProcessed = curIndex;
+		int unitIdx = -1;
+		while ((primesProcessed & mask[++unitIdx]) != 0 && unitIdx <  mask.length-1);
+
+		var num = (int)(primesProcessed / mask[unitIdx]);
+		if (unitIdx != units.length-1 || num <= 2)
+			System.out.print(String.format(units[unitIdx], num));
+	}
+
 
 	@Override
 	public void store(BaseTypes ... baseTypes)
@@ -392,32 +398,5 @@ public class PrimeSource implements PrimeSourceIntfc
 	private PrimeRefIntfc getPrimeToPrimeRef(BigInteger prime)
 	{
 		return getIdxToPrimeRef(getPrimeToIdx(prime));
-	}
-
-	/** set start instance if startTime=true; display diff from start to now in milli-seconds if startTime=false
-	 *
-	 * @param startTime
-	 * @return
-	 */
-	private void event(boolean startTime)
-	{
-		long diff = 0;
-		if (startTime)
-		{
-			this.start = Instant.now();
-		}
-		else
-		{
-			diff = ChronoUnit.MILLIS.between(start, Instant.now());
-			long m = diff % 1000;
-			long s = diff / 1000 % 60;
-			long mim = diff / 60000 % 60;
-
-			log.info(String.format("Init prime generation: %s min %s sec %s milli",
-					timeDisplayFmt.format(mim),
-					timeDisplayFmt.format(s),
-					timeDisplayFmt.format(m)));
-		}
-
 	}
 }

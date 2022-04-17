@@ -26,10 +26,8 @@ public class LogGraphStructure extends PrimeGrapher implements LogGraphIntfc
 		super(ps, baseType);
 	}
 
-	private boolean preferParallel;
-	public LogGraphIntfc doPreferParallel(boolean preferParallel)
+	public LogGraphIntfc doPreferParallel()
 	{
-		this.preferParallel = preferParallel;
 		return this;
 	}
 
@@ -50,5 +48,11 @@ public class LogGraphStructure extends PrimeGrapher implements LogGraphIntfc
 						graph.outDegreeOf(n),
 						graph.outgoingEdgesOf(n).stream().map(e -> graph.getEdgeTarget(e).toString()).collect(Collectors.joining(","))
 			) ) );
+	}
+
+	@Override
+	public LogGraphIntfc doPreferParallel(boolean preferParallel) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

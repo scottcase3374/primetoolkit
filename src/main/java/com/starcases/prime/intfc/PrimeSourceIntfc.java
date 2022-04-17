@@ -24,7 +24,6 @@ import lombok.NonNull;
 public interface PrimeSourceIntfc extends Serializable
 {
 	void init();
-
 	void store(BaseTypes ... baseTypes);
 	void load(BaseTypes ... baseTypes);
 
