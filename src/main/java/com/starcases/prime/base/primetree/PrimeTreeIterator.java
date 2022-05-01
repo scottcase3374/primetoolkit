@@ -1,4 +1,4 @@
-package com.starcases.prime.base.prefixtree;
+package com.starcases.prime.base.primetree;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -15,38 +15,47 @@ import org.eclipse.collections.impl.set.sorted.mutable.TreeSortedSet;
  * Instances are intended for use in a single thread and NOT
  * shared across threads.
  */
-public class PrefixIterator implements PrefixIteratorIntfc
+public class PrimeTreeIterator implements PrimeTreeIteratorIntfc
 {
-	private BasePrefixTree tree;
-	private Map<BigInteger, PrefixTreeNode> treeNodeMap = null;
-	private List<PrefixTreeNode> sourceTreeNodes = null;
+	final List<PrimeTreeNode> sourceTreeNodes =  FastList.newList();
+	final PrimeTree tree;
+	Map<BigInteger, PrimeTreeNode> treeNodeMap;
 
-	PrefixIterator(BasePrefixTree bpt, boolean trackSourceTreeNodes)
+	PrimeTreeIterator(PrimeTree bpt)
 	{
 		tree = bpt;
 		treeNodeMap = tree.prefixMap;
-		if (trackSourceTreeNodes)
-		{
-			 sourceTreeNodes =  FastList.newList();
-		}
 	}
 
 	/**
-	 * Only returns items used by current iterator using add().
+	 *
 	 */
 	@Override
 	public Set<BigInteger> toSet()
 	{
-		return sourceTreeNodes.stream().map(tn -> tn.getPrefixPrime().get()).collect(Collectors.toCollection(TreeSortedSet::newSet));
+		 final var ptn = sourceTreeNodes.get(sourceTreeNodes.size()-1);
+		 var baseSet  = ptn.getSourcePrimes();
+
+		if (baseSet == null)
+		{
+			final var sp1 = sourceTreeNodes.stream()
+					.map(PrimeTreeNode::getPrefixPrime).collect(Collectors.toCollection(TreeSortedSet::newSet));
+
+			ptn.setSourcePrimes(s1 -> s1 != null ? s1 : sp1);
+			baseSet = sp1;
+		}
+
+		return baseSet;
 	}
 
 	/**
-	 * This only walks the tree; no tracking of source nodes is performed.
+	 * This walks the tree and tracks the navigated source nodes.
 	 */
 	@Override
-	public PrefixTreeNode next(BigInteger i)
+	public PrimeTreeNode next(BigInteger i)
 	{
 		final var tn = treeNodeMap.get(i);
+		sourceTreeNodes.add(tn);
 		treeNodeMap = tn.getNext();
 		return tn;
 	}
@@ -56,13 +65,13 @@ public class PrefixIterator implements PrefixIteratorIntfc
 	 * Side effect: tracks source nodes enabling toSet() to return the items representing a prefix.
 	 */
 	@Override
-	public PrefixTreeNode add(BigInteger i)
+	public PrimeTreeNode add(BigInteger i)
 	{
 		final var tn = treeNodeMap.computeIfAbsent(i, f ->
 												{
-													final var nextMap = new ConcurrentHashMap<BigInteger,PrefixTreeNode>();
+													final var nextMap = new ConcurrentHashMap<BigInteger,PrimeTreeNode>();
 
-													return  new PrefixTreeNode(i, nextMap);
+													return  new PrimeTreeNode(i, nextMap);
 												}
 											);
 

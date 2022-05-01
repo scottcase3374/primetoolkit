@@ -14,21 +14,21 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.starcases.prime.base.AbstractPrimeBaseGenerator;
 import com.starcases.prime.base.BaseTypes;
-import com.starcases.prime.base.prefixtree.BasePrefixTree;
+import com.starcases.prime.base.primetree.PrimeTree;
+import com.starcases.prime.intfc.CollectionTrackerIntfc;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
 import java.util.List;
 
 import lombok.NonNull;
+
 import javax.validation.constraints.Min;
 import org.eclipse.collections.api.map.primitive.MutableLongObjectMap;
 import org.eclipse.collections.api.map.primitive.MutableObjectLongMap;
-import org.eclipse.collections.api.set.sorted.MutableSortedSet;
 import org.eclipse.collections.impl.map.mutable.primitive.LongObjectHashMap;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectLongHashMap;
 import org.eclipse.collections.impl.set.sorted.mutable.TreeSortedSet;
-import org.infinispan.manager.EmbeddedCacheManager;
 
 /**
  * Provides data structure holding the core data and objects that provide access to the data from the
@@ -59,13 +59,15 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 
 	static final DecimalFormat timeDisplayFmt = new DecimalFormat("###,###");
 
-	// This is non-static because it currently can be overridden by passing
+	// can be overridden by passing
 	// an appropriate "new" function ptr into the PrimeSource
 	// constructor  -> param primeRefCtor
 	@NonNull
-	private transient BiFunction<Long, Set<BigInteger>, PrimeRefIntfc> primeRefRawCtor;
+	private transient BiFunction<Long, List<Set<BigInteger>>, PrimeRefIntfc> primeRefRawCtor;
 
-	private transient BasePrefixTree prefixTree;
+	private transient CollectionTrackerIntfc collTrack;
+
+	private transient PrimeTree primeTree;
 
 	// map BigInteger (prime) to long index
 	@NonNull
@@ -84,11 +86,13 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 			@Min(1) long maxCount,
 			@NonNull List<Consumer<PrimeSourceIntfc>> consumersSetPrimeSrc,
 			@Min(1) int confidenceLevel,
-			@NonNull BiFunction<Long, Set<BigInteger>, PrimeRefIntfc> primeRefRawCtor,
-			EmbeddedCacheManager cacheMgr
+			@NonNull BiFunction<Long, List<Set<BigInteger>>, PrimeRefIntfc> primeRefRawCtor,
+			CollectionTrackerIntfc collTrack
 			)
 	{
 		super.ps = this;
+
+		this.collTrack = collTrack;
 
 		final int capacity = (int)(maxCount*1.25);
 		idxToPrimeMap = new LongObjectHashMap<>(capacity);
@@ -99,13 +103,9 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 		this.primeRefRawCtor = primeRefRawCtor;
 		consumersSetPrimeSrc.forEach(c -> c.accept(this));
 
-		MutableSortedSet<BigInteger> tmpBases = TreeSortedSet.newSet();
-		tmpBases.add(BigInteger.ONE);
-		addPrimeRef(tmpBases, BigInteger.ONE);
-
-		tmpBases = TreeSortedSet.newSet();
-		tmpBases.add(BigInteger.TWO);
-		addPrimeRef(tmpBases, BigInteger.TWO);
+		// Prime, Prefix, suffix
+		addPrimeRef(BigInteger.ONE, List.of(TreeSortedSet.newSetWith(BigInteger.ONE), TreeSortedSet.newSetWith(BigInteger.ZERO)));
+		addPrimeRef(BigInteger.TWO, List.of(TreeSortedSet.newSetWith(BigInteger.TWO), TreeSortedSet.newSetWith(BigInteger.ZERO)));
 
 		this.confidenceLevel = confidenceLevel;
 	}
@@ -113,7 +113,12 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	@Override
 	public void init()
 	{
-		this.setTrackTime(true);
+		if (doInit.compareAndExchangeAcquire(false, true))
+		{
+			// Prevent double init - various valid combinations of code can attempt that.
+			return;
+		}
+
 		genBases();
 	}
 
@@ -129,77 +134,96 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	@Override
 	protected void genBasesImpl()
 	{
-		if (doInit.compareAndExchangeAcquire(false, true))
-		{
-			// Prevent double init - various valid combinations of code can attempt that.
-			return;
-		}
-
 		log.info("PrimeSource::genBasesImpl()");
 
-		prefixTree = new BasePrefixTree(this);
-
-		final var primeIndexMaxPermutation = new BitSet();
-		final var primeIndexPermutation = new BitSet();
+		primeTree = new PrimeTree(this, collTrack);
 
 		var allPrimesProcessed = false;
-
-		// each iteration increases the #bits by 1; a new Prime is determined per iteration
 		do
 		{
 			final var curPrimeIdx = nextIdx.get();
 			final var curPrime = getPrime(curPrimeIdx);
 
-			// Represents a X-bit search space of indexes for primes to add for next Prime.
-			final var numBitsForPrimeCount = primeToIdx.size()-1;
-			primeIndexMaxPermutation.clear(numBitsForPrimeCount-1);
-			primeIndexMaxPermutation.set(numBitsForPrimeCount); // keep 'shifting' max bit left
-
-			// no reason to perform work when no indexes
-			// selected so start with 1 index selected.
-			primeIndexPermutation.clear();
-			primeIndexPermutation.set(0);
-
-			final var sumCeiling = curPrime.stream().map(this::calcSumCeiling).reduce(BigInteger.ZERO, BigInteger::add);
-
-			var doLoop = !(primeIndexPermutation.equals(primeIndexMaxPermutation));
-			while (doLoop)
+			if (!genByListPermutation(curPrime))
 			{
-				final BigInteger permutationSum = primeIndexPermutation
-						.stream()
-						.mapToObj(this::getPrime)
-						.filter(Optional::isPresent)
-						.map(Optional::get)
-						.reduce(curPrime.orElse(BigInteger.ZERO), BigInteger::add);
-
-				// exceed known prime then iteration is done - limit useless work
-				doLoop = permutationSum.compareTo(sumCeiling) <= 0;
-				if (doLoop)
-				{
-					if (curPrime.isPresent() && viablePrime(permutationSum, curPrime.get()))
-					{
-						var pt = prefixTree.iterator();
-						primeIndexPermutation.stream().forEach(i ->
-							{
-								var prefPrime = getPrime(i).get();
-
-								pt.add(prefPrime);
-							});
-						pt.add(curPrime.get()); // last base is the previous prime.
-
-						addPrimeRef(pt.toSet(), permutationSum);
-						doLoop = false;
-					}
-					else
-						incrementPermutation(primeIndexPermutation);
-				}
+				genByPrimePermutation(curPrime);
 			}
 
 			displayProgress(curPrimeIdx);
 			allPrimesProcessed = curPrimeIdx >= targetPrimeCount;
-
 		}
 		while (!allPrimesProcessed);
+	}
+
+	private void genByPrimePermutation(Optional<BigInteger> curPrime)
+	{
+		// Represents a X-bit search space of indexes for primes to add for next Prime.
+		final var numBitsForPrimeCount = primeToIdx.size()-1;
+		var primeIndexMaxPermutation = new BitSet();
+		primeIndexMaxPermutation.set(numBitsForPrimeCount); // keep 'shifting' max bit left
+
+		// no reason to perform work when no indexes
+		// selected so start with 1 index selected.
+		var primeIndexPermutation = new BitSet();
+		primeIndexPermutation.set(0);
+
+		final var sumCeiling = curPrime.stream().map(this::calcSumCeiling).reduce(BigInteger.ZERO, BigInteger::add);
+
+		var doLoop = !(primeIndexPermutation.equals(primeIndexMaxPermutation));
+		while (doLoop)
+		{
+			final BigInteger permutationSum = primeIndexPermutation
+					.stream()
+					.mapToObj(this::getPrime)
+					.filter(Optional::isPresent)
+					.map(Optional::get)
+					.reduce(curPrime.orElse(BigInteger.ZERO), BigInteger::add);
+
+			// exceed known prime then iteration is done - limit useless work
+			doLoop = permutationSum.compareTo(sumCeiling) <= 0;
+			if (doLoop)
+			{
+				if (curPrime.isPresent() && viablePrime(permutationSum, curPrime.get()))
+				{
+					var prefix = primeTree.iterator();
+					primeIndexPermutation.stream().forEach(i ->
+						{
+							var prefPrime = getPrime(i).get();
+
+							prefix.add(prefPrime);
+						});
+
+					var suffix = primeTree.iterator();
+					suffix.add(curPrime.get()); // last base is the previous prime.
+
+					var prefixSet = collTrack.track(prefix.toSet()).coll();
+					//var prefixSet = prefix.toSet();
+					addPrimeRef(permutationSum, List.of(prefixSet, suffix.toSet()));
+					doLoop = false;
+				}
+				else
+					incrementPermutation(primeIndexPermutation);
+			}
+		}
+	}
+
+	private boolean genByListPermutation(Optional<BigInteger> curPrime)
+	{
+		boolean [] found = {false};
+		curPrime.ifPresent(cur ->
+						{
+							final var tmpCur = cur;
+							var pdata = primeTree.select(p1 -> { var p = tmpCur.add(BigInteger.valueOf(p1));
+																return p.isProbablePrime(100); });
+							pdata.ifPresent( pd ->
+										{
+											found[0] = true;
+											addPrimeRef(tmpCur.add(BigInteger.valueOf(pd.prime())), List.of(pd.coll(), Set.of(tmpCur)));
+										}
+									);
+							});
+
+		return found[0];
 	}
 
 	private void displayProgress(long curIndex)
@@ -221,54 +245,13 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	@Override
 	public void store(BaseTypes ... baseTypes)
 	{
-
-//		Map<Integer, BigInteger> primeCache = cacheMgr.getCache("primes");
-//		primeCache.putAll(primes);
-
-//		Map<Integer, PrimeRefIntfc> primeRefCache = cacheMgr.getCache("primerefs");
-//		primeRefCache.putAll(primeRefs);
-
-//		if (log.isLoggable(Level.INFO))
-//			log.info(String.format("Stored [%d] primes, [%d] PrimeRefs", primeCache.size(), primeRefCache.size()));
-		//if (baseTypes != null)
-		//	cacheMgr.getCache(BaseTypes.DEFAULT.name()).putAll(primeRefs.get(BaseTypes.DEFAULT));
+		// not used as of now
 	}
 
 	@Override
 	public void load(BaseTypes ... baseTypes)
 	{
-//		if (doInit.getPlain())
-//		{
-//			return;
-//		}
-//		Map<Integer, BigInteger>  prCache = cacheMgr.getCache("primes");
-//		if (!prCache.isEmpty())
-//		{
-//			primes.putAll(prCache);
-//
-//			if (log.isLoggable(Level.INFO))
-//				log.info(String.format("cached prime entries loaded: %d ", primes.size()));
-//		}
-//		else
-//		{
-//			if (log.isLoggable(Level.INFO))
-//				log.info("prime cache empty");
-//		}
-//
-//		Map<Integer, PrimeRef>  prRefCache = cacheMgr.getCache("primerefs");
-//		if (!prRefCache.isEmpty())
-//		{
-//			//prRefCache.forEach((k,v) -> {v.init(null, baseSetPrimeSrc); primeRefs.put(k, v); });
-//			primeRefs.putAll(prRefCache);
-//
-//			if (log.isLoggable(Level.INFO))
-//				log.info(String.format("cached prime ref entries loaded: %d ", primeRefs.size()));
-//		}
-//		else
-//		{
-//			if (log.isLoggable(Level.INFO))
-//				log.info("prime refs cache empty");
-//		}
+		// not used as of now
 	}
 
 	@Override
@@ -340,12 +323,12 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	 * @param aPrime
 	 */
 	private void addPrimeRef(
-			@NonNull Set<BigInteger> base,
-			@NonNull @Min(1) BigInteger newPrime
+			@NonNull @Min(1) BigInteger newPrime,
+			@NonNull List<Set<BigInteger>> baseSets
 			)
 	{
 		var idx = nextIdx.incrementAndGet();
-		PrimeRefIntfc ret = primeRefRawCtor.apply(idx, base);
+		PrimeRefIntfc ret = primeRefRawCtor.apply(idx, baseSets);
 		updateMaps(idx, newPrime, ret);
 	}
 

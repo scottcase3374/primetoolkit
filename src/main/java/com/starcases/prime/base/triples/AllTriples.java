@@ -3,6 +3,7 @@ package com.starcases.prime.base.triples;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -270,6 +271,6 @@ public class AllTriples
 			.map(PrimeRefIntfc::getPrime)
 			.collect(Collectors.toCollection(TreeSortedSet::newSet));
 
-		prime.getPrimeBaseData().addPrimeBases(bs, BaseTypes.THREETRIPLE);
+		prime.getPrimeBaseData().addPrimeBases(List.of(bs), BaseTypes.THREETRIPLE);
 	}
 }

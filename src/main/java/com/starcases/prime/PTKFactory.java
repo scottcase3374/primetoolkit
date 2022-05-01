@@ -10,10 +10,8 @@ import java.util.function.Supplier;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
-import org.infinispan.manager.DefaultCacheManager;
-import org.infinispan.manager.EmbeddedCacheManager;
-
 import com.starcases.prime.base.BaseTypes;
+import com.starcases.prime.impl.CollectionTrackerImpl;
 import com.starcases.prime.impl.PrimeSource;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
@@ -21,6 +19,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 
+import com.starcases.prime.intfc.CollectionTrackerIntfc;
 import com.starcases.prime.intfc.FactoryIntfc;
 import com.starcases.prime.intfc.PrimeBaseIntfc;
 import com.starcases.prime.intfc.PrimeRefIntfc;
@@ -33,23 +32,6 @@ import com.starcases.prime.intfc.PrimeRefIntfc;
 
 public class PTKFactory
 {
-	@Getter
-	private static EmbeddedCacheManager cacheMgr;
-
-//	static
-//	{
-		//try
-	//	{
-			//cacheMgr = new DefaultCacheManager("infinispan.xml");
-			//cacheMgr.startCaches("primes", "primerefs");
-			// "PREFIX", "PREFIX_TREE", "NPRIME", "THREETRIPLE" , "DEFAULT"
-	//	}
-	//	catch(IOException e)
-	//	{
-	//		System.out.println("couldn't create cache mgr from classpath:infinispan.xm");
-	//	}
-//	}
-
 	@Getter
 	@Setter
 	private static @Min(1) long maxCount;
@@ -68,7 +50,7 @@ public class PTKFactory
 
 	@Getter
 	@Setter
-	private static @NonNull BiFunction<Long, Set<BigInteger>, PrimeRefIntfc> primeRefRawCtor;
+	private static @NonNull BiFunction<Long, List<Set<BigInteger>>, PrimeRefIntfc> primeRefRawCtor;
 
 	@Getter
 	@Setter
@@ -81,6 +63,9 @@ public class PTKFactory
 	@Getter
 	@Setter
 	private static @NonNull Supplier<PrimeBaseIntfc> primeBaseCtor;
+
+	@Getter
+	private static @NonNull CollectionTrackerIntfc collTrack = new CollectionTrackerImpl();
 
 	private PTKFactory()
 	{}
@@ -105,7 +90,7 @@ public class PTKFactory
 					}
 
 					@Override
-					public BiFunction<Long, Set<BigInteger>, PrimeRefIntfc> getPrimeRefRawConstructor()
+					public BiFunction<Long, List<Set<BigInteger>>, PrimeRefIntfc> getPrimeRefRawConstructor()
 					{
 						return primeRefRawCtor;
 					}
@@ -125,14 +110,15 @@ public class PTKFactory
 	static PrimeSourceIntfc primeSource(
 			@Min(1) long maxCount,
 			@Min(1) int confidenceLevel,
-			@NonNull BiFunction<Long, Set<BigInteger>, PrimeRefIntfc> primeRefRawCtor,
+			@NonNull BiFunction<Long, List<Set<BigInteger>>, PrimeRefIntfc> primeRefRawCtor,
 			@NonNull List<Consumer<PrimeSourceIntfc>> consumersSetPrimeSource
 			)
 	{
 		return new PrimeSource(maxCount
 								, consumersSetPrimeSource
 								, confidenceLevel
-								,primeRefRawCtor
-								, cacheMgr);
+								,primeRefRawCtor,
+								collTrack
+								);
 	}
 }

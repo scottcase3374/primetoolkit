@@ -26,11 +26,6 @@ public class LogGraphStructure extends PrimeGrapher implements LogGraphIntfc
 		super(ps, baseType);
 	}
 
-	public LogGraphIntfc doPreferParallel()
-	{
-		return this;
-	}
-
 	@Override
 	@Command
 	public void l()
@@ -51,8 +46,8 @@ public class LogGraphStructure extends PrimeGrapher implements LogGraphIntfc
 	}
 
 	@Override
-	public LogGraphIntfc doPreferParallel(boolean preferParallel) {
-		// TODO Auto-generated method stub
-		return null;
+	public LogGraphIntfc doPreferParallel(boolean preferParallel)
+	{
+		return this;
 	}
 }

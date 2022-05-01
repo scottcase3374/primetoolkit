@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.collections.impl.list.mutable.FastList;
-import org.infinispan.protostream.annotations.ProtoFactory;
 
 import com.starcases.prime.intfc.BaseMetadataIntfc;
 import com.starcases.prime.intfc.PrimeBaseIntfc;
@@ -43,7 +42,6 @@ public class PrimeBaseContainer implements PrimeBaseIntfc
 	@Getter
 	private BaseMetadataIntfc baseMetadata;
 
-	@ProtoFactory
 	public PrimeBaseContainer()
 	{
 		// nothing to init here
@@ -54,17 +52,18 @@ public class PrimeBaseContainer implements PrimeBaseIntfc
 	 * @param primeBase
 	 */
 	@Override
-	public void addPrimeBases(@NonNull BaseTypes baseType, @NonNull Set<BigInteger> primeBase, BaseMetadataIntfc baseMetadata)
+	public void addPrimeBases(@NonNull BaseTypes baseType, @NonNull List<Set<BigInteger>> primeBase, BaseMetadataIntfc baseMetadata)
 	{
 		this.primeBases.compute(baseType,
 				(k, v) ->
 					{
 						if (v == null)
 						{
-							v = new FastList<Set<BigInteger>>(1);
+							v = new FastList<Set<BigInteger>>();
 						}
 
-						v.add(primeBase);
+						v.addAll(primeBase);
+
 						return v;
 					});
 		this.baseMetadata = baseMetadata;
@@ -75,13 +74,13 @@ public class PrimeBaseContainer implements PrimeBaseIntfc
 	 * @param primeBase
 	 */
 	@Override
-	public void addPrimeBases(@NonNull Set<BigInteger> primeBase)
+	public void addPrimeBases(@NonNull List<Set<BigInteger>> primeBase)
 	{
 		addPrimeBases(BaseTypes.DEFAULT, primeBase, null);
 	}
 
 	@Override
-	public void addPrimeBases(@NonNull Set<BigInteger> primeBase, @NonNull BaseTypes baseType)
+	public void addPrimeBases(@NonNull List<Set<BigInteger>> primeBase, @NonNull BaseTypes baseType)
 	{
 		addPrimeBases(baseType, primeBase, null);
 	}

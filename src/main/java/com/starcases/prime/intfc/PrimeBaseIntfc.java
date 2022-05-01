@@ -15,7 +15,7 @@ import lombok.NonNull;
  * Note that the methods without a BaseTypes argument use BaseTypes.DEFAULT.
  * Generally, the code that creates the initial primes uses these no-arg versions
  * and any "alternative base" creation code should always use the BaseTypes argument
- * version when creating the additional base info.
+ * version when creating additional base info.
  *
  * Use the no-arg version if you
  * also need to get data regarding the default version while generating new bases.
@@ -24,11 +24,11 @@ import lombok.NonNull;
  */
 public interface PrimeBaseIntfc extends Serializable
 {
-	void addPrimeBases(@NonNull BaseTypes baseType, @NonNull Set<BigInteger> primeBase, @NonNull BaseMetadataIntfc metadata);
+	void addPrimeBases(@NonNull BaseTypes baseType, @NonNull List<Set<BigInteger>> primeBase, @NonNull BaseMetadataIntfc metadata);
 
-	void addPrimeBases(@NonNull Set<BigInteger> primeBase);
+	void addPrimeBases(@NonNull List<Set<BigInteger>> primeBase);
 
-	void addPrimeBases(@NonNull Set<BigInteger> primeBase, @NonNull BaseTypes baseType);
+	void addPrimeBases(@NonNull List<Set<BigInteger>> primeBase, @NonNull BaseTypes baseType);
 
 	BaseMetadataIntfc getBaseMetadata();
 

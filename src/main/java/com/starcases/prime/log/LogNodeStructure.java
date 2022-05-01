@@ -1,5 +1,6 @@
 package com.starcases.prime.log;
 
+import java.math.BigInteger;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -44,6 +45,12 @@ public class LogNodeStructure extends AbstractLogBase
 
 					pr.getPrimeBaseData().getPrimeBases()
 							.stream()
+							.peek(c -> { System.out.println(String.format("set orig: %s", c.stream().map(b -> b.toString()).collect(Collectors.joining(",")))); } )
+							.filter( p -> !p.contains(BigInteger.ZERO))
+							.reduce((s1, s2) -> { s1.addAll(s2); return s1; })
+
+							.stream()
+							.peek(c -> { System.out.println(String.format("set reduced: %s", c.stream().map(b -> b.toString()).collect(Collectors.joining(",")))); } )
 							.<String>mapMulti((basePrimes, consumer) ->
 												{
 													sb.append(

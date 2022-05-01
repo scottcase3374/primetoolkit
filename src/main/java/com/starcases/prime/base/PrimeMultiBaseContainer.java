@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.collections.impl.list.mutable.FastList;
-import org.infinispan.protostream.annotations.ProtoFactory;
 
 import com.starcases.prime.intfc.BaseMetadataIntfc;
 import com.starcases.prime.intfc.PrimeBaseIntfc;
@@ -16,8 +15,8 @@ import com.starcases.prime.intfc.PrimeSourceIntfc;
 
 import lombok.Getter;
 import lombok.NonNull;
-// FIXME
-public class PrimePrefixSuffixBaseContainer implements PrimeBaseIntfc
+
+public class PrimeMultiBaseContainer implements PrimeBaseIntfc
 {
 	/**
 	 *
@@ -43,8 +42,7 @@ public class PrimePrefixSuffixBaseContainer implements PrimeBaseIntfc
 	@Getter
 	private BaseMetadataIntfc baseMetadata;
 
-	@ProtoFactory
-	public PrimePrefixSuffixBaseContainer()
+	public PrimeMultiBaseContainer()
 	{
 		// nothing to init here
 	}
@@ -54,17 +52,18 @@ public class PrimePrefixSuffixBaseContainer implements PrimeBaseIntfc
 	 * @param primeBase
 	 */
 	@Override
-	public void addPrimeBases(@NonNull BaseTypes baseType, @NonNull Set<BigInteger> primeBase, BaseMetadataIntfc baseMetadata)
+	public void addPrimeBases(@NonNull BaseTypes baseType, @NonNull List<Set<BigInteger>> primeBase, BaseMetadataIntfc baseMetadata)
 	{
 		this.primeBases.compute(baseType,
 				(k, v) ->
 					{
 						if (v == null)
 						{
-							v = new FastList<Set<BigInteger>>(1);
+							v = new FastList<Set<BigInteger>>();
 						}
 
-						v.add(primeBase);
+						final var vTmp = v;
+						primeBase.stream().forEach(vTmp::add);
 						return v;
 					});
 		this.baseMetadata = baseMetadata;
@@ -75,13 +74,13 @@ public class PrimePrefixSuffixBaseContainer implements PrimeBaseIntfc
 	 * @param primeBase
 	 */
 	@Override
-	public void addPrimeBases(@NonNull Set<BigInteger> primeBase)
+	public void addPrimeBases(@NonNull List<Set<BigInteger>> primeBase)
 	{
 		addPrimeBases(BaseTypes.DEFAULT, primeBase, null);
 	}
 
 	@Override
-	public void addPrimeBases(@NonNull Set<BigInteger> primeBase, @NonNull BaseTypes baseType)
+	public void addPrimeBases(@NonNull List<Set<BigInteger>> primeBase, @NonNull BaseTypes baseType)
 	{
 		addPrimeBases(baseType, primeBase, null);
 	}

@@ -77,9 +77,6 @@ public abstract class AbstractPrimeBaseGenerator implements PrimeBaseGenerateInt
 	 */
 	protected void event(boolean startTime)
 	{
-		if (!doLog)
-			return;
-
 		long diff = 0;
 		if (startTime)
 		{

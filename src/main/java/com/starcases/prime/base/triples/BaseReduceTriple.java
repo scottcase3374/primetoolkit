@@ -1,5 +1,6 @@
 package com.starcases.prime.base.triples;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -111,7 +112,7 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 		.forEach(curPrime ->
 					curPrime
 					.getPrimeBaseData()
-					.addPrimeBases(curPrime.getPrimeBaseData().getPrimeBases(BaseTypes.DEFAULT).get(0), BaseTypes.THREETRIPLE)
+					.addPrimeBases(List.of(curPrime.getPrimeBaseData().getPrimeBases(BaseTypes.DEFAULT).get(0)), BaseTypes.THREETRIPLE)
 		);
 
 

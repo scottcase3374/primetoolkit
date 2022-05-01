@@ -17,13 +17,13 @@ import org.jgrapht.graph.DefaultEdge;
 
 import com.starcases.prime.PTKFactory;
 import com.starcases.prime.base.BaseTypes;
-import com.starcases.prime.base.PrimeBaseContainer;
+import com.starcases.prime.base.PrimeMultiBaseContainer;
 import com.starcases.prime.base.nprime.BaseReduceNPrime;
 import com.starcases.prime.base.nprime.LogBasesNPrime;
 import com.starcases.prime.base.prefix.BasePrefixes;
 import com.starcases.prime.base.prefix.LogBasePrefixes;
-import com.starcases.prime.base.prefixtree.BasePrefixTree;
-import com.starcases.prime.base.prefixtree.LogBasePrefixTree;
+import com.starcases.prime.base.primetree.LogPrimeTree;
+import com.starcases.prime.base.primetree.PrimeTree;
 import com.starcases.prime.base.triples.BaseReduceTriple;
 import com.starcases.prime.base.triples.LogBases3AllTriples;
 import com.starcases.prime.graph.export.ExportGML;
@@ -134,67 +134,70 @@ public class Init implements Runnable
 		PTKFactory.setConfidenceLevel(initOpts.confidenceLevel);
 
 		PTKFactory.setActiveBaseId(BaseTypes.DEFAULT);
-		PTKFactory.setBaseSetPrimeSource(PrimeBaseContainer::setPrimeSource);
+		PTKFactory.setBaseSetPrimeSource(PrimeMultiBaseContainer::setPrimeSource);
 		PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
 
-		PTKFactory.setPrimeBaseCtor(PrimeBaseContainer::new);
+		PTKFactory.setPrimeBaseCtor(PrimeMultiBaseContainer::new);
 		PTKFactory.setPrimeRefRawCtor( (i, base) -> (new PrimeRef(i)).init(PTKFactory.getPrimeBaseCtor(), base) );
+	}
+
+	void renameOutputLog()
+	{
+		try
+		{
+			if (initOpts.outputFile.exists())
+			{
+				File ren = File.createTempFile("ptk", ".old", new File(initOpts.outputFile.getParent()));
+				if (initOpts.outputFile.renameTo(ren))
+				{
+					if (log.isLoggable(Level.INFO))
+						log.info(String.format("Renamed output file: %s"  + " to " ,  initOpts.outputFile, ren.getCanonicalPath()));
+				}
+				else
+				{
+					if (log.isLoggable(Level.SEVERE))
+						log.severe(String.format("FAILED: Rename output file: %s to %s",  initOpts.outputFile,  ren.getCanonicalPath()));
+				}
+			}
+		}
+		catch(IOException e)
+		{
+			log.severe("ERROR: could not rename file: " + initOpts.outputFile);
+			log.severe(e.toString());
+		}
 	}
 
 	void stdOutRedirect()
 	{
-		if (initOpts.outputFile != null)
+		try
 		{
-			try
+			if (initOpts.outputFile != null)
 			{
-				if (initOpts.outputFile.exists())
-				{
-					File ren = File.createTempFile("ptk", ".old", new File(initOpts.outputFile.getParent()));
-					if (initOpts.outputFile.renameTo(ren))
-					{
-						if (log.isLoggable(Level.INFO))
-							log.info(String.format("Renamed output file: %s"  + " to " ,  initOpts.outputFile, ren.getCanonicalPath()));
-					}
-					else
-					{
-						if (log.isLoggable(Level.SEVERE))
-							log.severe(String.format("FAILED: Rename output file: %s to %s",  initOpts.outputFile,  ren.getCanonicalPath()));
-					}
-				}
-				else
-				{
-					if (log.isLoggable(Level.INFO))
-						log.info("Created outputfile: " + initOpts.outputFile.getCanonicalPath() + " :" +    initOpts.outputFile.createNewFile());
-				}
+				renameOutputLog();
+
+				if (log.isLoggable(Level.INFO))
+					log.info("Created outputfile: " + initOpts.outputFile.getCanonicalPath() + " :" +    initOpts.outputFile.createNewFile());
 
 				// Point standard out to our selected output file.
 				System.setOut(new PrintStream(initOpts.outputFile));
 			}
-			catch(IOException e)
-			{
-				log.severe("ERROR: could not set standard out to file: " + initOpts.outputFile);
-				log.severe(e.toString());
-			}
+		}
+		catch(IOException e)
+		{
+			log.severe("ERROR: could not set standard out to file: " + initOpts.outputFile);
+			log.severe(e.toString());
 		}
 	}
 
 	void actionInitDefaultPrimeContent()
 	{
-		//final var load = initOpts != null && initOpts.loadPrimes != null;
-		//final var store = initOpts != null && initOpts.storePrimes != null;
 
 		actions.add(s -> {
 			FactoryIntfc factory = PTKFactory.getFactory();
 			ps = factory.getPrimeSource();
 
-			////if (load)
-			//	ps.load(initOpts.loadPrimes);
-
 			log.info("Init::actionInitDefaultPrimeContent - primeSource init");
 			ps.init();
-
-			//if (store)
-			//	ps.store(initOpts.storePrimes);
 
 			ps.setActiveBaseId(PTKFactory.getActiveBaseId());
 		});
@@ -213,10 +216,6 @@ public class Init implements Runnable
 			{
 			case NPRIME:
 				PTKFactory.setActiveBaseId(BaseTypes.NPRIME);
-				PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
-				PTKFactory.setBaseSetPrimeSource(PrimeBaseContainer::setPrimeSource);
-				PTKFactory.setPrimeBaseCtor(PrimeBaseContainer::new);
-				PTKFactory.setPrimeRefRawCtor( (i, base) -> (new PrimeRef(i)).init(PTKFactory.getPrimeBaseCtor(), base) );
 
 				actions.add(s ->
 								{
@@ -232,10 +231,6 @@ public class Init implements Runnable
 
 			case THREETRIPLE:
 				PTKFactory.setActiveBaseId(BaseTypes.THREETRIPLE);
-				PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
-				PTKFactory.setBaseSetPrimeSource( PrimeBaseContainer::setPrimeSource);
-				PTKFactory.setPrimeBaseCtor(PrimeBaseContainer::new);
-				PTKFactory.setPrimeRefRawCtor( (i, base) -> (new PrimeRef(i)).init(PTKFactory.getPrimeBaseCtor(), base) );
 
 				actions.add(s ->
 								{
@@ -250,10 +245,6 @@ public class Init implements Runnable
 
 			case PREFIX:
 				PTKFactory.setActiveBaseId(BaseTypes.PREFIX);
-				PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
-				PTKFactory.setBaseSetPrimeSource( PrimeBaseContainer::setPrimeSource);
-				PTKFactory.setPrimeBaseCtor(PrimeBaseContainer::new);
-				PTKFactory.setPrimeRefRawCtor( (i, base) -> (new PrimeRef(i)).init(PTKFactory.getPrimeBaseCtor(), base) );
 
 				actions.add(s ->
 								{
@@ -266,18 +257,14 @@ public class Init implements Runnable
 								});
 				break;
 
-			case PREFIX_TREE:
-				PTKFactory.setActiveBaseId(BaseTypes.PREFIX_TREE);
-				PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
-				PTKFactory.setBaseSetPrimeSource( PrimeBaseContainer::setPrimeSource);
-				PTKFactory.setPrimeBaseCtor(PrimeBaseContainer::new);
-				PTKFactory.setPrimeRefRawCtor( (i, base) -> (new PrimeRef(i)).init(PTKFactory.getPrimeBaseCtor(), base));
-
+			case PRIME_TREE:
+				PTKFactory.setActiveBaseId(BaseTypes.PRIME_TREE);
 
 				actions.add(s ->
 								{
 									log.info(method + baseOpts.bases);
-									var base = new BasePrefixTree(ps);
+
+									var base = new PrimeTree(ps, PTKFactory.getCollTrack());
 									base.setTrackTime(trackGenTime);
 									base.doPreferParallel(initOpts.preferParallel);
 									base.setLogBaseGeneration(baseOpts.logGenerate);
@@ -286,7 +273,10 @@ public class Init implements Runnable
 				break;
 
 			default:
-				log.info(method + baseOpts.bases);
+				if(log.isLoggable(Level.INFO))
+				{
+					log.info(String.format("%s%s",method, baseOpts.bases));
+				}
 				break;
 			}
 		}
@@ -298,7 +288,10 @@ public class Init implements Runnable
 
 		if (logOpts != null && logOpts.logOper != null)
 		{
-			log.info(method + logOpts.logOper);
+			if (log.isLoggable(Level.INFO))
+			{
+				log.info(String.format("%s%s", method, logOpts.logOper));
+			}
 			switch (logOpts.logOper)
 			{
 			case NODESTRUCT:
@@ -324,8 +317,8 @@ public class Init implements Runnable
 						actions.add(s -> (new LogBasePrefixes(ps)).doPreferParallel(false).l() );
 						break;
 
-					case PREFIX_TREE:
-						actions.add(s -> (new LogBasePrefixTree(ps)).doPreferParallel(false).l() );
+					case PRIME_TREE:
+						actions.add(s -> (new LogPrimeTree(ps)).doPreferParallel(false).l() );
 						break;
 
 					case  DEFAULT:

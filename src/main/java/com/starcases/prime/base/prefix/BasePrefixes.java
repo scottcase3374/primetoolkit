@@ -1,10 +1,7 @@
 package com.starcases.prime.base.prefix;
 
-import java.math.BigInteger;
+import java.util.List;
 import java.util.logging.Logger;
-
-import org.eclipse.collections.api.set.sorted.MutableSortedSet;
-import org.eclipse.collections.impl.set.sorted.mutable.TreeSortedSet;
 
 import com.starcases.prime.base.AbstractPrimeBaseGenerator;
 import com.starcases.prime.base.BaseTypes;
@@ -34,10 +31,10 @@ public class BasePrefixes extends AbstractPrimeBaseGenerator
 						final var origBases = pr.getPrimeBaseData().getPrimeBases().get(0);
 
 						// We don't include the Pn-1 idx in prefix list
-						final var last = ((MutableSortedSet<BigInteger>)origBases).getLastOptional();
-						MutableSortedSet<BigInteger> tmpSet = TreeSortedSet.newSet(origBases);
-						last.ifPresent(tmpSet::remove);
-						pr.getPrimeBaseData().addPrimeBases(tmpSet, BaseTypes.PREFIX);
+						//final var last = ((MutableSortedSet<BigInteger>)origBases).getLastOptional();
+						//MutableSortedSet<BigInteger> tmpSet = TreeSortedSet.newSet(origBases);
+						//last.ifPresent(tmpSet::remove);
+						pr.getPrimeBaseData().addPrimeBases(List.of(origBases), BaseTypes.PREFIX);
 					}
 					catch(Exception e)
 					{

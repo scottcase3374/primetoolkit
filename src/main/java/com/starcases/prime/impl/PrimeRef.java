@@ -1,13 +1,11 @@
 package com.starcases.prime.impl;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
-
-import org.infinispan.protostream.annotations.ProtoFactory;
-import org.infinispan.protostream.annotations.ProtoField;
 
 import com.starcases.prime.intfc.PrimeBaseIntfc;
 import com.starcases.prime.intfc.PrimeRefIntfc;
@@ -24,7 +22,6 @@ import lombok.Setter;
 * the sum of some subset of previous primes.
 *
 **/
-
 public class PrimeRef implements PrimeRefIntfc
 {
 	/**
@@ -46,7 +43,6 @@ public class PrimeRef implements PrimeRefIntfc
 	 */
 	@Setter
 	@Getter
-	@ProtoField(number=1, defaultValue="0")
 	public long primeIdx;
 
 
@@ -58,7 +54,6 @@ public class PrimeRef implements PrimeRefIntfc
 	 *
 	 * @param Prime
 	 */
-	@ProtoFactory()
 	public PrimeRef(long primeIdx)
 	{
 		this.primeIdx = primeIdx;
@@ -66,7 +61,7 @@ public class PrimeRef implements PrimeRefIntfc
 
 	public PrimeRef init(
 			@NonNull Supplier<PrimeBaseIntfc> primeBaseSupplier,
-			@NonNull Set<BigInteger> primeBases)
+			@NonNull List<Set<BigInteger>> primeBases)
 	{
 		primeBaseData = primeBaseSupplier.get();
 		getPrimeBaseData().addPrimeBases(primeBases);

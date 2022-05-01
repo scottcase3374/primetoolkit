@@ -4,6 +4,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.starcases.prime.cli.Init;
+
 import lombok.NonNull;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;

@@ -1,6 +1,8 @@
-package com.starcases.prime.base.prefixtree;
+package com.starcases.prime.base.primetree;
 
 
+import java.math.BigInteger;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -10,11 +12,11 @@ import com.starcases.prime.log.AbstractLogBase;
 
 import lombok.NonNull;
 
-public class LogBasePrefixTree extends AbstractLogBase
+public class LogPrimeTree extends AbstractLogBase
 {
-	private static final Logger log = Logger.getLogger(LogBasePrefixTree.class.getName());
+	private static final Logger log = Logger.getLogger(LogPrimeTree.class.getName());
 
-	public LogBasePrefixTree(@NonNull PrimeSourceIntfc ps)
+	public LogPrimeTree(@NonNull PrimeSourceIntfc ps)
 	{
 		super(ps);
 	}
@@ -22,7 +24,8 @@ public class LogBasePrefixTree extends AbstractLogBase
 	@Override
 	public void l()
 	{
-		log.info(String.format("LogBasePrefixTree log()%n"));
+		if (log.isLoggable(Level.INFO))
+			log.info(String.format("LogPrimeTree log()%n"));
 
 		final var sb = new StringBuilder();
 
@@ -30,10 +33,10 @@ public class LogBasePrefixTree extends AbstractLogBase
 
 		ps.getPrimeRefStream(false)
 		.<String>mapMulti((pr, consumer) ->
-							{
+
 								pr
 									.getPrimeBaseData()
-									.getPrimeBases(BaseTypes.PREFIX_TREE)
+									.getPrimeBases(BaseTypes.PRIME_TREE)
 									.iterator()
 									.forEachRemaining( primeBases ->
 														{
@@ -41,7 +44,7 @@ public class LogBasePrefixTree extends AbstractLogBase
 															sb.append(
 																primeBases
 															 	.stream()
-															 	.map(i -> i.toString())
+															 	.map(BigInteger::toString)
 															 	.collect(Collectors.joining(",","[","]"))
 															 	);
 
@@ -49,8 +52,8 @@ public class LogBasePrefixTree extends AbstractLogBase
 															consumer.accept(sb.toString());
 															sb.setLength(0);
 															itemIdx[0]++;
-														});
-							}
+														})
+
 				)
 		.forEach(System.out::println);
 	}
