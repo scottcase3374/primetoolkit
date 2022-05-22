@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.base.PrimeBaseContainer;
 import com.starcases.prime.impl.PrimeRef;
 import com.starcases.prime.intfc.FactoryIntfc;
@@ -24,7 +23,6 @@ class TripleUnitTest
 		PTKFactory.setMaxCount(100);
 		PTKFactory.setConfidenceLevel(100);
 
-		PTKFactory.setActiveBaseId(BaseTypes.DEFAULT);
 		PTKFactory.setBaseSetPrimeSource(PrimeRef::setPrimeSource);
 		PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
 
@@ -39,10 +37,10 @@ class TripleUnitTest
 
 //	@Test
 //	void testFindMatchOffset() {
-//		Assertions.assertEquals(1, ps.getPrimeIdx(BigInteger.TWO));
+//		Assertions.assertEquals(1, primeSrc.getPrimeIdx(BigInteger.TWO));
 //
 //		var bi37 = BigInteger.valueOf(37L);
 //		var bi41 = BigInteger.valueOf(41L);
-//		Assertions.assertEquals(1, ps.getPrimeRef(bi41).get().getPrimeRefIdx()-ps.getPrimeRef(bi37).get().getPrimeRefIdx());
+//		Assertions.assertEquals(1, primeSrc.getPrimeRef(bi41).get().getPrimeRefIdx()-primeSrc.getPrimeRef(bi37).get().getPrimeRefIdx());
 //	}
 }

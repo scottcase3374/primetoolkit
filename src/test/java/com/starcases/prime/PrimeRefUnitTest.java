@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.base.PrimeBaseContainer;
 import com.starcases.prime.impl.PrimeRef;
 import com.starcases.prime.intfc.FactoryIntfc;
@@ -24,7 +23,6 @@ class PrimeRefUnitTest
 		PTKFactory.setMaxCount(100);
 		PTKFactory.setConfidenceLevel(100);
 
-		PTKFactory.setActiveBaseId(BaseTypes.DEFAULT);
 		PTKFactory.setBaseSetPrimeSource(PrimeBaseContainer::setPrimeSource);
 		PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
 
@@ -38,22 +36,22 @@ class PrimeRefUnitTest
 
 //	@Test
 //	void testPrimeIdxDiff() {
-//		Assertions.assertEquals(1, ps.getPrimeIdx(BigInteger.TWO));
+//		Assertions.assertEquals(1, primeSrc.getPrimeIdx(BigInteger.TWO));
 //
 //		var bi5 = BigInteger.valueOf(5L);
 //		var bi3 = BigInteger.valueOf(3L);
-//		Assertions.assertEquals(1, ps.getPrimeRef(bi5).get().getPrimeRefIdx()-ps.getPrimeRef(bi3).get().getPrimeRefIdx());
+//		Assertions.assertEquals(1, primeSrc.getPrimeRef(bi5).get().getPrimeRefIdx()-primeSrc.getPrimeRef(bi3).get().getPrimeRefIdx());
 //	}
 
 
 //	@Test
 //	void testPrimeDist() {
-//		Assertions.assertEquals(Optional.of(BigInteger.ONE), ps.getPrimeRef(BigInteger.TWO).get().getDistToNextPrime());
-//		Assertions.assertEquals(Optional.of(BigInteger.ONE.negate()), ps.getPrimeRef(BigInteger.TWO).get().getDistToPrevPrime());
+//		Assertions.assertEquals(Optional.of(BigInteger.ONE), primeSrc.getPrimeRef(BigInteger.TWO).get().getDistToNextPrime());
+//		Assertions.assertEquals(Optional.of(BigInteger.ONE.negate()), primeSrc.getPrimeRef(BigInteger.TWO).get().getDistToPrevPrime());
 //
 //		var bi7 = BigInteger.valueOf(7L);
-//		Assertions.assertEquals(Optional.of(BigInteger.valueOf(4L)), ps.getPrimeRef(bi7).get().getDistToNextPrime());
-//		Assertions.assertEquals(Optional.of(BigInteger.valueOf(2L).negate()), ps.getPrimeRef(bi7).get().getDistToPrevPrime());
+//		Assertions.assertEquals(Optional.of(BigInteger.valueOf(4L)), primeSrc.getPrimeRef(bi7).get().getDistToNextPrime());
+//		Assertions.assertEquals(Optional.of(BigInteger.valueOf(2L).negate()), primeSrc.getPrimeRef(bi7).get().getDistToPrevPrime());
 //	}
 
 }

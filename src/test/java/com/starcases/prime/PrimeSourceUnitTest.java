@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.base.PrimeBaseContainer;
 import com.starcases.prime.impl.PrimeRef;
 import com.starcases.prime.intfc.FactoryIntfc;
@@ -31,7 +30,6 @@ class PrimeSourceUnitTest
 		PTKFactory.setMaxCount(100);
 		PTKFactory.setConfidenceLevel(100);
 
-		PTKFactory.setActiveBaseId(BaseTypes.DEFAULT);
 		PTKFactory.setBaseSetPrimeSource(PrimeBaseContainer::setPrimeSource);
 		PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
 
@@ -45,10 +43,10 @@ class PrimeSourceUnitTest
 
 //	@Test
 //	void testGetPrimeIdx() {
-//		Assertions.assertEquals(1, ps.getPrimeIdx(BigInteger.TWO));
+//		Assertions.assertEquals(1, primeSrc.getPrimeIdx(BigInteger.TWO));
 //
 //		var bi101 = BigInteger.valueOf(101L);
-//		Assertions.assertEquals(26, ps.getPrimeIdx(bi101));
+//		Assertions.assertEquals(26, primeSrc.getPrimeIdx(bi101));
 //	}
 
 	// @ Test

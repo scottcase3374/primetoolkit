@@ -4,8 +4,11 @@ import java.io.PrintWriter;
 import java.math.BigInteger;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NonNull;
 import javax.validation.constraints.Min;
 import com.starcases.prime.intfc.PrimeRefIntfc;
@@ -18,26 +21,55 @@ import com.starcases.prime.intfc.PrimeSourceIntfc;
 
 interface ElementIntfc
 {
+	/**
+	 * Perform output of GML for the associated element.
+	 */
 	void output();
 }
 
+/**
+ * Top-level for GML output, coordinates other class types to
+ * generate GML
+ */
+@SuppressWarnings({"PMD.LawOfDemeter"})
 public class ExportGML
 {
-	private static final Logger log = Logger.getLogger(ExportGML.class.getName());
+	/**
+	 * default logging
+	 */
+	private static final Logger LOG = Logger.getLogger(ExportGML.class.getName());
 
+	/**
+	 * track elements for GML production - helps with producing
+	 *  matching end tags for lists of elements
+	 */
+	@Getter(AccessLevel.PRIVATE)
 	@NonNull
 	private final Deque<ElementIntfc> stack = new ArrayDeque<>();
 
+	/**
+	 * Access to prime/primeref lookups.
+	 */
+	@Getter(AccessLevel.PRIVATE)
 	@NonNull
-	private final PrimeSourceIntfc ps;
+	private final PrimeSourceIntfc primeSrc;
 
+	/**
+	 * Destination for GML output
+	 */
+	@Getter(AccessLevel.PRIVATE)
 	@NonNull
-	private final PrintWriter pr;
+	private final PrintWriter outputWriter;
 
-	public ExportGML(@NonNull PrimeSourceIntfc ps, @NonNull PrintWriter pr)
+	/**
+	 * Primary constructor for GML output
+	 * @param primeSrc
+	 * @param outputWriter
+	 */
+	public ExportGML(@NonNull final PrimeSourceIntfc primeSrc, @NonNull final PrintWriter outputWriter)
 	{
-		this.ps = ps;
-		this.pr = pr;
+		this.primeSrc = primeSrc;
+		this.outputWriter = outputWriter;
 	}
 
 	private void graph()
@@ -46,103 +78,153 @@ public class ExportGML
 
 		try
 		{
-			var it = ps.getPrimeRefIter();
+			final var pRefIter = primeSrc.getPrimeRefIter();
 
-			while (it.hasNext())
-				expNode(it.next());
+			while (pRefIter.hasNext())
+			{
+				expNode(pRefIter.next());
+			}
 
 			stack.stream().forEach(ElementIntfc::output);
 
-			pr.println("]");
+			outputWriter.println("]");
 		}
-		catch(Exception e)
+		catch(final Exception e)
 		{
-			log.severe("exception in graph: " + e);
+			if (LOG.isLoggable(Level.SEVERE))
+			{
+				LOG.severe("exception in graph: " + e);
+			}
 		}
 	}
 
+	/**
+	 * export of actual data
+	 */
 	private void expGraph()
 	{
-		pr.println("graph");
-		pr.println("[");
+		outputWriter.println("graph");
+		outputWriter.println("[");
 		expDirected();
 	}
 
 	private void expDirected()
 	{
-		pr.println("  directed 1");
+		outputWriter.println("  directed 1");
 	}
 
-	private void expNode(@NonNull PrimeRefIntfc prime)
+	private void expNode(@NonNull final PrimeRefIntfc prime)
 	{
-		new NodeElement(ps, pr, prime).output();
-		stack.add(new EdgeElement(prime, pr));
+		new NodeElement(outputWriter, prime).output();
+		stack.add(new EdgeElement(prime, outputWriter));
 	}
 
+	/**
+	 * Entry point to export data.
+	 */
 	public void export()
 	{
-		ps.init();
+		primeSrc.init();
 		graph();
 	}
 }
 
+/**
+ * Handles node elements as part of the GML output.
+ */
 class NodeElement implements ElementIntfc
 {
+	/**
+	 * PrimeRef item to export
+	 */
+	@Getter(AccessLevel.PRIVATE)
 	@NonNull
 	private final PrimeRefIntfc pRef;
 
+	/**
+	 * output destination for node GML
+	 */
+	@Getter(AccessLevel.PRIVATE)
 	@NonNull
-	private final PrimeSourceIntfc ps;
+	private final PrintWriter outputWriter;
 
-	@NonNull
-	private final PrintWriter pr;
-
-	public NodeElement(@NonNull PrimeSourceIntfc ps, @NonNull PrintWriter pr, @NonNull PrimeRefIntfc prime)
+	/**
+	 * Constructor of nodes which are converted to GML for output
+	 * @param outputWriter
+	 * @param prime
+	 */
+	public NodeElement(@NonNull final PrintWriter outputWriter, @NonNull final PrimeRefIntfc prime)
 	{
 		this.pRef = prime;
-		this.ps = ps;
-		this.pr = pr;
+		this.outputWriter = outputWriter;
 	}
 
+	@Override
 	public void output()
 	{
-		pr.println("  node");
-		pr.println("  [");
+		outputWriter.println("  node");
+		outputWriter.println("  [");
 
-		pr.println(String.format("    id %d", pRef.getPrime()));
-		pr.println(String.format("label \"%s\"", pRef.getPrime()));
-		pr.println("  ]");
+		outputWriter.println(String.format("    id %d", pRef.getPrime()));
+		outputWriter.println(String.format("label \"%s\"", pRef.getPrime()));
+		outputWriter.println("  ]");
 	}
 }
 
+/**
+ * Used for exporting edge element information as part of
+ * the GML output.
+ */
+@SuppressWarnings({"PMD.LawOfDemeter"})
 class EdgeElement implements ElementIntfc
 {
+	/**
+	 * Edge element data which is output as GML.
+	 */
 	@NonNull
+	@Getter(AccessLevel.PRIVATE)
 	private final PrimeRefIntfc pRef;
 
+	/**
+	 * GML output destination .
+	 */
 	@NonNull
-	private final PrintWriter pr;
+	@Getter(AccessLevel.PRIVATE)
+	private final PrintWriter outputWriter;
 
-	public EdgeElement(@NonNull PrimeRefIntfc prime, @NonNull PrintWriter pr)
+	/**
+	 * Constructor representing edges of graph to convert and output as GML
+	 * @param prime
+	 * @param outputWriter
+	 */
+	public EdgeElement(@NonNull final PrimeRefIntfc prime, @NonNull final PrintWriter outputWriter)
 	{
 		this.pRef = prime;
-		this.pr = pr;
+		this.outputWriter = outputWriter;
 	}
 
+	@Override
 	public void output()
 	{
-		pRef.getPrimeBaseData().getPrimeBases().get(0).stream().forEach(s -> outputEdge(pr, s, pRef.getPrime()));
+		pRef.getPrimeBaseData().getPrimeBases().get(0).stream().forEach(s -> outputEdge(outputWriter, s, pRef.getPrime()));
 	}
 
-	private void outputEdge(@NonNull PrintWriter pr, @NonNull @Min(1) BigInteger source, @NonNull @Min(1) BigInteger target)
+	/**
+	 * Actual output logic for edges.
+	 *
+	 * @param outputWriter
+	 * @param source
+	 * @param target
+	 */
+	private void outputEdge(@NonNull final PrintWriter outputWriter, @NonNull @Min(1) final BigInteger source, @NonNull @Min(1) final BigInteger target)
 	{
-		pr.println("  edge");
-		pr.println("  [");
-		pr.print("    source ");
-		pr.println(source);
-		pr.print("    target ");
-		pr.println(target);
-		pr.println("  ]");
+		outputWriter.println("  edge");
+		outputWriter.println("  [");
+		outputWriter.print("    source ");
+		outputWriter.println(source);
+		outputWriter.print("    target ");
+		outputWriter.println(target);
+		outputWriter.println("  ]");
 	}
 }
 

@@ -1,6 +1,7 @@
 package com.starcases.prime.base.nprime;
 
 import java.math.BigInteger;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -10,8 +11,10 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
 import org.eclipse.collections.api.bag.sorted.MutableSortedBag;
+import org.eclipse.collections.api.list.MutableList;
+import org.eclipse.collections.api.set.MutableSet;
 import org.eclipse.collections.impl.bag.sorted.mutable.TreeBag;
-import org.eclipse.collections.impl.list.mutable.MultiReaderFastList;
+import org.eclipse.collections.impl.collector.Collectors2;
 
 import com.starcases.prime.base.AbstractPrimeBaseGenerator;
 import com.starcases.prime.base.BaseTypes;
@@ -40,58 +43,60 @@ import lombok.NonNull;
  * so result would be: 2(x3) 1(x1),  1(x5) 2(x6),      1(x5) 2(x7)
  *          which reduces to:  1(x11), 2(x16)   =>  1x11 + 2x16 = 43
  */
+@SuppressWarnings({"PMD.CommentSize", "PMD.LawOfDemeter"})
 public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 {
-	private static final Logger log = Logger.getLogger(BaseReduceNPrime.class.getName());
+	private static final Logger LOG = Logger.getLogger(BaseReduceNPrime.class.getName());
 
 	@Min(2)
 	@Max(3)
 	private BigInteger maxReduce;
 
-	public BaseReduceNPrime(@NonNull PrimeSourceIntfc ps)
+	public BaseReduceNPrime(@NonNull final PrimeSourceIntfc ps)
 	{
 		super(ps);
 	}
 
-	public void setMaxReduce(@Min(2) @Max(3) int maxReduce)
+	public void setMaxReduce(@Min(2) @Max(3) final int maxReduce)
 	{
 		this.maxReduce = BigInteger.valueOf(maxReduce);
 	}
 
 	/**
-	 * Non-recursive algo to go through bases of bases to count those that we want counts for.
+	 * Non-recursive algo to go through bases of bases to
+	 * count those that we want counts for.
 	 *
 	 * @param primeRef cur Prime being reduced
 	 */
-	private void primeReduction(@NonNull PrimeRefIntfc primeRef, @NonNull MutableSortedBag<BigInteger> retBases)
+	@SuppressWarnings({"PMD.LawOfDemeter"})
+	private void primeReduction(@NonNull final PrimeRefIntfc primeRef, @NonNull final MutableSortedBag<BigInteger> retBases)
 	{
 		// want to process initial bases for Prime
-		final var initialBases = primeRef.getPrimeBaseData().getPrimeBases(BaseTypes.DEFAULT).get(0);
-		final List<Set<BigInteger>> bases = MultiReaderFastList.newList();
-		bases.add(initialBases);
+		MutableList<BigInteger> bases = primeRef
+				.getPrimeBaseData()
+				.getPrimeBases()
+				.stream()
+				.flatMap(Set::stream)
+				.collect(Collectors2.toList());
 
 		while (!bases.isEmpty())
 		{
-			final var curBases = bases.remove(bases.size()-1);
-			curBases.forEach(bi ->
-				{
-					if (bi.compareTo(maxReduce) >= 0)
-					{
-						ps
-						.getPrimeRef(bi)
-						.ifPresent(ii ->
-							bases.add(
-									ii.getPrimeBaseData()
-									.getPrimeBases(BaseTypes.DEFAULT)
-									.get(0)
-								));
-					}
-					else
-					{
-						retBases.add(bi);
-					}
-				} );
+			bases.selectWith((BigInteger bi, BigInteger reduceVal) -> bi.compareTo(reduceVal) < 0, maxReduce, retBases);
+
+			final var tmp = bases
+					.stream()
+					.filter(bi ->  bi.compareTo(maxReduce) >= 0)
+					.map(bi1 -> primeSrc.getPrimeRef(bi1)
+								.orElseThrow()
+								.getPrimeBaseData()
+								.getPrimeBases())
+					.flatMap(Collection::stream)	// List of Set of BigInteger  -> Stream of Set of BigInteger
+					.flatMap(Collection::stream)	// Stream of Set of BigInteger to Stream of BigInteger
+					.collect(Collectors2.toList())	// Stream of BigIntegers -> List of BigInteger
+					;
+			bases = tmp;
 		}
+
 	}
 
 	/**
@@ -99,37 +104,44 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 	 * @param maxReduce
 	 */
 	@Override
+	@SuppressWarnings("PMD.LawOfDemeter")
 	protected void genBasesImpl()
 	{
-		if (doLog)
+		if (isBaseGenerationOutput())
 		{
-			log.entering("BaseReduceNPrime", "genBases()");
+			LOG.entering("BaseReduceNPrime", "genBases()");
 
-			if (log.isLoggable(Level.INFO))
+			if (LOG.isLoggable(Level.INFO))
 			{
-				log.info(String.format("genBases(): maxReduce[%d]", maxReduce));
+				LOG.info(String.format("genBases(): maxReduce[%d]", maxReduce));
 			}
 		}
 
-		ps.getPrimeRefStream(this.preferParallel)
-			.filter(pr -> pr.getPrimeBaseData().getPrimeBases() != null && !pr.getPrimeBaseData().getPrimeBases().isEmpty())
+		primeSrc.getPrimeRefStream(this.preferParallel)
+			.filter(pr -> isNonNullEmpty(pr.getPrimeBaseData().getPrimeBases()))
 				.forEach( curPrime ->
 		{
 			try
 			{
-				MutableSortedBag<BigInteger> retBases = TreeBag.newBag();
+				final MutableSortedBag<BigInteger> retBases = TreeBag.newBag();
 				primeReduction(curPrime, retBases);
 
 				curPrime
 					.getPrimeBaseData()
-					.addPrimeBases(BaseTypes.NPRIME, List.of(retBases.toSortedSet()), new NPrimeBaseMetadata(retBases));
+					.addPrimeBases(BaseTypes.NPRIME, List.of(retBases.toSortedSet(), Set.of(curPrime.getPrime())), new NPrimeBaseMetadata(retBases));
 			}
 			catch(Exception e)
 			{
-				log.severe("Error: " + e);
-				e.printStackTrace();
-
+				if (LOG.isLoggable(Level.SEVERE))
+				{
+					LOG.severe("Error: " + e);
+				}
 			}
 		});
+	}
+
+	private boolean isNonNullEmpty(final Collection<?> coll)
+	{
+		return coll != null && !coll.isEmpty();
 	}
 }

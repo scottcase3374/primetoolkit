@@ -7,6 +7,9 @@ import com.starcases.prime.intfc.PrimeRefIntfc;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Provides a mapping from a prime to a prime ref.
+ */
 class PrimeMapEntry
 {
 	@Getter
@@ -17,7 +20,12 @@ class PrimeMapEntry
 	@Setter
 	private PrimeRefIntfc primeRef;
 
-	public PrimeMapEntry(BigInteger prime, PrimeRefIntfc primeRef)
+	/**
+	 * Constructor
+	 * @param prime
+	 * @param primeRef
+	 */
+	public PrimeMapEntry(final BigInteger prime, final PrimeRefIntfc primeRef)
 	{
 		this.prime = prime;
 		this.primeRef = primeRef;

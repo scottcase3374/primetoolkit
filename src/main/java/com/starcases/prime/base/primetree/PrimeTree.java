@@ -5,11 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.LongPredicate;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.collections.impl.list.mutable.MultiReaderFastList;
 import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 
+import com.starcases.prime.PrimeToolKit;
 import com.starcases.prime.base.AbstractPrimeBaseGenerator;
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.impl.PData;
@@ -23,14 +25,15 @@ import lombok.NonNull;
  * Represents a potentially partial or complete set of primes that sums to a prime
  * in combination with one or more other distinct primes or by itself.
  */
+@SuppressWarnings("PMD.LongVariable")
 public class PrimeTree extends AbstractPrimeBaseGenerator
 {
-	private static final Logger log = Logger.getLogger(PrimeTree.class.getName());
+	private static final Logger LOG = Logger.getLogger(PrimeTree.class.getName());
 
 	final Map<BigInteger, PrimeTreeNode> prefixMap = new ConcurrentHashMap<>();
 	private final CollectionTrackerIntfc collectionTracker;
 
-	public PrimeTree(@NonNull PrimeSourceIntfc ps, @NonNull CollectionTrackerIntfc collectionTracker)
+	public PrimeTree(@NonNull final PrimeSourceIntfc ps, @NonNull final CollectionTrackerIntfc collectionTracker)
 	{
 		super(ps);
 		this.collectionTracker = collectionTracker;
@@ -38,7 +41,7 @@ public class PrimeTree extends AbstractPrimeBaseGenerator
 
 	public PrimeTreeIteratorIntfc iterator()
 	{
-		return new PrimeTreeIterator(this);
+		return new PrimeTreeIterator(this, collectionTracker);
 	}
 
 	/**
@@ -49,7 +52,7 @@ public class PrimeTree extends AbstractPrimeBaseGenerator
 	 * @param biFunc
 	 * @return
 	 */
-	public Optional<PData> select(LongPredicate pred)
+	public Optional<PData> select(final LongPredicate pred)
 	{
 		return collectionTracker.select(pred);
 	}
@@ -58,40 +61,42 @@ public class PrimeTree extends AbstractPrimeBaseGenerator
 	 * top-level function; iterate over entire dataset to reduce every Prime
 	 * @param maxReduce
 	 */
+	@SuppressWarnings("PMD.LawOfDemeter")
 	@Override
 	protected void genBasesImpl()
 	{
-		System.out.println(String.format("%n"));
-		log.info("PrimeTree genBases()");
+		PrimeToolKit.output(String.format("%n"));
+		if (LOG.isLoggable(Level.INFO))
+		{
+			LOG.info("PrimeTree genBases()");
+		}
 
-		final var prStream = ps.getPrimeRefStream(2L, this.preferParallel);
-
-		prStream.forEach(
-				curPrime ->
+		primeSrc.
+		getPrimeRefStream(2L, this.preferParallel)
+		.forEach(
+			curPrime ->
+			{
+				if (this.baseGenerationOutput && LOG.isLoggable(Level.INFO))
 				{
-					if (this.doLog)
-						log.info("genBases() - prime " + curPrime.getPrime());
+					LOG.info("genBases() - prime " + curPrime.getPrime());
+				}
 
-					final var origBaseBases = curPrime.getPrimeBaseData().getPrimeBases().get(0);
-					List<BigInteger> curPrimePrefixBases = MultiReaderFastList.newList(origBaseBases);
+				final var origBaseBases = curPrime.getPrimeBaseData().getPrimeBases().get(0);
+				List<BigInteger> curPrimePrefixBases = MultiReaderFastList.newList(origBaseBases);
 
-					// Prefixes don't include the Prime (n-1) item per the definition of "prefix" used.
-					if (!curPrimePrefixBases.isEmpty())
+				final var curPrefixIt = this.iterator();
+				curPrimePrefixBases.forEach(basePrime ->
 					{
-						curPrimePrefixBases = curPrimePrefixBases.subList(0, curPrimePrefixBases.size()-1);
-					}
-
-					var curPrefixIt = this.iterator();
-					curPrimePrefixBases.forEach(basePrime ->
+						final var prime = basePrime;
+						if (this.isBaseGenerationOutput() && LOG.isLoggable(Level.INFO))
 						{
-							final var prime = basePrime;
-							if (this.doLog)
-								log.info(String.format("handling prime[%d] base-index [%d] base-prime [%d]", curPrime.getPrime(), basePrime, prime));
+							LOG.info(String.format("handling prime[%d] base-index [%d] base-prime [%d]", curPrime.getPrime(), basePrime, prime));
+						}
 
-							curPrefixIt.add(prime);
-						});
+						curPrefixIt.add(prime);
+					});
 
-					curPrime.getPrimeBaseData().addPrimeBases(List.of(curPrefixIt.toSet()), BaseTypes.PRIME_TREE);
-				});
+			curPrime.getPrimeBaseData().addPrimeBases(List.of(curPrefixIt.toSet()), BaseTypes.PRIME_TREE);
+		});
 	}
 }

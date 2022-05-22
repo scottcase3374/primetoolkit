@@ -2,13 +2,14 @@ package com.starcases.prime.graph.visualize;
 
 import javax.swing.WindowConstants;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.jgrapht.event.GraphListener;
 import org.jgrapht.graph.DefaultEdge;
 
 import com.starcases.prime.base.BaseTypes;
-import com.starcases.prime.graph.impl.PrimeGrapher;
+import com.starcases.prime.graph.impl.AbstractPrimeGrapher;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 
@@ -17,20 +18,23 @@ import lombok.NonNull;
 /**
  * Visualization
  *
- * Default graphing entry point - provides circular layout and compact tree layout based on
+ * Default graphing entry point - provides circular
+ * layout and compact tree layout based on
  * same underlying data.
  *
  * supports inclusion of other visuals/displays (such as MetaData Table) via GraphListener.
  */
-public class ViewDefault extends PrimeGrapher
+@SuppressWarnings("PMD.CommentSize")
+public class ViewDefault extends AbstractPrimeGrapher
 {
-	private static final Logger log = Logger.getLogger(ViewDefault.class.getName());
+	private static final Logger LOG = Logger.getLogger(ViewDefault.class.getName());
 
-	public ViewDefault(@NonNull PrimeSourceIntfc ps, @NonNull BaseTypes baseType, @NonNull List<GraphListener<PrimeRefIntfc, DefaultEdge>> graphs)
+	public ViewDefault(@NonNull final PrimeSourceIntfc ps, @NonNull final BaseTypes baseType, @NonNull final List<GraphListener<PrimeRefIntfc, DefaultEdge>> graphs)
 	{
 		super(ps, baseType, graphs);
 	}
 
+	@SuppressWarnings({"PMD.LawOfDemeter"})
 	public void viewDefault()
 	{
         try
@@ -54,7 +58,10 @@ public class ViewDefault extends PrimeGrapher
 		}
 		catch(Exception e)
 		{
-			log.severe("Exception:" + e);
+			if (LOG.isLoggable(Level.SEVERE))
+			{
+				LOG.severe("Exception:" + e);
+			}
 		}
 	}
 }

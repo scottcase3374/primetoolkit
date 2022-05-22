@@ -1,5 +1,7 @@
 package com.starcases.prime.cli;
 
+import lombok.Getter;
+import lombok.Setter;
 import picocli.CommandLine.Option;
 
 /**
@@ -7,8 +9,11 @@ import picocli.CommandLine.Option;
  * Command line interface setup
  *
  */
+@SuppressWarnings("PMD.AtLeastOneConstructor")
 class GraphOpts
 {
+	@Getter
+	@Setter
 	@Option(names = {"-g", "--graph"}, arity="0..1", description = "Valid vals: ${COMPLETION-CANDIDATES}" )
-	Graph graphType;
+	private Graph graphType;
 }

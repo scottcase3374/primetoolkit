@@ -1,9 +1,13 @@
 package com.starcases.prime.cli;
 
+import java.util.Set;
+
 import javax.validation.constraints.Min;
 
 import com.starcases.prime.base.BaseTypes;
 
+import lombok.Getter;
+import lombok.Setter;
 import picocli.CommandLine.Option;
 
 /**
@@ -11,18 +15,26 @@ import picocli.CommandLine.Option;
  * Command Line Interface setups
  *
  */
+@SuppressWarnings("PMD.AtLeastOneConstructor")
 class BaseOpts
 {
-	@Option(names = {"-b", "--base"}, arity = "0..1", description = "Valid vals: ${COMPLETION-CANDIDATES}")
-	BaseTypes bases;
+	@Setter
+	@Option(names = {"-b", "--base"}, arity = "0..*", description = "Valid vals: ${COMPLETION-CANDIDATES}")
+	private BaseTypes[] bases;
 
+	@Getter
+	@Setter
 	@Min(2)
 	@Option(names = {"--max-reduce"}, description = "Max base value [1-max) to use for NPrime.", defaultValue="4", required = false)
-	int maxReduce;
+	private int maxReduce;
 
+	@Getter
+	@Setter
 	@Option(names = {"--active-base-id"}, description = "Valid vals: ${COMPLETION-CANDIDATES}", defaultValue = "DEFAULT", required = false)
-	BaseTypes activeBaseId;
+	private BaseTypes activeBaseId;
 
-	@Option(names = {"--log-generate"}, description = "Log generation of base during creation", defaultValue = "false", required = false)
-	boolean logGenerate;
+	public Set<BaseTypes> getBases()
+	{
+		return Set.of(bases);
+	}
 }

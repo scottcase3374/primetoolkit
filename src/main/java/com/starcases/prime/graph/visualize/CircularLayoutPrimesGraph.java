@@ -26,12 +26,15 @@ public class CircularLayoutPrimesGraph extends JFrame
 	@NonNull
     private static final Dimension DEFAULT_SIZE = new Dimension(900,900);
 
-    public CircularLayoutPrimesGraph(@NonNull Graph<PrimeRefIntfc,DefaultEdge> graph)
+	@SuppressWarnings("PMD.AvoidFinalLocalVariable")
+    public CircularLayoutPrimesGraph(@NonNull final Graph<PrimeRefIntfc,DefaultEdge> graph)
     {
+    	super();
+
         // create a visualization using JGraph, via an adapter
         jgxAdapter = new JGraphXAdapter<>(graph);
 
-        mxGraphComponent component = new mxGraphComponent(jgxAdapter);
+        final mxGraphComponent component = new mxGraphComponent(jgxAdapter);
         component.setConnectable(false);
         component.getGraph().setAllowDanglingEdges(false);
         getContentPane().add(component);
@@ -39,8 +42,8 @@ public class CircularLayoutPrimesGraph extends JFrame
         // circle layout
         final var radius = 100;
         final var layout = new mxCircleLayout(jgxAdapter);
-        layout.setX0((DEFAULT_SIZE.width / 2.0) - radius);
-        layout.setY0((DEFAULT_SIZE.height / 2.0) - radius);
+        layout.setX0(DEFAULT_SIZE.width / 2.0 - radius);
+        layout.setY0(DEFAULT_SIZE.height / 2.0 - radius);
         layout.setRadius(radius);
         layout.setMoveCircle(true);
 

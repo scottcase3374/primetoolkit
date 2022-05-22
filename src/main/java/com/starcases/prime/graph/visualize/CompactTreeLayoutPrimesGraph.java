@@ -14,12 +14,15 @@ import com.mxgraph.swing.mxGraphComponent;
 /**
  * Visualization example
  *
- * Uses a tree oriented layout/display to show the primes and Prime-base relationships.
- * Inverts the tree to make some of the data more obvious - if using large number of primes,
+ * Uses a tree oriented layout/display to show the primes
+ * 	and Prime-base relationships.
+ * Inverts the tree to make some of the data more obvious - if
+ * 	using large number of primes,
  * the graphs become so dense as to provide little use.
  *
  *
  */
+@SuppressWarnings("PMD.CommentSize")
 public class CompactTreeLayoutPrimesGraph extends JFrame
 {
 	private static final long serialVersionUID = 1L;
@@ -28,8 +31,10 @@ public class CompactTreeLayoutPrimesGraph extends JFrame
 	@NonNull
 	private final transient JGraphXAdapter<PrimeRefIntfc, DefaultEdge> jgxAdapter;
 
-    public CompactTreeLayoutPrimesGraph(@NonNull Graph<PrimeRefIntfc,DefaultEdge> graph)
+    public CompactTreeLayoutPrimesGraph(@NonNull final Graph<PrimeRefIntfc,DefaultEdge> graph)
     {
+    	super();
+
         // create a visualization using JGraph, via an adapter
         jgxAdapter = new JGraphXAdapter<>(graph);
 

@@ -10,7 +10,6 @@ import java.util.function.Supplier;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
-import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.impl.CollectionTrackerImpl;
 import com.starcases.prime.impl.PrimeSource;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
@@ -29,47 +28,74 @@ import com.starcases.prime.intfc.PrimeRefIntfc;
  * factory providing defaults for some example usages.
  *
  */
-
-public class PTKFactory
+@SuppressWarnings({"PMD.LongVariable", "PMD.CommentSize"})
+public final class PTKFactory
 {
+	/**
+	 * Maximum number of primes to handle.
+	 */
 	@Getter
 	@Setter
 	private static @Min(1) long maxCount;
 
+	/**
+	 * ceiling value for the set of primes to reduce to.
+	 */
 	@Getter
 	@Setter
 	private static @Max(3) int maxReduce;
 
+	/**
+	 * apache confidence level of resulting prime check.
+	 */
 	@Getter
 	@Setter
 	private static @Min(1) int confidenceLevel;
 
-	@Getter
-	@Setter
-	private static @NonNull BaseTypes activeBaseId;
-
+	/**
+	 * helper for constructing primeref instances.
+	 */
 	@Getter
 	@Setter
 	private static @NonNull BiFunction<Long, List<Set<BigInteger>>, PrimeRefIntfc> primeRefRawCtor;
 
+	/**
+	 * helper for assigning the primesrc to prime ref.
+	 */
 	@Getter
 	@Setter
 	private static @NonNull Consumer<PrimeSourceIntfc> primeRefSetPrimeSource;
 
+	/**
+	 * helper for assigning the primesrc
+	 */
 	@Getter
 	@Setter
 	private static @NonNull Consumer<PrimeSourceIntfc> baseSetPrimeSource;
 
+	/**
+	 * helper for assigning the primesrc
+	 */
 	@Getter
 	@Setter
 	private static @NonNull Supplier<PrimeBaseIntfc> primeBaseCtor;
 
+	/**
+	 * track collections of primes representing prefix prime sums - maintain single copy per unique set.
+	 */
 	@Getter
 	private static @NonNull CollectionTrackerIntfc collTrack = new CollectionTrackerImpl();
 
+	/**
+	 * default ctor
+	 */
 	private PTKFactory()
 	{}
 
+	/**
+	 * return factory instance to use.
+	 * @return
+	 */
 	public static FactoryIntfc getFactory()
 	{
 		return new FactoryIntfc()
@@ -107,15 +133,15 @@ public class PTKFactory
 	 * @param baseSetPrimeSource
 	 * @return
 	 */
-	static PrimeSourceIntfc primeSource(
-			@Min(1) long maxCount,
-			@Min(1) int confidenceLevel,
-			@NonNull BiFunction<Long, List<Set<BigInteger>>, PrimeRefIntfc> primeRefRawCtor,
-			@NonNull List<Consumer<PrimeSourceIntfc>> consumersSetPrimeSource
+	private static PrimeSourceIntfc primeSource(
+			@Min(1) final long maxCount,
+			@Min(1) final int confidenceLevel,
+			@NonNull final BiFunction<Long, List<Set<BigInteger>>, PrimeRefIntfc> primeRefRawCtor,
+			@NonNull final List<Consumer<PrimeSourceIntfc>> consumersSetPrimeSrc
 			)
 	{
 		return new PrimeSource(maxCount
-								, consumersSetPrimeSource
+								, consumersSetPrimeSrc
 								, confidenceLevel
 								,primeRefRawCtor,
 								collTrack

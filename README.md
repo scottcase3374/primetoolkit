@@ -30,25 +30,25 @@ Current processing on my i7 with 64Gb RAM reaches about 3-5 million (cmd line ar
 The codebase uses Java 17 with Java 17 preview features enabled. This is mostly for switch statements using pattern matching.
 
 ## Execution - command line argument examples
-- init --max-count=100 --log=BASES
+- init --max-count=100 --log=BASES 									--output-file=/~/ptk-demo/bases-count-100.log
     - Logs the prime#'s and the index; #-bases is just 1
-- init --max-count=100000 -e=GML
+- init --max-count=100000 -e=GML 									--output-file=/~/ptk-demo/gml-default-100000.log
     - Dumps primes to a GML file in home directory
-- init --max-count=1000 --log=GRAPHSTRUCT
+- init --max-count=1000 --log=GRAPHSTRUCT							--output-file=/~/ptk-demo/graphstruct-default-1000.log
     - Logs data from the graph structure
-- init --max-count=100 --log=GRAPHSTRUCT --graph=DEFAULT
+- init --max-count=100 --log=GRAPHSTRUCT --graph=DEFAULT 			--output-file=/~/ptk-demo/graphstruct-default-100-graph.log
     - Logs data from graph structure and renders some graphs/data
-- init --max-count=3000000 --log=NODESTRUCT
+- init --max-count=3000000 --log=NODESTRUCT 						--output-file=/~/ptk-demo/graphstruct-default-3mil.log
     - Logs data from the node structure
-- init --max-count=3000000 --log=NODESTRUCT --graph=DEFAULT
+- init --max-count=3000000 --log=NODESTRUCT --graph=DEFAULT 		--output-file=/~/ptk-demo/nodestruct-default-3mil.log
     - Logs data from node structure and renders some graphs/data
-- init --max-count=500 --log=BASES --base=THREETRIPLE
+- init --max-count=500 --log=BASES --base=THREETRIPLE  				--output-file=/~/ptk-demo/3triple-bases-500.log
     - Logs the prime, index, #bases(triples) and each triple
-- init --max-count=250 --log=BASES --base=NPRIME --max-reduce=3
+- init --max-count=250 --log=BASES --base=NPRIME --max-reduce=3		--output-file=/~/ptk-demo/nprime-bases-250-maxreduce-3.log
     - Logs the prime, index, and a base-prime/count for primes under the "max-reduce" value (i.e. primes 1 and 2)
-- init --max-count=250 --LOG=BASES --base=NPRIME --max-reduce=6
+- init --max-count=250 --LOG=BASES --base=NPRIME --max-reduce=6		--output-file=/~/ptk-demo/nprime-bases-250-maxreduce-6.log
     - Logs the prime, index, and a base-prime/count for primes under the "max-reduce" value  (i.e. primes, 1,2,3,5)
-- init --max-count=25000 --log=BASES --base=NPRIME --max-reduce=4 --prefer-parallel=true
+- init --max-count=25000 --log=BASES --base=NPRIME --max-reduce=4 --prefer-parallel=true --output-file=/~/ptk-demo/nprime-bases-25k-maxreduce-4.log
     - Generates in parallel then logs the prime, index, and a base-prime/count for primes under the "max-reduce" value (i.e. primes 1,2,3)
 
 Adding option:

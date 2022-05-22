@@ -16,7 +16,8 @@ import com.starcases.prime.intfc.PrimeSourceIntfc;
 import lombok.NonNull;
 
 /*
- *  Given a Prime, find EVERY set of 3 pre-existing primes that sum to the Prime.
+ *  Given a Prime, find EVERY set of 3 pre-existing primes
+ *   that sum to the Prime.
  *
  *
  *  A few examples of a single triple (or 2) per Prime.
@@ -58,12 +59,13 @@ import lombok.NonNull;
  * 29 109-> 31,37,41 *
  */
 
+/**
+ * Produce "triples" for each prime.
+ */
+@SuppressWarnings("PMD.CommentSize")
 public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 {
-	private static final Logger log = Logger.getLogger(BaseReduceTriple.class.getName());
-
-	@NonNull
-	private BaseTypes activeBaseId;
+	private static final Logger LOG = Logger.getLogger(BaseReduceTriple.class.getName());
 
 	@Min(0)
 	private static final AtomicInteger good = new AtomicInteger(0);
@@ -71,23 +73,20 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 	/**
 	 * Constructor
 	 *
-	 * @param ps
+	 * @param primeSrc
 	 */
-	public BaseReduceTriple(@NonNull PrimeSourceIntfc ps)
+	public BaseReduceTriple(@NonNull final PrimeSourceIntfc ps)
 	{
 		super(ps);
-
-		activeBaseId = BaseTypes.THREETRIPLE;
-		ps.setActiveBaseId(activeBaseId);
 	}
 
 	/**
 	 * Main method responsible for producing the triples for a single Prime.
 	 * @param Prime
 	 */
-	private void reducePrime(@NonNull PrimeRefIntfc prime)
+	private void reducePrime(@NonNull final PrimeRefIntfc prime)
 	{
-		final var triple = new AllTriples(ps, prime);
+		final var triple = new AllTriples(primeSrc, prime);
 		triple.process();
 	}
 
@@ -95,18 +94,19 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 	 * top-level function; iterate over entire dataset to reduce every Prime
 	 * @param maxReduce
 	 */
+	@SuppressWarnings("PMD.LawOfDemeter")
 	@Override
 	protected void genBasesImpl()
 	{
 		final var counter = new AtomicInteger(0);
-		if (doLog)
+		if (isBaseGenerationOutput())
 		{
-			log.entering("BaseReduce3Triple", "genBases()");
-			log.info("BaseReduce3Triple genBases()");
+			LOG.entering("BaseReduce3Triple", "genBases()");
+			LOG.info("BaseReduce3Triple genBases()");
 		}
 
 		// handle Bootstrap values - can't really represent < 11 with a sum of 3 primes
-		ps
+		primeSrc
 		.getPrimeRefStream(false)
 		.limit(5) // primes 1,2,3,5,7
 		.forEach(curPrime ->
@@ -116,14 +116,16 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 		);
 
 
-		ps.getPrimeRefStream(5L, true).forEach(curPrime -> handlePrime(curPrime, counter.incrementAndGet()));
+		primeSrc.getPrimeRefStream(5L, true).forEach(curPrime -> handlePrime(curPrime, counter.incrementAndGet()));
 
-		if (log.isLoggable(Level.INFO))
-			log.info(String.format("Total entries: %d;", counter.get()));
+		if (LOG.isLoggable(Level.INFO))
+		{
+			LOG.info(String.format("Total entries: %d;", counter.get()));
+		}
 	}
 
 
-	private String handlePrime(PrimeRefIntfc curPrime, int counter)
+	private String handlePrime(final PrimeRefIntfc curPrime, final int counter)
 	{
 		final var retVal = String.format("p[%d]idx[%d] good=", curPrime.getPrime(), counter);
 		try
@@ -131,10 +133,12 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 			reducePrime(curPrime);
 			return retVal + good.getAndIncrement();
 		}
-		catch(Exception e)
+		catch(final Exception e)
 		{
-			log.severe(String.format("BaseReduce3Triple generation => idx[%d] Prime [%d] error: %s", counter, curPrime.getPrime(), e.toString()));
-			e.printStackTrace();
+			if (LOG.isLoggable(Level.SEVERE))
+			{
+				LOG.severe(String.format("BaseReduce3Triple generation => idx[%d] Prime [%d] error: %s", counter, curPrime.getPrime(), e.toString()));
+			}
 		}
 		return retVal + "false";
 	}

@@ -14,21 +14,27 @@ import java.math.BigInteger;
 import java.util.NoSuchElementException;
 
 /**
- * This was just an experiment with the GraphStream lib originally and then converted to jgrapht.
- * After that, the idea to create a more "tool kit" feeling came to mind and I started to refactor
- * it in support of that.  There are a number of classes/interfaces/relationships I would
- * change if I started completely over but this accomplishes what I desired at a minimal level
+ * This was just an experiment with the GraphStream lib originally
+ *  and then converted to jgrapht.
+ * After that, the idea to create a more "tool kit" feeling came to
+ * mind and I started to refactor
+ * it in support of that.  There are a number of
+ * classes/interfaces/relationships I would
+ * change if I started completely over but this accomplishes
+ * what I desired at a minimal level
  * even though it could be done better  yet.
  *
- * Goal: Work with some graph and visualization support to understand capabilities.
+ * Goal: Work with some graph and visualization
+ * support to understand capabilities.
  *
  *
  */
+@SuppressWarnings({"PMD.CommentSize"})
 public class PrimeNodeGenerator
 {
-	protected int level = 0;
+	protected int level;
 
-	protected PrimeRefIntfc primeRef = null;
+	protected PrimeRefIntfc primeRef;
 
 	@NonNull
 	protected final PrimeSourceIntfc ps;
@@ -39,13 +45,14 @@ public class PrimeNodeGenerator
 	@NonNull
 	protected final BaseTypes baseType;
 
-	public PrimeNodeGenerator(@NonNull PrimeSourceIntfc ps, Graph<PrimeRefIntfc, DefaultEdge> graph, @NonNull BaseTypes baseType)
+	public PrimeNodeGenerator(@NonNull final  PrimeSourceIntfc ps, final Graph<PrimeRefIntfc, DefaultEdge> graph, @NonNull final BaseTypes baseType)
 	{
 		this.ps = ps;
 		this.graph = graph;
 		this.baseType = baseType;
 	}
 
+	@SuppressWarnings("PMD.LawOfDemeter")
 	public void begin()
 	{
 		// bootstrap
@@ -61,6 +68,7 @@ public class PrimeNodeGenerator
 		}
 	}
 
+	@SuppressWarnings("PMD.LawOfDemeter")
 	public boolean nextEvents()
 	{
 		try
@@ -69,7 +77,7 @@ public class PrimeNodeGenerator
 			addNodeRawBase();
 			return true;
 		}
-		catch(NoSuchElementException | IndexOutOfBoundsException | NullPointerException e)
+		catch(final NoSuchElementException | IndexOutOfBoundsException | NullPointerException e)
 		{
 			// do nothing - final return handles it.
 		}
@@ -80,6 +88,7 @@ public class PrimeNodeGenerator
 	 * get a primeRef and add to graph.
 	 * Create edges from Prime node to primes from the base sets representing the Prime.
 	 */
+	@SuppressWarnings("PMD.LawOfDemeter")
 	protected void addNodeRawBase()
 	{
 		// Link from Prime node to Prime bases (i.e. unique set of smaller primes that sums to this Prime).
@@ -94,12 +103,13 @@ public class PrimeNodeGenerator
 		level++;
 	}
 
-	protected void addVertext(PrimeRefIntfc primeRef)
+	protected void addVertext(final PrimeRefIntfc primeRef)
 	{
 		graph.addVertex(primeRef);
 	}
 
-	protected void addBaseEdge(BigInteger base, PrimeRefIntfc primeRef)
+	@SuppressWarnings("PMD.LawOfDemeter")
+	protected void addBaseEdge(final BigInteger base, final PrimeRefIntfc primeRef)
 	{
 		ps.getPrimeRef(base).ifPresent( p -> graph.addEdge(p , primeRef));
 	}

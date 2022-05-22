@@ -10,18 +10,25 @@ import com.starcases.prime.base.BaseTypes;
 import lombok.NonNull;
 
 /**
- * Interface supports multiple implementations having different tradeoffs.
+ * Interface supports multiple implementations
+ * having different tradeoffs.
  *
- * Note that the methods without a BaseTypes argument use BaseTypes.DEFAULT.
- * Generally, the code that creates the initial primes uses these no-arg versions
- * and any "alternative base" creation code should always use the BaseTypes argument
+ * Note that the methods without a BaseTypes argument
+ * use BaseTypes.DEFAULT.
+ *
+ * Generally, the code that creates the initial primes
+ * uses these no-arg versions
+ * and any "alternative base" creation code should always
+ * use the BaseTypes argument
  * version when creating additional base info.
  *
  * Use the no-arg version if you
- * also need to get data regarding the default version while generating new bases.
+ * also need to get data regarding the default version
+ *  while generating new bases.
  *
  *
  */
+@SuppressWarnings("PMD.CommentSize")
 public interface PrimeBaseIntfc extends Serializable
 {
 	void addPrimeBases(@NonNull BaseTypes baseType, @NonNull List<Set<BigInteger>> primeBase, @NonNull BaseMetadataIntfc metadata);
@@ -30,7 +37,7 @@ public interface PrimeBaseIntfc extends Serializable
 
 	void addPrimeBases(@NonNull List<Set<BigInteger>> primeBase, @NonNull BaseTypes baseType);
 
-	BaseMetadataIntfc getBaseMetadata();
+	BaseMetadataIntfc getBaseMetadata(@NonNull BaseTypes baseType);
 
 	/**
 	 *

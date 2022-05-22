@@ -7,19 +7,22 @@ import java.util.Optional;
 
 /**
  *
- * Main interface for working with the primes and accessing the info on bases.
+ * Main interface for working with the primes and accessing the info on
+ * bases.
  *
- * Generally, the primes are not stored in the classes implementing this interface.
+ * Generally, the primes are not stored in the classes implementing this
+ *  interface.
  *
- * The PrimeSourceIntfc implementations generally store the primes and other directly
- * related data - this facilitated the use of integer indexes and data types
- * which support near O(1) lookups by index.  The index should be managed by each
- * class implementing this PrimeRefIntfc interface.
+ * The PrimeSourceIntfc implementations generally store the primes and other
+ *  directly related data - this facilitated the use of integer indexes and
+ *   data types which support near O(1) lookups by index.  The index should
+ *   be managed by each class implementing this PrimeRefIntfc interface.
  *
  */
+@SuppressWarnings("PMD.CommentSize")
 public interface PrimeRefIntfc extends Serializable
 {
-	static final Comparator<PrimeRefIntfc> primeRefComparator = (PrimeRefIntfc o1, PrimeRefIntfc o2) -> o1.getPrime().compareTo(o2.getPrime());
+	Comparator<PrimeRefIntfc> PREF_COMPARATOR = (PrimeRefIntfc o1, PrimeRefIntfc o2) -> o1.getPrime().compareTo(o2.getPrime());
 
 	Optional<BigInteger> getDistToNextPrime();
 	Optional<BigInteger> getDistToPrevPrime();

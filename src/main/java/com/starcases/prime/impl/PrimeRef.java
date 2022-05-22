@@ -32,11 +32,6 @@ public class PrimeRef implements PrimeRefIntfc
 	@NonNull
 	private static transient PrimeSourceIntfc primeSrc;
 
-	public static void setPrimeSource(@NonNull PrimeSourceIntfc primeSrcIntfc)
-	{
-		primeSrc = primeSrcIntfc;
-	}
-
 	/*
 	 *  Index for this instance of a Prime.
 	 *  index to bitsets or collections for this val
@@ -45,8 +40,7 @@ public class PrimeRef implements PrimeRefIntfc
 	@Getter
 	public long primeIdx;
 
-
-	private PrimeBaseIntfc primeBaseData = null;
+	private PrimeBaseIntfc primeBaseData;
 
 	/**
 	 * Handle simple Prime where the base is simply itself - i.e. 1, 2
@@ -54,30 +48,49 @@ public class PrimeRef implements PrimeRefIntfc
 	 *
 	 * @param Prime
 	 */
-	public PrimeRef(long primeIdx)
+	public PrimeRef(final long primeIdx)
 	{
 		this.primeIdx = primeIdx;
 	}
 
+	/**
+	 * alt constructor
+	 * @param primeBaseSupplier
+	 * @param primeBases
+	 * @return
+	 */
+	@SuppressWarnings({"PMD.LawOfDemeter"})
 	public PrimeRef init(
-			@NonNull Supplier<PrimeBaseIntfc> primeBaseSupplier,
-			@NonNull List<Set<BigInteger>> primeBases)
+			@NonNull final Supplier<PrimeBaseIntfc> primeBaseSupplier,
+			@NonNull final List<Set<BigInteger>> primeBases)
 	{
 		primeBaseData = primeBaseSupplier.get();
 		getPrimeBaseData().addPrimeBases(primeBases);
 		return this;
 	}
 
+	public static void setPrimeSource(@NonNull final PrimeSourceIntfc primeSrcIntfc)
+	{
+		primeSrc = primeSrcIntfc;
+	}
+
 	@Override
-	public boolean equals(Object obj)
+	public boolean equals(final Object obj)
 	{
 		if (this == obj)
+		{
 			return true;
+		}
 		if (obj == null)
+		{
 			return false;
+		}
 		if (getClass() != obj.getClass())
+		{
 			return false;
-		PrimeRef other = (PrimeRef) obj;
+		}
+
+		final PrimeRef other = (PrimeRef) obj;
 		return primeIdx == other.primeIdx;
 	}
 
@@ -91,11 +104,14 @@ public class PrimeRef implements PrimeRefIntfc
 	public Optional<PrimeRefIntfc> getPrevPrimeRef()
 	{
 		if (primeIdx == 0)
+		{
 			return Optional.empty();
+		}
 
 		return primeSrc.getPrimeRef(primeIdx -1);
 	}
 
+	@SuppressWarnings({"PMD.LawOfDemeter"})
 	@Override
 	public BigInteger getPrime()
 	{
@@ -121,6 +137,7 @@ public class PrimeRef implements PrimeRefIntfc
 	 *
 	 * empty optional if next Prime is unknown/not calculated
 	 */
+	@SuppressWarnings({"PMD.LawOfDemeter"})
 	@Override
 	public Optional<BigInteger> getDistToNextPrime()
 	{
@@ -133,6 +150,7 @@ public class PrimeRef implements PrimeRefIntfc
 	 *
 	 * empty optional if prev Prime is unknown/doesn't exist
 	 */
+	@SuppressWarnings({"PMD.LawOfDemeter"})
 	@Override
 	public Optional<BigInteger> getDistToPrevPrime()
 	{

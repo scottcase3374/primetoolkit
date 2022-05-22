@@ -2,34 +2,42 @@ package com.starcases.prime.base.primetree;
 
 import java.math.BigInteger;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.UnaryOperator;
 
+
+import com.starcases.prime.intfc.CollectionTrackerIntfc;
+
+/**
+ * Top-level class for representing a prime as a sum
+ * of unique smaller primes. A tree/graph style
+ * representation is used internally.
+ */
 class PrimeTreeNode
 {
 	private final AtomicReference<BigInteger> prefixPrime = new AtomicReference<>(null);
 
 	private final AtomicReference<Map<BigInteger, PrimeTreeNode>> next = new AtomicReference<>(null);
 
-	// Represents a partial set of primes (e.g. prefix, suffix set) which lead up to the current node.
-	private final AtomicReference<Set<BigInteger>> sourcePrimes = new AtomicReference<>(null);
-	//final AtomicInteger sourcePrimeCollId = new AtomicInteger();
+	private final CollectionTrackerIntfc collTrack;
 
-	public PrimeTreeNode(BigInteger curPrime, Map<BigInteger, PrimeTreeNode> prefix)
+	public PrimeTreeNode(final BigInteger curPrime, final Map<BigInteger, PrimeTreeNode> prefix, final CollectionTrackerIntfc collTrack)
 	{
 		this.prefixPrime.set(curPrime);
 		this.next.set(prefix);
+		this.collTrack = collTrack;
 	}
 
-	public Set<BigInteger> getSourcePrimes()
+	@SuppressWarnings("PMD.LawOfDemeter")
+	public Optional<Set<BigInteger>> getSourcePrimes(final long key)
 	{
-		return sourcePrimes.getAcquire();
+		return collTrack.get(key).map(c -> c.coll());
 	}
 
-	public Set<BigInteger> setSourcePrimes(UnaryOperator<Set<BigInteger>> supplier)
+	public Set<BigInteger> setSourcePrimes(final Set<BigInteger> supplier)
 	{
-		return sourcePrimes.updateAndGet(supplier);
+		return collTrack.track(supplier).coll();
 	}
 
 	public BigInteger getPrefixPrime()

@@ -2,10 +2,12 @@ package com.starcases.prime.base;
 
 import java.math.BigInteger;
 import java.util.Collections;
-import java.util.EnumMap;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 
 import org.eclipse.collections.impl.list.mutable.FastList;
 
@@ -13,9 +15,12 @@ import com.starcases.prime.intfc.BaseMetadataIntfc;
 import com.starcases.prime.intfc.PrimeBaseIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
-import lombok.Getter;
 import lombok.NonNull;
 
+/**
+ *  Default 'container' for base information.
+ */
+@SuppressWarnings("PMD.AtLeastOneConstructor")
 public class PrimeBaseContainer implements PrimeBaseIntfc
 {
 	/**
@@ -23,28 +28,22 @@ public class PrimeBaseContainer implements PrimeBaseIntfc
 	 */
 	private static final long serialVersionUID = 1L;
 
-	@NonNull
-	private static transient PrimeSourceIntfc primeSrc;
-
-	public static void setPrimeSource(@NonNull PrimeSourceIntfc primeSrcIntfc)
-	{
-		primeSrc = primeSrcIntfc;
-	}
-
 	/**
 	 * Represents sets of base primes that sum to this Prime. (index to primes)
 	 *
 	 */
 	@NonNull
-	private final Map<BaseTypes, List<Set<BigInteger>>> primeBases = new EnumMap<>(BaseTypes.class);
+	private final Map<BaseTypes, List<Set<BigInteger>>> primeBases = new ConcurrentHashMap<>();
 
+	private Map<BaseTypes, BaseMetadataIntfc> baseMetadata = new ConcurrentHashMap<>();
 
-	@Getter
-	private BaseMetadataIntfc baseMetadata;
-
-	public PrimeBaseContainer()
+	public BaseMetadataIntfc getBaseMetadata(final BaseTypes baseType)
 	{
-		// nothing to init here
+		return baseMetadata.getOrDefault(baseType, null);
+	}
+
+	public static void setPrimeSource(@NonNull final PrimeSourceIntfc primeSrcIntfc)
+	{
 	}
 
 	/**
@@ -52,7 +51,7 @@ public class PrimeBaseContainer implements PrimeBaseIntfc
 	 * @param primeBase
 	 */
 	@Override
-	public void addPrimeBases(@NonNull BaseTypes baseType, @NonNull List<Set<BigInteger>> primeBase, BaseMetadataIntfc baseMetadata)
+	public void addPrimeBases(@NonNull final BaseTypes baseType, @NonNull final List<Set<BigInteger>> primeBase, final BaseMetadataIntfc baseMetadata)
 	{
 		this.primeBases.compute(baseType,
 				(k, v) ->
@@ -66,7 +65,7 @@ public class PrimeBaseContainer implements PrimeBaseIntfc
 
 						return v;
 					});
-		this.baseMetadata = baseMetadata;
+		this.baseMetadata.computeIfAbsent(baseType, a -> baseMetadata);
 	}
 
 	/**
@@ -74,13 +73,13 @@ public class PrimeBaseContainer implements PrimeBaseIntfc
 	 * @param primeBase
 	 */
 	@Override
-	public void addPrimeBases(@NonNull List<Set<BigInteger>> primeBase)
+	public void addPrimeBases(@NonNull final List<Set<BigInteger>> primeBase)
 	{
 		addPrimeBases(BaseTypes.DEFAULT, primeBase, null);
 	}
 
 	@Override
-	public void addPrimeBases(@NonNull List<Set<BigInteger>> primeBase, @NonNull BaseTypes baseType)
+	public void addPrimeBases(@NonNull final List<Set<BigInteger>> primeBase, @NonNull final BaseTypes baseType)
 	{
 		addPrimeBases(baseType, primeBase, null);
 	}
@@ -95,7 +94,7 @@ public class PrimeBaseContainer implements PrimeBaseIntfc
 	}
 
 	@Override
-	public List<Set<BigInteger>> getPrimeBases(@NonNull BaseTypes baseType)
+	public List<Set<BigInteger>> getPrimeBases(@NonNull final BaseTypes baseType)
 	{
 		return primeBases.getOrDefault(baseType, Collections.emptyList());
 	}

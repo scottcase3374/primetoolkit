@@ -24,8 +24,10 @@ public class ParallelEdgeLayoutGraph extends JFrame
 	@NonNull
 	private final transient JGraphXAdapter<String, DefaultEdge> jgxAdapter;
 
-    public ParallelEdgeLayoutGraph(@NonNull Graph<String,DefaultEdge> graph)
+    public ParallelEdgeLayoutGraph(@NonNull final Graph<String,DefaultEdge> graph)
     {
+    	super();
+
         // create a visualization using JGraph, via an adapter
         jgxAdapter = new JGraphXAdapter<>(graph);
 

@@ -10,24 +10,27 @@ import javax.validation.constraints.Min;
 
 import com.starcases.prime.base.BaseTypes;
 
-import lombok.NonNull;
-
 /**
  *
- * Main interface for needs related to Prime / base generation and alternative algs.
+ * Main interface for needs related to Prime / base
+ * generation and alternative algs.
  *
- * Implementations of this interface generally contain the primes data and directly data
- * directly related to the primes.  This allows near direct access to the individual primes
+ * Implementations of this interface generally contain the
+ * primes data and directly data
+ * directly related to the primes.  This allows near direct
+ * access to the individual primes
  * and data for navigating amongst the primes.
  *
  */
+@SuppressWarnings("PMD.CommentSize")
 public interface PrimeSourceIntfc extends Serializable
 {
+	void setDisplayProgress(boolean doDisplay);
+	void setDisplayPrimeTreeMetrics(boolean doDisplay);
+
 	void init();
 	void store(BaseTypes ... baseTypes);
 	void load(BaseTypes ... baseTypes);
-
-	void setActiveBaseId(@NonNull BaseTypes activeBaseId);
 
 	/**
 	 * Iterator to PrimeRefIntfc instances.

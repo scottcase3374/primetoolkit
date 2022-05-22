@@ -54,12 +54,13 @@ enum SumConstraintState
 
 	private final Integer compToResult;
 
-	SumConstraintState(Integer compToResult)
+	SumConstraintState(final Integer compToResult)
 	{
 		this.compToResult = compToResult;
 	}
 
-	static SumConstraintState getEnum(Integer compToResult)
+	@SuppressWarnings("PMD.LawOfDemeter")
+	static SumConstraintState getEnum(final Integer compToResult)
 	{
 		return Arrays.stream(SumConstraintState.values())
 				.filter(e -> Objects.nonNull(e.compToResult) && e.compToResult.equals(compToResult))
@@ -67,9 +68,10 @@ enum SumConstraintState
 				.orElse(NONMATCH);
 	}
 
+	@SuppressWarnings({"PMD.LawOfDemeter"})
 	public static SumConstraintState checkSumConstraints(
-			@NonNull PrimeRefIntfc [] primeRefs,
-			@NonNull PrimeRefIntfc targetPrime)
+			@NonNull final PrimeRefIntfc [] primeRefs,
+			@NonNull final PrimeRefIntfc targetPrime)
 	{
 		final var sum = Arrays.
 						stream(primeRefs)
@@ -120,15 +122,16 @@ enum ConditionConstraintState
 	 * @param primeRefs
 	 * @return
 	 */
+	@SuppressWarnings("PMD.LawOfDemeter")
 	public static ConditionConstraintState checkConditionConstraints(
-			@NonNull PrimeRefIntfc [] primeRefs)
+			@NonNull final PrimeRefIntfc ... primeRefs)
 	{
 		// TripleIdx - BOT,MID,TOP
 		var cs = ConditionConstraintState.OK;
 		var baseCount = 0;
 		long [] bases = { -1, -1, -1 }; // dummy values
 
-		for (var pr : primeRefs)
+		for (final var pr : primeRefs)
 		{
 			bases[baseCount] = pr.getPrimeRefIdx();
 			if (bases[baseCount++] > pr.getPrimeRefIdx())
@@ -140,8 +143,7 @@ enum ConditionConstraintState
 
 		if (ConditionConstraintState.OK.equals(cs))
 		{
-			final var baseCountOk = baseCount == bases.length;
-			if (!baseCountOk)
+			if (baseCount != bases.length)
 			{
 				cs = ConditionConstraintState.MISSING_BASE;
 			}
@@ -162,14 +164,21 @@ enum ConditionConstraintState
  * Class implementing the logic for finding all viable triples.
  *
  */
+@SuppressWarnings({"PMD.LongVariable", "PMD.CommentSize"})
 public class AllTriples
 {
+	/**
+	 * unchanging set of constants.
+	 */
 	static final EnumSet<ConditionConstraintState> BAD_CONDITION_STATE =
 			EnumSet.of(ConditionConstraintState.DUPE,
 					ConditionConstraintState.RANGE_ERROR,
 					ConditionConstraintState.MISSING_BASE);
 
-	static final EnumSet<SumConstraintState> GOOD_SUM_STATE =
+	/**
+	 * unchanging set of constants.
+	 */
+	static private final EnumSet<SumConstraintState> GOOD_SUM_STATE =
 			EnumSet.of(SumConstraintState.MATCH,
 					SumConstraintState.INCREMENT_SUM);
 
@@ -178,12 +187,12 @@ public class AllTriples
 	private static final  int TOP = 2;
 
 	@NonNull
-	private  PrimeRefIntfc targetPrime;
+	private  final PrimeRefIntfc targetPrime;
 
 	@NonNull
-	private  PrimeSourceIntfc ps;
+	private final PrimeSourceIntfc ps;
 
-	public AllTriples(@NonNull PrimeSourceIntfc ps, @NonNull PrimeRefIntfc targetPrime)
+	public AllTriples(@NonNull final PrimeSourceIntfc ps, @NonNull final PrimeRefIntfc targetPrime)
 	{
 		this.targetPrime = targetPrime;
 		this.ps = ps;
@@ -197,11 +206,12 @@ public class AllTriples
 	 * @param sumConstraint
 	 * @param conditionConstraint
 	 */
+	@SuppressWarnings("PMD.LawOfDemeter")
 	void nextPrimeRef(
-						int idx,
-						@NonNull PrimeRefIntfc [] triple,
-						@NonNull SumConstraintState [] sumConstraint,
-						@NonNull ConditionConstraintState [] conditionConstraint)
+						final int idx,
+						@NonNull final PrimeRefIntfc [] triple,
+						@NonNull final SumConstraintState [] sumConstraint,
+						@NonNull final ConditionConstraintState...conditionConstraint)
 	{
 		if (triple[idx] != null)
 		{
@@ -221,6 +231,7 @@ public class AllTriples
 	 * Performing the process for each prime ref in concurrent/parallel produces a speedup but since this is
 	 * generating all combinations of valid sums, it is slow for more than small sets of primes.
 	 */
+	@SuppressWarnings("PMD.LawOfDemeter")
 	void process()
 	{
 		final PrimeRefIntfc [] triple =
@@ -264,7 +275,8 @@ public class AllTriples
 		while(GOOD_SUM_STATE.contains(sumConstraint[0]) && !BAD_CONDITION_STATE.contains(conditionConstraint[0]));
 	}
 
-	private void addPrimeBases(@NonNull PrimeRefIntfc prime, @NonNull PrimeRefIntfc [] vals)
+	@SuppressWarnings("PMD.LawOfDemeter")
+	private void addPrimeBases(final @NonNull PrimeRefIntfc prime, final @NonNull PrimeRefIntfc [] vals)
 	{
 		final var bs = Arrays.stream(vals)
 			.filter(Objects::nonNull)

@@ -9,5 +9,5 @@ package com.starcases.prime.intfc;
 public interface PrimeBaseGenerateIntfc
 {
 	void genBases();
-	void setLogBaseGeneration(boolean doLog);
+	void setBaseGenerationOutput(boolean doLog);
 }

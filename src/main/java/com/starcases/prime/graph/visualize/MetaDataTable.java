@@ -25,6 +25,7 @@ import javax.swing.JScrollPane;
  * and mostly uses those to calculate information that may be of interest.
  *
  */
+@SuppressWarnings({"PMD.LongVariable", "PMD.CommentSize"})
 public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc, DefaultEdge>
 {
 	/**
@@ -35,7 +36,6 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 	private static final int PRIME_MAX_DIST_PREV_PRIME = 1;
 	private static final int AVG_BASE_SIZE = 2;
 	private static final int AVG_DIST_PREV_PRIME = 3;
-	//private static final int MAX_PRIME_BASE = 4;
 
 	@NonNull
 	private static final String [] column = {
@@ -62,6 +62,8 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 	 */
 	public MetaDataTable()
 	{
+		super();
+
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		table = new JTable(data, column);
 		final var scrollPane = new JScrollPane(table);
@@ -69,7 +71,7 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 		getContentPane().add(scrollPane);
 	}
 
-	protected void handlePrimeMaxBaseSize(@NonNull GraphVertexChangeEvent<PrimeRefIntfc> e)
+	protected void handlePrimeMaxBaseSize(@NonNull final GraphVertexChangeEvent<PrimeRefIntfc> e)
 	{
 //		if (primeMaxBaseSize == null || e.getVertex().getPrimeBaseData().getBaseSize() > primeMaxBaseSize.getPrimeBaseData().getBaseSize())
 //		{
@@ -82,7 +84,8 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 //						primeMaxBaseSize.getPrimeBaseData().getBaseSize());
 	}
 
-	protected void handlePrimeMaxDistToPrevPrime(@NonNull GraphVertexChangeEvent<PrimeRefIntfc> e)
+	@SuppressWarnings("PMD.LawOfDemeter")
+	protected void handlePrimeMaxDistToPrevPrime(@NonNull final GraphVertexChangeEvent<PrimeRefIntfc> e)
 	{
 		if (primeMaxDistToPrev == null)
 		{
@@ -101,18 +104,20 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 		data[0][PRIME_MAX_DIST_PREV_PRIME] = String.format("Prime [%d] / max-dist[%d]", primeMaxDistToPrev.getPrime(), primeMaxDistToPrev.getDistToPrevPrime().orElse(BigInteger.ZERO));
 	}
 
-	protected void handleAvgBaseSize(@NonNull GraphVertexChangeEvent<PrimeRefIntfc> e)
+	protected void handleAvgBaseSize(@NonNull final GraphVertexChangeEvent<PrimeRefIntfc> e)
 	{
 		//totalBases = totalBases.add(BigDecimal.valueOf(e.getVertex().getPrimeBaseData().getBaseSize()));
-		data[0][AVG_BASE_SIZE] = String.format("# primes [%d], total-bases[%d] avg-bases[%f]", primeMaxDistToPrev.getPrimeRefIdx(), totalBases.longValue(), ((double)totalBases.longValue() / (primeMaxDistToPrev.getPrimeRefIdx()+1)));
+		data[0][AVG_BASE_SIZE] = String.format("# primes [%d], total-bases[%d] avg-bases[%f]", primeMaxDistToPrev.getPrimeRefIdx(), totalBases.longValue(), (double)totalBases.longValue() / (primeMaxDistToPrev.getPrimeRefIdx()+1));
 	}
 
+	@SuppressWarnings("PMD.LawOfDemeter")
 	protected void handleAvgDistToPrev()
 	{
 		data[0][AVG_DIST_PREV_PRIME] = String.format("Total dist[%d], total-primes[%d] avg-dist[%f]", primeMaxDistToPrev.getPrime().longValue(), primeMaxDistToPrev.getPrimeRefIdx() , ((double)primeMaxDistToPrev.getPrime().longValue() / (primeMaxDistToPrev.getPrimeRefIdx()+1)));
 	}
 
-	protected void handleHighPrimeBase(@NonNull GraphVertexChangeEvent<PrimeRefIntfc> e)
+	@SuppressWarnings("PMD.LawOfDemeter")
+	protected void handleHighPrimeBase(@NonNull final GraphVertexChangeEvent<PrimeRefIntfc> e)
 	{
 		if (highPrimeBase == null || e.getVertex().getPrimeBaseData().getPrimeBases().get(0).size() > highPrimeBase.getPrimeBaseData().getPrimeBases().get(0).size())
 		{
@@ -122,7 +127,7 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 	}
 
 	@Override
-	public void vertexAdded(@NonNull GraphVertexChangeEvent<PrimeRefIntfc> e)
+	public void vertexAdded(@NonNull final GraphVertexChangeEvent<PrimeRefIntfc> e)
 	{
 		handlePrimeMaxBaseSize(e);
 		handlePrimeMaxDistToPrevPrime(e);
@@ -157,7 +162,8 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 //	}
 
 	/**
-	 * Need to think about how to handle multiple sets of bases for a single Prime.  In that
+	 * Need to think about how to handle multiple sets of bases
+	 * for a single Prime.  In that
 	 * scenario, which base set should be used to determine the max Prime base.  The
 	 * current usage is just general reporting but the results should be consistent.
 	 */
@@ -174,26 +180,26 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 //				.orElseThrow();
 //	}
 	@Override
-	public void edgeAdded(GraphEdgeChangeEvent<PrimeRefIntfc, DefaultEdge> e)
+	public void edgeAdded(final GraphEdgeChangeEvent<PrimeRefIntfc, DefaultEdge> e)
 	{
 		// Not handling any edge related logic right now.
 	}
 
 	@Override
-	public void vertexRemoved(GraphVertexChangeEvent<PrimeRefIntfc> e)
+	public void vertexRemoved(final GraphVertexChangeEvent<PrimeRefIntfc> e)
 	{
 		// No removal performed
 	}
 
 	@Override
-	public void edgeWeightUpdated(@NonNull GraphEdgeChangeEvent<PrimeRefIntfc, DefaultEdge> e)
+	public void edgeWeightUpdated(@NonNull final GraphEdgeChangeEvent<PrimeRefIntfc, DefaultEdge> e)
 	{
 		GraphListener.super.edgeWeightUpdated(e);
 	}
 
 
 	@Override
-	public void edgeRemoved(GraphEdgeChangeEvent<PrimeRefIntfc, DefaultEdge> e)
+	public void edgeRemoved(final GraphEdgeChangeEvent<PrimeRefIntfc, DefaultEdge> e)
 	{
 		// No removals performed
 	}

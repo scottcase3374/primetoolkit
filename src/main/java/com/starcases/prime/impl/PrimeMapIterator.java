@@ -4,11 +4,14 @@ import java.util.Iterator;
 
 import com.starcases.prime.intfc.PrimeRefIntfc;
 
+/**
+ * Implementation of iterator returning prime refs.
+ */
 class PrimeMapIterator implements Iterator<PrimeRefIntfc>
 {
-	private Iterator<PrimeMapEntry> entry;
+	private final transient Iterator<PrimeMapEntry> entry;
 
-	public PrimeMapIterator(Iterator<PrimeMapEntry> entry)
+	public PrimeMapIterator(final Iterator<PrimeMapEntry> entry)
 	{
 		this.entry = entry;
 	}
@@ -19,6 +22,7 @@ class PrimeMapIterator implements Iterator<PrimeRefIntfc>
 		return entry.hasNext();
 	}
 
+	@SuppressWarnings("PMD.LawOfDemeter")
 	@Override
 	public PrimeRefIntfc next()
 	{

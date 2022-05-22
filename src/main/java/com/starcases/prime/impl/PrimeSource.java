@@ -1,17 +1,18 @@
 package com.starcases.prime.impl;
 
 import java.math.BigInteger;
-import java.text.DecimalFormat;
 import java.util.BitSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.starcases.prime.PrimeToolKit;
 import com.starcases.prime.base.AbstractPrimeBaseGenerator;
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.base.primetree.PrimeTree;
@@ -22,6 +23,7 @@ import com.starcases.prime.intfc.PrimeSourceIntfc;
 import java.util.List;
 
 import lombok.NonNull;
+import lombok.Setter;
 
 import javax.validation.constraints.Min;
 import org.eclipse.collections.api.map.primitive.MutableLongObjectMap;
@@ -31,14 +33,16 @@ import org.eclipse.collections.impl.map.mutable.primitive.ObjectLongHashMap;
 import org.eclipse.collections.impl.set.sorted.mutable.TreeSortedSet;
 
 /**
- * Provides data structure holding the core data and objects that provide access to the data from the
+ * Provides data structure holding the core data and objects that provide
+ * access to the data from the
  * "public interface for primes". Also some utility support to support alternative algs for
  * finding primes, working with bases of the primes, and general information/access.
  *
  */
+@SuppressWarnings({"PMD.LongVariable", "PMD.CommentSize"})
 public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSourceIntfc
 {
-	private static final Logger log = Logger.getLogger(PrimeSource.class.getName());
+	private static final Logger LOG = Logger.getLogger(PrimeSource.class.getName());
 
 	private static final long serialVersionUID = 1L;
 
@@ -54,24 +58,25 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	@Min(1)
 	private final long targetPrimeCount;
 
-	@NonNull
-	private BaseTypes activeBaseId = BaseTypes.DEFAULT;
+	@Setter
+	private boolean displayProgress = false;
 
-	static final DecimalFormat timeDisplayFmt = new DecimalFormat("###,###");
+	@Setter
+	private boolean displayPrimeTreeMetrics = false;
 
 	// can be overridden by passing
 	// an appropriate "new" function ptr into the PrimeSource
 	// constructor  -> param primeRefCtor
 	@NonNull
-	private transient BiFunction<Long, List<Set<BigInteger>>, PrimeRefIntfc> primeRefRawCtor;
+	private final transient BiFunction<Long, List<Set<BigInteger>>, PrimeRefIntfc> primeRefRawCtor;
 
-	private transient CollectionTrackerIntfc collTrack;
+	private final transient CollectionTrackerIntfc collTrack;
 
 	private transient PrimeTree primeTree;
 
 	// map BigInteger (prime) to long index
 	@NonNull
-	private transient MutableObjectLongMap<BigInteger> primeToIdx;
+	private final transient MutableObjectLongMap<BigInteger> primeToIdx;
 
 	// map long idx to PrimeMapEntry,  PrimeMapEntry is primeRef and BigInt
 	// long idx provides order to primerefs and therefore indirectly to the primes
@@ -83,14 +88,15 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	//
 
 	public PrimeSource(
-			@Min(1) long maxCount,
-			@NonNull List<Consumer<PrimeSourceIntfc>> consumersSetPrimeSrc,
-			@Min(1) int confidenceLevel,
-			@NonNull BiFunction<Long, List<Set<BigInteger>>, PrimeRefIntfc> primeRefRawCtor,
-			CollectionTrackerIntfc collTrack
+			@Min(1) final long maxCount,
+			@NonNull final List<Consumer<PrimeSourceIntfc>> consumersSetPrimeSrc,
+			@Min(1) final int confidenceLevel,
+			@NonNull final BiFunction<Long, List<Set<BigInteger>>, PrimeRefIntfc> primeRefRawCtor,
+			final CollectionTrackerIntfc collTrack
 			)
 	{
-		super.ps = this;
+		super();
+		super.primeSrc = this;
 
 		this.collTrack = collTrack;
 
@@ -120,6 +126,11 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 		}
 
 		genBases();
+
+		if (displayPrimeTreeMetrics)
+		{
+			collTrack.log();
+		}
 	}
 
 	/**
@@ -134,7 +145,10 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	@Override
 	protected void genBasesImpl()
 	{
-		log.info("PrimeSource::genBasesImpl()");
+		if (LOG.isLoggable(Level.INFO))
+		{
+			LOG.info("PrimeSource::genBasesImpl()");
+		}
 
 		primeTree = new PrimeTree(this, collTrack);
 
@@ -149,22 +163,27 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 				genByPrimePermutation(curPrime);
 			}
 
-			displayProgress(curPrimeIdx);
+			if (displayProgress)
+			{
+				displayProgress(curPrimeIdx);
+			}
+
 			allPrimesProcessed = curPrimeIdx >= targetPrimeCount;
 		}
 		while (!allPrimesProcessed);
 	}
 
-	private void genByPrimePermutation(Optional<BigInteger> curPrime)
+	@SuppressWarnings("PMD.LawOfDemeter")
+	private void genByPrimePermutation(final Optional<BigInteger> curPrime)
 	{
 		// Represents a X-bit search space of indexes for primes to add for next Prime.
 		final var numBitsForPrimeCount = primeToIdx.size()-1;
-		var primeIndexMaxPermutation = new BitSet();
+		final var primeIndexMaxPermutation = new BitSet();
 		primeIndexMaxPermutation.set(numBitsForPrimeCount); // keep 'shifting' max bit left
 
 		// no reason to perform work when no indexes
 		// selected so start with 1 index selected.
-		var primeIndexPermutation = new BitSet();
+		final var primeIndexPermutation = new BitSet();
 		primeIndexPermutation.set(0);
 
 		final var sumCeiling = curPrime.stream().map(this::calcSumCeiling).reduce(BigInteger.ZERO, BigInteger::add);
@@ -185,35 +204,35 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 			{
 				if (curPrime.isPresent() && viablePrime(permutationSum, curPrime.get()))
 				{
-					var prefix = primeTree.iterator();
+					final var prefix = primeTree.iterator();
 					primeIndexPermutation.stream().forEach(i ->
 						{
-							var prefPrime = getPrime(i).get();
+							final var prefPrime = getPrime(i).get();
 
 							prefix.add(prefPrime);
 						});
 
-					var suffix = primeTree.iterator();
-					suffix.add(curPrime.get()); // last base is the previous prime.
+					final var tmpS = prefix.toSet();
+					final var prefixSet = collTrack.track(tmpS).coll();
 
-					var prefixSet = collTrack.track(prefix.toSet()).coll();
-					//var prefixSet = prefix.toSet();
-					addPrimeRef(permutationSum, List.of(prefixSet, suffix.toSet()));
+					addPrimeRef(permutationSum, List.of(prefixSet, Set.of(curPrime.get())));
 					doLoop = false;
 				}
 				else
+				{
 					incrementPermutation(primeIndexPermutation);
+				}
 			}
 		}
 	}
 
-	private boolean genByListPermutation(Optional<BigInteger> curPrime)
+	private boolean genByListPermutation(final Optional<BigInteger> curPrime)
 	{
 		boolean [] found = {false};
 		curPrime.ifPresent(cur ->
 						{
 							final var tmpCur = cur;
-							var pdata = primeTree.select(p1 -> { var p = tmpCur.add(BigInteger.valueOf(p1));
+							final var pdata = primeTree.select(p1 -> { final var p = tmpCur.add(BigInteger.valueOf(p1));
 																return p.isProbablePrime(100); });
 							pdata.ifPresent( pd ->
 										{
@@ -226,38 +245,37 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 		return found[0];
 	}
 
-	private void displayProgress(long curIndex)
+	private void displayProgress(final long curIndex)
 	{
 		final String [] units = { "%n[%s x 1024k] ", "%n [%s x 128k] ", "%n [%s x 16k] ", "K"};
 		final long [] mask = {(1 << 20) -1, (1 << 17) -1 , (1 << 14) -1, (1 << 10) -1};
 
 		// display some progress info
-		var primesProcessed = curIndex;
+		final var primesProcessed = curIndex;
 		int unitIdx = -1;
-		while ((primesProcessed & mask[++unitIdx]) != 0 && unitIdx <  mask.length-1);
+		while ((primesProcessed & mask[++unitIdx]) != 0 && unitIdx <  mask.length-1)
+		{
+			; // loop expression does the work
+		}
 
-		var num = (int)(primesProcessed / mask[unitIdx]);
+		final var num = (int)(primesProcessed / mask[unitIdx]);
 		if (unitIdx != units.length-1 || num <= 2)
-			System.out.print(String.format(units[unitIdx], num));
+		{
+			PrimeToolKit.output(String.format(units[unitIdx], num));
+		}
 	}
 
 
 	@Override
-	public void store(BaseTypes ... baseTypes)
+	public void store(final BaseTypes ... baseTypes)
 	{
 		// not used as of now
 	}
 
 	@Override
-	public void load(BaseTypes ... baseTypes)
+	public void load(final BaseTypes ... baseTypes)
 	{
 		// not used as of now
-	}
-
-	@Override
-	public void setActiveBaseId(@NonNull BaseTypes activeBaseId)
-	{
-		this.activeBaseId = activeBaseId;
 	}
 
 	@Override
@@ -266,43 +284,46 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 		return new PrimeMapIterator(idxToPrimeMap.iterator());
 	}
 
+	@SuppressWarnings("PMD.LawOfDemeter")
 	@Override
-	public Stream<PrimeRefIntfc> getPrimeRefStream(boolean preferParallel)
+	public Stream<PrimeRefIntfc> getPrimeRefStream(final boolean preferParallel)
 	{
 		return (preferParallel ? idxToPrimeMap.values().parallelStream() : idxToPrimeMap.values().stream()).map(PrimeMapEntry::getPrimeRef);
 	}
 
+	@SuppressWarnings("PMD.LawOfDemeter")
 	@Override
-	public Stream<PrimeRefIntfc> getPrimeRefStream(long skipCount, boolean preferParallel)
+	public Stream<PrimeRefIntfc> getPrimeRefStream(final long skipCount, final boolean preferParallel)
 	{
 		return (preferParallel ? idxToPrimeMap.values().stream().skip(skipCount).parallel() : idxToPrimeMap.values().stream().skip(skipCount)).map(PrimeMapEntry::getPrimeRef);
 	}
 
 	@Override
-	public Optional<BigInteger> getPrime(@Min(0) long primeIdx)
+	public Optional<BigInteger> getPrime(@Min(0) final long primeIdx)
 	{
 		return Optional.ofNullable(getIdxToPrime(primeIdx));
 	}
 
 	@Override
-	public Optional<PrimeRefIntfc> getPrimeRef(@Min(0) BigInteger prime)
+	public Optional<PrimeRefIntfc> getPrimeRef(@Min(0) final BigInteger prime)
 	{
 		return Optional.ofNullable(getPrimeToPrimeRef(prime));
 	}
 
 	@Override
-	public Optional<PrimeRefIntfc> getPrimeRef(@Min(0) long primeIdx)
+	public Optional<PrimeRefIntfc> getPrimeRef(@Min(0) final long primeIdx)
 	{
-		var pr = getIdxToPrimeRef(primeIdx);
+		final var pr = getIdxToPrimeRef(primeIdx);
 		return Optional.of(pr);
 	}
 
-	private BigInteger calcSumCeiling(@NonNull @Min(3) BigInteger primeSum)
+	@SuppressWarnings("PMD.LawOfDemeter")
+	private BigInteger calcSumCeiling(@NonNull @Min(3) final BigInteger primeSum)
 	{
 		return primeSum.shiftLeft(1).subtract(BigInteger.ONE);
 	}
 
-	private void incrementPermutation(@NonNull BitSet primePermutation)
+	private void incrementPermutation(@NonNull final BitSet primePermutation)
 	{
 		var bit = 0;
 		// Generate next permutation of the bit indexes
@@ -311,7 +332,9 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 			primePermutation.flip(bit);
 
 			if (primePermutation.get(bit)) // true means no carry
+			{
 				break;
+			}
 
 			bit++;
 		} while(true);
@@ -323,16 +346,16 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	 * @param aPrime
 	 */
 	private void addPrimeRef(
-			@NonNull @Min(1) BigInteger newPrime,
-			@NonNull List<Set<BigInteger>> baseSets
+			@NonNull @Min(1) final BigInteger newPrime,
+			@NonNull final List<Set<BigInteger>> baseSets
 			)
 	{
-		var idx = nextIdx.incrementAndGet();
-		PrimeRefIntfc ret = primeRefRawCtor.apply(idx, baseSets);
+		final var idx = nextIdx.incrementAndGet();
+		final PrimeRefIntfc ret = primeRefRawCtor.apply(idx, baseSets);
 		updateMaps(idx, newPrime, ret);
 	}
 
-	private void updateMaps(long idx, BigInteger newPrime, PrimeRefIntfc ref)
+	private void updateMaps(final long idx, final BigInteger newPrime, final PrimeRefIntfc ref)
 	{
 		this.idxToPrimeMap.put(idx, new PrimeMapEntry(newPrime, ref));
 		this.primeToIdx.put(newPrime, idx);
@@ -345,7 +368,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	 * @param sumOfPrimeSet
 	 * @return true for sum that is viable Prime; false otherwise
 	 */
-	private boolean viablePrime(@NonNull @Min(1) BigInteger primeSum, @Min(1) BigInteger lastMaxPrime)
+	private boolean viablePrime(@NonNull @Min(1) final BigInteger primeSum, @Min(1) final BigInteger lastMaxPrime)
 	{
 		return
 			// Part of "non-cheating" Prime checks.
@@ -358,27 +381,30 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 				primeSum.testBit(0)
 			&&
 				// This is bootstrap logic.
-				// If possible, this block should be removed and allow the remaining blocks to determine next Prime.
+				// If possible, this block should be removed and allow the
+				// remaining blocks to determine next Prime.
 				primeSum.isProbablePrime(confidenceLevel);
 	}
 
-	private long getPrimeToIdx(BigInteger bi)
+	private long getPrimeToIdx(final BigInteger bi)
 	{
 		return primeToIdx.get(bi);
 	}
 
-	private PrimeRefIntfc getIdxToPrimeRef(long idx)
+	@SuppressWarnings("PMD.LawOfDemeter")
+	private PrimeRefIntfc getIdxToPrimeRef(final long idx)
 	{
 		return idxToPrimeMap.get(idx).getPrimeRef();
 	}
 
-	private BigInteger getIdxToPrime(long idx)
+	@SuppressWarnings("PMD.LawOfDemeter")
+	private BigInteger getIdxToPrime(final long idx)
 	{
-		var ret = idxToPrimeMap.get(idx);
+		final var ret = idxToPrimeMap.get(idx);
 		return ret != null ? ret.getPrime() : null;
 	}
 
-	private PrimeRefIntfc getPrimeToPrimeRef(BigInteger prime)
+	private PrimeRefIntfc getPrimeToPrimeRef(final BigInteger prime)
 	{
 		return getIdxToPrimeRef(getPrimeToIdx(prime));
 	}

@@ -25,8 +25,9 @@ public class CompactTreeLayoutBaseMetaDataGraph extends JFrame
 	private final transient JGraphXAdapter<PrimeRefIntfc, DefaultEdge> jgxAdapter;
 
 
-    public CompactTreeLayoutBaseMetaDataGraph(@NonNull Graph<PrimeRefIntfc,DefaultEdge> graph)
+    public CompactTreeLayoutBaseMetaDataGraph(@NonNull final Graph<PrimeRefIntfc,DefaultEdge> graph)
     {
+    	super();
         // create a visualization using JGraph, via an adapter
         jgxAdapter = new JGraphXAdapter<>(graph);
 
