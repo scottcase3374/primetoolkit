@@ -230,16 +230,13 @@ public class Init implements Runnable
 	{
 		boolean ret = true;
 		final File folder = new File(initOpts.getOutputFolder().replaceFirst("^.*~", System.getenv("HOME")));
-		if (!folder.exists())
+		if (!folder.exists() && !folder.mkdirs())
 		{
-			if (!folder.mkdirs())
+			if (LOG.isLoggable(Level.SEVERE))
 			{
-				if (LOG.isLoggable(Level.SEVERE))
-				{
-					LOG.severe("ERROR: could not create base folder: " + initOpts.getOutputFolder());
-				}
-				ret = false;
+				LOG.severe("ERROR: could not create base folder: " + initOpts.getOutputFolder());
 			}
+			ret = false;
 		}
 		return ret;
 	}
