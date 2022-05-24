@@ -14,7 +14,25 @@ import java.util.function.Supplier;
  */
 public interface FactoryIntfc
 {
+	/**
+	 * Get prime src ref.
+	 * provide prime/primeref lookups
+	 * @return
+	 */
 	PrimeSourceIntfc getPrimeSource();
+
+	/**
+	 * Get a supplier of the base constructor.
+	 * Provides a means of configuring system differently
+	 * Need better desc.
+	 * @return
+	 */
 	Supplier<PrimeBaseIntfc> getPrimeBaseConstructor();
+
+	/**
+	 * Provides a means of configuring system differently.
+	 * Need better desc.
+	 * @return
+	 */
 	BiFunction<Long, List<Set<BigInteger>>, PrimeRefIntfc> getPrimeRefRawConstructor();
 }

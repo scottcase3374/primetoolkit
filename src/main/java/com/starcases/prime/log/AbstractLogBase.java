@@ -3,7 +3,10 @@ package com.starcases.prime.log;
 import com.starcases.prime.intfc.LogGraphIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 
 
 /**
@@ -16,14 +19,20 @@ public abstract class AbstractLogBase implements LogGraphIntfc
 	/**
 	 * Prime source instance - provides access to most operations needed for working with the prime references.
 	 */
+	@Getter(AccessLevel.PROTECTED)
 	@NonNull
-	protected transient final PrimeSourceIntfc ps;
+	protected final PrimeSourceIntfc primeSrc;
 
 	/**
 	 * flag indicating that parallel/concurrent execution is preferred.
 	 */
-	protected transient boolean preferParallel;
+	@Getter(AccessLevel.PROTECTED)
+	@Setter(AccessLevel.PRIVATE)
+	protected boolean preferParallel;
 
+	/**
+	 * Set flag indicating ok to use multiple CPU cores
+	 */
 	@Override
 	public LogGraphIntfc doPreferParallel(final boolean preferParallel)
 	{
@@ -31,8 +40,12 @@ public abstract class AbstractLogBase implements LogGraphIntfc
 		return this;
 	}
 
-	protected AbstractLogBase(@NonNull final PrimeSourceIntfc ps)
+	/**
+	 * constructor for base of logging
+	 * @param primeSrc
+	 */
+	protected AbstractLogBase(@NonNull final PrimeSourceIntfc primeSrc)
 	{
-		this.ps = ps;
+		this.primeSrc = primeSrc;
 	}
 }

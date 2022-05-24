@@ -8,6 +8,8 @@ import com.mxgraph.layout.mxCompactTreeLayout;
 import com.mxgraph.swing.mxGraphComponent;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NonNull;
 
 /**
@@ -20,11 +22,18 @@ public class CompactTreeLayoutBaseMetaDataGraph extends JFrame
 {
 	private static final long serialVersionUID = 1L;
 
-	// Sonar complains about wanting jgxAdapter to be either serializable or transient
+	/**
+	 * Sonar complains about wanting jgxAdapter to be either serializable or transient
+	 */
+	@Getter(AccessLevel.PRIVATE)
 	@NonNull
-	private final transient JGraphXAdapter<PrimeRefIntfc, DefaultEdge> jgxAdapter;
+	private final JGraphXAdapter<PrimeRefIntfc, DefaultEdge> jgxAdapter;
 
 
+	/**
+	 * Constructor for tree layout of meta data info
+	 * @param graph
+	 */
     public CompactTreeLayoutBaseMetaDataGraph(@NonNull final Graph<PrimeRefIntfc,DefaultEdge> graph)
     {
     	super();

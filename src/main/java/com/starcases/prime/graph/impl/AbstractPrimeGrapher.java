@@ -65,25 +65,23 @@ public abstract class AbstractPrimeGrapher
 	 * General constructor
 	 *
 	 */
-	protected AbstractPrimeGrapher(@NonNull final PrimeSourceIntfc ps, @NonNull final BaseTypes baseType)
+	protected AbstractPrimeGrapher(@NonNull final PrimeSourceIntfc primeSrc, @NonNull final BaseTypes baseType)
 	{
-		this(ps, baseType, Collections.emptyList());
+		this(primeSrc, baseType, Collections.emptyList());
 	}
 
 	/**
 	 * Provide support for visual output related to graphs
 	 */
-	protected AbstractPrimeGrapher(@NonNull final PrimeSourceIntfc ps, @NonNull final BaseTypes baseType, @NonNull final List<GraphListener<PrimeRefIntfc, DefaultEdge>> graphs)
+	protected AbstractPrimeGrapher(@NonNull final PrimeSourceIntfc primeSrc, @NonNull final BaseTypes baseType, @NonNull final List<GraphListener<PrimeRefIntfc, DefaultEdge>> graphs)
 	{
-		this.primeSrc = ps;
+		this.primeSrc = primeSrc;
 		this.baseType = baseType;
 		this.primeSrc.init();
 
 		final var lgraph = new DefaultListenableGraph<PrimeRefIntfc, DefaultEdge>(primeGraphBuilder.build(), true);
 		graphs.stream().forEach(lgraph::addGraphListener);
 		this.graph = lgraph;
-
-		populateData();
 	}
 
 	/**
@@ -94,12 +92,12 @@ public abstract class AbstractPrimeGrapher
 	 * @return
 	 */
 	@SuppressWarnings("PMD.LawOfDemeter")
-	BigInteger getTotalSum(@NonNull final BigInteger [] sum3, @NonNull final Integer [] indexes)
+	protected BigInteger getTotalSum(@NonNull final BigInteger [] sum3, @NonNull final Integer [] indexes)
 	{
-		for (var i = 0; i< sum3.length; i++)
+		for (var index = 0; index< sum3.length; index++)
 		{
-			final var x = i;
-			primeSrc.getPrime(indexes[i]).ifPresent(p -> sum3[x] = p);
+			final var tmpIndex = index;
+			primeSrc.getPrime(indexes[index]).ifPresent(p -> sum3[tmpIndex] = p);
 		}
 		return Arrays.asList(sum3).stream().reduce(BigInteger.ZERO, BigInteger::add);
 	}
@@ -107,7 +105,7 @@ public abstract class AbstractPrimeGrapher
 	/**
 	 * Perform the data population
 	 */
-	void populateData()
+	public void populateData()
 	{
 		// Start setting up the actual graph/data generations
 		final var primeNodeGenerator = new PrimeNodeGenerator(primeSrc, graph, baseType);
@@ -115,7 +113,7 @@ public abstract class AbstractPrimeGrapher
 
 		while(primeNodeGenerator.nextEvents())
 		{
-			; // iterates through the events which are processed elsewhere.
+			 // iterates through the events which are processed elsewhere.
 		}
 	}
 }

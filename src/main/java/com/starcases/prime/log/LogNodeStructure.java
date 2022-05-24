@@ -19,52 +19,59 @@ import lombok.NonNull;
  */
 public class LogNodeStructure extends AbstractLogBase
 {
+	/**
+	 * default logger
+	 */
 	private static final Logger LOG = Logger.getLogger(LogNodeStructure.class.getName());
 
-	public LogNodeStructure(@NonNull final PrimeSourceIntfc ps)
+	/**
+	 * Constructor for logging node structures
+	 * @param primeSrc
+	 */
+	public LogNodeStructure(@NonNull final PrimeSourceIntfc primeSrc)
 	{
-		super(ps);
+		super(primeSrc);
 	}
 
 	@SuppressWarnings({"PMD.LawOfDemeter"})
 	@Override
-	public void l()
+	public void outputLogs()
 	{
 		LOG.info("LogNodeStructure l()");
 		var idx = 0;
-		final var prIt = ps.getPrimeRefIter();
+		final var prIt = primeSrc.getPrimeRefIter();
 		while (prIt.hasNext())
 		{
-			final var pr = prIt.next();
+			final var primeRef = prIt.next();
 			try
 			{
 				PrimeToolKit.output(String.format("%nPrime [%d] idx[%d]  %n",
-						pr.getPrime(),
+						primeRef.getPrime(),
 						idx++
 						));
 
 					final long [] cnt = {0};
-					final var sb = new StringBuilder("\t");
+					final var outputStr = new StringBuilder("\t");
 
-					pr.getPrimeBaseData().getPrimeBases()
+					primeRef.getPrimeBaseData().getPrimeBases()
 							.stream()
 							.filter( p -> !p.contains(BigInteger.ZERO))
 							.reduce((s1, s2) -> { s1.addAll(s2); return s1; })
 							.stream()
 							.<String>mapMulti((basePrimes, consumer) ->
 												{
-													sb.append(
+													outputStr.append(
 													 	basePrimes
 													 	.stream()
 													 	.map(BigInteger::toString)
 													 	.collect(Collectors.joining(",","[","]"))
 													 	);
 
-													if (cnt[0] % 5 == 0 || cnt[0] >= pr.getPrimeBaseData().getPrimeBases().get(0).size())
+													if (cnt[0] % 5 == 0 || cnt[0] >= primeRef.getPrimeBaseData().getPrimeBases().get(0).size())
 													{
-														consumer.accept(sb.toString());
-														sb.setLength(0);
-														sb.append('\t');
+														consumer.accept(outputStr.toString());
+														outputStr.setLength(0);
+														outputStr.append('\t');
 													}
 													cnt[0]++;
 												}
@@ -75,7 +82,7 @@ public class LogNodeStructure extends AbstractLogBase
 			{
 				if (LOG.isLoggable(Level.SEVERE))
 				{
-					LOG.severe(String.format("Can't show bases for: %d exception:", pr.getPrime()));
+					LOG.severe(String.format("Can't show bases for: %d exception:", primeRef.getPrime()));
 					LOG.throwing(this.getClass().getName(), "l()", e);
 				}
 			}

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.math.BigInteger;
 import java.util.Optional;
 
+import org.junit.Ignore;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,16 +17,31 @@ import com.starcases.prime.impl.PrimeRef;
 import com.starcases.prime.intfc.FactoryIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 
+/**
+ * Prime source unit tests
+ * Lookup prime / prime refs.
+ */
+@SuppressWarnings({"PMD.AtLeastOneConstructor", "PMD.CommentDefaultAccessModifier"})
 @ExtendWith(MockitoExtension.class)
 class PrimeSourceUnitTest
 {
+	/**
+	 * Prime source ref - lookup prime/prime refs.
+	 */
+	@Setter
+	@Getter
 	@NonNull
-	private PrimeSourceIntfc ps;
+	private PrimeSourceIntfc primeSrc;
 
+	/**
+	 * unit test pre-init
+	 */
 	@BeforeEach
-	void init()
+	public void init()
 	{
 		PTKFactory.setMaxCount(100);
 		PTKFactory.setConfidenceLevel(100);
@@ -36,38 +52,48 @@ class PrimeSourceUnitTest
 		PTKFactory.setPrimeBaseCtor(PrimeBaseContainer::new);
 		PTKFactory.setPrimeRefRawCtor( (i, base) -> (new PrimeRef(i)).init(PTKFactory.getPrimeBaseCtor(), base ));
 
-		FactoryIntfc factory = PTKFactory.getFactory();
-		ps = factory.getPrimeSource();
-		ps.init();
+		final FactoryIntfc factory = PTKFactory.getFactory();
+		primeSrc = factory.getPrimeSource();
+		primeSrc.init();
 	}
 
-//	@Test
-//	void testGetPrimeIdx() {
-//		Assertions.assertEquals(1, primeSrc.getPrimeIdx(BigInteger.TWO));
-//
-//		var bi101 = BigInteger.valueOf(101L);
-//		Assertions.assertEquals(26, primeSrc.getPrimeIdx(bi101));
-//	}
-
-	// @ Test
-	void testGetNextLowPrimeBigInteger() {
-		fail("Not yet implemented");
-	}
-
-	// @ Test
-	void testGetNextHighPrimeBigInteger() {
-		fail("Not yet implemented");
-	}
-
+	/**
+	 * Unit test - unused
+	 */
+	@Ignore
 	@Test
-	void testGetPrime() {
-
-		var bi101 = Optional.of(BigInteger.valueOf(101L));
-		Assertions.assertEquals(bi101, ps.getPrime(26));
+	void checkGetNextLowPrimeBigInteger()
+	{
+		fail("Not yet implemented");
 	}
 
-	// @ Test
-	void testGetPrimeRef() {
+	/**
+	 * Unit test - unused
+	 */
+	@Ignore
+	@Test
+	void testGetNextHighPrimeBigInteger()
+	{
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Unit test - get prime
+	 */
+	@Test
+	void canGetPrime()
+	{
+		final var bi101 = Optional.of(BigInteger.valueOf(101L));
+		Assertions.assertEquals(bi101, primeSrc.getPrime(26));
+	}
+
+	/**
+	 * unit test - unused
+	 */
+	@Ignore
+	@Test
+	void testGetPrimeRef()
+	{
 		fail("Not yet implemented");
 	}
 }

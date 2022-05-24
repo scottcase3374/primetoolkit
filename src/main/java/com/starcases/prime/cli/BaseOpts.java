@@ -18,21 +18,26 @@ import picocli.CommandLine.Option;
 @SuppressWarnings("PMD.AtLeastOneConstructor")
 class BaseOpts
 {
+	/**
+	 * Base info selected - picocli
+	 */
 	@Setter
 	@Option(names = {"-b", "--base"}, arity = "0..*", description = "Valid vals: ${COMPLETION-CANDIDATES}")
 	private BaseTypes[] bases;
 
+	/**
+	 * max reduce value - picocli
+	 */
 	@Getter
 	@Setter
 	@Min(2)
 	@Option(names = {"--max-reduce"}, description = "Max base value [1-max) to use for NPrime.", defaultValue="4", required = false)
 	private int maxReduce;
 
-	@Getter
-	@Setter
-	@Option(names = {"--active-base-id"}, description = "Valid vals: ${COMPLETION-CANDIDATES}", defaultValue = "DEFAULT", required = false)
-	private BaseTypes activeBaseId;
-
+	/**
+	 * Get bases to process
+	 * @return
+	 */
 	public Set<BaseTypes> getBases()
 	{
 		return Set.of(bases);

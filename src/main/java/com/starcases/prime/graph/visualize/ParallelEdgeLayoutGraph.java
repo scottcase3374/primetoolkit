@@ -8,6 +8,8 @@ import org.jgrapht.graph.DefaultEdge;
 import com.mxgraph.layout.mxParallelEdgeLayout;
 import com.mxgraph.swing.mxGraphComponent;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NonNull;
 
 /**
@@ -20,10 +22,17 @@ public class ParallelEdgeLayoutGraph extends JFrame
 {
 	private static final long serialVersionUID = 1L;
 
-	// Sonar complains about wanting jgxAdapter to be either serializable or transient
+	/**
+	 *
+	 */
+	@Getter(AccessLevel.PRIVATE)
 	@NonNull
 	private final transient JGraphXAdapter<String, DefaultEdge> jgxAdapter;
 
+	/**
+	 * Constructor for parallel edge layout of data
+	 * @param graph
+	 */
     public ParallelEdgeLayoutGraph(@NonNull final Graph<String,DefaultEdge> graph)
     {
     	super();

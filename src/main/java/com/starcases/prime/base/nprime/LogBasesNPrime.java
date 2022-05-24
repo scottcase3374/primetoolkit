@@ -17,23 +17,30 @@ import picocli.CommandLine.Command;
 @SuppressWarnings({"PMD.LawOfDemeter"})
 public class LogBasesNPrime extends AbstractLogBase
 {
+	/**
+	 * default logger
+	 */
 	private static final Logger log = Logger.getLogger(LogBasesNPrime.class.getName());
 
-	public LogBasesNPrime(@NonNull final PrimeSourceIntfc ps)
+	/**
+	 * Constructor for logging of NPrime base
+	 * @param primeSrc
+	 */
+	public LogBasesNPrime(@NonNull final PrimeSourceIntfc primeSrc)
 	{
-		super(ps);
+		super(primeSrc);
 	}
 
 	@Override
 	@Command
-	public void l()
+	public void outputLogs()
 	{
 		if (log.isLoggable(Level.INFO))
 		{
 			log.info(String.format("%nLogging NPrime%n"));
 		}
 
-		final var prIt = ps.getPrimeRefStream(5L, false).iterator();
+		final var prIt = primeSrc.getPrimeRefStream(5L, false).iterator();
 
 		prIt.forEachRemaining(pr ->
 		{
@@ -41,15 +48,15 @@ public class LogBasesNPrime extends AbstractLogBase
 			if (bmd instanceof NPrimeBaseMetadata nprimemd)
 			{
 				final var counts = nprimemd.getCountForBaseIdx();
-				final String s =
+				final String itemCountsStr =
 						counts
 						.toStringOfItemToCount();
 
 					// Handle "header" info for the current Prime - Prime value
 					// and the index of the Prime.
-					PrimeToolKit.output("%nPrime [%d] %s %n",
+					PrimeToolKit.output(BaseTypes.NPRIME, "%nPrime [%d] %s %n",
 														pr.getPrime(),
-														s
+														itemCountsStr
 														);
 			}
 			else

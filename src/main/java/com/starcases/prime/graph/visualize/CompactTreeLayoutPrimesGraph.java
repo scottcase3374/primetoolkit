@@ -6,6 +6,8 @@ import org.jgrapht.ext.JGraphXAdapter;
 import org.jgrapht.graph.DefaultEdge;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NonNull;
 
 import com.mxgraph.layout.mxCompactTreeLayout;
@@ -27,10 +29,17 @@ public class CompactTreeLayoutPrimesGraph extends JFrame
 {
 	private static final long serialVersionUID = 1L;
 
-	// Sonar complains about wanting jgxAdapter to be either serializable or transient
+	/**
+	 *
+	 */
+	@Getter(AccessLevel.PRIVATE)
 	@NonNull
-	private final transient JGraphXAdapter<PrimeRefIntfc, DefaultEdge> jgxAdapter;
+	private final JGraphXAdapter<PrimeRefIntfc, DefaultEdge> jgxAdapter;
 
+	/**
+	 * Constructor for compact tree layout of default base data
+	 * @param graph
+	 */
     public CompactTreeLayoutPrimesGraph(@NonNull final Graph<PrimeRefIntfc,DefaultEdge> graph)
     {
     	super();

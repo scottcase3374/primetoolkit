@@ -7,7 +7,10 @@ import org.jgrapht.event.GraphVertexChangeEvent;
 
 import com.starcases.prime.intfc.PrimeRefIntfc;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -25,7 +28,7 @@ import javax.swing.JScrollPane;
  * and mostly uses those to calculate information that may be of interest.
  *
  */
-@SuppressWarnings({"PMD.LongVariable", "PMD.CommentSize"})
+@SuppressWarnings({"PMD.LongVariable", "PMD.CommentSize", "PMD.AvoidDuplicateLiterals"})
 public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc, DefaultEdge>
 {
 	/**
@@ -33,10 +36,25 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * metric - Index into column/data fields
+	 */
 	private static final int PRIME_MAX_DIST_PREV_PRIME = 1;
+
+	/**
+	 * metric - index into column/data fields
+	 */
 	private static final int AVG_BASE_SIZE = 2;
+
+
+	/**
+	 * metric - index into column/data fields
+	 */
 	private static final int AVG_DIST_PREV_PRIME = 3;
 
+	/**
+	 * represent a set of column header values for various metrics
+	 */
 	@NonNull
 	private static final String [] column = {
 			"Prime / max num-bases (Default type)",
@@ -46,14 +64,39 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 			"Highest Prime base"
 	};
 
+	/**
+	 * represent a set of data valuesin a table for various metrics
+	 */
+	@Getter(AccessLevel.PRIVATE)
+	@Setter(AccessLevel.PRIVATE)
 	@NonNull
 	private String [][] data = { {"","","", "", ""}};
 
-
+	/**
+	 * metric - max distance to previous prime
+	 */
+	@Getter(AccessLevel.PRIVATE)
+	@Setter(AccessLevel.PRIVATE)
 	private PrimeRefIntfc primeMaxDistToPrev;
+
+	/**
+	 * metric - total base
+	 */
+	@Getter(AccessLevel.PRIVATE)
+	@Setter(AccessLevel.PRIVATE)
 	private BigDecimal totalBases = BigDecimal.ZERO;
+
+	/**
+	 * metric - highest prime base
+	 */
+	@Getter(AccessLevel.PRIVATE)
+	@Setter(AccessLevel.PRIVATE)
 	private PrimeRefIntfc highPrimeBase;
 
+	/**
+	 * UI element for metrics
+	 */
+	@Getter(AccessLevel.PRIVATE)
 	@NonNull
 	private final JTable table;
 
@@ -71,135 +114,102 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 		getContentPane().add(scrollPane);
 	}
 
-	protected void handlePrimeMaxBaseSize(@NonNull final GraphVertexChangeEvent<PrimeRefIntfc> e)
+	/**
+	 * Unused right now
+	 * @param event
+	 */
+	protected void handlePrimeMaxBaseSize(@NonNull final GraphVertexChangeEvent<PrimeRefIntfc> event)
 	{
-//		if (primeMaxBaseSize == null || e.getVertex().getPrimeBaseData().getBaseSize() > primeMaxBaseSize.getPrimeBaseData().getBaseSize())
-//		{
-//			primeMaxBaseSize = e.getVertex();
-//		}
-//
-//		data[0][PRIME_MAX_BASE_SIZE] =
-//				String.format("Prime [%d] / Base# [%d] ",
-//						primeMaxBaseSize.getPrime(),
-//						primeMaxBaseSize.getPrimeBaseData().getBaseSize());
+		// unused right now
 	}
 
+	/**
+	 * Calc the max distance primes in a base.
+	 * @param event
+	 */
 	@SuppressWarnings("PMD.LawOfDemeter")
-	protected void handlePrimeMaxDistToPrevPrime(@NonNull final GraphVertexChangeEvent<PrimeRefIntfc> e)
+	protected void handlePrimeMaxDistToPrevPrime(@NonNull final GraphVertexChangeEvent<PrimeRefIntfc> event)
 	{
 		if (primeMaxDistToPrev == null)
 		{
-			primeMaxDistToPrev = e.getVertex();
+			primeMaxDistToPrev = event.getVertex();
 		}
 		else
 		{
-			final var edist = e.getVertex().getDistToPrevPrime();
+			final var edist = event.getVertex().getDistToPrevPrime();
 			final var pdist = primeMaxDistToPrev.getDistToPrevPrime();
 
 			if (pdist.isEmpty() || (edist.isPresent() && edist.get().abs().compareTo(pdist.get().abs()) > 0))
 			{
-				primeMaxDistToPrev = e.getVertex();
+				primeMaxDistToPrev = event.getVertex();
 			}
 		}
 		data[0][PRIME_MAX_DIST_PREV_PRIME] = String.format("Prime [%d] / max-dist[%d]", primeMaxDistToPrev.getPrime(), primeMaxDistToPrev.getDistToPrevPrime().orElse(BigInteger.ZERO));
 	}
 
-	protected void handleAvgBaseSize(@NonNull final GraphVertexChangeEvent<PrimeRefIntfc> e)
+	/**
+	 * Calc the base number of items for a base.
+	 * @param event
+	 */
+	protected void handleAvgBaseSize(@NonNull final GraphVertexChangeEvent<PrimeRefIntfc> event)
 	{
-		//totalBases = totalBases.add(BigDecimal.valueOf(e.getVertex().getPrimeBaseData().getBaseSize()));
 		data[0][AVG_BASE_SIZE] = String.format("# primes [%d], total-bases[%d] avg-bases[%f]", primeMaxDistToPrev.getPrimeRefIdx(), totalBases.longValue(), (double)totalBases.longValue() / (primeMaxDistToPrev.getPrimeRefIdx()+1));
 	}
 
+	/**
+	 * Calc average dist from previous prime to next prime
+	 */
 	@SuppressWarnings("PMD.LawOfDemeter")
 	protected void handleAvgDistToPrev()
 	{
 		data[0][AVG_DIST_PREV_PRIME] = String.format("Total dist[%d], total-primes[%d] avg-dist[%f]", primeMaxDistToPrev.getPrime().longValue(), primeMaxDistToPrev.getPrimeRefIdx() , ((double)primeMaxDistToPrev.getPrime().longValue() / (primeMaxDistToPrev.getPrimeRefIdx()+1)));
 	}
 
-	@SuppressWarnings("PMD.LawOfDemeter")
-	protected void handleHighPrimeBase(@NonNull final GraphVertexChangeEvent<PrimeRefIntfc> e)
-	{
-		if (highPrimeBase == null || e.getVertex().getPrimeBaseData().getPrimeBases().get(0).size() > highPrimeBase.getPrimeBaseData().getPrimeBases().get(0).size())
-		{
-			highPrimeBase = e.getVertex();
-		}
-		//data[0][MAX_PRIME_BASE] = String.format("Prime[%d], Highest base[%d]", highPrimeBase.getPrime(), highPrimeBase.getPrimeBaseData().getMaxPrimeBase());
-	}
-
-	@Override
-	public void vertexAdded(@NonNull final GraphVertexChangeEvent<PrimeRefIntfc> e)
-	{
-		handlePrimeMaxBaseSize(e);
-		handlePrimeMaxDistToPrevPrime(e);
-		handleAvgBaseSize(e);
-		handleAvgDistToPrev();
-		handleHighPrimeBase(e);
-	}
-
-//	@Override
-//	public BigInteger getMaxPrimeBase()
-//	{
-//		return getMaxPrimeBase(BaseTypes.DEFAULT);
-//	}
-//
-//	@Override
-//	public BigInteger getMaxPrimeBase(@NonNull BaseTypes baseType)
-//	{
-//		return primeSrc
-//				.getPrime(primeBaseIdxs
-//						.get(baseType)
-//						.stream()
-//						.max((i1, i2) -> i1.compareTo(i2))
-//						.orElseThrow())
-//				.orElse(BigInteger.ZERO);
-//	}
-
-//
-//	@Override
-//	public BigInteger getMaxPrimeBase()
-//	{
-//		return getMaxPrimeBase(BaseTypes.DEFAULT);
-//	}
-
 	/**
-	 * Need to think about how to handle multiple sets of bases
-	 * for a single Prime.  In that
-	 * scenario, which base set should be used to determine the max Prime base.  The
-	 * current usage is just general reporting but the results should be consistent.
+	 * Find base with most items
+	 * @param event
 	 */
-//	@Override
-//	public BigInteger getMaxPrimeBase(@NonNull BaseTypes baseType)
-//	{
-//		return primeBaseIdxs
-//				.get(baseType)
-//				.stream()
-//				.map(bs -> primeSrc
-//							.getPrime(bs.nextSetBit(0))
-//							.orElseThrow())
-//				.findAny()
-//				.orElseThrow();
-//	}
+	@SuppressWarnings("PMD.LawOfDemeter")
+	protected void handleHighPrimeBase(@NonNull final GraphVertexChangeEvent<PrimeRefIntfc> event)
+	{
+		if (highPrimeBase == null || event.getVertex().getPrimeBaseData().getPrimeBases().get(0).size() > highPrimeBase.getPrimeBaseData().getPrimeBases().get(0).size())
+		{
+			highPrimeBase = event.getVertex();
+		}
+	}
+
 	@Override
-	public void edgeAdded(final GraphEdgeChangeEvent<PrimeRefIntfc, DefaultEdge> e)
+	public void vertexAdded(@NonNull final GraphVertexChangeEvent<PrimeRefIntfc> event)
+	{
+		handlePrimeMaxBaseSize(event);
+		handlePrimeMaxDistToPrevPrime(event);
+		handleAvgBaseSize(event);
+		handleAvgDistToPrev();
+		handleHighPrimeBase(event);
+	}
+
+	@Override
+	public void edgeAdded(final GraphEdgeChangeEvent<PrimeRefIntfc, DefaultEdge> event)
 	{
 		// Not handling any edge related logic right now.
 	}
 
 	@Override
-	public void vertexRemoved(final GraphVertexChangeEvent<PrimeRefIntfc> e)
+	public void vertexRemoved(final GraphVertexChangeEvent<PrimeRefIntfc> event)
 	{
 		// No removal performed
 	}
 
+	@SuppressWarnings("PMD.LawOfDemeter")
 	@Override
-	public void edgeWeightUpdated(@NonNull final GraphEdgeChangeEvent<PrimeRefIntfc, DefaultEdge> e)
+	public void edgeWeightUpdated(@NonNull final GraphEdgeChangeEvent<PrimeRefIntfc, DefaultEdge> event)
 	{
-		GraphListener.super.edgeWeightUpdated(e);
+		GraphListener.super.edgeWeightUpdated(event);
 	}
 
 
 	@Override
-	public void edgeRemoved(final GraphEdgeChangeEvent<PrimeRefIntfc, DefaultEdge> e)
+	public void edgeRemoved(final GraphEdgeChangeEvent<PrimeRefIntfc, DefaultEdge> event)
 	{
 		// No removals performed
 	}

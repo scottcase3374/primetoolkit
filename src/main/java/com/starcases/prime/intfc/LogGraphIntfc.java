@@ -6,6 +6,15 @@ package com.starcases.prime.intfc;
  */
 public interface LogGraphIntfc
 {
-	void l();
+	/**
+	 * Output log info
+	 */
+	void outputLogs();
+
+	/**
+	 * set flag to allow use of multiple CPU cores
+	 * @param preferParallel
+	 * @return
+	 */
 	LogGraphIntfc doPreferParallel(boolean preferParallel);
 }

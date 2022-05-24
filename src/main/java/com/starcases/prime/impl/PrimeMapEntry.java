@@ -12,10 +12,16 @@ import lombok.Setter;
  */
 class PrimeMapEntry
 {
+	/**
+	 * Current prime
+	 */
 	@Getter
 	@Setter
 	private BigInteger prime;
 
+	/**
+	 * related prime ref.
+	 */
 	@Getter
 	@Setter
 	private PrimeRefIntfc primeRef;

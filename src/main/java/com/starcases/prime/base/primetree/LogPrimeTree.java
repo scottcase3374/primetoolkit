@@ -6,6 +6,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import com.starcases.prime.PrimeToolKit;
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import com.starcases.prime.log.AbstractLogBase;
@@ -20,30 +21,40 @@ import lombok.NonNull;
  */
 public class LogPrimeTree extends AbstractLogBase
 {
+	/**
+	 * Default logger instance
+	 */
 	private static final Logger LOG = Logger.getLogger(LogPrimeTree.class.getName());
 
-	public LogPrimeTree(@NonNull final PrimeSourceIntfc ps)
+	/**
+	 * Primary constructor
+	 * @param primeSrc
+	 */
+	public LogPrimeTree(@NonNull final PrimeSourceIntfc primeSrc)
 	{
-		super(ps);
+		super(primeSrc);
 	}
 
+	/**
+	 * Output the informaation regarding the base.
+	 */
 	@SuppressWarnings("PMD.LawOfDemeter")
 	@Override
-	public void l()
+	public void outputLogs()
 	{
 		if (LOG.isLoggable(Level.INFO))
 		{
 			LOG.info(String.format("LogPrimeTree log()%n"));
 		}
 
-		final var sb = new StringBuilder();
+		final var outputStr = new StringBuilder();
 
 		final int [] itemIdx = {0};
 
-		ps.getPrimeRefStream(false)
+		primeSrc.getPrimeRefStream(false)
 		.<String>mapMulti((pr, consumer) ->
 							{
-								sb.append(String.format("Prime [%d] idx[%d] Tree: ", pr.getPrime(), itemIdx[0]));
+								outputStr.append(String.format("Prime [%d] idx[%d] Tree: ", pr.getPrime(), itemIdx[0]));
 
 								pr
 								.getPrimeBaseData()
@@ -51,7 +62,7 @@ public class LogPrimeTree extends AbstractLogBase
 								.iterator()
 								.forEachRemaining( primeBases ->
 
-														sb.append(
+														outputStr.append(
 															primeBases
 														 	.stream()
 														 	.map(BigInteger::toString)
@@ -59,14 +70,14 @@ public class LogPrimeTree extends AbstractLogBase
 														 	)
 
 													);
-								sb.append(String.format("%n"));
-								consumer.accept(sb.toString());
-								sb.setLength(0);
+								outputStr.append(String.format("%n"));
+								consumer.accept(outputStr.toString());
+								outputStr.setLength(0);
 								itemIdx[0]++;
 
 							}
 				)
-		.forEach(System.out::println);
+		.forEach(str -> PrimeToolKit.output(BaseTypes.PRIME_TREE, "%s", str));
 	}
 }
 

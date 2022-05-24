@@ -13,11 +13,11 @@ public class BigIntRef extends WeakReference<BigInteger>
 	/**
 	 * Constructor
 	 *
-	 * @param bi
+	 * @param bigInt
 	 * @param refQ
 	 */
-	public BigIntRef(final BigInteger bi, final ReferenceQueue<BigInteger> refQ)
+	public BigIntRef(final BigInteger bigInt, final ReferenceQueue<BigInteger> refQ)
 	{
-		super(bi, refQ);
+		super(bigInt, refQ);
 	}
 }

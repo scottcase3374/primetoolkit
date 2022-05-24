@@ -22,6 +22,7 @@ import lombok.Setter;
 * the sum of some subset of previous primes.
 *
 **/
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class PrimeRef implements PrimeRefIntfc
 {
 	/**
@@ -29,10 +30,13 @@ public class PrimeRef implements PrimeRefIntfc
 	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Access lookup for prime/primeRefs
+	 */
 	@NonNull
-	private static transient PrimeSourceIntfc primeSrc;
+	private static PrimeSourceIntfc primeSrc;
 
-	/*
+	/**
 	 *  Index for this instance of a Prime.
 	 *  index to bitsets or collections for this val
 	 */
@@ -40,6 +44,10 @@ public class PrimeRef implements PrimeRefIntfc
 	@Getter
 	public long primeIdx;
 
+	/**
+	 * Base data
+	 */
+	@Getter
 	private PrimeBaseIntfc primeBaseData;
 
 	/**
@@ -59,7 +67,7 @@ public class PrimeRef implements PrimeRefIntfc
 	 * @param primeBases
 	 * @return
 	 */
-	@SuppressWarnings({"PMD.LawOfDemeter"})
+	@SuppressWarnings("PMD.LawOfDemeter")
 	public PrimeRef init(
 			@NonNull final Supplier<PrimeBaseIntfc> primeBaseSupplier,
 			@NonNull final List<Set<BigInteger>> primeBases)
@@ -69,6 +77,12 @@ public class PrimeRef implements PrimeRefIntfc
 		return this;
 	}
 
+	/**
+	 * Assign the prime source reference for performing
+	 * prime/primeref lookups.
+	 *
+	 * @param primeSrcIntfc
+	 */
 	public static void setPrimeSource(@NonNull final PrimeSourceIntfc primeSrcIntfc)
 	{
 		primeSrc = primeSrcIntfc;
@@ -111,18 +125,12 @@ public class PrimeRef implements PrimeRefIntfc
 		return primeSrc.getPrimeRef(primeIdx -1);
 	}
 
-	@SuppressWarnings({"PMD.LawOfDemeter"})
+	@SuppressWarnings("PMD.LawOfDemeter")
 	@Override
 	public BigInteger getPrime()
 	{
 		return primeSrc.getPrime(primeIdx)
 				.orElseThrow();
-	}
-
-	@Override
-	public PrimeBaseIntfc getPrimeBaseData()
-	{
-		return this.primeBaseData;
 	}
 
 	@Override
@@ -137,7 +145,7 @@ public class PrimeRef implements PrimeRefIntfc
 	 *
 	 * empty optional if next Prime is unknown/not calculated
 	 */
-	@SuppressWarnings({"PMD.LawOfDemeter"})
+	@SuppressWarnings("PMD.LawOfDemeter")
 	@Override
 	public Optional<BigInteger> getDistToNextPrime()
 	{
@@ -150,7 +158,7 @@ public class PrimeRef implements PrimeRefIntfc
 	 *
 	 * empty optional if prev Prime is unknown/doesn't exist
 	 */
-	@SuppressWarnings({"PMD.LawOfDemeter"})
+	@SuppressWarnings("PMD.LawOfDemeter")
 	@Override
 	public Optional<BigInteger> getDistToPrevPrime()
 	{

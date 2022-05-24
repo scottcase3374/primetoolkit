@@ -12,6 +12,9 @@ import picocli.CommandLine.Option;
 @SuppressWarnings("PMD.AtLeastOneConstructor")
 class GraphOpts
 {
+	/**
+	 * Graph type to generate - picocli
+	 */
 	@Getter
 	@Setter
 	@Option(names = {"-g", "--graph"}, arity="0..1", description = "Valid vals: ${COMPLETION-CANDIDATES}" )

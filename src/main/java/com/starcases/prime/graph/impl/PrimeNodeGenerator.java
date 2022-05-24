@@ -8,7 +8,10 @@ import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 
 import java.math.BigInteger;
 import java.util.NoSuchElementException;
@@ -29,36 +32,67 @@ import java.util.NoSuchElementException;
  *
  *
  */
-@SuppressWarnings({"PMD.CommentSize"})
+@SuppressWarnings({"PMD.CommentSize", "PMD.AvoidDuplicateLiterals"})
 public class PrimeNodeGenerator
 {
+	/**
+	 * roughly equivalent to index of prime
+	 */
+	@Getter(AccessLevel.PROTECTED)
+	@Setter(AccessLevel.PROTECTED)
 	protected int level;
 
+	/**
+	 * Ref to prime info
+	 */
+	@Getter(AccessLevel.PROTECTED)
+	@Setter(AccessLevel.PROTECTED)
 	protected PrimeRefIntfc primeRef;
 
+	/**
+	 * Lookup prime/prime refs
+	 */
 	@NonNull
-	protected final PrimeSourceIntfc ps;
+	@Getter(AccessLevel.PROTECTED)
+	protected final PrimeSourceIntfc primeSrc;
 
+	/**
+	 * maintain graph structure
+	 */
 	@NonNull
+	@Getter(AccessLevel.PROTECTED)
 	protected final Graph<PrimeRefIntfc, DefaultEdge> graph;
 
+	/**
+	 * Base used
+	 */
 	@NonNull
+	@Getter(AccessLevel.PROTECTED)
 	protected final BaseTypes baseType;
 
-	public PrimeNodeGenerator(@NonNull final  PrimeSourceIntfc ps, final Graph<PrimeRefIntfc, DefaultEdge> graph, @NonNull final BaseTypes baseType)
+	/**
+	 * constructor for the node generator
+	 * @param primeSrc
+	 * @param graph
+	 * @param baseType
+	 */
+	public PrimeNodeGenerator(@NonNull final  PrimeSourceIntfc primeSrc, final Graph<PrimeRefIntfc, DefaultEdge> graph, @NonNull final BaseTypes baseType)
 	{
-		this.ps = ps;
+		this.primeSrc = primeSrc;
 		this.graph = graph;
 		this.baseType = baseType;
 	}
 
+	/**
+	 * Begin producing nodes
+	 */
 	@SuppressWarnings("PMD.LawOfDemeter")
 	public void begin()
 	{
 		// bootstrap
 		for (level = 0; level < 2; level++)
 		{
-			ps.getPrimeRef(level).ifPresent(
+			primeSrc.getPrimeRef(level).ifPresent(
 					targetNode ->
 									{
 										graph.addVertex(targetNode);
@@ -68,12 +102,16 @@ public class PrimeNodeGenerator
 		}
 	}
 
+	/**
+	 * Continue producing events/nodes after initial bootstrap
+	 * @return
+	 */
 	@SuppressWarnings("PMD.LawOfDemeter")
 	public boolean nextEvents()
 	{
 		try
 		{
-			primeRef = ps.getPrimeRef(level).orElseThrow();
+			primeRef = primeSrc.getPrimeRef(level).orElseThrow();
 			addNodeRawBase();
 			return true;
 		}
@@ -103,14 +141,23 @@ public class PrimeNodeGenerator
 		level++;
 	}
 
+	/**
+	 * Add new vertex for prime/ref
+	 * @param primeRef
+	 */
 	protected void addVertext(final PrimeRefIntfc primeRef)
 	{
 		graph.addVertex(primeRef);
 	}
 
+	/**
+	 * Add edge for prime/pref sourced from specified base
+	 * @param base
+	 * @param primeRef
+	 */
 	@SuppressWarnings("PMD.LawOfDemeter")
 	protected void addBaseEdge(final BigInteger base, final PrimeRefIntfc primeRef)
 	{
-		ps.getPrimeRef(base).ifPresent( p -> graph.addEdge(p , primeRef));
+		primeSrc.getPrimeRef(base).ifPresent( p -> graph.addEdge(p , primeRef));
 	}
 }

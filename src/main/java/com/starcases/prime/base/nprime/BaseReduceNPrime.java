@@ -12,7 +12,6 @@ import javax.validation.constraints.Min;
 
 import org.eclipse.collections.api.bag.sorted.MutableSortedBag;
 import org.eclipse.collections.api.list.MutableList;
-import org.eclipse.collections.api.set.MutableSet;
 import org.eclipse.collections.impl.bag.sorted.mutable.TreeBag;
 import org.eclipse.collections.impl.collector.Collectors2;
 
@@ -21,7 +20,10 @@ import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 
 /**
  * Given a Prime and a maximum number of primes; reduce default bases to multiples
@@ -46,20 +48,27 @@ import lombok.NonNull;
 @SuppressWarnings({"PMD.CommentSize", "PMD.LawOfDemeter"})
 public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 {
+	/**
+	 * default logger
+	 */
 	private static final Logger LOG = Logger.getLogger(BaseReduceNPrime.class.getName());
 
+	/**
+	 * Reduce all values greater than maxReduce - track multiples
+	 */
+	@Getter(AccessLevel.PUBLIC)
+	@Setter(AccessLevel.PUBLIC)
 	@Min(2)
 	@Max(3)
 	private BigInteger maxReduce;
 
-	public BaseReduceNPrime(@NonNull final PrimeSourceIntfc ps)
+	/**
+	 * constructor for Base NPrime construction
+	 * @param primeSrc
+	 */
+	public BaseReduceNPrime(@NonNull final PrimeSourceIntfc primeSrc)
 	{
-		super(ps);
-	}
-
-	public void setMaxReduce(@Min(2) @Max(3) final int maxReduce)
-	{
-		this.maxReduce = BigInteger.valueOf(maxReduce);
+		super(primeSrc);
 	}
 
 	/**

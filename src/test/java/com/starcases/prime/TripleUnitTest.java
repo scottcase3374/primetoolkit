@@ -9,16 +9,30 @@ import com.starcases.prime.impl.PrimeRef;
 import com.starcases.prime.intfc.FactoryIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 
+/**
+ * Testing triple bases
+ */
+@SuppressWarnings("PMD.AtLeastOneConstructor")
 @ExtendWith(MockitoExtension.class)
 class TripleUnitTest
 {
+	/**
+	 * Prime source for lookup of prime/primerefs
+	 */
+	@Getter
+	@Setter
 	@NonNull
-	private PrimeSourceIntfc ps;
+	private PrimeSourceIntfc primeSrc;
 
+	/**
+	 * pre-Initialize test
+	 */
 	@BeforeEach
-	void init()
+	public void init()
 	{
 		PTKFactory.setMaxCount(100);
 		PTKFactory.setConfidenceLevel(100);
@@ -29,18 +43,9 @@ class TripleUnitTest
 		PTKFactory.setPrimeBaseCtor(PrimeBaseContainer::new);
 		PTKFactory.setPrimeRefRawCtor( (i, base) -> (new PrimeRef(i)).init(PTKFactory.getPrimeBaseCtor(), base) );
 
-		FactoryIntfc factory = PTKFactory.getFactory();
-		ps = factory.getPrimeSource();
-		ps.init();
+		final FactoryIntfc factory = PTKFactory.getFactory();
+		primeSrc = factory.getPrimeSource();
+		primeSrc.init();
 
 	}
-
-//	@Test
-//	void testFindMatchOffset() {
-//		Assertions.assertEquals(1, primeSrc.getPrimeIdx(BigInteger.TWO));
-//
-//		var bi37 = BigInteger.valueOf(37L);
-//		var bi41 = BigInteger.valueOf(41L);
-//		Assertions.assertEquals(1, primeSrc.getPrimeRef(bi41).get().getPrimeRefIdx()-primeSrc.getPrimeRef(bi37).get().getPrimeRefIdx());
-//	}
 }

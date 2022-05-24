@@ -31,12 +31,35 @@ import lombok.NonNull;
 @SuppressWarnings("PMD.CommentSize")
 public interface PrimeBaseIntfc extends Serializable
 {
+	/**
+	 * Add Sets of primes (big integers) and a base metadata container to the specified base.
+	 * FIXME distinguish between this and the other similar methods.
+	 * @param baseType
+	 * @param primeBase
+	 * @param metadata
+	 */
 	void addPrimeBases(@NonNull BaseTypes baseType, @NonNull List<Set<BigInteger>> primeBase, @NonNull BaseMetadataIntfc metadata);
 
+	/**
+	 * Add sets of primes to current base
+	 * FIXME distinguish between this and the other similar methods.
+	 * @param primeBase
+	 */
 	void addPrimeBases(@NonNull List<Set<BigInteger>> primeBase);
 
+	/**
+	 * Add sets of primes for specified base.
+	 * FIXME distinguish between this and the other similar methods.
+	 * @param primeBase
+	 * @param baseType
+	 */
 	void addPrimeBases(@NonNull List<Set<BigInteger>> primeBase, @NonNull BaseTypes baseType);
 
+	/**
+	 * Get the base meta data container for the specified base type.
+	 * @param baseType
+	 * @return
+	 */
 	BaseMetadataIntfc getBaseMetadata(@NonNull BaseTypes baseType);
 
 	/**

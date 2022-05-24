@@ -15,7 +15,10 @@ import com.starcases.prime.intfc.BaseMetadataIntfc;
 import com.starcases.prime.intfc.PrimeBaseIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 
 /**
  *  Default 'container' for base information.
@@ -35,15 +38,29 @@ public class PrimeBaseContainer implements PrimeBaseIntfc
 	@NonNull
 	private final Map<BaseTypes, List<Set<BigInteger>>> primeBases = new ConcurrentHashMap<>();
 
+	/**
+	 * Optional Metadata regarding base types of interest
+	 */
+	@Getter(AccessLevel.PRIVATE)
+	@Setter(AccessLevel.PRIVATE)
 	private Map<BaseTypes, BaseMetadataIntfc> baseMetadata = new ConcurrentHashMap<>();
 
+	/**
+	 * Get optional meta data regarding a base.
+	 */
+	@Override
 	public BaseMetadataIntfc getBaseMetadata(final BaseTypes baseType)
 	{
 		return baseMetadata.getOrDefault(baseType, null);
 	}
 
+	/**
+	 * Assign prime source ref for prime/primeref lookups.
+	 * @param primeSrcIntfc
+	 */
 	public static void setPrimeSource(@NonNull final PrimeSourceIntfc primeSrcIntfc)
 	{
+		// unused right now
 	}
 
 	/**

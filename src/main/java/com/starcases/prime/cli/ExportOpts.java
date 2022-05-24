@@ -12,13 +12,11 @@ import picocli.CommandLine.Option;
 @SuppressWarnings("PMD.AtLeastOneConstructor")
 class ExportOpts
 {
+	/**
+	 * export type to generate - picocli
+	 */
 	@Getter
 	@Setter
 	@Option(names = {"-e", "--export"},arity="0..1", description = "Valid vals: ${COMPLETION-CANDIDATES}")
 	private Export exportType;
-
-	@Getter
-	@Setter
-	@Option(names = { "--export-file"}, description = "Path/file to export file.", required = false)
-	private String exportFile;
 }

@@ -13,24 +13,58 @@ import com.starcases.prime.intfc.CollectionTrackerIntfc;
 
 import org.eclipse.collections.impl.set.sorted.mutable.TreeSortedSet;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Instances are intended for use in a single thread and NOT
  * shared across threads.
  */
 public class PrimeTreeIterator implements PrimeTreeIteratorIntfc
 {
-	final List<PrimeTreeNode> sourceTreeNodes =  FastList.newList();
-	final PrimeTree tree;
-	final CollectionTrackerIntfc collTrack;
+	/**
+	 * Source nodes tracked
+	 */
+	@Getter(AccessLevel.PRIVATE)
+	private final List<PrimeTreeNode> sourceTreeNodes =  FastList.newList();
 
+	/**
+	 * Ref to the a tree iterating over
+	 */
+	@Getter(AccessLevel.PRIVATE)
+	private final PrimeTree tree;
+
+	/**
+	 * container to track unique instances of the unique prefix/tree info
+	 */
+	@Getter(AccessLevel.PRIVATE)
+	private final CollectionTrackerIntfc collTrack;
+
+	/**
+	 * Ref to next tree node map
+	 */
+	@Getter(AccessLevel.PRIVATE)
+	@Setter(AccessLevel.PRIVATE)
 	private Map<BigInteger, PrimeTreeNode> treeNodeMap;
+
+	/**
+	 * Current sum of nodes in iterated path
+	 */
+	@Getter(AccessLevel.PRIVATE)
+	@Setter(AccessLevel.PRIVATE)
 	private BigInteger curSum = BigInteger.ZERO;
 
 
+	/**
+	 * constructor for the iterator
+	 * @param bpt
+	 * @param collTrack
+	 */
 	PrimeTreeIterator(final PrimeTree bpt, final CollectionTrackerIntfc collTrack)
 	{
 		tree = bpt;
-		treeNodeMap = tree.prefixMap;
+		treeNodeMap = tree.getPrefixMap();
 		this.collTrack = collTrack;
 	}
 
@@ -51,7 +85,7 @@ public class PrimeTreeIterator implements PrimeTreeIteratorIntfc
 									.map(PrimeTreeNode::getPrefixPrime)
 									.collect(Collectors.toCollection(TreeSortedSet::newSet));
 
-							ptn.setSourcePrimes(sp1);
+							ptn.assignSourcePrimes(sp1);
 							return sp1;
 				 		});
 	}
@@ -61,12 +95,12 @@ public class PrimeTreeIterator implements PrimeTreeIteratorIntfc
 	 */
 	@SuppressWarnings("PMD.LawOfDemeter")
 	@Override
-	public PrimeTreeNode next(final BigInteger i)
+	public PrimeTreeNode next(final BigInteger prime)
 	{
-		final var tn = treeNodeMap.get(i);
-		sourceTreeNodes.add(tn);
-		treeNodeMap = tn.getNext();
-		return tn;
+		final var treeNode = treeNodeMap.get(prime);
+		sourceTreeNodes.add(treeNode);
+		treeNodeMap = treeNode.getNext();
+		return treeNode;
 	}
 
 	/**
@@ -76,25 +110,25 @@ public class PrimeTreeIterator implements PrimeTreeIteratorIntfc
 	 */
 	@SuppressWarnings("PMD.LawOfDemeter")
 	@Override
-	public PrimeTreeNode add(final BigInteger i)
+	public PrimeTreeNode add(final BigInteger prime)
 	{
-		final var tn = treeNodeMap.computeIfAbsent(i, f ->
+		final var treeNode = treeNodeMap.computeIfAbsent(prime, f ->
 												{
 													final var nextMap = new ConcurrentHashMap<BigInteger,PrimeTreeNode>();
 
-													return  new PrimeTreeNode(i, nextMap, collTrack);
+													return  new PrimeTreeNode(prime, nextMap, collTrack);
 												}
 											);
 
-		curSum = curSum.add(i);
-		sourceTreeNodes.add(tn);
-		treeNodeMap = tn.getNext();
-		return tn;
+		curSum = curSum.add(prime);
+		sourceTreeNodes.add(treeNode);
+		treeNodeMap = treeNode.getNext();
+		return treeNode;
 	}
 
 	@Override
-	public boolean hasNext(final BigInteger i)
+	public boolean hasNext(final BigInteger prime)
 	{
-		return treeNodeMap.containsKey(i);
+		return treeNodeMap.containsKey(prime);
 	}
 }

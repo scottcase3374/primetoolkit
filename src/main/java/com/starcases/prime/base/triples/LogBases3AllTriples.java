@@ -23,17 +23,27 @@ import picocli.CommandLine.Command;
  */
 public class LogBases3AllTriples  extends AbstractLogBase
 {
+	/**
+	 * default logger
+	 */
 	private static final Logger LOG = Logger.getLogger(LogBases3AllTriples.class.getName());
 
-	public LogBases3AllTriples(@NonNull final PrimeSourceIntfc ps)
+	/**
+	 * constructor for logging base 3 triples
+	 * @param primeSrc
+	 */
+	public LogBases3AllTriples(@NonNull final PrimeSourceIntfc primeSrc)
 	{
-		super(ps);
+		super(primeSrc);
 	}
 
+	/**
+	 * output log info
+	 */
 	@SuppressWarnings({"PMD.AvoidFinalLocalVariable", "PMD.LawOfDemeter"})
 	@Override
 	@Command
-	public void l()
+	public void outputLogs()
 	{
 		if (LOG.isLoggable(Level.INFO))
 		{
@@ -42,28 +52,28 @@ public class LogBases3AllTriples  extends AbstractLogBase
 
 		final var maxBasesInRow = 5;
 		int [] idx = {5};
-		ps
+		primeSrc
 			.getPrimeRefStream(5L, false)
 			.forEach( pr ->
 						{
 							try
 							{
 								final var size = pr.getPrimeBaseData().getPrimeBases(BaseTypes.THREETRIPLE).size();
-								PrimeToolKit.output(String.format("%nPrime [%d] idx[%d] #-bases[%d]%n",
+								PrimeToolKit.output(BaseTypes.THREETRIPLE, String.format("%nPrime [%d] idx[%d] #-bases[%d]%n",
 										pr.getPrime(),
 										idx[0]++,
 										size
 										));
 
 									final long [] cnt = {0};
-									final StringBuilder sb = new StringBuilder(150);
-									sb.append('\t');
+									final StringBuilder outputStr = new StringBuilder(150);
+									outputStr.append('\t');
 									pr.getPrimeBaseData().getPrimeBases(BaseTypes.THREETRIPLE)
 											.stream()
 											.<String>mapMulti((bs, consumer) ->
 																{
 																	cnt[0]++;
-																	sb.append(
+																	outputStr.append(
 																	 	bs
 																	 	.stream()
 																	 	.map(BigInteger::toString)
@@ -72,18 +82,18 @@ public class LogBases3AllTriples  extends AbstractLogBase
 
 																	if (cnt[0] < size)
 																	{
-																		sb.append(", ");
+																		outputStr.append(", ");
 																	}
 
 																	if (cnt[0] % maxBasesInRow == 0 || cnt[0] >= size)
 																	{
-																		consumer.accept(sb.toString());
-																		sb.setLength(0);
-																		sb.append('\t');
+																		consumer.accept(outputStr.toString());
+																		outputStr.setLength(0);
+																		outputStr.append('\t');
 																	}
 																}
 													)
-											.forEach(t -> PrimeToolKit.output("%s\n", t));
+											.forEach(str -> PrimeToolKit.output(BaseTypes.THREETRIPLE, "%s", str));
 							}
 							catch(final Exception e)
 							{

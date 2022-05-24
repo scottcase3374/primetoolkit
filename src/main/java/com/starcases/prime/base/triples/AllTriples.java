@@ -13,6 +13,8 @@ import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NonNull;
 
 /**
@@ -20,6 +22,7 @@ import lombok.NonNull;
  * Indicator to relationship between current sum of triple values vs the target Prime.
  *
  */
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 enum SumConstraintState
 {
 	/**
@@ -68,7 +71,14 @@ enum SumConstraintState
 				.orElse(NONMATCH);
 	}
 
-	@SuppressWarnings({"PMD.LawOfDemeter"})
+	/**
+	 * Determine the state of the sum-constraints
+	 *
+	 * @param primeRefs
+	 * @param targetPrime
+	 * @return
+	 */
+	@SuppressWarnings("PMD.LawOfDemeter")
 	public static SumConstraintState checkSumConstraints(
 			@NonNull final PrimeRefIntfc [] primeRefs,
 			@NonNull final PrimeRefIntfc targetPrime)
@@ -127,7 +137,7 @@ enum ConditionConstraintState
 			@NonNull final PrimeRefIntfc ... primeRefs)
 	{
 		// TripleIdx - BOT,MID,TOP
-		var cs = ConditionConstraintState.OK;
+		var constraintState = ConditionConstraintState.OK;
 		var baseCount = 0;
 		long [] bases = { -1, -1, -1 }; // dummy values
 
@@ -136,26 +146,26 @@ enum ConditionConstraintState
 			bases[baseCount] = pr.getPrimeRefIdx();
 			if (bases[baseCount++] > pr.getPrimeRefIdx())
 			{
-				cs = ConditionConstraintState.RANGE_ERROR;
+				constraintState = ConditionConstraintState.RANGE_ERROR;
 				break;
 			}
 		}
 
-		if (ConditionConstraintState.OK.equals(cs))
+		if (ConditionConstraintState.OK.equals(constraintState))
 		{
 			if (baseCount != bases.length)
 			{
-				cs = ConditionConstraintState.MISSING_BASE;
+				constraintState = ConditionConstraintState.MISSING_BASE;
 			}
 			else
 			{
 				if (Arrays.stream(bases).distinct().count() != bases.length)
 				{
-					cs = ConditionConstraintState.DUPE;
+					constraintState = ConditionConstraintState.DUPE;
 				}
 			}
 		}
-		return cs;
+		return constraintState;
 	}
 }
 
@@ -170,7 +180,7 @@ public class AllTriples
 	/**
 	 * unchanging set of constants.
 	 */
-	static final EnumSet<ConditionConstraintState> BAD_CONDITION_STATE =
+	private static final EnumSet<ConditionConstraintState> BAD_CONDITION_STATE =
 			EnumSet.of(ConditionConstraintState.DUPE,
 					ConditionConstraintState.RANGE_ERROR,
 					ConditionConstraintState.MISSING_BASE);
@@ -178,24 +188,48 @@ public class AllTriples
 	/**
 	 * unchanging set of constants.
 	 */
-	static private final EnumSet<SumConstraintState> GOOD_SUM_STATE =
+	private static  final EnumSet<SumConstraintState> GOOD_SUM_STATE =
 			EnumSet.of(SumConstraintState.MATCH,
 					SumConstraintState.INCREMENT_SUM);
 
+	/**
+	 * Index for bottom item
+	 */
 	private static final  int BOT = 0;
+
+	/**
+	 * index for middle item
+	 */
     private static final  int MID = 1;
+
+    /**
+     * index for top item
+     */
 	private static final  int TOP = 2;
 
+	/**
+	 * Target prime to equal
+	 */
+	@Getter(AccessLevel.PRIVATE)
 	@NonNull
 	private  final PrimeRefIntfc targetPrime;
 
+	/**
+	 * prime source ref for lookup of prime/prime refs.
+	 */
 	@NonNull
-	private final PrimeSourceIntfc ps;
+	@Getter(AccessLevel.PRIVATE)
+	private final PrimeSourceIntfc primeSrc;
 
-	public AllTriples(@NonNull final PrimeSourceIntfc ps, @NonNull final PrimeRefIntfc targetPrime)
+	/**
+	 * constructor for creating base type of "triples".
+	 * @param primeSrc
+	 * @param targetPrime
+	 */
+	public AllTriples(@NonNull final PrimeSourceIntfc primeSrc, @NonNull final PrimeRefIntfc targetPrime)
 	{
 		this.targetPrime = targetPrime;
-		this.ps = ps;
+		this.primeSrc = primeSrc;
 	}
 
 	/**
@@ -207,7 +241,7 @@ public class AllTriples
 	 * @param conditionConstraint
 	 */
 	@SuppressWarnings("PMD.LawOfDemeter")
-	void nextPrimeRef(
+	private void nextPrimeRef(
 						final int idx,
 						@NonNull final PrimeRefIntfc [] triple,
 						@NonNull final SumConstraintState [] sumConstraint,
@@ -232,13 +266,13 @@ public class AllTriples
 	 * generating all combinations of valid sums, it is slow for more than small sets of primes.
 	 */
 	@SuppressWarnings("PMD.LawOfDemeter")
-	void process()
+	public void process()
 	{
 		final PrimeRefIntfc [] triple =
 			{
-				ps.getPrimeRef(0).orElse(null),  // Prime 1
-				ps.getPrimeRef(2).orElse(null), // Prime 3
-				ps.getPrimeRef(4).orElse(null) // Prime 7
+				primeSrc.getPrimeRef(0).orElse(null),  // Prime 1
+				primeSrc.getPrimeRef(2).orElse(null), // Prime 3
+				primeSrc.getPrimeRef(4).orElse(null) // Prime 7
 			};
 
 		final SumConstraintState [] sumConstraint = {SumConstraintState.checkSumConstraints(triple, targetPrime)};
@@ -260,15 +294,15 @@ public class AllTriples
 				while(GOOD_SUM_STATE.contains(sumConstraint[0]) && !BAD_CONDITION_STATE.contains(conditionConstraint[0]));
 
 				// reset inner loop
-				triple[BOT] =  ps.getPrimeRef(0).orElse(null);
+				triple[BOT] =  primeSrc.getPrimeRef(0).orElse(null);
 
 				this.nextPrimeRef(MID, triple, sumConstraint, conditionConstraint);
 			}
 			while(GOOD_SUM_STATE.contains(sumConstraint[0]) && !BAD_CONDITION_STATE.contains(conditionConstraint[0]));
 
 			// reset inner loops
-			triple[MID] = ps.getPrimeRef(1).orElse(null);
-			triple[BOT] = ps.getPrimeRef(0).orElse(null);
+			triple[MID] = primeSrc.getPrimeRef(1).orElse(null);
+			triple[BOT] = primeSrc.getPrimeRef(0).orElse(null);
 
 			this.nextPrimeRef(TOP, triple, sumConstraint, conditionConstraint);
 		}
@@ -278,11 +312,11 @@ public class AllTriples
 	@SuppressWarnings("PMD.LawOfDemeter")
 	private void addPrimeBases(final @NonNull PrimeRefIntfc prime, final @NonNull PrimeRefIntfc [] vals)
 	{
-		final var bs = Arrays.stream(vals)
+		final var basePrimeColl = Arrays.stream(vals)
 			.filter(Objects::nonNull)
 			.map(PrimeRefIntfc::getPrime)
 			.collect(Collectors.toCollection(TreeSortedSet::newSet));
 
-		prime.getPrimeBaseData().addPrimeBases(List.of(bs), BaseTypes.THREETRIPLE);
+		prime.getPrimeBaseData().addPrimeBases(List.of(basePrimeColl), BaseTypes.THREETRIPLE);
 	}
 }

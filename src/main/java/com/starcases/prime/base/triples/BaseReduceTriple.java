@@ -65,8 +65,14 @@ import lombok.NonNull;
 @SuppressWarnings("PMD.CommentSize")
 public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 {
+	/**
+	 * default logger
+	 */
 	private static final Logger LOG = Logger.getLogger(BaseReduceTriple.class.getName());
 
+	/**
+	 * Track items in numerical order by incrementing this in an atomic fashion.
+	 */
 	@Min(0)
 	private static final AtomicInteger good = new AtomicInteger(0);
 
@@ -75,9 +81,9 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 	 *
 	 * @param primeSrc
 	 */
-	public BaseReduceTriple(@NonNull final PrimeSourceIntfc ps)
+	public BaseReduceTriple(@NonNull final PrimeSourceIntfc primeSrc)
 	{
-		super(ps);
+		super(primeSrc);
 	}
 
 	/**

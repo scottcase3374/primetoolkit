@@ -12,35 +12,97 @@ import java.util.Set;
  */
 public interface PrimeTreeIteratorIntfc extends ListIterator<PrimeTreeNode>
 {
+	/**
+	 * Override Remove item.
+	 * NO-OP
+	 */
 	@Override
-	default void remove() {}
+	default void remove()
+	{
+		// NO-OP
+	}
+
+	/**
+	 * override nextIndex
+	 * NO-OP
+	 */
 	@Override
 	default int nextIndex() {return -1;}
 
+	/**
+	 * override previousIndex
+	 * NO-OP
+	 */
 	@Override
 	default int previousIndex() {return -1;}
 
 	@Override
+	/**
+	 * NO-OP
+	 */
 	default PrimeTreeNode next() { return null; }
 
+	/**
+	 * Override previous.
+	 * NO-OP
+	 */
 	@Override
 	default PrimeTreeNode previous() { return null; }
 
+	/**
+	 * override hasNext
+	 * NO-OP
+	 */
 	@Override
 	default boolean hasNext() { return false; }
 
 	@Override
 	default boolean hasPrevious() { return false; }
 
+	/**
+	 * override set
+	 * NO-OP
+	 */
 	@Override
-	default void set(final PrimeTreeNode tn) {}
+	default void set(final PrimeTreeNode treeNode)
+	{
+		// NO-OP
+	}
 
+	/**
+	 * Overrdie add
+	 * NO-OP
+	 */
 	@Override
-	default void add(final PrimeTreeNode tn) {}
+	default void add(final PrimeTreeNode treeNode)
+	{
+		// NO-OP
+	}
 
-	boolean hasNext(BigInteger i);
-	PrimeTreeNode next(BigInteger i);
-	PrimeTreeNode add(BigInteger i);
+	/**
+	 * Determine if next item is specified prime.
+	 * @param prime
+	 * @return
+	 */
+	boolean hasNext(BigInteger prime);
 
+	/**
+	 * Get next tree node for specified prime
+	 * @param prime
+	 * @return
+	 */
+	PrimeTreeNode next(BigInteger prime);
+
+	/**
+	 * Add next prime as next tree node.
+	 * @param prime
+	 * @return
+	 */
+	PrimeTreeNode add(BigInteger prime);
+
+	/**
+	 * Get a set representation
+	 * @return
+	 */
 	Set<BigInteger> toSet();
 }

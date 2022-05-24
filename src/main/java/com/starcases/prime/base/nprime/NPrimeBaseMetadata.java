@@ -16,13 +16,20 @@ import lombok.NonNull;
 public class NPrimeBaseMetadata implements BaseMetadataIntfc
 {
 	/**
-	 *
+	 * serial version id
 	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Track count for subset of bases
+	 */
 	@Getter
 	private final MutableSortedBag<BigInteger> countForBaseIdx;
 
+	/**
+	 * Create the count metadata
+	 * @param countForBaseIdx
+	 */
 	public NPrimeBaseMetadata(@NonNull final MutableSortedBag<BigInteger> countForBaseIdx)
 	{
 		this.countForBaseIdx = countForBaseIdx;

@@ -13,6 +13,9 @@ import com.starcases.prime.intfc.CollectionTrackerIntfc;
 
 import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+
 /**
  * manage handing out consistent references to the same copy of lists when given
  * the same members to prevent multiple copies of large collections.
@@ -20,9 +23,21 @@ import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 @SuppressWarnings("PMD.AtLeastOneConstructor")
 public class CollectionTrackerImpl implements CollectionTrackerIntfc
 {
+	/**
+	 * Track source primes (tree/prefix)
+	 */
+	@Getter(AccessLevel.PRIVATE)
 	private final ConcurrentHashMap<Long, PData> sourcePrimes = new ConcurrentHashMap<>(500);
+
+	/**
+	 * Track counts of each source prime entry
+	 */
+	@Getter(AccessLevel.PRIVATE)
 	private final ConcurrentHashMap<Long, Long> useCounts = new ConcurrentHashMap<>(500);
 
+	/**
+	 * Track the specified collection
+	 */
 	@SuppressWarnings({"PMD.LawOfDemeter"})
 	@Override
 	public PData track(final Set<BigInteger> collection)
@@ -32,12 +47,16 @@ public class CollectionTrackerImpl implements CollectionTrackerIntfc
 		return sourcePrimes.computeIfAbsent(sum, k -> new PData(collection, sum));
 	}
 
+	/**
+	 * Select an existing collection based upon the provided
+	 * predicate
+	 */
 	@SuppressWarnings({"PMD.LawOfDemeter"})
 	@Override
 	public Optional<PData> select(final LongPredicate pred)
 	{
 		final Predicate<Entry<Long,PData>> pred1 = p -> pred.test(p.getKey());
-		var ret = sourcePrimes.entrySet()
+		final var ret = sourcePrimes.entrySet()
 				.stream()
 				.filter(pred1)
 				.findAny()
@@ -46,12 +65,19 @@ public class CollectionTrackerImpl implements CollectionTrackerIntfc
 		return ret;
 	}
 
+	/**
+	 * get the tracked data for the specified key.
+	 */
 	@Override
 	public Optional<PData> get(final long key)
 	{
 		return Optional.ofNullable(sourcePrimes.get(key));
 	}
 
+	/**
+	 * output logging for collection tracking.
+	 */
+	@Override
 	public void log()
 	{
 		PrimeToolKit.output("%nCollection tracking:%n", "");

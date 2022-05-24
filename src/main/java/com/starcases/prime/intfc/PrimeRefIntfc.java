@@ -22,16 +22,45 @@ import java.util.Optional;
 @SuppressWarnings("PMD.CommentSize")
 public interface PrimeRefIntfc extends Serializable
 {
+	/**
+	 * Prime ref compatator
+	 */
 	Comparator<PrimeRefIntfc> PREF_COMPARATOR = (PrimeRefIntfc o1, PrimeRefIntfc o2) -> o1.getPrime().compareTo(o2.getPrime());
 
+	/**
+	 * Get distance to next prime from current prime.
+	 * @return
+	 */
 	Optional<BigInteger> getDistToNextPrime();
+
+	/**
+	 * Get distance to previous prime from current prime.
+	 * @return
+	 */
 	Optional<BigInteger> getDistToPrevPrime();
 
+	/**
+	 * Get the next prime based on numerical ordering
+	 * @return
+	 */
 	Optional<PrimeRefIntfc> getNextPrimeRef();
+
+	/**
+	 * get the previous prime based on numerical ordering.
+	 * @return
+	 */
 	Optional<PrimeRefIntfc> getPrevPrimeRef();
 
+	/**
+	 * Get big integer representing the current prime ref.
+	 * @return
+	 */
 	BigInteger getPrime();
 
+	/**
+	 * Get container for prime base data.
+	 * @return
+	 */
 	PrimeBaseIntfc getPrimeBaseData();
 
 	/**

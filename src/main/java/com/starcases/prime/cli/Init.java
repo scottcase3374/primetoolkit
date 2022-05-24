@@ -2,9 +2,13 @@ package com.starcases.prime.cli;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.io.PrintWriter;
-
+import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -61,20 +65,32 @@ import picocli.CommandLine.Command;
  * interface function is just a dummy value - not used.
  *
  */
-@SuppressWarnings({"PMD.AtLeastOneConstructor", "PMD.CommentSize", "PMD.AvoidFinalLocalVariable"})
+@SuppressWarnings({"PMD.AtLeastOneConstructor", "PMD.CommentSize", "PMD.AvoidFinalLocalVariable", "PMD.AvoidDuplicateLiterals"})
 @Command(name = "init", description = "initial setup")
 public class Init implements Runnable
 {
+	/**
+	 * default logger
+	 */
 	private static final Logger LOG = Logger.getLogger(Init.class.getName());
 
+	/**
+	 * prime source - for prime/prime ref lookups
+	 */
 	@Getter
 	@Setter
-	private PrimeSourceIntfc ps;
+	private PrimeSourceIntfc primeSrc;
 
+	/**
+	 * Init opts info from picocli
+	 */
 	@Getter
 	@ArgGroup(exclusive = false, validate = false)
 	private final InitOpts initOpts = new InitOpts();
 
+	/**
+	 * Base type selections
+	 */
 	@Getter
 	@Setter
 	@ArgGroup(exclusive = false, validate = false)
@@ -117,7 +133,11 @@ public class Init implements Runnable
 	@Override
 	public void run()
 	{
-		ensureOutputFolder();
+		final var outputFolderOk = ensureOutputFolder();
+		if (outputFolderOk)
+		{
+			stdOutRedirect();
+		}
 
 		setFactoryDefaults();
 
@@ -137,52 +157,59 @@ public class Init implements Runnable
 	/**
 	 * default graph setup
 	 *
-	 * @param ps
+	 * @param primeSrc
 	 * @param baseType
 	 */
-	private void graph(final PrimeSourceIntfc ps, final BaseTypes baseType)
+	private void graph(final PrimeSourceIntfc primeSrc, final BaseTypes baseType)
 	{
 		final var metaDataView = new MetaDataTable();
 		final var viewList = new ArrayList<GraphListener<PrimeRefIntfc, DefaultEdge>>();
 		viewList.add(metaDataView);
 		metaDataView.setSize(400, 320);
 		metaDataView.setVisible(true);
-		final var vd = new ViewDefault(ps,  baseType, viewList);
-		vd.viewDefault();
+		final var viewDefault = new ViewDefault(primeSrc,  baseType, viewList);
+		viewDefault.viewDefault();
 	}
 
 	/**
 	 * default export setup.
 	 *
-	 * @param ps
+	 * @param primeSrc
 	 * @param exportFileDef
 	 */
-	private void export(final PrimeSourceIntfc ps, final String exportFileDef)
+	private void export(final PrimeSourceIntfc primeSrc)
 	{
 		try
 		{
-			String exportFile;
-			if (exportFileDef == null)
+			final var exportPath = this.decorateFileName("default", "export", "gml");
+
+			try (var exportWriter = new PrintWriter(Files.newBufferedWriter(exportPath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)))
 			{
-				exportFile = "export.gml";
-			}
-			else
-			{
-				exportFile = exportFileDef;
-			}
-			try (var pw = new PrintWriter(exportFile))
-			{
-				final var e = new ExportGML(ps, pw);
-				e.export();
-				pw.flush();
+				final var exporter = new ExportGML(primeSrc, exportWriter);
+				exporter.export();
+				exportWriter.flush();
 			}
 		}
-		catch(Exception e)
+		catch(Exception except)
 		{
 			if (LOG.isLoggable(Level.SEVERE))
 			{
-				LOG.severe("Exception "+ e);
+				LOG.severe("Exception "+ except);
 			}
+		}
+	}
+
+	@SuppressWarnings("PMD.LawOfDemeter")
+	private Path decorateFileName(final String base, final String fileName, final String extension)
+	{
+		try
+		{
+			final File folder = new File(initOpts.getOutputFolder().replaceFirst("^.*~", System.getenv("HOME")));
+			return Path.of(folder.getCanonicalPath().toLowerCase(), String.format("%s-%s-%s.%s", fileName, base ,DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()) , extension).toLowerCase() );
+		}
+		catch(final IOException e)
+		{
+			return null;
 		}
 	}
 
@@ -199,67 +226,60 @@ public class Init implements Runnable
 	}
 
 	@SuppressWarnings("PMD.LawOfDemeter")
-	private void ensureOutputFolder()
+	private boolean ensureOutputFolder()
 	{
-		if (!initOpts.getOutputFolder().exists())
+		boolean ret = true;
+		final File folder = new File(initOpts.getOutputFolder().replaceFirst("^.*~", System.getenv("HOME")));
+		if (!folder.exists())
 		{
-			if (!initOpts.getOutputFolder().mkdirs() && LOG.isLoggable(Level.SEVERE))
+			if (!folder.mkdirs())
 			{
-				LOG.severe("ERROR: could not create base folder: " + initOpts.getOutputFolder());
-				return;
+				if (LOG.isLoggable(Level.SEVERE))
+				{
+					LOG.severe("ERROR: could not create base folder: " + initOpts.getOutputFolder());
+				}
+				ret = false;
 			}
-			stdOutRedirect();
 		}
+		return ret;
 	}
 
 	@SuppressWarnings("PMD.LawOfDemeter")
 	private void stdOutRedirect()
 	{
-		String cpath = "";
-		try
+		final Path stdOutPath = this.decorateFileName("std", "out", "log");
+		if (stdOutPath != null)
 		{
-			File f = createFile("stdout-");
-			cpath = f.getCanonicalPath();
-			if (LOG.isLoggable(Level.INFO))
-			{
-				LOG.info("Created outputfile: " + cpath);
-			}
-
 			// Point standard out to our selected output file.
-			PrimeToolKit.setOut(new PrintStream(f));
+			PrimeToolKit.setOutput("stdout", stdOutPath);
 		}
-		catch(final IOException e)
+		else
 		{
 			if (LOG.isLoggable(Level.SEVERE))
 			{
-				LOG.severe("ERROR: could not set standard out to file: " + cpath);
-				LOG.severe(e.toString());
+				LOG.severe("ERROR: could not set standard out to provided destination. " );
 			}
 		}
-	}
-
-	private File createFile(final String prefix) throws IOException
-	{
-		return File.createTempFile(prefix, null, initOpts.getOutputFolder());
 	}
 
 	private void actionInitDefaultPrimeContent()
 	{
 		actions.add(s -> {
 			final FactoryIntfc factory = PTKFactory.getFactory();
-			ps = factory.getPrimeSource();
+			primeSrc = factory.getPrimeSource();
 			if (LOG.isLoggable(Level.INFO))
 			{
 				LOG.info("Init::actionInitDefaultPrimeContent - primeSource init");
 			}
 
-			ps.setDisplayProgress(outputOpts.getOutputOpers().contains(OutputOper.PROGRESS));
+			primeSrc.setDisplayProgress(outputOpts.getOutputOpers().contains(OutputOper.PROGRESS));
 
-			ps.setDisplayPrimeTreeMetrics(outputOpts.getOutputOpers().contains(OutputOper.PRIMETREE_METRICS));
+			primeSrc.setDisplayPrimeTreeMetrics(outputOpts.getOutputOpers().contains(OutputOper.PRIMETREE_METRICS));
 
-			ps.init();
+			primeSrc.init();
 		});
 	}
+
 
 	@SuppressWarnings("PMD.LawOfDemeter")
 	private void actionHandleAdditionalBases()
@@ -283,11 +303,13 @@ public class Init implements Runnable
 											{
 												LOG.info(method + baseType.name());
 											}
-											final var base = new BaseReduceNPrime(ps);
+											PrimeToolKit.setOutput(baseType.name(), this.decorateFileName(baseType.name(), "base", "log"));
+											final var base = new BaseReduceNPrime(primeSrc);
 											base.setTrackTime(trackGenTime);
 											base.doPreferParallel(initOpts.isPreferParallel());
 											base.setBaseGenerationOutput(outputOpts.getOutputOpers().contains(OutputOper.CREATE));
-											base.setMaxReduce(baseOpts.getMaxReduce());
+
+											base.setMaxReduce(BigInteger.valueOf(baseOpts.getMaxReduce()));
 											base.genBases();
 										});
 						break;
@@ -299,7 +321,8 @@ public class Init implements Runnable
 											{
 												LOG.info(method + baseType.name());
 											}
-											final var base = new BaseReduceTriple(ps);
+											PrimeToolKit.setOutput(baseType.name(), this.decorateFileName(baseType.name(), "base", "log"));
+											final var base = new BaseReduceTriple(primeSrc);
 											base.setTrackTime(trackGenTime);
 											base.doPreferParallel(initOpts.isPreferParallel());
 											base.setBaseGenerationOutput(outputOpts.getOutputOpers().contains(OutputOper.CREATE));
@@ -314,8 +337,8 @@ public class Init implements Runnable
 											{
 												LOG.info(method + baseType.name());
 											}
-
-											final var base = new BasePrefixes(ps);
+											PrimeToolKit.setOutput(baseType.name(), this.decorateFileName(baseType.name(), "base", "log"));
+											final var base = new BasePrefixes(primeSrc);
 											base.setTrackTime(trackGenTime);
 											base.doPreferParallel(initOpts.isPreferParallel());
 											base.setBaseGenerationOutput(outputOpts.getOutputOpers().contains(OutputOper.CREATE));
@@ -330,8 +353,8 @@ public class Init implements Runnable
 											{
 												LOG.info(method + baseType.name());
 											}
-
-											final var base = new PrimeTree(ps, PTKFactory.getCollTrack());
+											PrimeToolKit.setOutput(baseType.name(), this.decorateFileName(baseType.name(), "base", "log"));
+											final var base = new PrimeTree(primeSrc, PTKFactory.getCollTrack());
 											base.setTrackTime(trackGenTime);
 											base.doPreferParallel(initOpts.isPreferParallel());
 											base.setBaseGenerationOutput(outputOpts.getOutputOpers().contains(OutputOper.CREATE));
@@ -369,56 +392,56 @@ public class Init implements Runnable
 				case "THREETRIPLE":
 					if (isBaseSelected(BaseTypes.THREETRIPLE))
 					{
-						actions.add(s -> new LogBases3AllTriples(ps).doPreferParallel(initOpts.isPreferParallel()).l() );
+						actions.add(s -> new LogBases3AllTriples(primeSrc).doPreferParallel(initOpts.isPreferParallel()).outputLogs() );
 					}
 					break;
 
 				case "NPRIME":
 					if (isBaseSelected(BaseTypes.NPRIME))
 					{
-						actions.add(s -> new LogBasesNPrime(ps).doPreferParallel(initOpts.isPreferParallel()).l() );
+						actions.add(s -> new LogBasesNPrime(primeSrc).doPreferParallel(initOpts.isPreferParallel()).outputLogs() );
 					}
 					break;
 
 				case "PREFIX":
 					if (isBaseSelected(BaseTypes.PREFIX))
 					{
-						actions.add(s -> new LogBasePrefixes(ps).doPreferParallel(false).l() );
+						actions.add(s -> new LogBasePrefixes(primeSrc).doPreferParallel(false).outputLogs() );
 					}
 					break;
 
 				case "PRIME_TREE":
 					if (isBaseSelected(BaseTypes.PRIME_TREE))
 					{
-						actions.add(s -> new LogPrimeTree(ps).doPreferParallel(false).l() );
+						actions.add(s -> new LogPrimeTree(primeSrc).doPreferParallel(false).outputLogs() );
 					}
 					break;
 
 				case "BASES":
 					if (isBaseSelected(BaseTypes.THREETRIPLE))
 					{
-						actions.add(s -> new LogBases3AllTriples(ps).doPreferParallel(initOpts.isPreferParallel()).l() );
+						actions.add(s -> new LogBases3AllTriples(primeSrc).doPreferParallel(initOpts.isPreferParallel()).outputLogs() );
 					}
 					if (isBaseSelected(BaseTypes.NPRIME))
 					{
-						actions.add(s -> new LogBasesNPrime(ps).doPreferParallel(initOpts.isPreferParallel()).l() );
+						actions.add(s -> new LogBasesNPrime(primeSrc).doPreferParallel(initOpts.isPreferParallel()).outputLogs() );
 					}
 					if (isBaseSelected(BaseTypes.PREFIX))
 					{
-						actions.add(s -> new LogBasePrefixes(ps).doPreferParallel(false).l() );
+						actions.add(s -> new LogBasePrefixes(primeSrc).doPreferParallel(false).outputLogs() );
 					}
 					if (isBaseSelected(BaseTypes.PRIME_TREE))
 					{
-						actions.add(s -> new LogPrimeTree(ps).doPreferParallel(false).l() );
+						actions.add(s -> new LogPrimeTree(primeSrc).doPreferParallel(false).outputLogs() );
 					}
 					break;
 
 				case "GRAPHSTRUCT":
-					actions.add(s -> new LogGraphStructure(ps, BaseTypes.DEFAULT ).doPreferParallel(initOpts.isPreferParallel()).l() );
+					actions.add(s -> new LogGraphStructure(primeSrc, BaseTypes.DEFAULT ).doPreferParallel(initOpts.isPreferParallel()).outputLogs() );
 					break;
 
 				case "NODESTRUCT":
-					actions.add(s -> new LogNodeStructure(ps).doPreferParallel(initOpts.isPreferParallel()).l() );
+					actions.add(s -> new LogNodeStructure(primeSrc).doPreferParallel(initOpts.isPreferParallel()).outputLogs() );
 					break;
 
 
@@ -442,7 +465,7 @@ public class Init implements Runnable
 	{
 		if (graphOpts != null && graphOpts.getGraphType() != null && graphOpts.getGraphType() == Graph.DEFAULT)
 		{
-			actions.add(s -> graph(ps, BaseTypes.DEFAULT));
+			actions.add(s -> graph(primeSrc, BaseTypes.DEFAULT));
 		}
 	}
 
@@ -450,7 +473,7 @@ public class Init implements Runnable
 	{
 		if (exportOpts != null && exportOpts.getExportType() != null && exportOpts.getExportType() == Export.GML)
 		{
-			actions.add(s -> export(ps, exportOpts.getExportFile()));
+			actions.add(s -> export(primeSrc));
 		}
 	}
 

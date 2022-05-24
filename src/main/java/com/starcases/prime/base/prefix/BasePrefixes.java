@@ -15,11 +15,18 @@ import lombok.NonNull;
  */
 public class BasePrefixes extends AbstractPrimeBaseGenerator
 {
+	/**
+	 * default logger
+	 */
 	private static final Logger LOG = Logger.getLogger(BasePrefixes.class.getName());
 
-	public BasePrefixes(@NonNull final PrimeSourceIntfc ps)
+	/**
+	 * constructor for creation of Base prefixes.
+	 * @param primeSrc
+	 */
+	public BasePrefixes(@NonNull final PrimeSourceIntfc primeSrc)
 	{
-		super(ps);
+		super(primeSrc);
 	}
 
 	@SuppressWarnings("PMD.LawOfDemeter")

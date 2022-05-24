@@ -5,10 +5,18 @@ import com.starcases.prime.intfc.OutputableIntfc;
 
 import picocli.CommandLine.ITypeConverter;
 
+/**
+ * Used to convert enum name to OutputableIntfc
+ * for use with picocli code.
+ */
+@SuppressWarnings("PMD.AtLeastOneConstructor")
 public class OutputableConverter implements ITypeConverter<OutputableIntfc>
 {
+	/**
+	 * Convert from enum string name to a general interface
+	 */
 	@Override
-	public OutputableIntfc convert(String value) throws Exception
+	public OutputableIntfc convert(final String value) throws Exception
 	{
 		return	switch(value)
 			{

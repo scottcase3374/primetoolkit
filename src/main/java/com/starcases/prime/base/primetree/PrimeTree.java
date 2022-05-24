@@ -18,6 +18,8 @@ import com.starcases.prime.impl.PData;
 import com.starcases.prime.intfc.CollectionTrackerIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NonNull;
 
 
@@ -28,17 +30,38 @@ import lombok.NonNull;
 @SuppressWarnings("PMD.LongVariable")
 public class PrimeTree extends AbstractPrimeBaseGenerator
 {
+	/**
+	 * default logger
+	 */
 	private static final Logger LOG = Logger.getLogger(PrimeTree.class.getName());
 
-	final Map<BigInteger, PrimeTreeNode> prefixMap = new ConcurrentHashMap<>();
+	/**
+	 * prefix mape
+	 */
+	@Getter(AccessLevel.PACKAGE)
+	private final Map<BigInteger, PrimeTreeNode> prefixMap = new ConcurrentHashMap<>();
+
+	/**
+	 * container for tracking the unique set of prefixes/trees
+	 */
+	@Getter(AccessLevel.PRIVATE)
 	private final CollectionTrackerIntfc collectionTracker;
 
-	public PrimeTree(@NonNull final PrimeSourceIntfc ps, @NonNull final CollectionTrackerIntfc collectionTracker)
+	/**
+	 * Constructor for the prime tree
+	 * @param primeSrc
+	 * @param collectionTracker
+	 */
+	public PrimeTree(@NonNull final PrimeSourceIntfc primeSrc, @NonNull final CollectionTrackerIntfc collectionTracker)
 	{
-		super(ps);
+		super(primeSrc);
 		this.collectionTracker = collectionTracker;
 	}
 
+	/**
+	 * get iterator to the tree info
+	 * @return
+	 */
 	public PrimeTreeIteratorIntfc iterator()
 	{
 		return new PrimeTreeIterator(this, collectionTracker);
@@ -82,7 +105,7 @@ public class PrimeTree extends AbstractPrimeBaseGenerator
 				}
 
 				final var origBaseBases = curPrime.getPrimeBaseData().getPrimeBases().get(0);
-				List<BigInteger> curPrimePrefixBases = MultiReaderFastList.newList(origBaseBases);
+				final List<BigInteger> curPrimePrefixBases = MultiReaderFastList.newList(origBaseBases);
 
 				final var curPrefixIt = this.iterator();
 				curPrimePrefixBases.forEach(basePrime ->

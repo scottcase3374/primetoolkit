@@ -27,13 +27,25 @@ import lombok.NonNull;
 @SuppressWarnings("PMD.CommentSize")
 public class ViewDefault extends AbstractPrimeGrapher
 {
+	/**
+	 * Default logger
+	 */
 	private static final Logger LOG = Logger.getLogger(ViewDefault.class.getName());
 
-	public ViewDefault(@NonNull final PrimeSourceIntfc ps, @NonNull final BaseTypes baseType, @NonNull final List<GraphListener<PrimeRefIntfc, DefaultEdge>> graphs)
+	/**
+	 * Constructor for default view setup
+	 * @param primeSrc
+	 * @param baseType
+	 * @param graphs
+	 */
+	public ViewDefault(@NonNull final PrimeSourceIntfc primeSrc, @NonNull final BaseTypes baseType, @NonNull final List<GraphListener<PrimeRefIntfc, DefaultEdge>> graphs)
 	{
-		super(ps, baseType, graphs);
+		super(primeSrc, baseType, graphs);
 	}
 
+	/**
+	 * Display the view
+	 */
 	@SuppressWarnings({"PMD.LawOfDemeter"})
 	public void viewDefault()
 	{

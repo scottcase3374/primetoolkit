@@ -20,17 +20,28 @@ import picocli.CommandLine.Command;
  */
 public class LogGraphStructure extends AbstractPrimeGrapher implements LogGraphIntfc
 {
+	/**
+	 * default logger
+	 */
 	private static final Logger LOG = Logger.getLogger(LogGraphStructure.class.getName());
 
-	public LogGraphStructure(@NonNull final PrimeSourceIntfc ps, @NonNull final BaseTypes baseType)
+	/**
+	 * constructor for logger of graph structure
+	 * @param primeSrc
+	 * @param baseType
+	 */
+	public LogGraphStructure(@NonNull final PrimeSourceIntfc primeSrc, @NonNull final BaseTypes baseType)
 	{
-		super(ps, baseType);
+		super(primeSrc, baseType);
 	}
 
+	/**
+	 * output log info
+	 */
 	@SuppressWarnings("PMD.LawOfDemeter")
 	@Override
 	@Command
-	public void l()
+	public void outputLogs()
 	{
 		LOG.entering("LogGraphStructure", "l()");
 			graph
@@ -47,6 +58,9 @@ public class LogGraphStructure extends AbstractPrimeGrapher implements LogGraphI
 			) ) );
 	}
 
+	/**
+	 * Indicate if use of multiple CPU cores is allowed.
+	 */
 	@Override
 	public LogGraphIntfc doPreferParallel(final boolean preferParallel)
 	{
