@@ -56,54 +56,42 @@ public class LogBases3AllTriples  extends AbstractLogBase
 			.getPrimeRefStream(5L, false)
 			.forEach( pr ->
 						{
-							try
-							{
-								final var size = pr.getPrimeBaseData().getPrimeBases(BaseTypes.THREETRIPLE).size();
-								PrimeToolKit.output(BaseTypes.THREETRIPLE, String.format("%nPrime [%d] idx[%d] #-bases[%d]%n",
-										pr.getPrime(),
-										idx[0]++,
-										size
-										));
+							final var size = pr.getPrimeBaseData().getPrimeBases(BaseTypes.THREETRIPLE).size();
+							PrimeToolKit.output(BaseTypes.THREETRIPLE, String.format("%nPrime [%d] idx[%d] #-bases[%d]%n",
+									pr.getPrime(),
+									idx[0]++,
+									size
+									));
 
-									final long [] cnt = {0};
-									final StringBuilder outputStr = new StringBuilder(150);
-									outputStr.append('\t');
-									pr.getPrimeBaseData().getPrimeBases(BaseTypes.THREETRIPLE)
-											.stream()
-											.<String>mapMulti((bs, consumer) ->
+								final long [] cnt = {0};
+								final StringBuilder outputStr = new StringBuilder(150);
+								outputStr.append('\t');
+								pr.getPrimeBaseData().getPrimeBases(BaseTypes.THREETRIPLE)
+										.stream()
+										.<String>mapMulti((bs, consumer) ->
+															{
+																cnt[0]++;
+																outputStr.append(
+																 	bs
+																 	.stream()
+																 	.map(BigInteger::toString)
+																 	.collect(Collectors.joining(",","[","]"))
+																 	);
+
+																if (cnt[0] < size)
 																{
-																	cnt[0]++;
-																	outputStr.append(
-																	 	bs
-																	 	.stream()
-																	 	.map(BigInteger::toString)
-																	 	.collect(Collectors.joining(",","[","]"))
-																	 	);
-
-																	if (cnt[0] < size)
-																	{
-																		outputStr.append(", ");
-																	}
-
-																	if (cnt[0] % maxBasesInRow == 0 || cnt[0] >= size)
-																	{
-																		consumer.accept(outputStr.toString());
-																		outputStr.setLength(0);
-																		outputStr.append('\t');
-																	}
+																	outputStr.append(", ");
 																}
-													)
-											.forEach(str -> PrimeToolKit.output(BaseTypes.THREETRIPLE, "%s", str));
-							}
-							catch(final Exception e)
-							{
-								if (LOG.isLoggable(Level.SEVERE))
-								{
-									LOG.severe(String.format("Can't show bases for: %d exception:", pr.getPrime()));
-									LOG.throwing(this.getClass().getName(), "l()", e);
-								}
-							}
-						}
-					);
+
+																if (cnt[0] % maxBasesInRow == 0 || cnt[0] >= size)
+																{
+																	consumer.accept(outputStr.toString());
+																	outputStr.setLength(0);
+																	outputStr.append('\t');
+																}
+															}
+												)
+										.forEach(str -> PrimeToolKit.output(BaseTypes.THREETRIPLE, "%s", str));
+						});
 	}
 }

@@ -33,24 +33,16 @@ public class BasePrefixes extends AbstractPrimeBaseGenerator
 	@Override
 	protected void genBasesImpl()
 	{
-		LOG.info("BasePrefixes genBases()");
+		if (LOG.isLoggable(Level.INFO))
+		{
+			LOG.info("BasePrefixes genBases()");
+		}
 
 		final var prStream = primeSrc.getPrimeRefStream(preferParallel);
 		prStream.forEach(pr ->
 				{
-					try
-					{
-						final var origBases = pr.getPrimeBaseData().getPrimeBases().get(0);
-						pr.getPrimeBaseData().addPrimeBases(List.of(origBases), BaseTypes.PREFIX);
-					}
-					catch(final Exception e)
-					{
-						if (LOG.isLoggable(Level.SEVERE))
-						{
-							LOG.severe(String.format("Can't show bases for: %d exception:", pr.getPrime()));
-							LOG.throwing(this.getClass().getName(), "genBasesImpl()", e);
-						}
-					}
+					final var origBases = pr.getPrimeBaseData().getPrimeBases().get(0);
+					pr.getPrimeBaseData().addPrimeBases(List.of(origBases), BaseTypes.PREFIX);
 				});
 	}
 }

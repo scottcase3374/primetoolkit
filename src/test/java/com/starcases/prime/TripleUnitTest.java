@@ -41,7 +41,7 @@ class TripleUnitTest
 		PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
 
 		PTKFactory.setPrimeBaseCtor(PrimeBaseContainer::new);
-		PTKFactory.setPrimeRefRawCtor( (i, base) -> (new PrimeRef(i)).init(PTKFactory.getPrimeBaseCtor(), base) );
+		PTKFactory.setPrimeRefRawCtor( (i, base) -> new PrimeRef(i).init(PTKFactory.getPrimeBaseCtor(), base) );
 
 		final FactoryIntfc factory = PTKFactory.getFactory();
 		primeSrc = factory.getPrimeSource();

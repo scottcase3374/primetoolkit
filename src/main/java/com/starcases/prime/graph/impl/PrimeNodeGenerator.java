@@ -14,7 +14,6 @@ import lombok.NonNull;
 import lombok.Setter;
 
 import java.math.BigInteger;
-import java.util.NoSuchElementException;
 
 /**
  * This was just an experiment with the GraphStream lib originally
@@ -109,17 +108,13 @@ public class PrimeNodeGenerator
 	@SuppressWarnings("PMD.LawOfDemeter")
 	public boolean nextEvents()
 	{
-		try
-		{
-			primeRef = primeSrc.getPrimeRef(level).orElseThrow();
-			addNodeRawBase();
-			return true;
-		}
-		catch(final NoSuchElementException | IndexOutOfBoundsException | NullPointerException e)
-		{
-			// do nothing - final return handles it.
-		}
-		return false;
+		primeSrc.getPrimeRef(level).ifPresent(pRef ->
+			{
+				primeRef = pRef;
+				addNodeRawBase();
+			});
+
+		return true;
 	}
 
 	/**

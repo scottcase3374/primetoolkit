@@ -162,13 +162,23 @@ public class Init implements Runnable
 	 */
 	private void graph(final PrimeSourceIntfc primeSrc, final BaseTypes baseType)
 	{
-		final var metaDataView = new MetaDataTable();
-		final var viewList = new ArrayList<GraphListener<PrimeRefIntfc, DefaultEdge>>();
-		viewList.add(metaDataView);
-		metaDataView.setSize(400, 320);
-		metaDataView.setVisible(true);
-		final var viewDefault = new ViewDefault(primeSrc,  baseType, viewList);
-		viewDefault.viewDefault();
+		try
+		{
+			final var metaDataView = new MetaDataTable();
+			final var viewList = new ArrayList<GraphListener<PrimeRefIntfc, DefaultEdge>>();
+			viewList.add(metaDataView);
+			metaDataView.setSize(400, 320);
+			metaDataView.setVisible(true);
+			final var viewDefault = new ViewDefault(primeSrc,  baseType, viewList);
+			viewDefault.viewDefault();
+		}
+		catch(IOException except)
+		{
+			if (LOG.isLoggable(Level.SEVERE))
+			{
+				LOG.severe("IOExcetion: " + except.toString());
+			}
+		}
 	}
 
 	/**
@@ -179,18 +189,13 @@ public class Init implements Runnable
 	 */
 	private void export(final PrimeSourceIntfc primeSrc)
 	{
-		try
+		try (var exportWriter = new PrintWriter(Files.newBufferedWriter(decorateFileName("default", "export", "gml"), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)))
 		{
-			final var exportPath = this.decorateFileName("default", "export", "gml");
-
-			try (var exportWriter = new PrintWriter(Files.newBufferedWriter(exportPath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)))
-			{
-				final var exporter = new ExportGML(primeSrc, exportWriter);
-				exporter.export();
-				exportWriter.flush();
-			}
+			final var exporter = new ExportGML(primeSrc, exportWriter);
+			exporter.export();
+			exportWriter.flush();
 		}
-		catch(Exception except)
+		catch(IOException except)
 		{
 			if (LOG.isLoggable(Level.SEVERE))
 			{
@@ -228,9 +233,13 @@ public class Init implements Runnable
 	@SuppressWarnings("PMD.LawOfDemeter")
 	private boolean ensureOutputFolder()
 	{
-		boolean ret = true;
+		boolean ret;
 		final File folder = new File(initOpts.getOutputFolder().replaceFirst("^.*~", System.getenv("HOME")));
-		if (!folder.exists() && !folder.mkdirs())
+		if (folder.exists() || folder.mkdirs())
+		{
+			ret = true;
+		}
+		else
 		{
 			if (LOG.isLoggable(Level.SEVERE))
 			{
@@ -281,16 +290,12 @@ public class Init implements Runnable
 	@SuppressWarnings("PMD.LawOfDemeter")
 	private void actionHandleAdditionalBases()
 	{
-		@SuppressWarnings("PMD.AvoidFinalLocalVariable")
-		final var method = "Init::actionHandleAdditionalBases - base ";
-
-		final var trackGenTime = true;
-
 		if (baseOpts != null && baseOpts.getBases() != null)
 		{
-
 			baseOpts.getBases().forEach(baseType ->
 			{
+				final var trackGenTime = true;
+				final var method = "Init::actionHandleAdditionalBases - base ";
 				switch(baseType)
 				{
 					case NPRIME:
@@ -374,12 +379,11 @@ public class Init implements Runnable
 	@SuppressWarnings("PMD.LawOfDemeter")
 	private void actionHandleOutputs()
 	{
-		final var method = "Init::actionHandleLogging - logOper ";
-
 		if (outputOpts != null && outputOpts.getOutputOpers() != null && !outputOpts.getOutputOpers().isEmpty())
 		{
 			if (LOG.isLoggable(Level.INFO))
 			{
+				final var method = "Init::actionHandleLogging - logOper ";
 				LOG.info(String.format("%s%s", method, outputOpts.getOutputOpers().stream().map(Object::toString).collect(Collectors.joining(","))));
 			}
 			outputOpts.getOutputOpers().forEach(oo ->

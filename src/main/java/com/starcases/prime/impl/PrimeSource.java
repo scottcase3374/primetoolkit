@@ -381,17 +381,16 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	{
 		var bit = 0;
 		// Generate next permutation of the bit indexes
-		do	// performs add and carry if needed
+		for(;;)
 		{
+			// performs add and carry if needed
 			primePermutation.flip(bit);
 
-			if (primePermutation.get(bit)) // true means no carry
+			if (primePermutation.get(bit++)) // true means no carry
 			{
 				break;
 			}
-
-			bit++;
-		} while(true);
+		}
 	}
 
 	/**

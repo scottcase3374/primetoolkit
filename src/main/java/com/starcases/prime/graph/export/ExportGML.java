@@ -76,26 +76,15 @@ public class ExportGML
 	{
 		expGraph();
 
-		try
+		final var pRefIter = primeSrc.getPrimeRefIter();
+
+		while (pRefIter.hasNext())
 		{
-			final var pRefIter = primeSrc.getPrimeRefIter();
-
-			while (pRefIter.hasNext())
-			{
-				expNode(pRefIter.next());
-			}
-
-			stack.stream().forEach(ElementIntfc::output);
-
-			outputWriter.println("]");
+			expNode(pRefIter.next());
 		}
-		catch(final Exception e)
-		{
-			if (LOG.isLoggable(Level.SEVERE))
-			{
-				LOG.severe("exception in graph: " + e);
-			}
-		}
+
+		stack.stream().forEach(ElementIntfc::output);
+		outputWriter.println("]");
 	}
 
 	/**
@@ -125,6 +114,10 @@ public class ExportGML
 	public void export()
 	{
 		primeSrc.init();
+		if (LOG.isLoggable(Level.INFO))
+		{
+			LOG.info("Running Export");
+		}
 		graph();
 	}
 }

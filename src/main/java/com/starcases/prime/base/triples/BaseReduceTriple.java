@@ -92,8 +92,7 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 	 */
 	private void reducePrime(@NonNull final PrimeRefIntfc prime)
 	{
-		final var triple = new AllTriples(primeSrc, prime);
-		triple.process();
+		new AllTriples(primeSrc, prime).process();
 	}
 
 	/**
@@ -130,22 +129,11 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 		}
 	}
 
-
 	private String handlePrime(final PrimeRefIntfc curPrime, final int counter)
 	{
 		final var retVal = String.format("p[%d]idx[%d] good=", curPrime.getPrime(), counter);
-		try
-		{
-			reducePrime(curPrime);
-			return retVal + good.getAndIncrement();
-		}
-		catch(final Exception e)
-		{
-			if (LOG.isLoggable(Level.SEVERE))
-			{
-				LOG.severe(String.format("BaseReduce3Triple generation => idx[%d] Prime [%d] error: %s", counter, curPrime.getPrime(), e.toString()));
-			}
-		}
-		return retVal + "false";
+
+		reducePrime(curPrime);
+		return retVal + good.getAndIncrement();
 	}
 }

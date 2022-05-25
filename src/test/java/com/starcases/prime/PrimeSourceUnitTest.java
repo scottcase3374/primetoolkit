@@ -6,7 +6,6 @@ import java.math.BigInteger;
 import java.util.Optional;
 
 import org.junit.Ignore;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,7 +49,7 @@ class PrimeSourceUnitTest
 		PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
 
 		PTKFactory.setPrimeBaseCtor(PrimeBaseContainer::new);
-		PTKFactory.setPrimeRefRawCtor( (i, base) -> (new PrimeRef(i)).init(PTKFactory.getPrimeBaseCtor(), base ));
+		PTKFactory.setPrimeRefRawCtor( (i, base) -> new PrimeRef(i).init(PTKFactory.getPrimeBaseCtor(), base ));
 
 		final FactoryIntfc factory = PTKFactory.getFactory();
 		primeSrc = factory.getPrimeSource();
@@ -84,7 +83,7 @@ class PrimeSourceUnitTest
 	void canGetPrime()
 	{
 		final var bi101 = Optional.of(BigInteger.valueOf(101L));
-		Assertions.assertEquals(bi101, primeSrc.getPrime(26));
+		assertEquals(bi101, primeSrc.getPrime(26));
 	}
 
 	/**

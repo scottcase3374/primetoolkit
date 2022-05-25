@@ -100,15 +100,24 @@ public final class PrimeToolKit
 			{
 				Files.writeString(path, String.format(format, params), StandardOpenOption.APPEND, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
 			}
-			catch (IOException e)
+			catch (final IOException e)
 			{
-				LOG.severe("Unable to write to file:" + path.toString());
-				LOG.info(String.format(format, params));
+				if (LOG.isLoggable(Level.SEVERE))
+				{
+					LOG.severe("Unable to write to file:" + path.toString());
+				}
+				if (LOG.isLoggable(Level.INFO))
+				{
+					LOG.info(String.format(format, params));
+				}
 			}
 		}
 		else
 		{
-			System.out.printf(format, params);
+			if (LOG.isLoggable(Level.INFO))
+			{
+				LOG.info(String.format(format, params));
+			}
 		}
 	}
 

@@ -1,6 +1,8 @@
 package com.starcases.prime.graph.visualize;
 
 import javax.swing.WindowConstants;
+
+import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,35 +47,30 @@ public class ViewDefault extends AbstractPrimeGrapher
 
 	/**
 	 * Display the view
+	 * @throws IOException
 	 */
 	@SuppressWarnings({"PMD.LawOfDemeter"})
-	public void viewDefault()
+	public void viewDefault() throws IOException
 	{
-        try
+		if (LOG.isLoggable(Level.INFO))
 		{
-			final var defaultGraph = new CircularLayoutPrimesGraph(this.graph);
-			defaultGraph.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-			defaultGraph.setSize(400, 320);
-			defaultGraph.setVisible(true);
-			defaultGraph.getRootPane().grabFocus();
-
-			final var compactTreeGraph = new CompactTreeLayoutPrimesGraph(this.graph);
-			compactTreeGraph.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-			compactTreeGraph.setSize(400, 320);
-			compactTreeGraph.setVisible(true);
-			compactTreeGraph.getRootPane().grabFocus();
-
-			do
-			{
-				// will exit when window closes
-			} while (System.in.read() != -1);
+			LOG.info("Display default View");
 		}
-		catch(Exception e)
+		final var defaultGraph = new CircularLayoutPrimesGraph(this.graph);
+		defaultGraph.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		defaultGraph.setSize(400, 320);
+		defaultGraph.setVisible(true);
+		defaultGraph.getRootPane().grabFocus();
+
+		final var compactTreeGraph = new CompactTreeLayoutPrimesGraph(this.graph);
+		compactTreeGraph.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		compactTreeGraph.setSize(400, 320);
+		compactTreeGraph.setVisible(true);
+		compactTreeGraph.getRootPane().grabFocus();
+
+		do
 		{
-			if (LOG.isLoggable(Level.SEVERE))
-			{
-				LOG.severe("Exception:" + e);
-			}
-		}
+			// will exit when window closes
+		} while (System.in.read() != -1);
 	}
 }

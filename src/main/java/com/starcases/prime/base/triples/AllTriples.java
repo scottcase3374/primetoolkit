@@ -157,12 +157,9 @@ enum ConditionConstraintState
 			{
 				constraintState = ConditionConstraintState.MISSING_BASE;
 			}
-			else
+			else if (Arrays.stream(bases).distinct().count() != bases.length)
 			{
-				if (Arrays.stream(bases).distinct().count() != bases.length)
-				{
-					constraintState = ConditionConstraintState.DUPE;
-				}
+				constraintState = ConditionConstraintState.DUPE;
 			}
 		}
 		return constraintState;

@@ -97,7 +97,7 @@ public abstract class AbstractPrimeGrapher
 		for (var index = 0; index< sum3.length; index++)
 		{
 			final var tmpIndex = index;
-			primeSrc.getPrime(indexes[index]).ifPresent(p -> sum3[tmpIndex] = p);
+			primeSrc.getPrime(indexes[tmpIndex]).ifPresent(p -> sum3[tmpIndex] = p);
 		}
 		return Arrays.asList(sum3).stream().reduce(BigInteger.ZERO, BigInteger::add);
 	}

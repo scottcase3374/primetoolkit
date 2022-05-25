@@ -112,6 +112,7 @@ public class PrimeTreeIterator implements PrimeTreeIteratorIntfc
 	@Override
 	public PrimeTreeNode add(final BigInteger prime)
 	{
+		curSum = curSum.add(prime);
 		final var treeNode = treeNodeMap.computeIfAbsent(prime, f ->
 												{
 													final var nextMap = new ConcurrentHashMap<BigInteger,PrimeTreeNode>();
@@ -120,9 +121,9 @@ public class PrimeTreeIterator implements PrimeTreeIteratorIntfc
 												}
 											);
 
-		curSum = curSum.add(prime);
-		sourceTreeNodes.add(treeNode);
 		treeNodeMap = treeNode.getNext();
+		sourceTreeNodes.add(treeNode);
+
 		return treeNode;
 	}
 

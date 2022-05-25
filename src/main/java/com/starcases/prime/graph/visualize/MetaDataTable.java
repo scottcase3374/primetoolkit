@@ -139,7 +139,7 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 			final var edist = event.getVertex().getDistToPrevPrime();
 			final var pdist = primeMaxDistToPrev.getDistToPrevPrime();
 
-			if (pdist.isEmpty() || (edist.isPresent() && edist.get().abs().compareTo(pdist.get().abs()) > 0))
+			if (pdist.isEmpty() || edist.isPresent() && edist.get().abs().compareTo(pdist.get().abs()) > 0)
 			{
 				primeMaxDistToPrev = event.getVertex();
 			}
@@ -162,7 +162,7 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 	@SuppressWarnings("PMD.LawOfDemeter")
 	protected void handleAvgDistToPrev()
 	{
-		data[0][AVG_DIST_PREV_PRIME] = String.format("Total dist[%d], total-primes[%d] avg-dist[%f]", primeMaxDistToPrev.getPrime().longValue(), primeMaxDistToPrev.getPrimeRefIdx() , ((double)primeMaxDistToPrev.getPrime().longValue() / (primeMaxDistToPrev.getPrimeRefIdx()+1)));
+		data[0][AVG_DIST_PREV_PRIME] = String.format("Total dist[%d], total-primes[%d] avg-dist[%f]", primeMaxDistToPrev.getPrime().longValue(), primeMaxDistToPrev.getPrimeRefIdx() , (double)primeMaxDistToPrev.getPrime().longValue() / (primeMaxDistToPrev.getPrimeRefIdx()+1));
 	}
 
 	/**

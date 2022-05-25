@@ -129,24 +129,14 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 		primeSrc.getPrimeRefStream(this.preferParallel)
 			.filter(pr -> isNonNullEmpty(pr.getPrimeBaseData().getPrimeBases()))
 				.forEach( curPrime ->
-		{
-			try
-			{
-				final MutableSortedBag<BigInteger> retBases = TreeBag.newBag();
-				primeReduction(curPrime, retBases);
-
-				curPrime
-					.getPrimeBaseData()
-					.addPrimeBases(BaseTypes.NPRIME, List.of(retBases.toSortedSet(), Set.of(curPrime.getPrime())), new NPrimeBaseMetadata(retBases));
-			}
-			catch(Exception e)
-			{
-				if (LOG.isLoggable(Level.SEVERE))
 				{
-					LOG.severe("Error: " + e);
-				}
-			}
-		});
+					final MutableSortedBag<BigInteger> retBases = TreeBag.newBag();
+					primeReduction(curPrime, retBases);
+
+					curPrime
+						.getPrimeBaseData()
+						.addPrimeBases(BaseTypes.NPRIME, List.of(retBases.toSortedSet(), Set.of(curPrime.getPrime())), new NPrimeBaseMetadata(retBases));
+						});
 	}
 
 	private boolean isNonNullEmpty(final Collection<?> coll)
