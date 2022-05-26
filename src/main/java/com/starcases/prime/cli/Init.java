@@ -12,6 +12,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -22,6 +23,7 @@ import org.jgrapht.graph.DefaultEdge;
 
 import com.starcases.prime.PTKFactory;
 import com.starcases.prime.PrimeToolKit;
+import com.starcases.prime.base.AbstractPrimeBaseGenerator;
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.base.PrimeMultiBaseContainer;
 import com.starcases.prime.base.nprime.BaseReduceNPrime;
@@ -102,7 +104,7 @@ public class Init implements Runnable
 	@Getter
 	@Setter
 	@ArgGroup(exclusive = false, validate = false)
-	private OutputOpts outputOpts;
+	private OutputOpts outputOpts = new OutputOpts();
 
 	/**
 	 * flags indicating a graph type to produce
@@ -253,6 +255,11 @@ public class Init implements Runnable
 	@SuppressWarnings("PMD.LawOfDemeter")
 	private void stdOutRedirect()
 	{
+		if (!initOpts.isStdOuputRedir())
+		{
+			return;
+		}
+
 		final Path stdOutPath = this.decorateFileName("std", "out", "log");
 		if (stdOutPath != null)
 		{
@@ -296,72 +303,23 @@ public class Init implements Runnable
 			{
 				final var trackGenTime = true;
 				final var method = "Init::actionHandleAdditionalBases - base ";
+				Supplier<AbstractPrimeBaseGenerator> baseSupplier = null;
 				switch(baseType)
 				{
 					case NPRIME:
-						actions.add(s ->
-										{
-											if (LOG.isLoggable(Level.INFO))
-											{
-												LOG.info(method + baseType.name());
-											}
-											PrimeToolKit.setOutput(baseType.name(), this.decorateFileName(baseType.name(), "base", "log"));
-											final var base = new BaseReduceNPrime(primeSrc);
-											base.setTrackTime(trackGenTime);
-											base.doPreferParallel(initOpts.isPreferParallel());
-											base.setBaseGenerationOutput(outputOpts.getOutputOpers().contains(OutputOper.CREATE));
-
-											base.setMaxReduce(BigInteger.valueOf(baseOpts.getMaxReduce()));
-											base.genBases();
-										});
+						baseSupplier = () -> new BaseReduceNPrime(primeSrc).assignMaxReduce(BigInteger.valueOf(baseOpts.getMaxReduce()));
 						break;
 
 					case THREETRIPLE:
-						actions.add(s ->
-										{
-											if (LOG.isLoggable(Level.INFO))
-											{
-												LOG.info(method + baseType.name());
-											}
-											PrimeToolKit.setOutput(baseType.name(), this.decorateFileName(baseType.name(), "base", "log"));
-											final var base = new BaseReduceTriple(primeSrc);
-											base.setTrackTime(trackGenTime);
-											base.doPreferParallel(initOpts.isPreferParallel());
-											base.setBaseGenerationOutput(outputOpts.getOutputOpers().contains(OutputOper.CREATE));
-											base.genBases();
-										});
+						baseSupplier = () -> new BaseReduceTriple(primeSrc);
 						break;
 
 					case PREFIX:
-						actions.add(s ->
-										{
-											if (LOG.isLoggable(Level.INFO))
-											{
-												LOG.info(method + baseType.name());
-											}
-											PrimeToolKit.setOutput(baseType.name(), this.decorateFileName(baseType.name(), "base", "log"));
-											final var base = new BasePrefixes(primeSrc);
-											base.setTrackTime(trackGenTime);
-											base.doPreferParallel(initOpts.isPreferParallel());
-											base.setBaseGenerationOutput(outputOpts.getOutputOpers().contains(OutputOper.CREATE));
-											base.genBases();
-										});
+						baseSupplier = () -> new BasePrefixes(primeSrc);
 						break;
 
 					case PRIME_TREE:
-						actions.add(s ->
-										{
-											if (LOG.isLoggable(Level.INFO))
-											{
-												LOG.info(method + baseType.name());
-											}
-											PrimeToolKit.setOutput(baseType.name(), this.decorateFileName(baseType.name(), "base", "log"));
-											final var base = new PrimeTree(primeSrc, PTKFactory.getCollTrack());
-											base.setTrackTime(trackGenTime);
-											base.doPreferParallel(initOpts.isPreferParallel());
-											base.setBaseGenerationOutput(outputOpts.getOutputOpers().contains(OutputOper.CREATE));
-											base.genBases();
-										});
+						baseSupplier = () -> new PrimeTree(primeSrc, PTKFactory.getCollTrack());
 						break;
 
 					default:
@@ -370,6 +328,29 @@ public class Init implements Runnable
 							LOG.info(String.format("%s%s",method, baseOpts.getBases()));
 						}
 						break;
+				}
+
+				if (null != baseSupplier)
+				{
+					final var tmpBaseSupplier = baseSupplier;
+					actions.add(s ->
+									{
+										if (LOG.isLoggable(Level.INFO))
+										{
+											LOG.info(method + baseType.name());
+										}
+
+										if (baseOpts.isUseBaseFile())
+										{
+											PrimeToolKit.setOutput(baseType.name(), this.decorateFileName(baseType.name(), "base", "log"));
+										}
+										final var base = tmpBaseSupplier.get();
+										base.setTrackTime(trackGenTime);
+										base.doPreferParallel(initOpts.isPreferParallel());
+										base.setBaseGenerationOutput(outputOpts.getOutputOpers().contains(OutputOper.CREATE));
+
+										base.genBases();
+									});
 				}
 			}
 		);

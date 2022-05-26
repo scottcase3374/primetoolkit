@@ -1,5 +1,6 @@
 package com.starcases.prime.cli;
 
+import java.util.Collections;
 import java.util.Set;
 
 import com.starcases.prime.intfc.OutputableIntfc;
@@ -31,6 +32,7 @@ class OutputOpts
 	 */
 	public Set<OutputableIntfc> getOutputOpers()
 	{
-		return Set.of(outputOper);
+
+		return outputOper == null ? Collections.emptySet() :  Set.of(outputOper);
 	}
 }

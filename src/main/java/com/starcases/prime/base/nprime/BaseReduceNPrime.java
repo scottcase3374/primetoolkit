@@ -57,7 +57,7 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 	 * Reduce all values greater than maxReduce - track multiples
 	 */
 	@Getter(AccessLevel.PUBLIC)
-	@Setter(AccessLevel.PUBLIC)
+	@Setter
 	@Min(2)
 	@Max(3)
 	private BigInteger maxReduce;
@@ -69,6 +69,17 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 	public BaseReduceNPrime(@NonNull final PrimeSourceIntfc primeSrc)
 	{
 		super(primeSrc);
+	}
+
+	/**
+	 * fluent style setter for the max reduction value
+	 * @param maxReduce
+	 * @return
+	 */
+	public BaseReduceNPrime assignMaxReduce(final BigInteger maxReduce)
+	{
+		this.maxReduce = maxReduce;
+		return this;
 	}
 
 	/**

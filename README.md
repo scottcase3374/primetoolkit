@@ -30,37 +30,18 @@ Current processing on my i7 with 64Gb RAM reaches about 3-5 million (cmd line ar
 The codebase uses Java 17 with Java 17 preview features enabled. This is mostly for switch statements using pattern matching.
 
 ## Execution - command line argument examples
-- init --max-count=100 --log=BASES 									--output-file=/~/ptk-demo/bases-count-100.log
-    - Logs the prime#'s and the index; #-bases is just 1
-- init --max-count=100000 -e=GML 									--output-file=/~/ptk-demo/gml-default-100000.log
-    - Dumps primes to a GML file in home directory
-- init --max-count=1000 --log=GRAPHSTRUCT							--output-file=/~/ptk-demo/graphstruct-default-1000.log
-    - Logs data from the graph structure
-- init --max-count=100 --log=GRAPHSTRUCT --graph=DEFAULT 			--output-file=/~/ptk-demo/graphstruct-default-100-graph.log
-    - Logs data from graph structure and renders some graphs/data
-- init --max-count=3000000 --log=NODESTRUCT 						--output-file=/~/ptk-demo/graphstruct-default-3mil.log
-    - Logs data from the node structure
-- init --max-count=3000000 --log=NODESTRUCT --graph=DEFAULT 		--output-file=/~/ptk-demo/nodestruct-default-3mil.log
-    - Logs data from node structure and renders some graphs/data
-- init --max-count=500 --log=BASES --base=THREETRIPLE  				--output-file=/~/ptk-demo/3triple-bases-500.log
-    - Logs the prime, index, #bases(triples) and each triple
-- init --max-count=250 --log=BASES --base=NPRIME --max-reduce=3		--output-file=/~/ptk-demo/nprime-bases-250-maxreduce-3.log
-    - Logs the prime, index, and a base-prime/count for primes under the "max-reduce" value (i.e. primes 1 and 2)
-- init --max-count=250 --LOG=BASES --base=NPRIME --max-reduce=6		--output-file=/~/ptk-demo/nprime-bases-250-maxreduce-6.log
-    - Logs the prime, index, and a base-prime/count for primes under the "max-reduce" value  (i.e. primes, 1,2,3,5)
-- init --max-count=25000 --log=BASES --base=NPRIME --max-reduce=4 --prefer-parallel=true --output-file=/~/ptk-demo/nprime-bases-25k-maxreduce-4.log
-    - Generates in parallel then logs the prime, index, and a base-prime/count for primes under the "max-reduce" value (i.e. primes 1,2,3)
+- init --max-count=100000 --base=DEFAULT --export=GML
+- init --max-count=100000 --export=GML
+    - Outputs prime node/edge info as GML into a file in the ~/ptk-output folder.
+- init --max-count=100 --base=PRIME_TREE --output=BASES  --prefer-parallel=true
+- init --max-count=100 --base=PREFIX --output=BASES  --prefer-parallel=true
+    - Parallel gen then output prime and calculated prefix/tree for the prime; (Prefix or tree) + Prime[n-1] = Prime
+- init --max-count=100 --base=THREETRIPLE --output=BASES
+    - Output the prime, index, #bases(triples) and each triple.
+- init --max-count=100 --base=PREFIX --output=PRIMETREE_METRICS --output=BASES
+     -  Outputs the prefix data as before but also includes prefix / count data.
 
 Adding option:
-
-	--log-generate
-may generate some additional intermediate logging.
-
-Adding option similar to:
-
-   --output-file=/home/scott/ptk.output
-
-will force console/standard-out redirection to that file. If filename already exist, it is renamed.
 
 You may need the following Java VM arguments depending on JDK version and setup/defaults for some variations/branches of the code;
 - --add-exports java.base/java.lang=ALL-UNNAMED
@@ -71,36 +52,23 @@ You may need the following Java VM arguments depending on JDK version and setup/
 ## Performance
 I made some improvements when performance was so poor as to prevent running default base creation for any meaningful number of primes. I'm very interested in improvements at the data structure selection level so that will be the focus for now.
 
-The initial design of triples used CompletableFuture (1 per target prime) which did reduce run times - running for 500 primes still took ~1m 30s minutes though. The logging to console out is a large time consumers (especially when running in an IDE such as Eclipse) - I implemented a CLI arg to redirect stdout to a file which helps.
+The initial design of triples used CompletableFuture (1 per target prime) which did reduce run times - running for 500 primes still took ~1m 30s minutes though. The logging to console out is a large time consumers (especially when running in an IDE such as Eclipse) - the "--use-base-file" flag helps by forcing base info to a file rather than console/stdout.
 
 I switched from CompletableFuture to a parallel stream which appeared to self tune better.  A few other changes were made - running triples with args of:
-- init --max-count 750 --base=THREETRIPLE --log-generate --log=BASES --output-file=/home/scott/ptk-demo/triples-750.log
-tool 7m 17s and produced an output log file of 75,289,288 bytes. The last record processed was: Prime [5693] idx[750] #-bases[17144]
-
-The recent changes reduced the run time for 750 triples to 6m 46s - with most of the changes related to reducing dynamic memory allocations and using more ints vs Integer/BigInteger and removing extraneous code which was no longer needed/used.
-
-Time for 750 triples went down to 6m 17s after switching to using Eclipse collections instead of JDK for some primary data. After almost
-exclusive use of Eclipse Collections the time went down to 6m 2s. This is with JDK 18 ea and not JDK 17/GraalVM - I wouldn't mind trying a conversion to Quarkus and a native image.  Quarkus supports Picocli which would be a small headache to handle otherwise (due to reflection) for a native image.
+- init --max-count 750 --base=THREETRIPLE --output=BASES  --use-base-file
+initially took 7m 17s and produced an output log file of 75,289,288 bytes. The last record processed was: Prime [5693] idx[750] #-bases[17144].  Current code completes in just under 6m.
 
 
 For a command line of:
-- init --max-count=25000 --log=BASES --base=NPRIME --max-reduce=4 --prefer-parallel=true
+- init --max-count=25000 --output=BASES --base=NPRIME --max-reduce=4 --prefer-parallel=true --user-base-file
 
-The run times when changing the prefer-parallel boolean were.
+The run times when changing the "--prefer-parallel" boolean were.
 - false: 4m 8s
 - true: 1m 5s.
 
 That flag applies to several base-logging and base-generation methods now. It generally drives either the use of parallel streams or aspects of the use of completableFutures.
 
-After removing a number of unused data items and methods, converting the primes collection from a list to a map and running without output to a file instead of console window in eclipse - runtime went from 1m 5s to 53s. The list to map conversion is part of some research into alternative data structs and also some checking into the use of soft/weak references in one or 2 places.
 
-After some further work where I switched from using Lists to Sets for managing the collection of bases - the run time went from 53s down to 19s.  Initial run with Eclipse collections instead of JDK for primary data - time rose to 25s.
-
-On a different note, one very interesting performance observation is related to a "simple" difference.
-- static final int TOP = 0;
-- static volatile int TOP = 0;
-- final int TOP = 0;
-It isn't really a performance difference that was noted but the effect on the system was quite different with volatile. The process kept each core at nearly 100% of user-cpu where as without volatile my system still had roughly the same total usage but it was listed under 'nice' when looking at the Unix 'top' command output. The priority of the process was different (higher priority) when volatile was used as above.  This data member was simply a fixed integer used as an index into some arrays.
 
 ## Observations
 - When logging 3 million node structs with other settings set to default - meaning you get a target prime # and a set of bases which includes the previous prime plus some subset of lower primes that sum to the target prime. The largest value in the subset of small primes in each base is usually less than 23 from a quick look at the data.  Example output: Prime 49979681 bases [[1,2,3,5,7,49979663]]  <dist[6], nextPrime[49979687]> idx[2999999]
@@ -278,12 +246,11 @@ Prime [1583] idx[250]
 which is interpreted as: Prime value 1583 is represented by: 1 x 155 + 2 x 318 + 3 x 264
 
 ## Design
-The current design is extensible and componentized to a decent degree which was very desirable.  Another idea crossed my mind though which is potentially a huge improvement in some ways.  Right now, Prime#'s are abstracted a bit through the PrimeRefIntfc and "bases" are abstracted via the PrimeBaseIntfc.  Primes can have bases generated via different methodologies, etc - such as where Prime N is the sum of Prime N-1 and some small set of primes in the range Prime 1 to N-2. So a base can be a set of primes.  The new idea fundamentally is - have the object representing a Prime implement both the PrimeRefIntfc AND PrimeBaseIntfc?  Where I would take this idea is - represent bases with effectively 2 parts such as:  (1) a set of "prefix" primes  (2) the N-1 prime.  This would promote sharing a single representation (prefix) out of a set of prefixes across many primes. The result is a trade-off between time (to calculate a BigInteger equivalent of a prime) versus being able to represent a much larger range of primes due to lower memory when representing very large primes.
+The current design is extensible to a degree. Primes can have bases generated via different methodologies, etc - such as where Prime N is the sum of Prime N-1 + some small set of primes in the range Prime 1 to N-2. So a base can be a set of primes summed. Primes can also be represented as 2 parts where one part is Prime[n-1] and the other part is a reference to collection of primes (aka a prefix or tree of primes) and both parts are summed.
 
-This could be combined with a type of caching - where a final prime is fully calculated and weak and/or soft references are used to enable access if needed for a period of time but then eventually the BigInteger would be reclaimable by the GC.  Before being reclaimed, it could be used to generate bases (or other types of bases) for other primes. Temporarily having the actual BigInteger representation allows simple diff calculations or finding the distance between items, etc. Hopefully this makes sense to a degree.  It needs a few good use cases or scenarios to help determine if it could truly work and be beneficial. It definitely is intended to enable more space vs time trade-offs to be possible.
+Currently, I'm mostly using the 2-part representation now and maintaining unique sets/trees of primes.
 
-As the initial design used sequential processes; when I started to add in support for more parallel/concurrent processing I should have
-immediately reviewed my data structures to identify any potential issues. Interestingly, when using HashMap, I didn't see actual issues with my results before moving to some of the concurrent collections.
+As the initial design used sequential processes; when I started to add in support for more parallel/concurrent processing I should have immediately reviewed my data structures to identify any potential issues. I ended up using Eclipse collections which were not always faster data structures but they did reduce memory consumption which allowed scaling to larger sets of primes. I also used the concurrent versions as needed to prevent race conditions.
 
 
 ## Implementation
@@ -296,4 +263,3 @@ information and then new base generation, logging and graphing actions are added
 	- More test coverage
 	- More metrics generation
 	- Specialized data structures
-	- Better support for tracking performance (run-time) of the various stages (prime determination, prime bases generation, logging, etc).

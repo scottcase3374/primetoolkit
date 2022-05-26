@@ -1,5 +1,6 @@
 package com.starcases.prime.cli;
 
+import java.util.Collections;
 import java.util.Set;
 
 import javax.validation.constraints.Min;
@@ -35,11 +36,19 @@ class BaseOpts
 	private int maxReduce;
 
 	/**
+	 * flag indicating whether to redirect output of base info to a file
+	 */
+	@Getter
+	@Setter
+	@Option(names = {"--use-base-file"}, description = "Output to a base specific file", required = false)
+	private boolean useBaseFile;
+
+	/**
 	 * Get bases to process
 	 * @return
 	 */
 	public Set<BaseTypes> getBases()
 	{
-		return Set.of(bases);
+		return bases == null ? Collections.emptySet() : Set.of(bases);
 	}
 }

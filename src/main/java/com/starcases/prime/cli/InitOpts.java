@@ -51,6 +51,14 @@ class InitOpts
 	private String outputFolder;
 
 	/**
+	 * flag indicating whether stdout should redirect to a file
+	 */
+	@Getter
+	@Setter
+	@Option(names = {"--stdout-redirect"}, description = "Indicate stdout should redirect to a file", required = false)
+	private boolean stdOuputRedir;
+
+	/**
 	 * flag indicating if use of multiple CPU cores is ok
 	 */
 	@Getter

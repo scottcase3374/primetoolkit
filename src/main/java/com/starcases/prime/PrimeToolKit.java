@@ -93,7 +93,20 @@ public final class PrimeToolKit
 	 */
 	public static void output(final BaseTypes baseType, final String format, final Object...params)
 	{
-		final var path = outputs.get(baseType.name());
+		output(baseType.toString(), format, params);
+	}
+
+	/**
+	 * Method to send out to a printstream which may by
+	 * default be stdout or renamed to a specific file.
+	 *
+	 * @param format
+	 * @param params
+	 * @throws IOException
+	 */
+	public static void output(final String baseType, final String format, final Object...params)
+	{
+		final var path = outputs.get(baseType);
 		if (path != null)
 		{
 			try
@@ -114,10 +127,7 @@ public final class PrimeToolKit
 		}
 		else
 		{
-			if (LOG.isLoggable(Level.INFO))
-			{
-				LOG.info(String.format(format, params));
-			}
+			System.out.printf(format + "\n", params);
 		}
 	}
 
@@ -130,7 +140,7 @@ public final class PrimeToolKit
 	 */
 	public static void output(final String format, final Object...params)
 	{
-		PrimeToolKit.output(BaseTypes.DEFAULT, format, params);
+		PrimeToolKit.output("stdout", format, params);
 	}
 
 	/**
