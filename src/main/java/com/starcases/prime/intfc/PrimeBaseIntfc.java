@@ -1,11 +1,11 @@
 package com.starcases.prime.intfc;
 
 import java.io.Serializable;
-import java.math.BigInteger;
-import java.util.List;
-import java.util.Set;
 
 import com.starcases.prime.base.BaseTypes;
+
+import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
+import org.eclipse.collections.api.list.MutableList;
 
 import lombok.NonNull;
 
@@ -32,28 +32,25 @@ import lombok.NonNull;
 public interface PrimeBaseIntfc extends Serializable
 {
 	/**
-	 * Add Sets of primes (big integers) and a base metadata container to the specified base.
-	 * FIXME distinguish between this and the other similar methods.
+	 * Add Sets of primes (longs) and a base metadata container to the specified base.
 	 * @param baseType
 	 * @param primeBase
 	 * @param metadata
 	 */
-	void addPrimeBases(@NonNull BaseTypes baseType, @NonNull List<Set<BigInteger>> primeBase, @NonNull BaseMetadataIntfc metadata);
+	void addPrimeBases(@NonNull BaseTypes baseType, @NonNull MutableList<ImmutableLongCollection> primeBase, @NonNull BaseMetadataIntfc metadata);
 
 	/**
 	 * Add sets of primes to current base
-	 * FIXME distinguish between this and the other similar methods.
 	 * @param primeBase
 	 */
-	void addPrimeBases(@NonNull List<Set<BigInteger>> primeBase);
+	void addPrimeBases(@NonNull MutableList<ImmutableLongCollection> primeBase);
 
 	/**
 	 * Add sets of primes for specified base.
-	 * FIXME distinguish between this and the other similar methods.
 	 * @param primeBase
 	 * @param baseType
 	 */
-	void addPrimeBases(@NonNull List<Set<BigInteger>> primeBase, @NonNull BaseTypes baseType);
+	void addPrimeBases(@NonNull MutableList<ImmutableLongCollection> primeBase, @NonNull BaseTypes baseType);
 
 	/**
 	 * Get the base meta data container for the specified base type.
@@ -69,11 +66,11 @@ public interface PrimeBaseIntfc extends Serializable
 	 *
 	 * @return No-arg version; so this returns data for Bases.DEFAULT
 	 */
-	List<Set<BigInteger>> getPrimeBases();
+	MutableList<ImmutableLongCollection> getPrimeBases();
 
 	/**
 	 * Not every use case needs multiple bases per Prime
 	 * @return
 	 */
-	List<Set<BigInteger>> getPrimeBases(@NonNull BaseTypes baseType);
+	MutableList<ImmutableLongCollection> getPrimeBases(@NonNull BaseTypes baseType);
 }

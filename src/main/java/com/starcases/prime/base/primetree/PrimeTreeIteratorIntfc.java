@@ -1,8 +1,8 @@
 package com.starcases.prime.base.primetree;
 
-import java.math.BigInteger;
 import java.util.ListIterator;
-import java.util.Set;
+
+import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
 
 /**
  * Represent an iterator for use with tree nodes.  Adds some alternative
@@ -10,6 +10,7 @@ import java.util.Set;
  * the default method signatures did not contain
  * needed items.
  */
+@SuppressWarnings("PMD.TooManyMethods")
 public interface PrimeTreeIteratorIntfc extends ListIterator<PrimeTreeNode>
 {
 	/**
@@ -84,25 +85,25 @@ public interface PrimeTreeIteratorIntfc extends ListIterator<PrimeTreeNode>
 	 * @param prime
 	 * @return
 	 */
-	boolean hasNext(BigInteger prime);
+	boolean hasNext(long prime);
 
 	/**
 	 * Get next tree node for specified prime
 	 * @param prime
 	 * @return
 	 */
-	PrimeTreeNode next(BigInteger prime);
+	PrimeTreeNode next(long prime);
 
 	/**
 	 * Add next prime as next tree node.
 	 * @param prime
 	 * @return
 	 */
-	PrimeTreeNode add(BigInteger prime);
+	PrimeTreeNode add(long prime);
 
 	/**
 	 * Get a set representation
 	 * @return
 	 */
-	Set<BigInteger> toSet();
+	ImmutableLongCollection toCollection();
 }

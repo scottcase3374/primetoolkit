@@ -1,10 +1,7 @@
 package com.starcases.prime.base.primetree;
 
-
-import java.math.BigInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import com.starcases.prime.PrimeToolKit;
 import com.starcases.prime.base.BaseTypes;
@@ -38,7 +35,7 @@ public class LogPrimeTree extends AbstractLogBase
 	/**
 	 * Output the informaation regarding the base.
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
+	@SuppressWarnings({"PMD.LawOfDemeter", "PMD.DataflowAnomalyAnalysis"})
 	@Override
 	public void outputLogs()
 	{
@@ -51,33 +48,23 @@ public class LogPrimeTree extends AbstractLogBase
 
 		final int [] itemIdx = {0};
 
-		primeSrc.getPrimeRefStream(false)
-		.<String>mapMulti((pr, consumer) ->
+		primeSrc
+			.getPrimeRefStream(false)
+			.forEach( primeRef ->
 							{
-								outputStr.append(String.format("Prime [%d] idx[%d] Tree: ", pr.getPrime(), itemIdx[0]));
+								PrimeToolKit.output(BaseTypes.PRIME_TREE, "%s", String.format("Prime [%d] idx[%d] Tree: ", primeRef.getPrime(), itemIdx[0]));
 
-								pr
-								.getPrimeBaseData()
-								.getPrimeBases(BaseTypes.PRIME_TREE)
-								.iterator()
-								.forEachRemaining( primeBases ->
-
-														outputStr.append(
-															primeBases
-														 	.stream()
-														 	.map(BigInteger::toString)
-														 	.collect(Collectors.joining(",","[","]"))
-														 	)
-
-													);
-								outputStr.append(String.format("%n"));
-								consumer.accept(outputStr.toString());
+								primeRef
+									.getPrimeBaseData()
+									.getPrimeBases(BaseTypes.PRIME_TREE)
+									.iterator()
+									.forEachRemaining( primeBases -> primeBases.appendString(outputStr, "[", ",", "]"));
+								PrimeToolKit.output(BaseTypes.PRIME_TREE, "\t%s", outputStr);
 								outputStr.setLength(0);
 								itemIdx[0]++;
 
 							}
-				)
-		.forEach(str -> PrimeToolKit.output(BaseTypes.PRIME_TREE, "%s", str));
+				);
 	}
 }
 

@@ -1,15 +1,16 @@
 package com.starcases.prime.impl;
 
-import java.math.BigInteger;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
+import java.util.OptionalLong;
 import java.util.function.Supplier;
 
 import com.starcases.prime.intfc.PrimeBaseIntfc;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
+
+import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
+import org.eclipse.collections.api.list.MutableList;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -70,7 +71,7 @@ public class PrimeRef implements PrimeRefIntfc
 	@SuppressWarnings("PMD.LawOfDemeter")
 	public PrimeRef init(
 			@NonNull final Supplier<PrimeBaseIntfc> primeBaseSupplier,
-			@NonNull final List<Set<BigInteger>> primeBases)
+			@NonNull final MutableList<ImmutableLongCollection> primeBases)
 	{
 		primeBaseData = primeBaseSupplier.get();
 		getPrimeBaseData().addPrimeBases(primeBases);
@@ -91,45 +92,44 @@ public class PrimeRef implements PrimeRefIntfc
 	@Override
 	public boolean equals(final Object obj)
 	{
+		boolean ret;
 		if (this == obj)
 		{
-			return true;
+			ret = true;
 		}
-		if (obj == null)
+		else if (obj == null)
 		{
-			return false;
+			ret = false;
 		}
-		if (getClass() != obj.getClass())
+		else if (getClass() != obj.getClass())
 		{
-			return false;
+			ret = false;
 		}
-
-		final PrimeRef other = (PrimeRef) obj;
-		return primeIdx == other.primeIdx;
+		else
+		{
+			final PrimeRef other = (PrimeRef) obj;
+			ret = primeIdx == other.primeIdx;
+		}
+		return ret;
 	}
 
 	@Override
 	public Optional<PrimeRefIntfc> getNextPrimeRef()
 	{
-		return primeSrc.getPrimeRef(primeIdx +1);
+		return primeSrc.getPrimeRefForIdx(primeIdx +1);
 	}
 
 	@Override
 	public Optional<PrimeRefIntfc> getPrevPrimeRef()
 	{
-		if (primeIdx == 0)
-		{
-			return Optional.empty();
-		}
-
-		return primeSrc.getPrimeRef(primeIdx -1);
+		return primeIdx == 0 ? Optional.empty() : primeSrc.getPrimeRefForIdx(primeIdx -1);
 	}
 
 	@SuppressWarnings("PMD.LawOfDemeter")
 	@Override
-	public BigInteger getPrime()
+	public long getPrime()
 	{
-		return primeSrc.getPrime(primeIdx)
+		return primeSrc.getPrimeForIdx(primeIdx)
 				.orElseThrow();
 	}
 
@@ -147,9 +147,10 @@ public class PrimeRef implements PrimeRefIntfc
 	 */
 	@SuppressWarnings("PMD.LawOfDemeter")
 	@Override
-	public Optional<BigInteger> getDistToNextPrime()
+	public OptionalLong getDistToNextPrime()
 	{
-		return  getNextPrimeRef().map(npr -> npr.getPrime().subtract(getPrime()));
+		final var result = getNextPrimeRef();
+		return  result.isPresent() ? OptionalLong.of(result.get().getPrime() - getPrime()) : OptionalLong.empty();
 	}
 
 	/**
@@ -160,9 +161,10 @@ public class PrimeRef implements PrimeRefIntfc
 	 */
 	@SuppressWarnings("PMD.LawOfDemeter")
 	@Override
-	public Optional<BigInteger> getDistToPrevPrime()
+	public OptionalLong getDistToPrevPrime()
 	{
-		return getPrevPrimeRef().map(ppr -> ppr.getPrime().subtract(getPrime()));
+		final var result = getPrevPrimeRef();
+		return result.isPresent() ? OptionalLong.of(result.get().getPrime() - getPrime()) : OptionalLong.empty();
 	}
 
 	@Override
@@ -174,6 +176,6 @@ public class PrimeRef implements PrimeRefIntfc
 	@Override
 	public String toString()
 	{
-		return this.getPrime().toString();
+		return Long.toString(this.getPrime());
 	}
 }

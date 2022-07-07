@@ -27,7 +27,6 @@ public abstract class AbstractPrimeBaseGenerator implements PrimeBaseGenerateInt
 	 */
 	private static final Logger ABSTRACT_LOG = Logger.getLogger(AbstractPrimeBaseGenerator.class.getName());
 
-
 	/**
 	 * Access to lookup of prime/primerefs and the init of base information.
 	 */
@@ -67,7 +66,6 @@ public abstract class AbstractPrimeBaseGenerator implements PrimeBaseGenerateInt
 	@Setter(AccessLevel.PRIVATE)
 	@Getter(AccessLevel.PRIVATE)
 	private Instant start;
-
 
 	/**
 	 * constructor for primary base.
@@ -132,27 +130,33 @@ public abstract class AbstractPrimeBaseGenerator implements PrimeBaseGenerateInt
 	 *
 	 * @param startTime
 	 */
-	@SuppressWarnings({"PMD.LawOfDemeter"})
+	@SuppressWarnings({"PMD.LawOfDemeter", "PMD.GuardLogStatement"})
 	protected void event(final boolean startTime)
 	{
-		if (startTime && ABSTRACT_LOG.isLoggable(Level.INFO))
+		if (ABSTRACT_LOG.isLoggable(Level.INFO))
 		{
-			this.start = Instant.now();
-		}
-		else
-		{
-			if (ABSTRACT_LOG.isLoggable(Level.INFO))
+			if (startTime)
 			{
-				final var diff = ChronoUnit.MILLIS.between(start, Instant.now());
-				final var milliRemain = diff % 1000;
-				final var secondRemain = diff / 1000 % 60;
-				final var minuteRemain = diff / 60_000 % 60;
+				this.start = Instant.now();
 
-				final var timeDisplayFmt = new DecimalFormat("###,###");
-				ABSTRACT_LOG.info(String.format("Base generation: %s min %s sec %s milli",
-						timeDisplayFmt.format(minuteRemain),
-						timeDisplayFmt.format(secondRemain),
-						timeDisplayFmt.format(milliRemain)));
+					ABSTRACT_LOG.info("Base generation start time: " + start);
+			}
+			else
+			{
+
+					final var end = Instant.now();
+					ABSTRACT_LOG.info("Base generation end time: " + end);
+					final var diff = ChronoUnit.MILLIS.between(start, end);
+					final var milliRemain = diff % 1_000;
+					final var secondRemain = (diff / 1_000) % 60;
+					final var minuteRemain = (diff / 60_000) % 60;
+
+					final var timeDisplayFmt = new DecimalFormat("###,###");
+					ABSTRACT_LOG.info(String.format("Base generation: %s min %s sec %s milli",
+							timeDisplayFmt.format(minuteRemain),
+							timeDisplayFmt.format(secondRemain),
+							timeDisplayFmt.format(milliRemain)
+							));
 			}
 		}
 	}

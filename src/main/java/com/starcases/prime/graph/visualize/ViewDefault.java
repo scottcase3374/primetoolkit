@@ -11,7 +11,7 @@ import org.jgrapht.event.GraphListener;
 import org.jgrapht.graph.DefaultEdge;
 
 import com.starcases.prime.base.BaseTypes;
-import com.starcases.prime.graph.impl.AbstractPrimeGrapher;
+import com.starcases.prime.graph.impl.PrimeGrapherBase;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 
@@ -27,7 +27,7 @@ import lombok.NonNull;
  * supports inclusion of other visuals/displays (such as MetaData Table) via GraphListener.
  */
 @SuppressWarnings("PMD.CommentSize")
-public class ViewDefault extends AbstractPrimeGrapher
+public class ViewDefault extends PrimeGrapherBase
 {
 	/**
 	 * Default logger

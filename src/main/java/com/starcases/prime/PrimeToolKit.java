@@ -9,7 +9,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.starcases.prime.base.BaseTypes;
-import com.starcases.prime.cli.Init;
+import com.starcases.prime.cli.DefaultInit;
 
 import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 
@@ -29,7 +29,7 @@ import picocli.CommandLine.Model.CommandSpec;
 @SuppressWarnings("PMD.AtLeastOneConstructor")
 @Getter
 @Setter
-@Command(name = "ptk", subcommands = { Init.class, CommandLine.HelpCommand.class }  , description="Prime Tool Kit")
+@Command(name = "ptk", subcommands = { DefaultInit.class, CommandLine.HelpCommand.class }  , description="Prime Tool Kit")
 public final class PrimeToolKit
 {
 	/**
@@ -104,6 +104,7 @@ public final class PrimeToolKit
 	 * @param params
 	 * @throws IOException
 	 */
+	@SuppressWarnings("PMD.SystemPrintln")
 	public static void output(final String baseType, final String format, final Object...params)
 	{
 		final var path = outputs.get(baseType);
@@ -127,7 +128,8 @@ public final class PrimeToolKit
 		}
 		else
 		{
-			System.out.printf(format + "\n", params);
+			System.out.printf(String.format(format, params));
+			System.out.printf("%n");
 		}
 	}
 

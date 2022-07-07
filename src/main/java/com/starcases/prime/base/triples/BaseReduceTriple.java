@@ -1,6 +1,5 @@
 package com.starcases.prime.base.triples;
 
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -12,6 +11,7 @@ import com.starcases.prime.base.AbstractPrimeBaseGenerator;
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
+import org.eclipse.collections.impl.list.mutable.MutableListFactoryImpl;
 
 import lombok.NonNull;
 
@@ -99,7 +99,7 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 	 * top-level function; iterate over entire dataset to reduce every Prime
 	 * @param maxReduce
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
+	@SuppressWarnings({"PMD.LawOfDemeter", "PMD.DataflowAnomalyAnalysis"})
 	@Override
 	protected void genBasesImpl()
 	{
@@ -117,7 +117,7 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 		.forEach(curPrime ->
 					curPrime
 					.getPrimeBaseData()
-					.addPrimeBases(List.of(curPrime.getPrimeBaseData().getPrimeBases(BaseTypes.DEFAULT).get(0)), BaseTypes.THREETRIPLE)
+					.addPrimeBases(MutableListFactoryImpl.INSTANCE.of(curPrime.getPrimeBaseData().getPrimeBases(BaseTypes.DEFAULT).get(0)), BaseTypes.THREETRIPLE)
 		);
 
 

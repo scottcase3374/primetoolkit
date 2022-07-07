@@ -1,24 +1,26 @@
 package com.starcases.prime.impl;
 
-import java.math.BigInteger;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.LongPredicate;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import com.starcases.prime.PrimeToolKit;
 import com.starcases.prime.intfc.CollectionTrackerIntfc;
 
+import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
 import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 
 import lombok.AccessLevel;
 import lombok.Getter;
 
 /**
- * manage handing out consistent references to the same copy of lists when given
- * the same members to prevent multiple copies of large collections.
+ * manage handing out consistent references to the same copy of
+ * collections when given the same members to prevent multiple
+ * copies of large collections.
+ *
+ * Single-level structure maps a sum of prime collection to a structure
+ * referencing the collection and the sum.
  */
 @SuppressWarnings("PMD.AtLeastOneConstructor")
 public class CollectionTrackerImpl implements CollectionTrackerIntfc
@@ -40,9 +42,9 @@ public class CollectionTrackerImpl implements CollectionTrackerIntfc
 	 */
 	@SuppressWarnings({"PMD.LawOfDemeter"})
 	@Override
-	public PData track(final Set<BigInteger> collection)
+	public PData track(final ImmutableLongCollection collection)
 	{
-		final var sum = collection.stream().reduce(BigInteger.ZERO, BigInteger::add).longValue();
+		final long sum = collection.sum();
 		useCounts.compute(sum, (l1, l2) -> l2 != null? l2+1 : 0);
 		return sourcePrimes.computeIfAbsent(sum, k -> new PData(collection, sum));
 	}
@@ -86,6 +88,6 @@ public class CollectionTrackerImpl implements CollectionTrackerIntfc
 					PrimeToolKit.output("sum: [%d] occurrences: [%d] prefix: [%s]%n",
 							l1,
 							l2,
-							sourcePrimes.get(l1).coll().stream().map(BigInteger::toString).collect(Collectors.joining(","))));
+							sourcePrimes.get(l1).toCanonicalCollection().makeString()));
 	}
 }

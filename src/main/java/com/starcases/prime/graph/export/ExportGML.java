@@ -1,7 +1,6 @@
 package com.starcases.prime.graph.export;
 
 import java.io.PrintWriter;
-import java.math.BigInteger;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.logging.Level;
@@ -199,7 +198,7 @@ class EdgeElement implements ElementIntfc
 	@Override
 	public void output()
 	{
-		pRef.getPrimeBaseData().getPrimeBases().get(0).stream().forEach(s -> outputEdge(outputWriter, s, pRef.getPrime()));
+		pRef.getPrimeBaseData().getPrimeBases().get(0).forEach(s -> outputEdge(outputWriter, s, pRef.getPrime()));
 	}
 
 	/**
@@ -209,7 +208,7 @@ class EdgeElement implements ElementIntfc
 	 * @param source
 	 * @param target
 	 */
-	private void outputEdge(@NonNull final PrintWriter outputWriter, @NonNull @Min(1) final BigInteger source, @NonNull @Min(1) final BigInteger target)
+	private void outputEdge(@NonNull final PrintWriter outputWriter, @Min(1) final long source,@Min(1) final long target)
 	{
 		outputWriter.println("  edge");
 		outputWriter.println("  [");

@@ -1,9 +1,8 @@
 package com.starcases.prime.impl;
 
-import java.math.BigInteger;
-import java.util.Set;
+import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
 
-public record PData(Set<BigInteger> coll, long prime)
+public record PData(ImmutableLongCollection toCanonicalCollection, long prime)
 {
 
 }

@@ -1,8 +1,6 @@
 package com.starcases.prime.base.nprime;
 
-import java.math.BigInteger;
-
-import org.eclipse.collections.api.bag.sorted.MutableSortedBag;
+import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
 
 import com.starcases.prime.intfc.BaseMetadataIntfc;
 
@@ -24,13 +22,13 @@ public class NPrimeBaseMetadata implements BaseMetadataIntfc
 	 * Track count for subset of bases
 	 */
 	@Getter
-	private final MutableSortedBag<BigInteger> countForBaseIdx;
+	private final ImmutableLongCollection countForBaseIdx;
 
 	/**
 	 * Create the count metadata
 	 * @param countForBaseIdx
 	 */
-	public NPrimeBaseMetadata(@NonNull final MutableSortedBag<BigInteger> countForBaseIdx)
+	public NPrimeBaseMetadata(@NonNull final ImmutableLongCollection countForBaseIdx)
 	{
 		this.countForBaseIdx = countForBaseIdx;
 	}

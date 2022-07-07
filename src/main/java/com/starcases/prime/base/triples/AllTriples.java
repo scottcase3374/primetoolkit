@@ -1,13 +1,15 @@
 package com.starcases.prime.base.triples;
 
-import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.EnumSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
-import org.eclipse.collections.impl.set.sorted.mutable.TreeSortedSet;
+import java.util.Objects;
+
+import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
+import org.eclipse.collections.api.factory.Lists;
+
+import org.eclipse.collections.impl.factory.Sets;
+import org.eclipse.collections.impl.set.immutable.primitive.ImmutableLongSetFactoryImpl;
 
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
@@ -87,12 +89,12 @@ enum SumConstraintState
 						stream(primeRefs)
 						.filter(Objects::nonNull)
 						.map(PrimeRefIntfc::getPrime)
-						.reduce(BigInteger.ZERO, BigInteger::add);
+						.reduce(0L, (a, b) -> a+b);
 
 		// determine if sum is higher than Prime, equal to Prime, less than Prime or just doesn't match for some reason.
-		final var sumComptoPrime = targetPrime.getPrime().compareTo(sum);
+		final var sumComptoPrime = targetPrime.getPrime() - sum;
 
-		return SumConstraintState.getEnum(sumComptoPrime);
+		return SumConstraintState.getEnum((int)sumComptoPrime);
 	}
 }
 
@@ -132,7 +134,7 @@ enum ConditionConstraintState
 	 * @param primeRefs
 	 * @return
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
+	@SuppressWarnings({"PMD.LawOfDemeter", "PMD.DataflowAnomalyAnalysis"})
 	public static ConditionConstraintState checkConditionConstraints(
 			@NonNull final PrimeRefIntfc ... primeRefs)
 	{
@@ -153,11 +155,11 @@ enum ConditionConstraintState
 
 		if (ConditionConstraintState.OK.equals(constraintState))
 		{
-			if (baseCount != bases.length)
+			if ( bases.length != baseCount)
 			{
 				constraintState = ConditionConstraintState.MISSING_BASE;
 			}
-			else if (Arrays.stream(bases).distinct().count() != bases.length)
+			else if (bases.length != Arrays.stream(bases).distinct().count())
 			{
 				constraintState = ConditionConstraintState.DUPE;
 			}
@@ -262,14 +264,14 @@ public class AllTriples
 	 * Performing the process for each prime ref in concurrent/parallel produces a speedup but since this is
 	 * generating all combinations of valid sums, it is slow for more than small sets of primes.
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
+	@SuppressWarnings({"PMD.LawOfDemeter", "PMD.DataflowAnomalyAnalysis"})
 	public void process()
 	{
 		final PrimeRefIntfc [] triple =
 			{
-				primeSrc.getPrimeRef(0).orElse(null),  // Prime 1
-				primeSrc.getPrimeRef(2).orElse(null), // Prime 3
-				primeSrc.getPrimeRef(4).orElse(null) // Prime 7
+				primeSrc.getPrimeRefForIdx(0).orElse(null),  // Prime 1
+				primeSrc.getPrimeRefForIdx(2).orElse(null), // Prime 3
+				primeSrc.getPrimeRefForIdx(4).orElse(null) // Prime 7
 			};
 
 		final SumConstraintState [] sumConstraint = {SumConstraintState.checkSumConstraints(triple, targetPrime)};
@@ -291,29 +293,27 @@ public class AllTriples
 				while(GOOD_SUM_STATE.contains(sumConstraint[0]) && !BAD_CONDITION_STATE.contains(conditionConstraint[0]));
 
 				// reset inner loop
-				triple[BOT] =  primeSrc.getPrimeRef(0).orElse(null);
+				triple[BOT] =  primeSrc.getPrimeRefForPrime(0).orElse(null);
 
 				this.nextPrimeRef(MID, triple, sumConstraint, conditionConstraint);
 			}
 			while(GOOD_SUM_STATE.contains(sumConstraint[0]) && !BAD_CONDITION_STATE.contains(conditionConstraint[0]));
 
 			// reset inner loops
-			triple[MID] = primeSrc.getPrimeRef(1).orElse(null);
-			triple[BOT] = primeSrc.getPrimeRef(0).orElse(null);
+			triple[MID] = primeSrc.getPrimeRefForPrime(1).orElse(null);
+			triple[BOT] = primeSrc.getPrimeRefForPrime(0).orElse(null);
 
 			this.nextPrimeRef(TOP, triple, sumConstraint, conditionConstraint);
 		}
 		while(GOOD_SUM_STATE.contains(sumConstraint[0]) && !BAD_CONDITION_STATE.contains(conditionConstraint[0]));
 	}
 
-	@SuppressWarnings("PMD.LawOfDemeter")
+	@SuppressWarnings({"PMD.LawOfDemeter", "PMD.DataflowAnomalyAnalysis", "PMD.UseVarargs"})
 	private void addPrimeBases(final @NonNull PrimeRefIntfc prime, final @NonNull PrimeRefIntfc [] vals)
 	{
-		final var basePrimeColl = Arrays.stream(vals)
-			.filter(Objects::nonNull)
-			.map(PrimeRefIntfc::getPrime)
-			.collect(Collectors.toCollection(TreeSortedSet::newSet));
+		final ImmutableLongCollection primeColl = ImmutableLongSetFactoryImpl.INSTANCE.of(prime.getPrime());
+		final ImmutableLongCollection primesColl = Sets.immutable.of(vals).collectLong(PrimeRefIntfc::getPrime);
 
-		prime.getPrimeBaseData().addPrimeBases(List.of(basePrimeColl), BaseTypes.THREETRIPLE);
+		prime.getPrimeBaseData().addPrimeBases(Lists.mutable.of(primeColl, primesColl), BaseTypes.THREETRIPLE);
 	}
 }

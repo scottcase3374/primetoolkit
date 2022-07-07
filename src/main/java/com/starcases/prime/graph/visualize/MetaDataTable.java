@@ -13,7 +13,6 @@ import lombok.NonNull;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import javax.swing.JFrame;
 import javax.swing.JTable;
 import javax.swing.WindowConstants;
@@ -139,12 +138,12 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 			final var edist = event.getVertex().getDistToPrevPrime();
 			final var pdist = primeMaxDistToPrev.getDistToPrevPrime();
 
-			if (pdist.isEmpty() || edist.isPresent() && edist.get().abs().compareTo(pdist.get().abs()) > 0)
+			if (pdist.isEmpty() || edist.isPresent() && Math.abs(edist.getAsLong()) - Math.abs(pdist.getAsLong()) > 0)
 			{
 				primeMaxDistToPrev = event.getVertex();
 			}
 		}
-		data[0][PRIME_MAX_DIST_PREV_PRIME] = String.format("Prime [%d] / max-dist[%d]", primeMaxDistToPrev.getPrime(), primeMaxDistToPrev.getDistToPrevPrime().orElse(BigInteger.ZERO));
+		data[0][PRIME_MAX_DIST_PREV_PRIME] = String.format("Prime [%d] / max-dist[%d]", primeMaxDistToPrev.getPrime(), primeMaxDistToPrev.getDistToPrevPrime().orElse(0L));
 	}
 
 	/**
@@ -162,7 +161,7 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 	@SuppressWarnings("PMD.LawOfDemeter")
 	protected void handleAvgDistToPrev()
 	{
-		data[0][AVG_DIST_PREV_PRIME] = String.format("Total dist[%d], total-primes[%d] avg-dist[%f]", primeMaxDistToPrev.getPrime().longValue(), primeMaxDistToPrev.getPrimeRefIdx() , (double)primeMaxDistToPrev.getPrime().longValue() / (primeMaxDistToPrev.getPrimeRefIdx()+1));
+		data[0][AVG_DIST_PREV_PRIME] = String.format("Total dist[%d], total-primes[%d] avg-dist[%f]", primeMaxDistToPrev.getPrime(), primeMaxDistToPrev.getPrimeRefIdx() , (double)primeMaxDistToPrev.getPrime() / (primeMaxDistToPrev.getPrimeRefIdx()+1));
 	}
 
 	/**

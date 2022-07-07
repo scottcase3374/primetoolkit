@@ -1,12 +1,13 @@
 package com.starcases.prime.base.prefix;
 
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.starcases.prime.base.AbstractPrimeBaseGenerator;
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
+
+import org.eclipse.collections.api.factory.Lists;
 
 import lombok.NonNull;
 
@@ -42,7 +43,7 @@ public class BasePrefixes extends AbstractPrimeBaseGenerator
 		prStream.forEach(pr ->
 				{
 					final var origBases = pr.getPrimeBaseData().getPrimeBases().get(0);
-					pr.getPrimeBaseData().addPrimeBases(List.of(origBases), BaseTypes.PREFIX);
+					pr.getPrimeBaseData().addPrimeBases(Lists.mutable.of(origBases), BaseTypes.PREFIX);
 				});
 	}
 }

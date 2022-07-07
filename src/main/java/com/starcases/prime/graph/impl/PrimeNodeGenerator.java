@@ -13,8 +13,6 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 
-import java.math.BigInteger;
-
 /**
  * This was just an experiment with the GraphStream lib originally
  *  and then converted to jgrapht.
@@ -91,7 +89,7 @@ public class PrimeNodeGenerator
 		// bootstrap
 		for (level = 0; level < 2; level++)
 		{
-			primeSrc.getPrimeRef(level).ifPresent(
+			primeSrc.getPrimeRefForIdx(level).ifPresent(
 					targetNode ->
 									{
 										graph.addVertex(targetNode);
@@ -108,7 +106,7 @@ public class PrimeNodeGenerator
 	@SuppressWarnings("PMD.LawOfDemeter")
 	public boolean nextEvents()
 	{
-		primeSrc.getPrimeRef(level).ifPresent(pRef ->
+		primeSrc.getPrimeRefForIdx(level).ifPresent(pRef ->
 			{
 				primeRef = pRef;
 				addNodeRawBase();
@@ -127,7 +125,6 @@ public class PrimeNodeGenerator
 		// Link from Prime node to Prime bases (i.e. unique set of smaller primes that sums to this Prime).
 		primeRef.getPrimeBaseData().getPrimeBases(baseType)
 							.get(0)
-							.stream()
 							.forEach(
 									base -> {
 											addVertext(primeRef);
@@ -151,8 +148,8 @@ public class PrimeNodeGenerator
 	 * @param primeRef
 	 */
 	@SuppressWarnings("PMD.LawOfDemeter")
-	protected void addBaseEdge(final BigInteger base, final PrimeRefIntfc primeRef)
+	protected void addBaseEdge(final long base, final PrimeRefIntfc primeRef)
 	{
-		primeSrc.getPrimeRef(base).ifPresent( p -> graph.addEdge(p , primeRef));
+		primeSrc.getPrimeRefForPrime(base).ifPresent( p -> graph.addEdge(p , primeRef));
 	}
 }

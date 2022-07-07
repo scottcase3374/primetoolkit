@@ -1,6 +1,5 @@
 package com.starcases.prime.graph.impl;
 
-import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -24,13 +23,13 @@ import lombok.NonNull;
  *
  */
 @SuppressWarnings({"PMD.LongVariable", "PMD.EmptyStatementNotInLoop"})
-public abstract class AbstractPrimeGrapher
+public class PrimeGrapherBase
 {
 	/**
 	 * A comparator for node objects.
 	 */
 	@NonNull
-	protected static final Comparator<PrimeRefIntfc> NODE_COMPARATOR = (PrimeRefIntfc o1, PrimeRefIntfc o2) -> o1.getPrime().compareTo(o2.getPrime());
+	protected static final Comparator<PrimeRefIntfc> NODE_COMPARATOR = (PrimeRefIntfc o1, PrimeRefIntfc o2) -> (int)(o1.getPrime() - o2.getPrime());
 
 	/**
 	 * Access prime/primeref lookup functionality
@@ -65,7 +64,7 @@ public abstract class AbstractPrimeGrapher
 	 * General constructor
 	 *
 	 */
-	protected AbstractPrimeGrapher(@NonNull final PrimeSourceIntfc primeSrc, @NonNull final BaseTypes baseType)
+	protected PrimeGrapherBase(@NonNull final PrimeSourceIntfc primeSrc, @NonNull final BaseTypes baseType)
 	{
 		this(primeSrc, baseType, Collections.emptyList());
 	}
@@ -73,7 +72,7 @@ public abstract class AbstractPrimeGrapher
 	/**
 	 * Provide support for visual output related to graphs
 	 */
-	protected AbstractPrimeGrapher(@NonNull final PrimeSourceIntfc primeSrc, @NonNull final BaseTypes baseType, @NonNull final List<GraphListener<PrimeRefIntfc, DefaultEdge>> graphs)
+	protected PrimeGrapherBase(@NonNull final PrimeSourceIntfc primeSrc, @NonNull final BaseTypes baseType, @NonNull final List<GraphListener<PrimeRefIntfc, DefaultEdge>> graphs)
 	{
 		this.primeSrc = primeSrc;
 		this.baseType = baseType;
@@ -91,15 +90,15 @@ public abstract class AbstractPrimeGrapher
 	 * @param indexes
 	 * @return
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
-	protected BigInteger getTotalSum(@NonNull final BigInteger [] sum3, @NonNull final Integer [] indexes)
+	@SuppressWarnings({"PMD.LawOfDemeter", "PMD.UseVarargs"})
+	protected long getTotalSum(@NonNull final long [] sum3, @NonNull final Integer [] indexes)
 	{
 		for (var index = 0; index< sum3.length; index++)
 		{
 			final var tmpIndex = index;
-			primeSrc.getPrime(indexes[tmpIndex]).ifPresent(p -> sum3[tmpIndex] = p);
+			primeSrc.getPrimeForIdx(indexes[tmpIndex]).ifPresent(p -> sum3[tmpIndex] = p);
 		}
-		return Arrays.asList(sum3).stream().reduce(BigInteger.ZERO, BigInteger::add);
+		return Arrays.stream(sum3).reduce(0L, (a,b) -> a+b);
 	}
 
 	/**

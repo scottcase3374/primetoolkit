@@ -1,16 +1,14 @@
 package com.starcases.prime.base.prefix;
 
-
-import java.math.BigInteger;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import com.starcases.prime.PrimeToolKit;
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import com.starcases.prime.log.AbstractLogBase;
+
+import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
 
 import lombok.NonNull;
 
@@ -36,7 +34,7 @@ public class LogBasePrefixes extends AbstractLogBase
 	/**
 	 * Output log info
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
+	@SuppressWarnings({"PMD.LawOfDemeter", "PMD.DataflowAnomalyAnalysis"})
 	@Override
 	public void outputLogs()
 	{
@@ -49,26 +47,21 @@ public class LogBasePrefixes extends AbstractLogBase
 
 		final int [] itemIdx = {0};
 
-		primeSrc.getPrimeRefStream(preferParallel)
-		.<String>mapMulti((pr, consumer) ->
-							{
-								final Set<BigInteger> primeBases = pr.getPrimeBaseData().getPrimeBases(BaseTypes.PREFIX).get(0);
+		primeSrc
+			.getPrimeRefStream(false)
+			.forEach( primeRef ->
+								{
+									final ImmutableLongCollection primeBases = primeRef.getPrimeBaseData().getPrimeBases(BaseTypes.PREFIX).get(0);
 
-								outputStr.append(String.format("Prime [%d] Prefix: ", pr.getPrime()));
-								outputStr.append(
-									primeBases
-								 	.stream()
-								 	.map(BigInteger::toString)
-								 	.collect(Collectors.joining(",","[","]"))
-								 	);
+									outputStr.append(String.format("Prime [%d] Prefix: \t", primeRef.getPrime()));
 
-								outputStr.append(String.format("%n"));
-								consumer.accept(outputStr.toString());
-								outputStr.setLength(0);
-								itemIdx[0]++;
-							}
-				)
-		.forEach(str -> PrimeToolKit.output(BaseTypes.PREFIX, "%s", str));
+									primeBases.appendString(outputStr, "[", ",", "]");
+
+									PrimeToolKit.output(BaseTypes.PREFIX, "%s", outputStr);
+									outputStr.setLength(0);
+									itemIdx[0]++;
+								}
+					);
 	}
 }
 

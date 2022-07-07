@@ -1,9 +1,7 @@
 package com.starcases.prime.base.triples;
 
-import java.math.BigInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import com.starcases.prime.PrimeToolKit;
 import com.starcases.prime.base.BaseTypes;
@@ -40,7 +38,7 @@ public class LogBases3AllTriples  extends AbstractLogBase
 	/**
 	 * output log info
 	 */
-	@SuppressWarnings({"PMD.AvoidFinalLocalVariable", "PMD.LawOfDemeter"})
+	@SuppressWarnings({"PMD.AvoidFinalLocalVariable", "PMD.LawOfDemeter", "PMD.DataflowAnomalyAnalysis"})
 	@Override
 	@Command
 	public void outputLogs()
@@ -54,44 +52,37 @@ public class LogBases3AllTriples  extends AbstractLogBase
 		int [] idx = {5};
 		primeSrc
 			.getPrimeRefStream(5L, false)
-			.forEach( pr ->
+			.forEach( primeRef ->
 						{
-							final var size = pr.getPrimeBaseData().getPrimeBases(BaseTypes.THREETRIPLE).size();
-							PrimeToolKit.output(BaseTypes.THREETRIPLE, String.format("%nPrime [%d] idx[%d] #-bases[%d]%n",
-									pr.getPrime(),
-									idx[0]++,
-									size
-									));
+							final var size = primeRef.getPrimeBaseData().getPrimeBases(BaseTypes.THREETRIPLE).size();
+							PrimeToolKit.output(BaseTypes.THREETRIPLE,
+												String.format("%nPrime [%d] idx[%d] #-bases[%d]",
+													primeRef.getPrime(),
+													idx[0]++,
+													size
+													));
 
 								final long [] cnt = {0};
 								final StringBuilder outputStr = new StringBuilder(150);
-								outputStr.append('\t');
-								pr.getPrimeBaseData().getPrimeBases(BaseTypes.THREETRIPLE)
-										.stream()
-										.<String>mapMulti((bs, consumer) ->
-															{
-																cnt[0]++;
-																outputStr.append(
-																 	bs
-																 	.stream()
-																 	.map(BigInteger::toString)
-																 	.collect(Collectors.joining(",","[","]"))
-																 	);
+								primeRef
+									.getPrimeBaseData()
+									.getPrimeBases(BaseTypes.THREETRIPLE)
+									.forEach( baseColl ->
+												{
+													cnt[0]++;
+													outputStr.append(baseColl.makeString("[", ",", "]"));
+													if (cnt[0] < size)
+													{
+														outputStr.append(", ");
+													}
 
-																if (cnt[0] < size)
-																{
-																	outputStr.append(", ");
-																}
-
-																if (cnt[0] % maxBasesInRow == 0 || cnt[0] >= size)
-																{
-																	consumer.accept(outputStr.toString());
-																	outputStr.setLength(0);
-																	outputStr.append('\t');
-																}
-															}
-												)
-										.forEach(str -> PrimeToolKit.output(BaseTypes.THREETRIPLE, "%s", str));
+													if (cnt[0] % maxBasesInRow == 0 || cnt[0] >= size)
+													{
+														PrimeToolKit.output(BaseTypes.THREETRIPLE, "\t%s", outputStr);
+														outputStr.setLength(0);
+													}
+												}
+											);
 						});
 	}
 }

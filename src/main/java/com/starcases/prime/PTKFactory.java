@@ -1,8 +1,6 @@
 package com.starcases.prime;
 
-import java.math.BigInteger;
-import java.util.List;
-import java.util.Set;
+import java.io.IOException;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -13,6 +11,13 @@ import javax.validation.constraints.Min;
 import com.starcases.prime.impl.CollectionTrackerImpl;
 import com.starcases.prime.impl.PrimeSource;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
+
+import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
+import org.eclipse.collections.api.list.ImmutableList;
+import org.eclipse.collections.api.list.MutableList;
+import org.eclipse.collections.impl.list.immutable.ImmutableListFactoryImpl;
+import org.infinispan.manager.DefaultCacheManager;
+import org.infinispan.manager.EmbeddedCacheManager;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -28,9 +33,30 @@ import com.starcases.prime.intfc.PrimeRefIntfc;
  * factory providing defaults for some example usages.
  *
  */
-@SuppressWarnings({"PMD.LongVariable", "PMD.CommentSize"})
+@SuppressWarnings({"PMD.LongVariable", "PMD.CommentSize", "PMD.SystemPrintln"})
 public final class PTKFactory
 {
+	/**
+	 * manage any/all caching to files
+	 */
+	@Getter
+	private static EmbeddedCacheManager cacheMgr;
+
+
+	static
+	{
+		try
+		{
+			cacheMgr = new DefaultCacheManager("infinispan.xml");
+			cacheMgr.startCaches("primes");
+			// "PREFIX", "PREFIX_TREE", "NPRIME", "THREETRIPLE" , "DEFAULT"
+		}
+		catch(IOException e)
+		{
+			System.out.println("couldn't create cache mgr from classpath:infinispan.xm");
+		}
+	}
+
 	/**
 	 * Maximum number of primes to handle.
 	 */
@@ -57,7 +83,7 @@ public final class PTKFactory
 	 */
 	@Getter
 	@Setter
-	private static @NonNull BiFunction<Long, List<Set<BigInteger>>, PrimeRefIntfc> primeRefRawCtor;
+	private static @NonNull BiFunction<Long, MutableList<ImmutableLongCollection>, PrimeRefIntfc> primeRefRawCtor;
 
 	/**
 	 * helper for assigning the primesrc to prime ref.
@@ -106,7 +132,7 @@ public final class PTKFactory
 						return primeSource(	maxCount,
 											confidenceLevel,
 											getPrimeRefRawConstructor(),
-											List.of(primeRefSetPrimeSource, baseSetPrimeSource));
+											ImmutableListFactoryImpl.INSTANCE.of(primeRefSetPrimeSource, baseSetPrimeSource));
 					}
 
 					@Override
@@ -116,7 +142,7 @@ public final class PTKFactory
 					}
 
 					@Override
-					public BiFunction<Long, List<Set<BigInteger>>, PrimeRefIntfc> getPrimeRefRawConstructor()
+					public BiFunction<Long, MutableList<ImmutableLongCollection>, PrimeRefIntfc> getPrimeRefRawConstructor()
 					{
 						return primeRefRawCtor;
 					}
@@ -136,8 +162,8 @@ public final class PTKFactory
 	private static PrimeSourceIntfc primeSource(
 			@Min(1) final long maxCount,
 			@Min(1) final int confidenceLevel,
-			@NonNull final BiFunction<Long, List<Set<BigInteger>>, PrimeRefIntfc> primeRefRawCtor,
-			@NonNull final List<Consumer<PrimeSourceIntfc>> consumersSetPrimeSrc
+			@NonNull final BiFunction<Long, MutableList<ImmutableLongCollection>, PrimeRefIntfc> primeRefRawCtor,
+			@NonNull final ImmutableList<Consumer<PrimeSourceIntfc>> consumersSetPrimeSrc
 			)
 	{
 		return new PrimeSource(maxCount

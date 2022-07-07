@@ -1,14 +1,15 @@
 package com.starcases.prime.intfc;
 
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.stream.Stream;
 
 import javax.validation.constraints.Min;
 
 import com.starcases.prime.base.BaseTypes;
+import com.starcases.prime.impl.GenerationProgress;
 
 /**
  *
@@ -26,10 +27,10 @@ import com.starcases.prime.base.BaseTypes;
 public interface PrimeSourceIntfc extends Serializable
 {
 	/**
-	 * Set flag indicating whether to output progress of initial base creation.
+	 * output progress of initial base creation.
 	 * @param doDisplay
 	 */
-	void setDisplayProgress(boolean doDisplay);
+	void setDisplayProgress(GenerationProgress progress);
 
 	/**
 	 * set flag indicating whether to output metrics regarding the
@@ -39,7 +40,7 @@ public interface PrimeSourceIntfc extends Serializable
 	void setDisplayPrimeTreeMetrics(boolean doDisplay);
 
 	/**
-	 * Init base info.
+	 * DefaultInit base info.
 	 */
 	void init();
 
@@ -91,7 +92,7 @@ public interface PrimeSourceIntfc extends Serializable
 	 * @param primeIdx
 	 * @return
 	 */
-	Optional<PrimeRefIntfc> getPrimeRef(@Min(0) long primeIdx);
+	Optional<PrimeRefIntfc> getPrimeRefForIdx(@Min(0) long primeIdx);
 
 	/**
 	 * Get prime ref associated with the specified BigInteger
@@ -100,7 +101,7 @@ public interface PrimeSourceIntfc extends Serializable
 	 * @param prime
 	 * @return
 	 */
-	Optional<PrimeRefIntfc> getPrimeRef(@Min(0) BigInteger prime);
+	Optional<PrimeRefIntfc> getPrimeRefForPrime(@Min(0) long prime);
 
 	/**
 	 * Get the big integer [prime] from the prime ref associated with
@@ -109,5 +110,5 @@ public interface PrimeSourceIntfc extends Serializable
 	 * @param primeIdx
 	 * @return
 	 */
-	Optional<BigInteger> getPrime(@Min(0) long primeIdx);
+	OptionalLong getPrimeForIdx(@Min(0) long primeIdx);
 }
