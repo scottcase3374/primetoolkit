@@ -61,7 +61,7 @@ public class CollectionTrackerImpl implements CollectionTrackerIntfc
 		final var ret = sourcePrimes.entrySet()
 				.stream()
 				.filter(pred1)
-				.findAny()
+				.min((x,y) -> x.getKey().compareTo(y.getKey()) )
 				.map(Entry::getValue);
 		ret.ifPresent(pd -> useCounts.compute(pd.prime(), (l1, l2) -> l2 != null ? l2+1 : 0));
 		return ret;

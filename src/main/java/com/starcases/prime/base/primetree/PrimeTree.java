@@ -25,6 +25,10 @@ import lombok.NonNull;
 /**
  * Represents a potentially partial or complete set of primes that sums to a prime
  * in combination with one or more other distinct primes or by itself.
+ *
+ * Used both internally in the initial base/prime creation as part of an efficiency
+ * improvement and also as another base representation by itself.
+ *
  */
 @SuppressWarnings("PMD.LongVariable")
 public class PrimeTree extends AbstractPrimeBaseGenerator
@@ -70,6 +74,8 @@ public class PrimeTree extends AbstractPrimeBaseGenerator
 	 * Execute 'func' against the prime tree data and return a PData
 	 * if the predicate is matched. Looking for key for
 	 * a prime sum that when added to a new prime results in a new prime.
+	 *
+	 * NOTE: Desire lowest matching value found
 	 *
 	 * @param biFunc
 	 * @return

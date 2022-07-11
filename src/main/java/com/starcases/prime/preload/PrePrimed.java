@@ -10,10 +10,13 @@ import java.util.StringTokenizer;
 import java.util.stream.Stream;
 import java.util.zip.ZipFile;
 
+import com.starcases.prime.PrimeToolKit;
+
 import org.infinispan.Cache;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -22,9 +25,23 @@ import lombok.Setter;
  * Typically loaded from files sourced from various internet
  * sites.
  */
+@SuppressWarnings({"PMD.LawOfDemeter"})
 public class PrePrimed
 {
+	/**
+	 * Define the number of bits to batch together to reduce the number of
+	 * cache accesses.  This is to reduce the space overhead which is
+	 * significant at large scale and to a lesser extent reduce time
+	 * spent in cache activities.
+	 */
+	@Getter(AccessLevel.PRIVATE)
 	private final static int SUBSET_BITS = 17;
+
+	/**
+	 * Convert the number of bits into the size of an array for the
+	 * caching.
+	 */
+	@Getter(AccessLevel.PRIVATE)
 	private final static int SUBSET_SIZE = 1 << SUBSET_BITS;
 
 	/**
@@ -33,14 +50,32 @@ public class PrePrimed
 	@Getter
 	private static EmbeddedCacheManager cacheMgr;
 
-	private Cache<Integer,PrimeSubset> cache = cacheMgr.getCache("primes");
+	/**
+	 * Cache object - both in-memory and persisted data
+	 */
+	@Getter(AccessLevel.PRIVATE)
+	private final Cache<Integer,PrimeSubset> cache = cacheMgr.getCache("primes");
 
+	/**
+	 * Paths to source folders containing files of any pre-computed prime/base info.
+	 */
 	@Getter
 	@Setter
 	private Path [] sourceFolders;
 
-	PrimeSubset subset = new PrimeSubset();
-	private int subsetIdx = 0;
+	/**
+	 * Container for the batches
+	 */
+	@Getter
+	@Setter
+	private PrimeSubset subset = new PrimeSubset();
+
+	/**
+	 * Break linear index range into indexed batches of indexed items.
+	 */
+	@Getter(AccessLevel.PRIVATE)
+	@Setter(AccessLevel.PRIVATE)
+	private int subsetIdx;
 
 	static
 	{
@@ -51,31 +86,40 @@ public class PrePrimed
 		}
 		catch (final IOException e)
 		{
-			e.printStackTrace();
+			PrimeToolKit.output("Error starting pre-prime cache: %s",e);
 		}
 	}
 
-	public static void main(String [] args)
+	/**
+	 * main method for testing purposes
+	 * @param args
+	 */
+	public static void main(final String [] args)
 	{
-		Path [] paths =  {
+		final Path [] srcPaths =  {
 				Path.of("/home/scott/src/eclipse/primes-ws/PrimeToolKit/data/1"),
 				Path.of("/home/scott/src/eclipse/primes-ws/PrimeToolKit/data/DEFAULT")
 		};
 
-		PrePrimed pp = new PrePrimed(paths);
-		pp.load();
+		final PrePrimed preprimedInst = new PrePrimed(srcPaths);
+		preprimedInst.load();
 	}
 
-	public PrePrimed(Path [] sourceFolders)
+	/**
+	 * Constructor for class responsible for loading pre-generated prime/base info.
+	 *
+	 * @param sourceFolders
+	 */
+	public PrePrimed(final Path ... sourceFolders)
 	{
 		this.sourceFolders = sourceFolders;
 		subset.alloc(SUBSET_SIZE);
 	}
 
-	private void assign(int idx, long val)
+	private void assign(final int idx, final long val)
 	{
-		int offset = idx % SUBSET_SIZE;
-		int subsetId = Math.max(idx >> SUBSET_BITS, 0);
+		final int offset = idx % SUBSET_SIZE;
+		final int subsetId = Math.max(idx >> SUBSET_BITS, 0);
 		if (subsetId != subsetIdx)
 		{
 			cache.put(subsetIdx++, subset);
@@ -85,11 +129,16 @@ public class PrePrimed
 		subset.set(offset, val);
 	}
 
-	public long retrieve(int idx)
+	/**
+	 * get item from batches of indexed containers in cache
+	 *
+	 * @param idx
+	 * @return
+	 */
+	public long retrieve(final int idx)
 	{
-		int offset = idx % SUBSET_SIZE;
-		int subsetId = Math.max(idx >> SUBSET_BITS, 0);
-		//System.out.println(String.format("parms - idx[%d] calc-ed-subset[%d] offset[%d]", idx, subsetId, offset));
+		final int offset = idx % SUBSET_SIZE;
+		final int subsetId = Math.max(idx >> SUBSET_BITS, 0);
 		return cache.get(subsetId).get(offset);
 	}
 
@@ -102,7 +151,7 @@ public class PrePrimed
 	 */
 	public boolean load()
 	{
-		int [] index = {0};
+		final int [] index = {0};
 
 		cache.getAdvancedCache().getStats().setStatisticsEnabled(true);
 		Arrays.stream(sourceFolders).forEach(
@@ -114,10 +163,10 @@ public class PrePrimed
 					 				.filter(file -> !Files.isDirectory(file)) // filter out directories
 					 				.forEach( fileRef ->
 					 				{
-					 					System.out.println("file: " + fileRef.toString());
+					 					PrimeToolKit.dbgOutput("file: %s", fileRef.toString());
 	 									try
 	 									{
-	 										Path tmpPath = fileRef;
+	 										final Path tmpPath = fileRef;
 	 										if (!tmpPath.getFileName().toString().endsWith(".zip"))
 	 										{
 		 										Files
@@ -129,7 +178,7 @@ public class PrePrimed
 														while(tokenizer.hasMoreTokens())
 														{
 															assign(index[0]++, Long.valueOf(tokenizer.nextToken()));
-														};
+														}
 		 											});
 	 										}
 	 										else
@@ -152,7 +201,7 @@ public class PrePrimed
 																			while(tokenizer.hasMoreTokens())
 																			{
 																				assign(index[0]++, Long.valueOf(tokenizer.nextToken()));
-																			};
+																			}
 							 											});
 					 											}
 					 											catch(IOException e2)
@@ -171,7 +220,7 @@ public class PrePrimed
 
 		cache.put(subsetIdx++, subset);
 
-		System.out.println("stats() : " + cache.getAdvancedCache().getStats().toJson());
+		PrimeToolKit.output("stats() : %s", cache.getAdvancedCache().getStats().toJson());
 		return true;
 	}
 }

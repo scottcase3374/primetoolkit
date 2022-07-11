@@ -19,7 +19,7 @@ import lombok.Setter;
 /**
  *  Default 'container' for base information.
  */
-@SuppressWarnings("PMD.AtLeastOneConstructor")
+@SuppressWarnings({"PMD.AtLeastOneConstructor", "PMD.LawOfDemeter"})
 public class PrimeBaseContainer implements PrimeBaseIntfc
 {
 	/**

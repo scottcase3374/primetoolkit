@@ -24,6 +24,7 @@ import com.starcases.prime.preload.PrePrimed;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 
 import javax.validation.constraints.Min;
 
@@ -48,13 +49,17 @@ import org.eclipse.collections.impl.set.immutable.primitive.ImmutableLongSetFact
 @SuppressWarnings({"PMD.CommentSize", "PMD.DataflowAnomalyAnalysis", "PMD.AvoidDuplicateLiterals"})
 public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSourceIntfc
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * default logger
 	 */
 	@Getter(AccessLevel.PRIVATE)
 	private static final Logger LOG = Logger.getLogger(PrimeSource.class.getName());
 
-	private static final long serialVersionUID = 1L;
+	//
+	// Flags conveyed into this class
+	//
 
 	/**
 	 * atomic flag preventing duplicate init
@@ -63,29 +68,11 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	private final AtomicBoolean doInit = new AtomicBoolean(false);
 
 	/**
-	 * confidence level for check of prime
+	 * Flag indicating whether to currently log mismatch between prime/base
+	 * found and the next actual prime in the sequence.
 	 */
 	@Getter(AccessLevel.PRIVATE)
-	private final int confidenceLevel;
-
-	/**
-	 * atomic long for next prime index.
-	 */
-	@Getter(AccessLevel.PRIVATE)
-	private final AtomicLong nextIdx = new AtomicLong(1);
-
-	/**
-	 * number of base primes to generate
-	 */
-	@Getter(AccessLevel.PRIVATE)
-	private final long targetPrimeCount;
-
-	/**
-	 * handle output progress
-	 * during initial base creation
-	 */
-	@Getter(AccessLevel.PRIVATE)
-	private GenerationProgress progress;
+	private final AtomicBoolean logMismatch = new AtomicBoolean(true);
 
 	/**
 	 * flag indicating whether to output prefix/tree
@@ -94,20 +81,73 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	@Getter(AccessLevel.PRIVATE)
 	private boolean displayPrimeTreeMetrics;
 
+	//
+	// Context type info/code for prime/base creation that is conveyed into
+	// this class
+	//
+
+	/**
+	 * confidence level for check of prime
+	 */
+	@Getter(AccessLevel.PRIVATE)
+	private final int confidenceLevel;
+
+	/**
+	 * number of base primes to generate
+	 */
+	@Getter(AccessLevel.PRIVATE)
+	private final long targetPrimeCount;
+
 	/** can be overridden by passing
 	* an appropriate "new" function ptr into the PrimeSource
 	* constructor  -> param primeRefCtor
 	*/
-
 	@Getter(AccessLevel.PRIVATE)
 	private final BiFunction<Long, MutableList<ImmutableLongCollection>, PrimeRefIntfc> primeRefRawCtor;
 
 	/**
-	 * single-level structure to manage single references to each unique
-	 *  collection of primes.
+	 * dest of output progress tracking
+	 * during initial base creation
+	 */
+	@Getter(AccessLevel.PRIVATE)
+	@Setter(AccessLevel.PRIVATE)
+	private GenerationProgress progress;
+
+	/**
+	 * Container of pre-generated prime/base data.
+	 */
+	@Getter(AccessLevel.PRIVATE)
+	private final PrePrimed prePrimed;
+
+	/**
+	 * single-level structure to manage a unique references to each unique
+	 *  collection of primes. Structure is populated during base/prime
+	 *  creation.
 	 */
 	@Getter(AccessLevel.PRIVATE)
 	private final CollectionTrackerIntfc collTrack;
+
+	//
+	// Internal data used/generated during prime/base creation
+	//
+
+	/**
+	 * atomic long for next prime index.
+	 */
+	@Getter(AccessLevel.PRIVATE)
+	private final AtomicLong nextIdx = new AtomicLong(1);
+
+	/**
+	 *  map prime to long index
+	 */
+	@Getter(AccessLevel.PRIVATE)
+	private final MutableLongLongMap primeToIdxMap;
+
+	/** map long idx to PrimeMapEntry,  PrimeMapEntry is primeRef and BigInt
+	* long idx provides order to primerefs and therefore indirectly to the primes
+	*/
+	@Getter(AccessLevel.PRIVATE)
+	private final MutableLongObjectMap<PrimeMapEntry> idxToPrimeMap;
 
 	/**
 	 * Multi-level container for the tree of primes.
@@ -115,21 +155,6 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	@Getter(AccessLevel.PRIVATE)
 	private PrimeTree primeTree;
 
-	/**
-	 *  map prime to long index
-	 */
-	@Getter(AccessLevel.PRIVATE)
-	private final MutableLongLongMap primeToIdx;
-
-	/** map long idx to PrimeMapEntry,  PrimeMapEntry is primeRef and BigInt
-	* long idx provides order to primerefs and therefore indirectly to the primes
-	*/
-
-	@Getter(AccessLevel.PRIVATE)
-	private final MutableLongObjectMap<PrimeMapEntry> idxToPrimeMap;
-
-
-	private final PrePrimed prePrimed;
 	//
 	// initialization
 	//
@@ -152,7 +177,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	{
 		super();
 
-		Path [] paths =  {
+		final Path [] paths =  {
 				Path.of("/home/scott/src/eclipse/primes-ws/PrimeToolKit/data/1"),
 				Path.of("/home/scott/src/eclipse/primes-ws/PrimeToolKit/data/DEFAULT")
 		};
@@ -168,14 +193,13 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 
 		final int capacity = (int)(maxCount*1.25);
 		idxToPrimeMap = new LongObjectHashMap<>(capacity);
-		primeToIdx = new LongLongHashMap(capacity);
+		primeToIdxMap = new LongLongHashMap(capacity);
 
 		targetPrimeCount = maxCount;
 
 		this.primeRefRawCtor = primeRefRawCtor;
 		consumersSetPrimeSrc.forEach(c -> c.accept(this));
 
-		// Prime, Prefix, suffix
 		addPrimeRef(0L, 1L, MutableListFactoryImpl.INSTANCE.of(ImmutableLongSetFactoryImpl.INSTANCE.with(1L), ImmutableLongSetFactoryImpl.INSTANCE.with(0L)));
 		addPrimeRef(1L, 2L, MutableListFactoryImpl.INSTANCE.of(ImmutableLongSetFactoryImpl.INSTANCE.with(2L), ImmutableLongSetFactoryImpl.INSTANCE.with(0L)));
 
@@ -195,11 +219,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	{
 		final PrimeRefIntfc ret = primeRefRawCtor.apply(Long.valueOf(nextPrimeIdx), baseSets);
 
-		final long prePrimedVal = prePrimed.retrieve((int)nextPrimeIdx);
-		if (newPrime != prePrimedVal && LOG.isLoggable(Level.SEVERE))
-		{
-			LOG.severe(String.format("idx [%d] newPrime[%d] pre-primed@idx [%d]", nextPrimeIdx, newPrime, prePrimedVal));
-		}
+		checkMismatch("addPrimeRef", nextPrimeIdx, newPrime);
 
 		updateMaps(nextPrimeIdx, newPrime, ret);
 	}
@@ -210,10 +230,29 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	}
 
 	/**
+	 * Data quality check; confirm that the identified prime/base is the expected value
+	 * when pre-determined values exists. This only logs a message on the first
+	 * mismatch.
+	 *
+	 * @param src
+	 * @param idx
+	 * @param newPrime
+	 */
+	private void checkMismatch(final String src, final long idx, final long newPrime)
+	{
+		final long expectedPrime = prePrimed.retrieve((int)idx);
+
+		if (newPrime != expectedPrime && LOG.isLoggable(Level.SEVERE) && logMismatch.compareAndSet(true, false) )
+		{
+			LOG.severe(String.format("Mismatch: [%s]  idx [%d] newPrime[%d] pre-primed@idx [%d]", src,  idx, newPrime, expectedPrime));
+		}
+	}
+
+	/**
 	 * This is the "prime" logic so to speak..  the "innovative" side of
 	 * this isn't the initial identification of primes but the data that
-	 * is created related to each prime - the "bases".  The question to
-	 * ask is - if given some items representing each prime; is there
+	 * is created related to each prime - the "bases".  The questions to
+	 * ask are - if given some items representing each prime; is there
 	 * an identifiable pattern over any range of primes that provides
 	 * insights into faster identification of much larger primes? Can
 	 * something new be learned with regard to factors of numbers created
@@ -268,6 +307,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 		boolean [] found = {false};
 		optCurPrime.ifPresent(curPrime ->
 						{
+							// NOTE: Selection process must pick lowest item
 							final Optional<PData> pdata = primeTree.select(
 									primeCollSum ->
 									{
@@ -280,11 +320,8 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 											final var nextPrime = curPrime + pd.prime();
 											found[0] = true;
 
-											final long prePrimedVal = prePrimed.retrieve((int)nextPrimeIdx);
-											if (nextPrime != prePrimedVal)
-											{
-												LOG.severe(String.format("genByListPermutation: idx? [%d] newPrime[%d] pre-primed@idx [%d]", nextPrimeIdx, nextPrime, prePrimedVal));
-											}
+											checkMismatch("genByListPermutation", nextPrimeIdx, nextPrime);
+
 											addPrimeRef(nextPrimeIdx, nextPrime, MutableListFactoryImpl.INSTANCE.of(pd.toCanonicalCollection(), ImmutableLongSetFactoryImpl.INSTANCE.with(curPrime)));
 										}
 									);
@@ -372,11 +409,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 					final var primeTreeColl = prefixTree.toCollection();
 					final var canonicalPrimeColl = collTrack.track(primeTreeColl).toCanonicalCollection();
 
-					final long prePrimedVal = prePrimed.retrieve((int)idx);
-					if (permutationSum != prePrimedVal)
-					{
-						LOG.severe(String.format("genByPrimePermutation: idx? [%d] newPrime[%d] pre-primed@idx [%d]", idx, permutationSum, prePrimedVal));
-					}
+					checkMismatch("genByPrimePermutation", idx, permutationSum);
 
 					addPrimeRef(idx, permutationSum, MutableListFactoryImpl.INSTANCE.of(canonicalPrimeColl, ImmutableLongSetFactoryImpl.INSTANCE.with(optCurPrimeVal)));
 					doLoop = false;
@@ -410,7 +443,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	@Override
 	public Optional<PrimeRefIntfc> getPrimeRefForPrime(@Min(0) final long prime)
 	{
-		return this.getPrimeRefForIdx(primeToIdx.get(prime));
+		return this.getPrimeRefForIdx(primeToIdxMap.get(prime));
 	}
 
 	@Override
@@ -518,7 +551,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	private void updateMaps(final long idx, final long newPrime, final PrimeRefIntfc ref)
 	{
 		this.idxToPrimeMap.put(idx, new PrimeMapEntry(newPrime, ref));
-		this.primeToIdx.put(newPrime, idx);
+		this.primeToIdxMap.put(newPrime, idx);
 	}
 
 	/**

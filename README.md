@@ -259,7 +259,18 @@ adding a Consumer<> instance to a list of actions for each pertinent action.  On
 are processed, each of the Consumer<> objects is evaluated.  The first actions generate the default prime
 information and then new base generation, logging and graphing actions are added as needed.
 
+## Challenges
+- Using pre-computed lists to speed up the search/selection process for the prime bases is useful but one aspect was
+unexpected. There are times when the pre-computed lists can construct a desirable item but the problem is that
+it might not be the actual next item that should be found if going in increasing order. A method to identify
+and resolve this is needed yet.  So as of now, some primes are missed in the creation/selection process
+but they are logged for those under the index count of 50mm.  A pre-computed list for the first ~50mm items
+is loaded into memory/persistent cache and used to identify when the real "next item" doesn't match what
+I found. It isn't a huge number of items in a fixed range but it does add up.
+
 ## ToDo
 	- More test coverage
 	- More metrics generation
-	- Specialized data structures
+	- More / improved cache support
+	- More generic / useful methods for identifying patterns in the bases.
+	- Create a simple REPL for using the system.

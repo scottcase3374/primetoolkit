@@ -33,7 +33,7 @@ import com.starcases.prime.intfc.PrimeRefIntfc;
  * factory providing defaults for some example usages.
  *
  */
-@SuppressWarnings({"PMD.LongVariable", "PMD.CommentSize", "PMD.SystemPrintln"})
+@SuppressWarnings({"PMD.LongVariable", "PMD.CommentSize", "PMD.SystemPrintln", "PMD.LawOfDemeter"})
 public final class PTKFactory
 {
 	/**
