@@ -34,7 +34,7 @@ public interface CollectionTrackerIntfc
 	/**
 	 * Select set/collection from the tracked
 	 * info based upon a predicate provided.
-	 * Expecting only 1 mactching collection
+	 * Expecting only 1 matching collection
 	 * maximumly.
 	 *
 	 * @param pred

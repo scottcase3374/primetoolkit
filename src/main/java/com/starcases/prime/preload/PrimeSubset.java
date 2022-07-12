@@ -4,7 +4,6 @@ import org.infinispan.protostream.annotations.AutoProtoSchemaBuilder;
 import org.infinispan.protostream.annotations.ProtoFactory;
 import org.infinispan.protostream.annotations.ProtoField;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 

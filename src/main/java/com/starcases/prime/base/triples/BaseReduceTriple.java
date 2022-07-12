@@ -6,11 +6,14 @@ import java.util.logging.Logger;
 
 import javax.validation.constraints.Min;
 
-
+import com.codahale.metrics.Timer;
 import com.starcases.prime.base.AbstractPrimeBaseGenerator;
 import com.starcases.prime.base.BaseTypes;
+import com.starcases.prime.cli.OutputOper;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
+import com.starcases.prime.metrics.MetricMonitor;
+
 import org.eclipse.collections.impl.list.mutable.MutableListFactoryImpl;
 
 import lombok.NonNull;
@@ -110,6 +113,8 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 			LOG.info("BaseReduce3Triple genBases()");
 		}
 
+		MetricMonitor.addTimer(BaseTypes.THREETRIPLE,"Gen 3Triple");
+
 		// handle Bootstrap values - can't really represent < 11 with a sum of 3 primes
 		primeSrc
 		.getPrimeRefStream(false)
@@ -121,7 +126,14 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 		);
 
 
-		primeSrc.getPrimeRefStream(5L, true).forEach(curPrime -> handlePrime(curPrime, counter.incrementAndGet()));
+		primeSrc.getPrimeRefStream(5L, true).forEach(curPrime ->
+						{
+							try (Timer.Context context = MetricMonitor.time(BaseTypes.THREETRIPLE).orElse(null))
+							{
+								 handlePrime(curPrime, counter.incrementAndGet());
+							}
+						}
+				);
 
 		if (LOG.isLoggable(Level.INFO))
 		{

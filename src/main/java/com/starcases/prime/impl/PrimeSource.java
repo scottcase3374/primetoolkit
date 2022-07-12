@@ -13,12 +13,15 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.codahale.metrics.Timer;
 import com.starcases.prime.base.AbstractPrimeBaseGenerator;
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.base.primetree.PrimeTree;
+import com.starcases.prime.cli.OutputOper;
 import com.starcases.prime.intfc.CollectionTrackerIntfc;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
+import com.starcases.prime.metrics.MetricMonitor;
 import com.starcases.prime.preload.PrePrimed;
 
 import lombok.AccessLevel;
@@ -82,6 +85,18 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	private boolean displayPrimeTreeMetrics;
 
 	//
+	// Metrics / health / progress
+	//
+
+	/**
+	 * dest of output progress tracking
+	 * during initial base creation
+	 */
+	@Getter(AccessLevel.PRIVATE)
+	@Setter(AccessLevel.PRIVATE)
+	private GenerationProgress progress;
+
+	//
 	// Context type info/code for prime/base creation that is conveyed into
 	// this class
 	//
@@ -104,14 +119,6 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	*/
 	@Getter(AccessLevel.PRIVATE)
 	private final BiFunction<Long, MutableList<ImmutableLongCollection>, PrimeRefIntfc> primeRefRawCtor;
-
-	/**
-	 * dest of output progress tracking
-	 * during initial base creation
-	 */
-	@Getter(AccessLevel.PRIVATE)
-	@Setter(AccessLevel.PRIVATE)
-	private GenerationProgress progress;
 
 	/**
 	 * Container of pre-generated prime/base data.
@@ -268,27 +275,34 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 
 		primeTree = new PrimeTree(this, collTrack);
 
+		MetricMonitor.addTimer(OutputOper.CREATE,"Gen Bases");
+		MetricMonitor.startReport();
 		long nextPrimeTmpIdx;
 		do
 		{
-			final int nextPrimeIdx = (int) nextIdx.incrementAndGet();
-			final var lastPrimeIdx = nextPrimeIdx -1;
-			final var lastPrime = getPrimeForIdx(lastPrimeIdx);
-
-			if (!genByListPermutation(nextPrimeIdx, lastPrime) && !genByPrimePermutation(nextPrimeIdx, lastPrime))
+			try (Timer.Context context = MetricMonitor.time(OutputOper.CREATE).orElse(null))
 			{
-				LOG.severe("No prime found");
-				throw new IllegalStateException("No prime found");
-			}
+				final int nextPrimeIdx = (int) nextIdx.incrementAndGet();
+				final var lastPrimeIdx = nextPrimeIdx -1;
+				final var lastPrime = getPrimeForIdx(lastPrimeIdx);
 
-			if (null != progress)
-			{
-				progress.dispProgress(nextPrimeIdx);
-			}
+				if (!genByListPermutation(nextPrimeIdx, lastPrime) && !genByPrimePermutation(nextPrimeIdx, lastPrime))
+				{
+					LOG.severe("No prime found");
+					throw new IllegalStateException("No prime found");
+				}
 
-			nextPrimeTmpIdx = nextPrimeIdx;
+				if (null != progress)
+				{
+					progress.dispProgress(nextPrimeIdx);
+				}
+
+				nextPrimeTmpIdx = nextPrimeIdx;
+			}
 		}
 		while (nextPrimeTmpIdx < targetPrimeCount);
+
+		this.prePrimed.dumpStats();
 	}
 
 	/**

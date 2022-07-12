@@ -71,6 +71,7 @@ That flag applies to several base-logging and base-generation methods now. It ge
 
 
 ## Observations
+- My current prime/base selection method misses a few primes. The issue seems rooted in my data having a solution for the value after the currently desired item but not the current item. So when using prefixes, I can find the next prime but since the prefix which would produce the current prime hasn't been encountered yet it misses it and selects the next one which was found.  This seems like some sort of backtracking need. One thought involves looking at the order items within in a prefix and trying to determine if there is a relationship of some sort with the fact that certain sums of prefix values will be less than the previous prefix sum if using a straight sequential ordering of the items vs the resulting sum.  i.e. An algorithm may look at potential prefixes in an order such of {1}, {1,2}, {1,2,3}, {1,2,3,5}... {5} but because of that the {1,2,3} is encountered prior to prefixes with fewer members - resulting in missing a few values.  This is hard to describe in just a sentence or 2. Maybe breadth first data vs depth first data would be an adequate description for what seems like the need.
 - When logging 3 million node structs with other settings set to default - meaning you get a target prime # and a set of bases which includes the previous prime plus some subset of lower primes that sum to the target prime. The largest value in the subset of small primes in each base is usually less than 23 from a quick look at the data.  Example output: Prime 49979681 bases [[1,2,3,5,7,49979663]]  <dist[6], nextPrime[49979687]> idx[2999999]
 - When working with logging triples, the number of triples that all sum to the target prime starts to exceed the target prime # itself at around the 137th prime.  Partial output:
 
@@ -270,7 +271,9 @@ I found. It isn't a huge number of items in a fixed range but it does add up.
 
 ## ToDo
 	- More test coverage
-	- More metrics generation
+	- More metrics
 	- More / improved cache support
-	- More generic / useful methods for identifying patterns in the bases.
+	- More generic / useful methods for identifying patterns in the bases/data.
 	- Create a simple REPL for using the system.
+	- Research migrating progress monitor to use MetricMonitor (DropWizard metrics)
+	- Enable more metric reporting options (like Graphite).

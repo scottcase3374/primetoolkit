@@ -13,10 +13,12 @@ import org.eclipse.collections.impl.bag.immutable.primitive.ImmutableLongBagFact
 import org.eclipse.collections.impl.bag.mutable.primitive.MutableLongBagFactoryImpl;
 import org.eclipse.collections.impl.list.mutable.MutableListFactoryImpl;
 
+import com.codahale.metrics.Timer;
 import com.starcases.prime.base.AbstractPrimeBaseGenerator;
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
+import com.starcases.prime.metrics.MetricMonitor;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -136,17 +138,22 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 			}
 		}
 
+		MetricMonitor.addTimer(BaseTypes.NPRIME,"Gen NPrime");
+
 		primeSrc.getPrimeRefStream(this.preferParallel)
 			.filter(pr -> isNonNullEmpty(pr.getPrimeBaseData().getPrimeBases()))
 				.forEach( curPrime ->
 				{
-					final MutableLongCollection retBases = MutableLongBagFactoryImpl.INSTANCE.empty();
-					primeReduction(curPrime, retBases);
-					final MutableList<ImmutableLongCollection> lst = MutableListFactoryImpl.INSTANCE.of(retBases.toImmutable(), ImmutableLongBagFactoryImpl.INSTANCE.with(curPrime.getPrime()));
+					try (Timer.Context context = MetricMonitor.time(BaseTypes.NPRIME).orElse(null))
+					{
+						final MutableLongCollection retBases = MutableLongBagFactoryImpl.INSTANCE.empty();
+						primeReduction(curPrime, retBases);
+						final MutableList<ImmutableLongCollection> lst = MutableListFactoryImpl.INSTANCE.of(retBases.toImmutable(), ImmutableLongBagFactoryImpl.INSTANCE.with(curPrime.getPrime()));
 
-					curPrime
-						.getPrimeBaseData()
-						.addPrimeBases(BaseTypes.NPRIME, lst, new NPrimeBaseMetadata(retBases.toImmutable()));
+						curPrime
+							.getPrimeBaseData()
+							.addPrimeBases(BaseTypes.NPRIME, lst, new NPrimeBaseMetadata(retBases.toImmutable()));
+					}
 				});
 	}
 

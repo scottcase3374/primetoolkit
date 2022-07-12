@@ -35,14 +35,14 @@ public class PrePrimed
 	 * spent in cache activities.
 	 */
 	@Getter(AccessLevel.PRIVATE)
-	private final static int SUBSET_BITS = 17;
+	private static final  int SUBSET_BITS = 17;
 
 	/**
 	 * Convert the number of bits into the size of an array for the
 	 * caching.
 	 */
 	@Getter(AccessLevel.PRIVATE)
-	private final static int SUBSET_SIZE = 1 << SUBSET_BITS;
+	private static final int SUBSET_SIZE = 1 << SUBSET_BITS;
 
 	/**
 	 * manage any/all caching to files
@@ -143,6 +143,14 @@ public class PrePrimed
 	}
 
 	/**
+	 * Dump cache statistics
+	 */
+	public void dumpStats()
+	{
+		PrimeToolKit.output("PrePrimed: stats() : %s", cache.getAdvancedCache().getStats().toJson());
+	}
+
+	/**
 	 * Load pre-generated primes.
 	 *
 	 *  NOTE: NOT an example of good programming style... too dense / hard to read.
@@ -205,22 +213,29 @@ public class PrePrimed
 							 											});
 					 											}
 					 											catch(IOException e2)
-					 											{}
+					 											{
+					 												// TODO ignore for now
+					 											}
 															});
 	 										}}
 	 									}
 	 									catch(IOException e)
-	 									{}
+	 									{
+	 									// TODO ignore for now
+	 									}
 					 				});
 							}
 						catch(IOException e1)
-						{}
+						{
+							// TODO ignore for now
+						}
 					}
 				);
 
 		cache.put(subsetIdx++, subset);
 
-		PrimeToolKit.output("stats() : %s", cache.getAdvancedCache().getStats().toJson());
+		dumpStats();
+
 		return true;
 	}
 }
