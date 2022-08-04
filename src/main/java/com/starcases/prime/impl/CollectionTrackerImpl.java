@@ -11,6 +11,7 @@ import com.starcases.prime.intfc.CollectionTrackerIntfc;
 import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
 import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.AccessLevel;
 import lombok.Getter;
 
@@ -22,6 +23,7 @@ import lombok.Getter;
  * Single-level structure maps a sum of prime collection to a structure
  * referencing the collection and the sum.
  */
+@ApplicationScoped
 @SuppressWarnings("PMD.AtLeastOneConstructor")
 public class CollectionTrackerImpl implements CollectionTrackerIntfc
 {

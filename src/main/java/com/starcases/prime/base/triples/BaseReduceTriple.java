@@ -9,7 +9,6 @@ import javax.validation.constraints.Min;
 import com.codahale.metrics.Timer;
 import com.starcases.prime.base.AbstractPrimeBaseGenerator;
 import com.starcases.prime.base.BaseTypes;
-import com.starcases.prime.cli.OutputOper;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import com.starcases.prime.metrics.MetricMonitor;

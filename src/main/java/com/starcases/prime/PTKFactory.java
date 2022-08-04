@@ -132,7 +132,7 @@ public final class PTKFactory
 						return primeSource(	maxCount,
 											confidenceLevel,
 											getPrimeRefRawConstructor(),
-											ImmutableListFactoryImpl.INSTANCE.of(primeRefSetPrimeSource, baseSetPrimeSource));
+											getConsumersSetPrimeSrc());
 					}
 
 					@Override
@@ -146,6 +146,12 @@ public final class PTKFactory
 					{
 						return primeRefRawCtor;
 					}
+
+					public ImmutableList<Consumer<PrimeSourceIntfc>> getConsumersSetPrimeSrc()
+					{
+						return ImmutableListFactoryImpl.INSTANCE.of(primeRefSetPrimeSource, baseSetPrimeSource);
+					}
+
 				};
 	}
 

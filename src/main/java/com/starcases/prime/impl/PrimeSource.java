@@ -276,7 +276,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 		primeTree = new PrimeTree(this, collTrack);
 
 		MetricMonitor.addTimer(OutputOper.CREATE,"Gen Bases");
-		MetricMonitor.startReport();
+
 		long nextPrimeTmpIdx;
 		do
 		{
@@ -523,10 +523,9 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 
 		//Map<Integer, BigInteger>  prCache = cacheMgr.getCache("primes");
 		//if (!prCache.isEmpty())
-	//	{
+		//	{
 		//	primes.putAll(prCache);
 		//	primes.forEach((k, v) -> addPrimeRef(v, Collections.emptyList()));
-
 		//	LOG.info(String.format("cached entries loaded: %d ", primes.size()));
 		//}
 		//else
@@ -557,7 +556,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	@Override
 	public void store(final BaseTypes ... baseTypes)
 	{
-	//	cacheMgr.getCache("primes").putAll(primes);
+		//	cacheMgr.getCache("primes").putAll(primes);
 		//if (baseTypes != null)
 		//	cacheMgr.getCache(BaseTypes.DEFAULT.name()).putAll(primeRefs.get(BaseTypes.DEFAULT));
 	}

@@ -10,7 +10,6 @@ import java.util.logging.Logger;
 
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.cli.DefaultInit;
-
 import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 
 import lombok.Getter;
@@ -47,7 +46,6 @@ public final class PrimeToolKit
 	 */
 	private static Map<String, Path> outputs = new ConcurrentHashMap<>();
 
-
 	/**
 	 * Associate a path instance to a key where the path is
 	 * used to sink output data for that key.
@@ -74,12 +72,18 @@ public final class PrimeToolKit
 	 */
 	public static void main(@NonNull final String [] args)
 	{
-		final var ptk = new PrimeToolKit();
-		final var commandLine = new CommandLine(ptk);
-		commandLine.registerConverter(Level.class, Level::parse);
-		final var exitCode = commandLine.execute(args);
+		final CommandLine commandLine;
+		try (SeContainer container = Weld.newInstance().initialize())
+		{
+			CDIFactory cdiFactory = container.select(CDIFactory.class).get();
 
-		System.exit(exitCode);
+			final var ptk = new PrimeToolKit();
+			commandLine = new CommandLine(ptk, cdiFactory);
+			commandLine.registerConverter(Level.class, Level::parse);
+			final var exitCode = commandLine.execute(args);
+			System.exit(exitCode);
+		}
+
 		LOG.info("exited");
 	}
 

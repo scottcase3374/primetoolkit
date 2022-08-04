@@ -15,21 +15,26 @@
 
 		<compiler-plugin.version>3.8.1</compiler-plugin.version>
 		<maven.versions.plugin.version>2.8.1</maven.versions.plugin.version>
+		<antlr.version>4.10.1</antlr.version>
 		<lombok.version>1.18.22</lombok.version>
 		<native.maven.plugin.version>0.9.9</native.maven.plugin.version>
 		<apache.openwebbeans.version>2.0.26</apache.openwebbeans.version>
 		<cdi.api.version>2.0</cdi.api.version>
-		<picocli.version>4.6.2</picocli.version>
+		<eclipse.collections.version>11.0.0</eclipse.collections.version>
+		<jboss.weld.version>5.0.1.Final</jboss.weld.version>
+		<picocli.version>4.6.3</picocli.version>
 		<jgrapht.version>1.5.1</jgrapht.version>
 		<jgraphx.version>4.2.2</jgraphx.version>
 		<infinispan.version>13.0.10.Final</infinispan.version>
+		<infinispan.protobuf-processor.version>4.4.3.Final</infinispan.protobuf-processor.version>
 		<junit.jupiter.version>5.3.1</junit.jupiter.version>
+		<junit.platform.surefire.version>1.0.1</junit.platform.surefire.version>
 		<mockito.version>2.23.0</mockito.version>
 		<maven.surefire.version>2.19.1</maven.surefire.version>
 		<commons.collections4.versino>4.4</commons.collections4.versino>
 		<validator.api.version>2.0.1.Final</validator.api.version>
 		<io.dropwizard.metrics.core.version>3.1.2</io.dropwizard.metrics.core.version>
-
+		<slf4j.version>1.7.32</slf4j.version>
 		<org.openjdk.jol.core.verion>0.16</org.openjdk.jol.core.verion>
 
 	</properties>
@@ -46,7 +51,7 @@
 		<dependency>
 			<groupId>org.jboss.weld.se</groupId>
 			<artifactId>weld-se-shaded</artifactId>
-			<version>4.0.3.Final</version>
+			<version>${jboss.weld.version}</version>
 		</dependency>
 
 		<dependency>
@@ -61,22 +66,35 @@
 			<version>${picocli.version}</version>
 		</dependency>
 
+
+		<dependency>
+			<groupId>org.antlr</groupId>
+			<artifactId>antlr4</artifactId>
+			<version>${antlr.version}</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.antlr</groupId>
+			<artifactId>antlr4-runtime</artifactId>
+			<version>${antlr.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.infinispan</groupId>
 			<artifactId>infinispan-core</artifactId>
 			<version>${infinispan.version}</version>
 		</dependency>
-
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-collections4</artifactId>
-			<version>${commons.collections4.versino}</version>
-		</dependency>
+<!---->
+<!--		<dependency>-->
+<!--			<groupId>org.apache.commons</groupId>-->
+<!--			<artifactId>commons-collections4</artifactId>-->
+<!--			<version>${commons.collections4.versino}</version>-->
+<!--		</dependency>-->
 
 		<dependency>
 			<groupId>org.eclipse.collections</groupId>
 			<artifactId>eclipse-collections</artifactId>
-			<version>11.0.0</version>
+			<version>${eclipse.collections.version}</version>
 		</dependency>
 
 		<dependency>
@@ -136,19 +154,19 @@
 		<dependency>
 			<groupId>org.infinispan.protostream</groupId>
 			<artifactId>protostream-processor</artifactId>
-			<version>4.4.3.Final</version>
+			<version>${infinispan.protobuf-processor.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
-			<version>1.7.32</version>
+			<version>${slf4j.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>jcl-over-slf4j</artifactId>
-			<version>1.7.32</version>
+			<version>${slf4j.version}</version>
 		</dependency>
 	</dependencies>
 
@@ -194,7 +212,7 @@
 					<dependency>
 						<groupId>org.junit.platform</groupId>
 						<artifactId>junit-platform-surefire-provider</artifactId>
-						<version>1.0.1</version>
+						<version>${junit.platform.surefire.version}</version>
 					</dependency>
 				</dependencies>
 			</plugin>

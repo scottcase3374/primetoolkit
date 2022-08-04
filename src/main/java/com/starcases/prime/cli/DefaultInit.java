@@ -44,6 +44,7 @@ import com.starcases.prime.intfc.FactoryIntfc;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import com.starcases.prime.log.LogNodeStructure;
+import com.starcases.prime.metrics.MetricMonitor;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -143,6 +144,8 @@ public class DefaultInit implements Runnable
 		}
 
 		setFactoryDefaults();
+
+		actionInitMetrics();
 
 		actionInitDefaultPrimeContent();
 
@@ -307,6 +310,11 @@ public class DefaultInit implements Runnable
 				primeSrc.store(initOpts.getStorePrimes());
 			}
 		});
+	}
+
+	private void actionInitMetrics()
+	{
+		MetricMonitor.startReport();
 	}
 
 
