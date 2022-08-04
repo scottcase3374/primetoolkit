@@ -35,7 +35,6 @@ public class LogPrimeTree extends AbstractLogBase
 	/**
 	 * Output the informaation regarding the base.
 	 */
-	@SuppressWarnings({"PMD.LawOfDemeter", "PMD.DataflowAnomalyAnalysis"})
 	@Override
 	public void outputLogs()
 	{

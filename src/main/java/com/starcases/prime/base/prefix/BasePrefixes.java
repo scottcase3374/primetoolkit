@@ -32,7 +32,6 @@ public class BasePrefixes extends AbstractPrimeBaseGenerator
 		super(primeSrc);
 	}
 
-	@SuppressWarnings("PMD.LawOfDemeter")
 	@Override
 	protected void genBasesImpl()
 	{

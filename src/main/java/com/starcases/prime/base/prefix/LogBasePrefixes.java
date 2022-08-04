@@ -34,7 +34,6 @@ public class LogBasePrefixes extends AbstractLogBase
 	/**
 	 * Output log info
 	 */
-	@SuppressWarnings({"PMD.LawOfDemeter", "PMD.DataflowAnomalyAnalysis"})
 	@Override
 	public void outputLogs()
 	{

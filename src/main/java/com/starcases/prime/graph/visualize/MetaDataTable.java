@@ -27,7 +27,7 @@ import javax.swing.JScrollPane;
  * and mostly uses those to calculate information that may be of interest.
  *
  */
-@SuppressWarnings({"PMD.LongVariable", "PMD.CommentSize", "PMD.AvoidDuplicateLiterals"})
+@SuppressWarnings({ "PMD.AvoidDuplicateLiterals"})
 public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc, DefaultEdge>
 {
 	/**
@@ -126,7 +126,6 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 	 * Calc the max distance primes in a base.
 	 * @param event
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
 	protected void handlePrimeMaxDistToPrevPrime(@NonNull final GraphVertexChangeEvent<PrimeRefIntfc> event)
 	{
 		if (primeMaxDistToPrev == null)
@@ -158,7 +157,6 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 	/**
 	 * Calc average dist from previous prime to next prime
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
 	protected void handleAvgDistToPrev()
 	{
 		data[0][AVG_DIST_PREV_PRIME] = String.format("Total dist[%d], total-primes[%d] avg-dist[%f]", primeMaxDistToPrev.getPrime(), primeMaxDistToPrev.getPrimeRefIdx() , (double)primeMaxDistToPrev.getPrime() / (primeMaxDistToPrev.getPrimeRefIdx()+1));
@@ -168,7 +166,6 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 	 * Find base with most items
 	 * @param event
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
 	protected void handleHighPrimeBase(@NonNull final GraphVertexChangeEvent<PrimeRefIntfc> event)
 	{
 		if (highPrimeBase == null || event.getVertex().getPrimeBaseData().getPrimeBases().get(0).size() > highPrimeBase.getPrimeBaseData().getPrimeBases().get(0).size())
@@ -199,13 +196,11 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 		// No removal performed
 	}
 
-	@SuppressWarnings("PMD.LawOfDemeter")
 	@Override
 	public void edgeWeightUpdated(@NonNull final GraphEdgeChangeEvent<PrimeRefIntfc, DefaultEdge> event)
 	{
 		GraphListener.super.edgeWeightUpdated(event);
 	}
-
 
 	@Override
 	public void edgeRemoved(final GraphEdgeChangeEvent<PrimeRefIntfc, DefaultEdge> event)

@@ -38,7 +38,6 @@ public class LogBases3AllTriples  extends AbstractLogBase
 	/**
 	 * output log info
 	 */
-	@SuppressWarnings({"PMD.AvoidFinalLocalVariable", "PMD.LawOfDemeter", "PMD.DataflowAnomalyAnalysis"})
 	@Override
 	@Command
 	public void outputLogs()

@@ -69,7 +69,6 @@ public class PrimeTreeIterator implements PrimeTreeIteratorIntfc
 	/**
 	 *
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
 	@Override
 	public ImmutableLongCollection toCollection()
 	{
@@ -88,7 +87,6 @@ public class PrimeTreeIterator implements PrimeTreeIteratorIntfc
 	/**
 	 * This walks the tree and tracks the navigated source nodes.
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
 	@Override
 	public PrimeTreeNode next(final long prime)
 	{
@@ -103,7 +101,6 @@ public class PrimeTreeIterator implements PrimeTreeIteratorIntfc
 	 * Side effect: tracks source nodes enabling toSet() to
 	 * return the items representing a prefix.
 	 */
-	@SuppressWarnings({"PMD.LawOfDemeter", "PMD.DataflowAnomalyAnalysis"})
 	@Override
 	public PrimeTreeNode add(final long prime)
 	{

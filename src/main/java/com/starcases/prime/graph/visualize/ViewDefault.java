@@ -26,7 +26,6 @@ import lombok.NonNull;
  *
  * supports inclusion of other visuals/displays (such as MetaData Table) via GraphListener.
  */
-@SuppressWarnings("PMD.CommentSize")
 public class ViewDefault extends PrimeGrapherBase
 {
 	/**
@@ -49,7 +48,6 @@ public class ViewDefault extends PrimeGrapherBase
 	 * Display the view
 	 * @throws IOException
 	 */
-	@SuppressWarnings({"PMD.LawOfDemeter"})
 	public void viewDefault() throws IOException
 	{
 		if (LOG.isLoggable(Level.INFO))

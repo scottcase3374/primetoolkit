@@ -13,7 +13,6 @@ import picocli.CommandLine.Option;
  * command line interface setup
  *
  */
-@SuppressWarnings("PMD.AtLeastOneConstructor")
 @Setter
 @Getter
 class InitOpts

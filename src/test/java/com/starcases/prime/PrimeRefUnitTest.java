@@ -16,7 +16,6 @@ import lombok.Setter;
 /**
  * Prime ref unit test
  */
-@SuppressWarnings("PMD.AtLeastOneConstructor")
 @ExtendWith(MockitoExtension.class)
 class PrimeRefUnitTest
 {

@@ -23,7 +23,6 @@ import com.starcases.prime.impl.GenerationProgress;
  * and data for navigating amongst the primes.
  *
  */
-@SuppressWarnings("PMD.CommentSize")
 public interface PrimeSourceIntfc extends Serializable
 {
 	/**

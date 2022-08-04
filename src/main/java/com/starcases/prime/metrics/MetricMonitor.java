@@ -18,9 +18,8 @@ import lombok.Getter;
 /**
  * Class for handling metric data gathered by various processes
  */
-public class MetricMonitor
+public final class MetricMonitor
 {
-
 	/**
 	 *  Metrics data registry (drop wizard)
 	 */
@@ -36,7 +35,7 @@ public class MetricMonitor
 	/**
 	 * Empty constructor
 	 */
-	public MetricMonitor()
+	private MetricMonitor()
 	{
 		// nothing else to do
 	}

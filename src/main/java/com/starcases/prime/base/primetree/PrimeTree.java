@@ -32,7 +32,6 @@ import lombok.NonNull;
  * improvement and also as another base representation by itself.
  *
  */
-@SuppressWarnings("PMD.LongVariable")
 public class PrimeTree extends AbstractPrimeBaseGenerator
 {
 	/**
@@ -91,7 +90,6 @@ public class PrimeTree extends AbstractPrimeBaseGenerator
 	 * top-level function; iterate over entire dataset to reduce every Prime
 	 * @param maxReduce
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
 	@Override
 	protected void genBasesImpl()
 	{

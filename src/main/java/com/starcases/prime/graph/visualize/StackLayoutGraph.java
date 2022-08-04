@@ -5,7 +5,6 @@ import java.io.Serializable;
 /**
  * Represent a stack layout for the graphing framework.
  */
-@SuppressWarnings("PMD.AtLeastOneConstructor")
 public class StackLayoutGraph implements Serializable
 {
 	/**

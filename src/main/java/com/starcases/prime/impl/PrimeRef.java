@@ -68,7 +68,6 @@ public class PrimeRef implements PrimeRefIntfc
 	 * @param primeBases
 	 * @return
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
 	public PrimeRef init(
 			@NonNull final Supplier<PrimeBaseIntfc> primeBaseSupplier,
 			@NonNull final MutableList<ImmutableLongCollection> primeBases)
@@ -125,7 +124,6 @@ public class PrimeRef implements PrimeRefIntfc
 		return primeIdx == 0 ? Optional.empty() : primeSrc.getPrimeRefForIdx(primeIdx -1);
 	}
 
-	@SuppressWarnings("PMD.LawOfDemeter")
 	@Override
 	public long getPrime()
 	{
@@ -145,7 +143,6 @@ public class PrimeRef implements PrimeRefIntfc
 	 *
 	 * empty optional if next Prime is unknown/not calculated
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
 	@Override
 	public OptionalLong getDistToNextPrime()
 	{
@@ -159,7 +156,6 @@ public class PrimeRef implements PrimeRefIntfc
 	 *
 	 * empty optional if prev Prime is unknown/doesn't exist
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
 	@Override
 	public OptionalLong getDistToPrevPrime()
 	{

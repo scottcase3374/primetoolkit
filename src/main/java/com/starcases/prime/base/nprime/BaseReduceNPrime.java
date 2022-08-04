@@ -45,7 +45,6 @@ import lombok.Setter;
  * so result would be: 2(x3) 1(x1),  1(x5) 2(x6),      1(x5) 2(x7)
  *          which reduces to:  1(x11), 2(x16)   =>  1x11 + 2x16 = 43
  */
-@SuppressWarnings({"PMD.CommentSize", "PMD.LawOfDemeter"})
 public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 {
 	/**
@@ -88,7 +87,6 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 	 *
 	 * @param primeRef cur Prime being reduced
 	 */
-	@SuppressWarnings({"PMD.LawOfDemeter"})
 	private void primeReduction(@NonNull final PrimeRefIntfc primeRef, @NonNull final MutableLongCollection retBases)
 	{
 		// want to process initial bases for Prime
@@ -125,7 +123,6 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 	 * @param maxReduce
 	 */
 	@Override
-	@SuppressWarnings("PMD.LawOfDemeter")
 	protected void genBasesImpl()
 	{
 		if (isBaseGenerationOutput())

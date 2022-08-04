@@ -15,8 +15,8 @@ import picocli.CommandLine.IFactory;
 public class CDIFactory implements IFactory
 {
     @Override
-    public <K> K create(Class<K> cls) throws Exception {
-        Instance<K> instance = CDI.current().select(cls);
+    public <K> K create(final Class<K> cls) throws Exception {
+        final Instance<K> instance = CDI.current().select(cls);
         if (instance.isResolvable()) {
             return instance.get();
         }

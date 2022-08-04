@@ -25,7 +25,6 @@ import lombok.Setter;
  * Typically loaded from files sourced from various internet
  * sites.
  */
-@SuppressWarnings({"PMD.LawOfDemeter"})
 public class PrePrimed
 {
 	/**
@@ -198,9 +197,9 @@ public class PrePrimed
 	 													.asIterator()
 	 													.forEachRemaining(entry ->
 															{
-																try( BufferedReader br = new BufferedReader(new InputStreamReader(tmpZipFile.getInputStream(entry))))
+																try( BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(tmpZipFile.getInputStream(entry))))
 					 											{
-																	br
+																	bufferedReader
 																		.lines()
 																		.skip(1)
 																		.forEach( line ->

@@ -13,7 +13,6 @@ import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
  * are the same instead of having multiple copies of large collections
  * in memory.
  */
-@SuppressWarnings("PMD.CommentSize")
 public interface CollectionTrackerIntfc
 {
 	/**

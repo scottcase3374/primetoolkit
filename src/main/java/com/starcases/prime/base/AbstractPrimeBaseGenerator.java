@@ -19,7 +19,6 @@ import lombok.Setter;
  * Abstract class for common Prime base functionality.
  *
  */
-@SuppressWarnings({"PMD.CommentSize"})
 public abstract class AbstractPrimeBaseGenerator implements PrimeBaseGenerateIntfc
 {
 	/**
@@ -130,7 +129,7 @@ public abstract class AbstractPrimeBaseGenerator implements PrimeBaseGenerateInt
 	 *
 	 * @param startTime
 	 */
-	@SuppressWarnings({"PMD.LawOfDemeter", "PMD.GuardLogStatement"})
+	@SuppressWarnings({ "PMD.GuardLogStatement"})
 	protected void event(final boolean startTime)
 	{
 		if (ABSTRACT_LOG.isLoggable(Level.INFO))

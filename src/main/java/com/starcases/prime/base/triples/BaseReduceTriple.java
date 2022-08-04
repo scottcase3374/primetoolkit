@@ -64,7 +64,6 @@ import lombok.NonNull;
 /**
  * Produce "triples" for each prime.
  */
-@SuppressWarnings("PMD.CommentSize")
 public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 {
 	/**
@@ -101,7 +100,6 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 	 * top-level function; iterate over entire dataset to reduce every Prime
 	 * @param maxReduce
 	 */
-	@SuppressWarnings({"PMD.LawOfDemeter", "PMD.DataflowAnomalyAnalysis"})
 	@Override
 	protected void genBasesImpl()
 	{

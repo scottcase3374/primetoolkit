@@ -9,7 +9,6 @@ import picocli.CommandLine.ITypeConverter;
  * Used to convert enum name to OutputableIntfc
  * for use with picocli code.
  */
-@SuppressWarnings("PMD.AtLeastOneConstructor")
 public class OutputableConverter implements ITypeConverter<OutputableIntfc>
 {
 	/**

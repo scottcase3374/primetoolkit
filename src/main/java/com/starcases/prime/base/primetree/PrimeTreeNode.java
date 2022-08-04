@@ -54,7 +54,6 @@ public class PrimeTreeNode
 	 * @param key
 	 * @return
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
 	public Optional<ImmutableLongCollection> getSourcePrimes(final long key)
 	{
 		return collTrack.get(key).map(PData::toCanonicalCollection);
@@ -65,7 +64,6 @@ public class PrimeTreeNode
 	 * @param sp1
 	 * @return
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
 	public ImmutableLongCollection assignSourcePrimes(final ImmutableLongCollection sp1)
 	{
 		return collTrack.track(sp1).toCanonicalCollection();

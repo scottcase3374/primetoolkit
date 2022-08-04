@@ -28,7 +28,6 @@ import lombok.NonNull;
  *
  *
  */
-@SuppressWarnings("PMD.CommentSize")
 public interface PrimeBaseIntfc extends Serializable
 {
 	/**

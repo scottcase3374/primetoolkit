@@ -20,7 +20,6 @@ import lombok.Setter;
  * represents a "base" of primes and acts as a container for
  * the items that represent the prime.
  */
-@SuppressWarnings({"PMD.AtLeastOneConstructor", "PMD.LawOfDemeter"})
 public class PrimeMultiBaseContainer implements PrimeBaseIntfc
 {
 	/**

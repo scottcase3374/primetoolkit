@@ -38,7 +38,6 @@ public class CircularLayoutPrimesGraph extends JFrame
 	 * Constructor for the circular layout of default base info
 	 * @param graph
 	 */
-	@SuppressWarnings("PMD.AvoidFinalLocalVariable")
     public CircularLayoutPrimesGraph(@NonNull final Graph<PrimeRefIntfc,DefaultEdge> graph)
     {
     	super();

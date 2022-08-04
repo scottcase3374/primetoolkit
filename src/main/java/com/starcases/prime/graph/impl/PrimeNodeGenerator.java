@@ -29,7 +29,7 @@ import lombok.Setter;
  *
  *
  */
-@SuppressWarnings({"PMD.CommentSize", "PMD.AvoidDuplicateLiterals"})
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals"})
 public class PrimeNodeGenerator
 {
 	/**
@@ -83,7 +83,6 @@ public class PrimeNodeGenerator
 	/**
 	 * Begin producing nodes
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
 	public void begin()
 	{
 		// bootstrap
@@ -103,7 +102,6 @@ public class PrimeNodeGenerator
 	 * Continue producing events/nodes after initial bootstrap
 	 * @return
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
 	public boolean nextEvents()
 	{
 		primeSrc.getPrimeRefForIdx(level).ifPresent(pRef ->
@@ -119,7 +117,6 @@ public class PrimeNodeGenerator
 	 * get a primeRef and add to graph.
 	 * Create edges from Prime node to primes from the base sets representing the Prime.
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
 	protected void addNodeRawBase()
 	{
 		// Link from Prime node to Prime bases (i.e. unique set of smaller primes that sums to this Prime).
@@ -147,7 +144,6 @@ public class PrimeNodeGenerator
 	 * @param base
 	 * @param primeRef
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
 	protected void addBaseEdge(final long base, final PrimeRefIntfc primeRef)
 	{
 		primeSrc.getPrimeRefForPrime(base).ifPresent( p -> graph.addEdge(p , primeRef));

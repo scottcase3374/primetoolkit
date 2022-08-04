@@ -64,7 +64,6 @@ enum SumConstraintState
 		this.compToResult = compToResult;
 	}
 
-	@SuppressWarnings("PMD.LawOfDemeter")
 	static SumConstraintState getEnum(final Integer compToResult)
 	{
 		return Arrays.stream(SumConstraintState.values())
@@ -80,7 +79,6 @@ enum SumConstraintState
 	 * @param targetPrime
 	 * @return
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
 	public static SumConstraintState checkSumConstraints(
 			@NonNull final PrimeRefIntfc [] primeRefs,
 			@NonNull final PrimeRefIntfc targetPrime)
@@ -134,7 +132,6 @@ enum ConditionConstraintState
 	 * @param primeRefs
 	 * @return
 	 */
-	@SuppressWarnings({"PMD.LawOfDemeter", "PMD.DataflowAnomalyAnalysis"})
 	public static ConditionConstraintState checkConditionConstraints(
 			@NonNull final PrimeRefIntfc ... primeRefs)
 	{
@@ -173,7 +170,6 @@ enum ConditionConstraintState
  * Class implementing the logic for finding all viable triples.
  *
  */
-@SuppressWarnings({"PMD.LongVariable", "PMD.CommentSize"})
 public class AllTriples
 {
 	/**
@@ -239,7 +235,6 @@ public class AllTriples
 	 * @param sumConstraint
 	 * @param conditionConstraint
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
 	private void nextPrimeRef(
 						final int idx,
 						@NonNull final PrimeRefIntfc [] triple,
@@ -264,7 +259,6 @@ public class AllTriples
 	 * Performing the process for each prime ref in concurrent/parallel produces a speedup but since this is
 	 * generating all combinations of valid sums, it is slow for more than small sets of primes.
 	 */
-	@SuppressWarnings({"PMD.LawOfDemeter", "PMD.DataflowAnomalyAnalysis"})
 	public void process()
 	{
 		final PrimeRefIntfc [] triple =
@@ -308,7 +302,6 @@ public class AllTriples
 		while(GOOD_SUM_STATE.contains(sumConstraint[0]) && !BAD_CONDITION_STATE.contains(conditionConstraint[0]));
 	}
 
-	@SuppressWarnings({"PMD.LawOfDemeter", "PMD.DataflowAnomalyAnalysis", "PMD.UseVarargs"})
 	private void addPrimeBases(final @NonNull PrimeRefIntfc prime, final @NonNull PrimeRefIntfc [] vals)
 	{
 		final ImmutableLongCollection primeColl = ImmutableLongSetFactoryImpl.INSTANCE.of(prime.getPrime());

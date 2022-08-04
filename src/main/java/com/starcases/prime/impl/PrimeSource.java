@@ -49,7 +49,7 @@ import org.eclipse.collections.impl.set.immutable.primitive.ImmutableLongSetFact
  *  and general information/access.
  *
  */
-@SuppressWarnings({"PMD.CommentSize", "PMD.DataflowAnomalyAnalysis", "PMD.AvoidDuplicateLiterals"})
+@SuppressWarnings({ "PMD.AvoidDuplicateLiterals"})
 public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSourceIntfc
 {
 	private static final long serialVersionUID = 1L;
@@ -355,7 +355,6 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	 * @param value
 	 * @return
 	 */
-	@SuppressWarnings("PMD.DataflowAnomalyAnalysis")
 	public int getBitsRequired(@Min(0) final long value)
 	{
 		final long [] masks = { 0xFFL, 0xFF00L, 0xFF000000L,  0xFF00000000000000L };
@@ -383,7 +382,6 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	 * @param optCurPrime
 	 * @return
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
 	private boolean genByPrimePermutation(final int idx, final OptionalLong optCurPrime)
 	{
 		// Represents a X-bit search space of indexes for primes to add for next Prime.
@@ -439,7 +437,6 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	}
 
 	@Override
-	@SuppressWarnings("PMD.LawOfDemeter")
 	public OptionalLong getPrimeForIdx(@Min(0) final long primeIdx)
 	{
 		final var ret = idxToPrimeMap.get(primeIdx);
@@ -447,7 +444,6 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	}
 
 	@Override
-	@SuppressWarnings("PMD.LawOfDemeter")
 	public Optional<PrimeRefIntfc> getPrimeRefForIdx(@Min(0) final long primeIdx)
 	{
 		final var primeRef = idxToPrimeMap.get(primeIdx).getPrimeRef();
@@ -466,14 +462,12 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 		return new PrimeMapIterator(idxToPrimeMap.iterator());
 	}
 
-	@SuppressWarnings("PMD.LawOfDemeter")
 	@Override
 	public Stream<PrimeRefIntfc> getPrimeRefStream(final boolean preferParallel)
 	{
 		return (preferParallel ? idxToPrimeMap.values().parallelStream() : idxToPrimeMap.values().stream()).map(PrimeMapEntry::getPrimeRef);
 	}
 
-	@SuppressWarnings("PMD.LawOfDemeter")
 	@Override
 	public Stream<PrimeRefIntfc> getPrimeRefStream(final long skipCount, final boolean preferParallel)
 	{
@@ -574,7 +568,6 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	 * @param sumOfPrimeSet
 	 * @return true for sum that is viable Prime; false otherwise
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
 	private boolean viablePrime(@Min(1) final long primeSum, @Min(1) final long lastMaxPrime)
 	{
 		return

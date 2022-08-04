@@ -9,9 +9,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.starcases.prime.base.BaseTypes;
+import com.starcases.prime.cdi.CDIFactory;
 import com.starcases.prime.cli.DefaultInit;
 import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
+import org.jboss.weld.environment.se.Weld;
 
+import jakarta.enterprise.inject.se.SeContainer;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -25,7 +28,6 @@ import picocli.CommandLine.Model.CommandSpec;
  * CLI Driver
  *
  */
-@SuppressWarnings("PMD.AtLeastOneConstructor")
 @Getter
 @Setter
 @Command(name = "ptk", subcommands = { DefaultInit.class, CommandLine.HelpCommand.class }  , description="Prime Tool Kit")
@@ -53,7 +55,6 @@ public final class PrimeToolKit
 	 * @param key
 	 * @param outputPath
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
 	public static void setOutput(final String key, final Path outputPath)
 	{
 		if (LOG.isLoggable(Level.INFO))
@@ -75,7 +76,7 @@ public final class PrimeToolKit
 		final CommandLine commandLine;
 		try (SeContainer container = Weld.newInstance().initialize())
 		{
-			CDIFactory cdiFactory = container.select(CDIFactory.class).get();
+			final CDIFactory cdiFactory = container.select(CDIFactory.class).get();
 
 			final var ptk = new PrimeToolKit();
 			commandLine = new CommandLine(ptk, cdiFactory);

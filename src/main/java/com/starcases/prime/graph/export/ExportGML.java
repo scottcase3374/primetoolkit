@@ -30,7 +30,6 @@ interface ElementIntfc
  * Top-level for GML output, coordinates other class types to
  * generate GML
  */
-@SuppressWarnings({"PMD.LawOfDemeter"})
 public class ExportGML
 {
 	/**
@@ -167,7 +166,6 @@ class NodeElement implements ElementIntfc
  * Used for exporting edge element information as part of
  * the GML output.
  */
-@SuppressWarnings({"PMD.LawOfDemeter"})
 class EdgeElement implements ElementIntfc
 {
 	/**

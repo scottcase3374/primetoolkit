@@ -33,7 +33,7 @@ import com.starcases.prime.intfc.PrimeRefIntfc;
  * factory providing defaults for some example usages.
  *
  */
-@SuppressWarnings({"PMD.LongVariable", "PMD.CommentSize", "PMD.SystemPrintln", "PMD.LawOfDemeter"})
+@SuppressWarnings({"PMD.SystemPrintln"})
 public final class PTKFactory
 {
 	/**
@@ -147,6 +147,7 @@ public final class PTKFactory
 						return primeRefRawCtor;
 					}
 
+					@Override
 					public ImmutableList<Consumer<PrimeSourceIntfc>> getConsumersSetPrimeSrc()
 					{
 						return ImmutableListFactoryImpl.INSTANCE.of(primeRefSetPrimeSource, baseSetPrimeSource);

@@ -24,7 +24,6 @@ import lombok.Getter;
  * referencing the collection and the sum.
  */
 @ApplicationScoped
-@SuppressWarnings("PMD.AtLeastOneConstructor")
 public class CollectionTrackerImpl implements CollectionTrackerIntfc
 {
 	/**
@@ -42,7 +41,6 @@ public class CollectionTrackerImpl implements CollectionTrackerIntfc
 	/**
 	 * Track the specified collection
 	 */
-	@SuppressWarnings({"PMD.LawOfDemeter"})
 	@Override
 	public PData track(final ImmutableLongCollection collection)
 	{
@@ -55,7 +53,6 @@ public class CollectionTrackerImpl implements CollectionTrackerIntfc
 	 * Select an existing collection based upon the provided
 	 * predicate
 	 */
-	@SuppressWarnings({"PMD.LawOfDemeter"})
 	@Override
 	public Optional<PData> select(final LongPredicate pred)
 	{

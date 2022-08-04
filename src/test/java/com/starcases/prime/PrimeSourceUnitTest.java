@@ -25,7 +25,7 @@ import lombok.Setter;
  * Prime source unit tests
  * Lookup prime / prime refs.
  */
-@SuppressWarnings({"PMD.AtLeastOneConstructor", "PMD.CommentDefaultAccessModifier"})
+@SuppressWarnings({"PMD.CommentDefaultAccessModifier"})
 @ExtendWith(MockitoExtension.class)
 class PrimeSourceUnitTest
 {
@@ -86,7 +86,6 @@ class PrimeSourceUnitTest
 	 * Unit test - get prime
 	 */
 	@Test
-	@SuppressWarnings("PMD.LawOfDemeter")
 	void canGetPrime()
 	{
 		final var bi101 = Optional.of(BigInteger.valueOf(101L));

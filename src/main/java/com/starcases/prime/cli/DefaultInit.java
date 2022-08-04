@@ -69,7 +69,7 @@ import picocli.CommandLine.Command;
  * interface function is just a dummy value - not used.
  *
  */
-@SuppressWarnings({"PMD.AtLeastOneConstructor", "PMD.CommentSize", "PMD.AvoidFinalLocalVariable", "PMD.AvoidDuplicateLiterals"})
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals"})
 @Command(name = "init", description = "Default initial setup")
 public class DefaultInit implements Runnable
 {
@@ -210,7 +210,6 @@ public class DefaultInit implements Runnable
 		}
 	}
 
-	@SuppressWarnings({"PMD.LawOfDemeter", "PMD.DataflowAnomalyAnalysis"})
 	private Path decorateFileName(final String base, final String fileName, final String extension)
 	{
 		Path ret = null;
@@ -238,7 +237,6 @@ public class DefaultInit implements Runnable
 		PTKFactory.setPrimeRefRawCtor( (i, base) -> new PrimeRef(i).init(PTKFactory.getPrimeBaseCtor(), base) );
 	}
 
-	@SuppressWarnings("PMD.LawOfDemeter")
 	private boolean ensureOutputFolder()
 	{
 		boolean ret;
@@ -258,7 +256,6 @@ public class DefaultInit implements Runnable
 		return ret;
 	}
 
-	@SuppressWarnings("PMD.LawOfDemeter")
 	private void stdOutRedirect()
 	{
 		if (!initOpts.isStdOuputRedir())
@@ -317,8 +314,6 @@ public class DefaultInit implements Runnable
 		MetricMonitor.startReport();
 	}
 
-
-	@SuppressWarnings({"PMD.LawOfDemeter", "PMD.DataflowAnomalyAnalysis"})
 	private void actionHandleAdditionalBases()
 	{
 		if (baseOpts != null && baseOpts.getBases() != null)
@@ -381,7 +376,6 @@ public class DefaultInit implements Runnable
 		}
 	}
 
-	@SuppressWarnings("PMD.LawOfDemeter")
 	private void actionHandleOutputs()
 	{
 		if (outputOpts != null && outputOpts.getOutputOpers() != null && !outputOpts.getOutputOpers().isEmpty())
@@ -461,7 +455,6 @@ public class DefaultInit implements Runnable
 		}
 	}
 
-	@SuppressWarnings("PMD.LawOfDemeter")
 	private boolean isBaseSelected(final BaseTypes baseType)
 	{
 		return baseOpts != null && baseOpts.getBases().contains(baseType);

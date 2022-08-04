@@ -31,7 +31,6 @@ public class LogNodeStructure extends AbstractLogBase
 		super(primeSrc);
 	}
 
-	@SuppressWarnings({"PMD.LawOfDemeter","PMD.DataflowAnomalyAnalysis"})
 	@Override
 	public void outputLogs()
 	{

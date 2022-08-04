@@ -5,7 +5,6 @@ import com.starcases.prime.PrimeToolKit;
 /**
  * Class that manages progress info for user.
  */
-@SuppressWarnings("PMD.AtLeastOneConstructor")
 public final class GenerationProgress
 {
 	/**

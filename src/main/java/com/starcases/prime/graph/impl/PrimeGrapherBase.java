@@ -22,7 +22,6 @@ import lombok.NonNull;
  * Provide support for the graph oriented processing - base class.
  *
  */
-@SuppressWarnings({"PMD.LongVariable", "PMD.EmptyStatementNotInLoop"})
 public class PrimeGrapherBase
 {
 	/**
@@ -90,7 +89,6 @@ public class PrimeGrapherBase
 	 * @param indexes
 	 * @return
 	 */
-	@SuppressWarnings({"PMD.LawOfDemeter", "PMD.UseVarargs"})
 	protected long getTotalSum(@NonNull final long [] sum3, @NonNull final Integer [] indexes)
 	{
 		for (var index = 0; index< sum3.length; index++)

@@ -13,7 +13,6 @@ import lombok.Setter;
  * Base for algorithms that just outputs info (which it may just calculate).
  *
  */
-@SuppressWarnings("PMD.CommentSize")
 public abstract class AbstractLogBase implements LogGraphIntfc
 {
 	/**

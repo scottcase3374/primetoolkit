@@ -19,7 +19,6 @@ import java.util.OptionalLong;
  *   be managed by each class implementing this PrimeRefIntfc interface.
  *
  */
-@SuppressWarnings("PMD.CommentSize")
 public interface PrimeRefIntfc extends Serializable
 {
 	/**

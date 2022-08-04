@@ -14,7 +14,6 @@ import picocli.CommandLine.Command;
 /**
  * Provides logging of NPrime style base information.
  */
-@SuppressWarnings({"PMD.LawOfDemeter"})
 public class LogBasesNPrime extends AbstractLogBase
 {
 	/**

@@ -38,7 +38,6 @@ public class LogGraphStructure extends PrimeGrapherBase implements LogGraphIntfc
 	/**
 	 * output log info
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
 	@Override
 	@Command
 	public void outputLogs()
