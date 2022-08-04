@@ -1,6 +1,5 @@
 package com.starcases.prime.metrics;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -10,6 +9,7 @@ import com.codahale.metrics.Slf4jReporter;
 import com.codahale.metrics.Timer;
 import com.starcases.prime.intfc.OutputableIntfc;
 
+import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 import org.slf4j.LoggerFactory;
 
 import lombok.AccessLevel;
@@ -30,7 +30,7 @@ public final class MetricMonitor
 	 * map from some framework identity type to a timer.
 	 */
 	@Getter(AccessLevel.PRIVATE)
-	private static final Map<OutputableIntfc, Timer> timers = new HashMap<>();
+	private static final Map<OutputableIntfc, Timer> timers = new ConcurrentHashMap<>();
 
 	/**
 	 * Empty constructor
