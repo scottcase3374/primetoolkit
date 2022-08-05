@@ -26,7 +26,6 @@
 		<jgrapht.version>1.5.1</jgrapht.version>
 		<jgraphx.version>4.2.2</jgraphx.version>
 		<infinispan.version>13.0.10.Final</infinispan.version>
-		<infinispan.protobuf-processor.version>4.4.3.Final</infinispan.protobuf-processor.version>
 		<junit.jupiter.version>5.3.1</junit.jupiter.version>
 		<junit.platform.surefire.version>1.0.1</junit.platform.surefire.version>
 		<mockito.version>2.23.0</mockito.version>
@@ -38,6 +37,14 @@
 		<org.openjdk.jol.core.verion>0.16</org.openjdk.jol.core.verion>
 
 	</properties>
+
+	<repositories>
+		<repository>
+			<id>Redhat-GA</id>
+			<name>Redhat GA</name>
+			<url>https://maven.repository.redhat.com/ga/</url>
+		</repository>
+	</repositories>
 
 	<dependencies>
 		<dependency>
@@ -66,30 +73,33 @@
 			<version>${picocli.version}</version>
 		</dependency>
 
-
 		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr4</artifactId>
 			<version>${antlr.version}</version>
 		</dependency>
 
-
 		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr4-runtime</artifactId>
 			<version>${antlr.version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.infinispan</groupId>
 			<artifactId>infinispan-core</artifactId>
-			<version>${infinispan.version}</version>
 		</dependency>
-<!---->
-<!--		<dependency>-->
-<!--			<groupId>org.apache.commons</groupId>-->
-<!--			<artifactId>commons-collections4</artifactId>-->
-<!--			<version>${commons.collections4.versino}</version>-->
-<!--		</dependency>-->
+
+		<dependency>
+			<groupId>org.infinispan.protostream</groupId>
+			<artifactId>protostream-processor</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.infinispan</groupId>
+			<artifactId>infinispan-cdi-embedded</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.eclipse.collections</groupId>
@@ -116,13 +126,11 @@
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
-			<version>${junit.jupiter.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
-			<version>${mockito.version}</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -152,13 +160,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.infinispan.protostream</groupId>
-			<artifactId>protostream-processor</artifactId>
-			<version>${infinispan.protobuf-processor.version}</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
 			<version>${slf4j.version}</version>
@@ -179,11 +180,13 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+
 			<dependency>
 				<groupId>org.infinispan</groupId>
-				<artifactId>infinispan-bom</artifactId>
+				<artifactId>infinispan-cdi-parent</artifactId>
 				<version>${infinispan.version}</version>
 				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
