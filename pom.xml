@@ -38,14 +38,6 @@
 
 	</properties>
 
-	<repositories>
-		<repository>
-			<id>Redhat-GA</id>
-			<name>Redhat GA</name>
-			<url>https://maven.repository.redhat.com/ga/</url>
-		</repository>
-	</repositories>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
