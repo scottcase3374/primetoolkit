@@ -1,7 +1,5 @@
 package com.starcases.prime.impl;
 
-import java.math.BigInteger;
-
 import com.starcases.prime.intfc.PrimeRefIntfc;
 
 import lombok.Getter;
@@ -17,7 +15,7 @@ class PrimeMapEntry
 	 */
 	@Getter
 	@Setter
-	private BigInteger prime;
+	private long prime;
 
 	/**
 	 * related prime ref.
@@ -31,7 +29,7 @@ class PrimeMapEntry
 	 * @param prime
 	 * @param primeRef
 	 */
-	public PrimeMapEntry(final BigInteger prime, final PrimeRefIntfc primeRef)
+	public PrimeMapEntry(final long prime, final PrimeRefIntfc primeRef)
 	{
 		this.prime = prime;
 		this.primeRef = primeRef;

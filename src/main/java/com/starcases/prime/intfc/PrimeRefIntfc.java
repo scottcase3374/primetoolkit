@@ -1,9 +1,9 @@
 package com.starcases.prime.intfc;
 
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.util.Comparator;
 import java.util.Optional;
+import java.util.OptionalLong;
 
 /**
  *
@@ -19,25 +19,24 @@ import java.util.Optional;
  *   be managed by each class implementing this PrimeRefIntfc interface.
  *
  */
-@SuppressWarnings("PMD.CommentSize")
 public interface PrimeRefIntfc extends Serializable
 {
 	/**
 	 * Prime ref compatator
 	 */
-	Comparator<PrimeRefIntfc> PREF_COMPARATOR = (PrimeRefIntfc o1, PrimeRefIntfc o2) -> o1.getPrime().compareTo(o2.getPrime());
+	Comparator<PrimeRefIntfc> PREF_COMPARATOR = (PrimeRefIntfc o1, PrimeRefIntfc o2) -> (int)(o1.getPrime() - o2.getPrime());
 
 	/**
 	 * Get distance to next prime from current prime.
 	 * @return
 	 */
-	Optional<BigInteger> getDistToNextPrime();
+	OptionalLong getDistToNextPrime();
 
 	/**
 	 * Get distance to previous prime from current prime.
 	 * @return
 	 */
-	Optional<BigInteger> getDistToPrevPrime();
+	OptionalLong getDistToPrevPrime();
 
 	/**
 	 * Get the next prime based on numerical ordering
@@ -55,7 +54,7 @@ public interface PrimeRefIntfc extends Serializable
 	 * Get big integer representing the current prime ref.
 	 * @return
 	 */
-	BigInteger getPrime();
+	long getPrime();
 
 	/**
 	 * Get container for prime base data.

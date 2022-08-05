@@ -24,7 +24,6 @@ import com.mxgraph.swing.mxGraphComponent;
  *
  *
  */
-@SuppressWarnings("PMD.CommentSize")
 public class CompactTreeLayoutPrimesGraph extends JFrame
 {
 	private static final long serialVersionUID = 1L;

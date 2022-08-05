@@ -16,7 +16,6 @@ import lombok.Setter;
 /**
  * Testing triple bases
  */
-@SuppressWarnings("PMD.AtLeastOneConstructor")
 @ExtendWith(MockitoExtension.class)
 class TripleUnitTest
 {

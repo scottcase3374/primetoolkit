@@ -42,7 +42,6 @@ class PrimeMapIterator implements Iterator<PrimeRefIntfc>
 	/**
 	 * Override of next
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
 	@Override
 	public PrimeRefIntfc next()
 	{

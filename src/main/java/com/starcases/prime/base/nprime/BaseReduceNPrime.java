@@ -1,24 +1,24 @@
 package com.starcases.prime.base.nprime;
 
-import java.math.BigInteger;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-
-import org.eclipse.collections.api.bag.sorted.MutableSortedBag;
+import org.eclipse.collections.api.collection.MutableCollection;
+import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
+import org.eclipse.collections.api.collection.primitive.MutableLongCollection;
 import org.eclipse.collections.api.list.MutableList;
-import org.eclipse.collections.impl.bag.sorted.mutable.TreeBag;
-import org.eclipse.collections.impl.collector.Collectors2;
+import org.eclipse.collections.impl.bag.immutable.primitive.ImmutableLongBagFactoryImpl;
+import org.eclipse.collections.impl.bag.mutable.primitive.MutableLongBagFactoryImpl;
+import org.eclipse.collections.impl.list.mutable.MutableListFactoryImpl;
 
+import com.codahale.metrics.Timer;
 import com.starcases.prime.base.AbstractPrimeBaseGenerator;
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
+import com.starcases.prime.metrics.MetricMonitor;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -45,7 +45,6 @@ import lombok.Setter;
  * so result would be: 2(x3) 1(x1),  1(x5) 2(x6),      1(x5) 2(x7)
  *          which reduces to:  1(x11), 2(x16)   =>  1x11 + 2x16 = 43
  */
-@SuppressWarnings({"PMD.CommentSize", "PMD.LawOfDemeter"})
 public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 {
 	/**
@@ -60,7 +59,7 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 	@Setter
 	@Min(2)
 	@Max(3)
-	private BigInteger maxReduce;
+	private long maxReduce;
 
 	/**
 	 * constructor for Base NPrime construction
@@ -76,7 +75,7 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 	 * @param maxReduce
 	 * @return
 	 */
-	public BaseReduceNPrime assignMaxReduce(final BigInteger maxReduce)
+	public BaseReduceNPrime assignMaxReduce(final long maxReduce)
 	{
 		this.maxReduce = maxReduce;
 		return this;
@@ -88,31 +87,31 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 	 *
 	 * @param primeRef cur Prime being reduced
 	 */
-	@SuppressWarnings({"PMD.LawOfDemeter"})
-	private void primeReduction(@NonNull final PrimeRefIntfc primeRef, @NonNull final MutableSortedBag<BigInteger> retBases)
+	private void primeReduction(@NonNull final PrimeRefIntfc primeRef, @NonNull final MutableLongCollection retBases)
 	{
 		// want to process initial bases for Prime
-		MutableList<BigInteger> bases = primeRef
+		MutableLongCollection bases = primeRef
 				.getPrimeBaseData()
 				.getPrimeBases()
 				.stream()
-				.flatMap(Set::stream)
-				.collect(Collectors2.toList());
+				.map(ImmutableLongCollection::longIterator)
+				.collect(null)
+				;
 
 		while (!bases.isEmpty())
 		{
-			bases.selectWith((BigInteger bi, BigInteger reduceVal) -> bi.compareTo(reduceVal) < 0, maxReduce, retBases);
+			bases.select( bi -> ( bi - maxReduce) < 0 ,retBases);
 
-			final var tmp = bases
-					.stream()
-					.filter(bi ->  bi.compareTo(maxReduce) >= 0)
-					.map(bi1 -> primeSrc.getPrimeRef(bi1)
+			final MutableLongCollection tmp = bases
+					.select(bi ->  (bi - maxReduce) >= 0)
+					/*.collect(bi1 -> primeSrc.getPrimeRefByPrime(bi1)
 								.orElseThrow()
 								.getPrimeBaseData()
-								.getPrimeBases())
-					.flatMap(Collection::stream)	// List of Set of BigInteger  -> Stream of Set of BigInteger
-					.flatMap(Collection::stream)	// Stream of Set of BigInteger to Stream of BigInteger
-					.collect(Collectors2.toList())	// Stream of BigIntegers -> List of BigInteger
+								.getPrimeBases()) */
+
+					//.flatCollect(Collection::stream)	// List of Set of BigInteger  -> Stream of Set of BigInteger
+					//.flatMap(Collection::stream)	// Stream of Set of BigInteger to Stream of BigInteger
+					//.collect(Collectors2.toList())	// Stream of BigIntegers -> List of BigInteger
 					;
 			bases = tmp;
 		}
@@ -124,7 +123,6 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 	 * @param maxReduce
 	 */
 	@Override
-	@SuppressWarnings("PMD.LawOfDemeter")
 	protected void genBasesImpl()
 	{
 		if (isBaseGenerationOutput())
@@ -137,20 +135,26 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 			}
 		}
 
+		MetricMonitor.addTimer(BaseTypes.NPRIME,"Gen NPrime");
+
 		primeSrc.getPrimeRefStream(this.preferParallel)
 			.filter(pr -> isNonNullEmpty(pr.getPrimeBaseData().getPrimeBases()))
 				.forEach( curPrime ->
 				{
-					final MutableSortedBag<BigInteger> retBases = TreeBag.newBag();
-					primeReduction(curPrime, retBases);
+					try (Timer.Context context = MetricMonitor.time(BaseTypes.NPRIME).orElse(null))
+					{
+						final MutableLongCollection retBases = MutableLongBagFactoryImpl.INSTANCE.empty();
+						primeReduction(curPrime, retBases);
+						final MutableList<ImmutableLongCollection> lst = MutableListFactoryImpl.INSTANCE.of(retBases.toImmutable(), ImmutableLongBagFactoryImpl.INSTANCE.with(curPrime.getPrime()));
 
-					curPrime
-						.getPrimeBaseData()
-						.addPrimeBases(BaseTypes.NPRIME, List.of(retBases.toSortedSet(), Set.of(curPrime.getPrime())), new NPrimeBaseMetadata(retBases));
-						});
+						curPrime
+							.getPrimeBaseData()
+							.addPrimeBases(BaseTypes.NPRIME, lst, new NPrimeBaseMetadata(retBases.toImmutable()));
+					}
+				});
 	}
 
-	private boolean isNonNullEmpty(final Collection<?> coll)
+	private boolean isNonNullEmpty(final MutableCollection<?> coll)
 	{
 		return coll != null && !coll.isEmpty();
 	}

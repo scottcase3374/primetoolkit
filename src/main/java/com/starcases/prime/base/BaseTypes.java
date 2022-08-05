@@ -10,12 +10,17 @@ import com.starcases.prime.intfc.OutputableIntfc;
 public enum BaseTypes implements OutputableIntfc
 {
 	/**
-	 * default is case where bases of Prime Pn consist of:  [Pn-1,
-	 * subset of other primes < Pn-1 which in total sum to Pn]
+	 * Defining as the set or a super set of the primes from:
+	 * 	https://primes.utm.edu/lists/small/millions/
 	 */
 	DEFAULT,
 
+	/**
+	 * default is case where bases of Prime Pn consist of:  [Pn-1,
+	 * subset of other primes < Pn-1 which in total sum to Pn]
+	 */
 	PREFIX,
+
 
 	PRIME_TREE,
 

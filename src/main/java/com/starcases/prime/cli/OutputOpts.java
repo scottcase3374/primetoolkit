@@ -14,7 +14,6 @@ import picocli.CommandLine.Option;
  * Command line interface setup
  *
  */
-@SuppressWarnings("PMD.AtLeastOneConstructor")
 class OutputOpts
 {
 	/**

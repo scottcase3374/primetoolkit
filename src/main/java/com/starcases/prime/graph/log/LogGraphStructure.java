@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 import com.starcases.prime.PrimeToolKit;
 import com.starcases.prime.base.BaseTypes;
-import com.starcases.prime.graph.impl.AbstractPrimeGrapher;
+import com.starcases.prime.graph.impl.PrimeGrapherBase;
 import com.starcases.prime.intfc.LogGraphIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
@@ -18,7 +18,7 @@ import picocli.CommandLine.Command;
  * the main data.
  *
  */
-public class LogGraphStructure extends AbstractPrimeGrapher implements LogGraphIntfc
+public class LogGraphStructure extends PrimeGrapherBase implements LogGraphIntfc
 {
 	/**
 	 * default logger
@@ -38,7 +38,6 @@ public class LogGraphStructure extends AbstractPrimeGrapher implements LogGraphI
 	/**
 	 * output log info
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
 	@Override
 	@Command
 	public void outputLogs()

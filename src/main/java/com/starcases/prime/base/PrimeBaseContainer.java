@@ -1,15 +1,11 @@
 package com.starcases.prime.base;
 
-import java.math.BigInteger;
-import java.util.Collections;
-
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
-
-import org.eclipse.collections.impl.list.mutable.FastList;
+import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
+import org.eclipse.collections.api.list.MutableList;
+import org.eclipse.collections.impl.list.mutable.MutableListFactoryImpl;
 
 import com.starcases.prime.intfc.BaseMetadataIntfc;
 import com.starcases.prime.intfc.PrimeBaseIntfc;
@@ -23,7 +19,6 @@ import lombok.Setter;
 /**
  *  Default 'container' for base information.
  */
-@SuppressWarnings("PMD.AtLeastOneConstructor")
 public class PrimeBaseContainer implements PrimeBaseIntfc
 {
 	/**
@@ -36,7 +31,7 @@ public class PrimeBaseContainer implements PrimeBaseIntfc
 	 *
 	 */
 	@NonNull
-	private final Map<BaseTypes, List<Set<BigInteger>>> primeBases = new ConcurrentHashMap<>();
+	private final Map<BaseTypes, MutableList<ImmutableLongCollection>> primeBases = new ConcurrentHashMap<>();
 
 	/**
 	 * Optional Metadata regarding base types of interest
@@ -68,14 +63,14 @@ public class PrimeBaseContainer implements PrimeBaseIntfc
 	 * @param primeBase
 	 */
 	@Override
-	public void addPrimeBases(@NonNull final BaseTypes baseType, @NonNull final List<Set<BigInteger>> primeBase, final BaseMetadataIntfc baseMetadata)
+	public void addPrimeBases(@NonNull final BaseTypes baseType, @NonNull final MutableList<ImmutableLongCollection> primeBase, final BaseMetadataIntfc baseMetadata)
 	{
 		this.primeBases.compute(baseType,
 				(k, v) ->
 					{
 						if (v == null)
 						{
-							v = new FastList<Set<BigInteger>>();
+							v = MutableListFactoryImpl.INSTANCE.of();
 						}
 
 						v.addAll(primeBase);
@@ -90,13 +85,13 @@ public class PrimeBaseContainer implements PrimeBaseIntfc
 	 * @param primeBase
 	 */
 	@Override
-	public void addPrimeBases(@NonNull final List<Set<BigInteger>> primeBase)
+	public void addPrimeBases(@NonNull final MutableList<ImmutableLongCollection> primeBase)
 	{
 		addPrimeBases(BaseTypes.DEFAULT, primeBase, null);
 	}
 
 	@Override
-	public void addPrimeBases(@NonNull final List<Set<BigInteger>> primeBase, @NonNull final BaseTypes baseType)
+	public void addPrimeBases(@NonNull final MutableList<ImmutableLongCollection> primeBase, @NonNull final BaseTypes baseType)
 	{
 		addPrimeBases(baseType, primeBase, null);
 	}
@@ -105,14 +100,14 @@ public class PrimeBaseContainer implements PrimeBaseIntfc
 	 * For DEFAULT base type
 	 */
 	@Override
-	public List<Set<BigInteger>> getPrimeBases()
+	public MutableList<ImmutableLongCollection> getPrimeBases()
 	{
 		return getPrimeBases(BaseTypes.DEFAULT);
 	}
 
 	@Override
-	public List<Set<BigInteger>> getPrimeBases(@NonNull final BaseTypes baseType)
+	public MutableList<ImmutableLongCollection> getPrimeBases(@NonNull final BaseTypes baseType)
 	{
-		return primeBases.getOrDefault(baseType, Collections.emptyList());
+		return primeBases.getOrDefault(baseType, MutableListFactoryImpl.INSTANCE.empty());
 	}
 }

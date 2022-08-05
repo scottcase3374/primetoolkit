@@ -13,7 +13,6 @@ import lombok.NonNull;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import javax.swing.JFrame;
 import javax.swing.JTable;
 import javax.swing.WindowConstants;
@@ -28,7 +27,7 @@ import javax.swing.JScrollPane;
  * and mostly uses those to calculate information that may be of interest.
  *
  */
-@SuppressWarnings({"PMD.LongVariable", "PMD.CommentSize", "PMD.AvoidDuplicateLiterals"})
+@SuppressWarnings({ "PMD.AvoidDuplicateLiterals"})
 public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc, DefaultEdge>
 {
 	/**
@@ -127,7 +126,6 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 	 * Calc the max distance primes in a base.
 	 * @param event
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
 	protected void handlePrimeMaxDistToPrevPrime(@NonNull final GraphVertexChangeEvent<PrimeRefIntfc> event)
 	{
 		if (primeMaxDistToPrev == null)
@@ -139,12 +137,12 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 			final var edist = event.getVertex().getDistToPrevPrime();
 			final var pdist = primeMaxDistToPrev.getDistToPrevPrime();
 
-			if (pdist.isEmpty() || edist.isPresent() && edist.get().abs().compareTo(pdist.get().abs()) > 0)
+			if (pdist.isEmpty() || edist.isPresent() && Math.abs(edist.getAsLong()) - Math.abs(pdist.getAsLong()) > 0)
 			{
 				primeMaxDistToPrev = event.getVertex();
 			}
 		}
-		data[0][PRIME_MAX_DIST_PREV_PRIME] = String.format("Prime [%d] / max-dist[%d]", primeMaxDistToPrev.getPrime(), primeMaxDistToPrev.getDistToPrevPrime().orElse(BigInteger.ZERO));
+		data[0][PRIME_MAX_DIST_PREV_PRIME] = String.format("Prime [%d] / max-dist[%d]", primeMaxDistToPrev.getPrime(), primeMaxDistToPrev.getDistToPrevPrime().orElse(0L));
 	}
 
 	/**
@@ -159,17 +157,15 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 	/**
 	 * Calc average dist from previous prime to next prime
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
 	protected void handleAvgDistToPrev()
 	{
-		data[0][AVG_DIST_PREV_PRIME] = String.format("Total dist[%d], total-primes[%d] avg-dist[%f]", primeMaxDistToPrev.getPrime().longValue(), primeMaxDistToPrev.getPrimeRefIdx() , (double)primeMaxDistToPrev.getPrime().longValue() / (primeMaxDistToPrev.getPrimeRefIdx()+1));
+		data[0][AVG_DIST_PREV_PRIME] = String.format("Total dist[%d], total-primes[%d] avg-dist[%f]", primeMaxDistToPrev.getPrime(), primeMaxDistToPrev.getPrimeRefIdx() , (double)primeMaxDistToPrev.getPrime() / (primeMaxDistToPrev.getPrimeRefIdx()+1));
 	}
 
 	/**
 	 * Find base with most items
 	 * @param event
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
 	protected void handleHighPrimeBase(@NonNull final GraphVertexChangeEvent<PrimeRefIntfc> event)
 	{
 		if (highPrimeBase == null || event.getVertex().getPrimeBaseData().getPrimeBases().get(0).size() > highPrimeBase.getPrimeBaseData().getPrimeBases().get(0).size())
@@ -200,13 +196,11 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 		// No removal performed
 	}
 
-	@SuppressWarnings("PMD.LawOfDemeter")
 	@Override
 	public void edgeWeightUpdated(@NonNull final GraphEdgeChangeEvent<PrimeRefIntfc, DefaultEdge> event)
 	{
 		GraphListener.super.edgeWeightUpdated(event);
 	}
-
 
 	@Override
 	public void edgeRemoved(final GraphEdgeChangeEvent<PrimeRefIntfc, DefaultEdge> event)

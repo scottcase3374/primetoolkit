@@ -14,7 +14,6 @@ import picocli.CommandLine.Command;
 /**
  * Provides logging of NPrime style base information.
  */
-@SuppressWarnings({"PMD.LawOfDemeter"})
 public class LogBasesNPrime extends AbstractLogBase
 {
 	/**
@@ -48,12 +47,9 @@ public class LogBasesNPrime extends AbstractLogBase
 			if (bmd instanceof NPrimeBaseMetadata nprimemd)
 			{
 				final var counts = nprimemd.getCountForBaseIdx();
-				final String itemCountsStr =
-						counts
-						.toStringOfItemToCount();
+				final String itemCountsStr = counts.toString();
 
-					// Handle "header" info for the current Prime - Prime value
-					// and the index of the Prime.
+					// Handle "header" info for the current Prime
 					PrimeToolKit.output(BaseTypes.NPRIME, "%nPrime [%d] %s %n",
 														pr.getPrime(),
 														itemCountsStr

@@ -1,17 +1,19 @@
 package com.starcases.prime.base.triples;
 
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.validation.constraints.Min;
 
-
+import com.codahale.metrics.Timer;
 import com.starcases.prime.base.AbstractPrimeBaseGenerator;
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
+import com.starcases.prime.metrics.MetricMonitor;
+
+import org.eclipse.collections.impl.list.mutable.MutableListFactoryImpl;
 
 import lombok.NonNull;
 
@@ -62,7 +64,6 @@ import lombok.NonNull;
 /**
  * Produce "triples" for each prime.
  */
-@SuppressWarnings("PMD.CommentSize")
 public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 {
 	/**
@@ -99,7 +100,6 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 	 * top-level function; iterate over entire dataset to reduce every Prime
 	 * @param maxReduce
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
 	@Override
 	protected void genBasesImpl()
 	{
@@ -110,6 +110,8 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 			LOG.info("BaseReduce3Triple genBases()");
 		}
 
+		MetricMonitor.addTimer(BaseTypes.THREETRIPLE,"Gen 3Triple");
+
 		// handle Bootstrap values - can't really represent < 11 with a sum of 3 primes
 		primeSrc
 		.getPrimeRefStream(false)
@@ -117,11 +119,18 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 		.forEach(curPrime ->
 					curPrime
 					.getPrimeBaseData()
-					.addPrimeBases(List.of(curPrime.getPrimeBaseData().getPrimeBases(BaseTypes.DEFAULT).get(0)), BaseTypes.THREETRIPLE)
+					.addPrimeBases(MutableListFactoryImpl.INSTANCE.of(curPrime.getPrimeBaseData().getPrimeBases(BaseTypes.DEFAULT).get(0)), BaseTypes.THREETRIPLE)
 		);
 
 
-		primeSrc.getPrimeRefStream(5L, true).forEach(curPrime -> handlePrime(curPrime, counter.incrementAndGet()));
+		primeSrc.getPrimeRefStream(5L, true).forEach(curPrime ->
+						{
+							try (Timer.Context context = MetricMonitor.time(BaseTypes.THREETRIPLE).orElse(null))
+							{
+								 handlePrime(curPrime, counter.incrementAndGet());
+							}
+						}
+				);
 
 		if (LOG.isLoggable(Level.INFO))
 		{

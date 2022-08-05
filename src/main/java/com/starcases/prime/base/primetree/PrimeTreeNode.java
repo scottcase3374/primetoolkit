@@ -1,13 +1,14 @@
 package com.starcases.prime.base.primetree;
 
-import java.math.BigInteger;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.starcases.prime.impl.PData;
 import com.starcases.prime.intfc.CollectionTrackerIntfc;
+
+import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
+import org.eclipse.collections.api.map.primitive.MutableLongObjectMap;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -17,17 +18,17 @@ import lombok.Getter;
  * of unique smaller primes. A tree/graph style
  * representation is used internally.
  */
-class PrimeTreeNode
+public class PrimeTreeNode
 {
 	/**
 	 *
 	 */
-	private final AtomicReference<BigInteger> prefixPrime = new AtomicReference<>(null);
+	private final AtomicLong prefixPrime = new AtomicLong();
 
 	/**
 	 * next link in tree
 	 */
-	private final AtomicReference<Map<BigInteger, PrimeTreeNode>> next = new AtomicReference<>(null);
+	private final AtomicReference<MutableLongObjectMap<PrimeTreeNode>> next = new AtomicReference<>(null);
 
 	/**
 	 * collection tracking
@@ -41,7 +42,7 @@ class PrimeTreeNode
 	 * @param prefix
 	 * @param collTrack
 	 */
-	public PrimeTreeNode(final BigInteger curPrime, final Map<BigInteger, PrimeTreeNode> prefix, final CollectionTrackerIntfc collTrack)
+	public PrimeTreeNode(final long curPrime, final MutableLongObjectMap<PrimeTreeNode> prefix, final CollectionTrackerIntfc collTrack)
 	{
 		this.prefixPrime.set(curPrime);
 		this.next.set(prefix);
@@ -53,28 +54,26 @@ class PrimeTreeNode
 	 * @param key
 	 * @return
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
-	public Optional<Set<BigInteger>> getSourcePrimes(final long key)
+	public Optional<ImmutableLongCollection> getSourcePrimes(final long key)
 	{
-		return collTrack.get(key).map(PData::coll);
+		return collTrack.get(key).map(PData::toCanonicalCollection);
 	}
 
 	/**
 	 * Track the set of primes provided by the supplier
-	 * @param supplier
+	 * @param sp1
 	 * @return
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
-	public Set<BigInteger> assignSourcePrimes(final Set<BigInteger> supplier)
+	public ImmutableLongCollection assignSourcePrimes(final ImmutableLongCollection sp1)
 	{
-		return collTrack.track(supplier).coll();
+		return collTrack.track(sp1).toCanonicalCollection();
 	}
 
 	/**
 	 * Get the associated prefix prime
 	 * @return
 	 */
-	public BigInteger getPrefixPrime()
+	public long getPrefixPrime()
 	{
 		return prefixPrime.getAcquire();
 	}
@@ -83,7 +82,7 @@ class PrimeTreeNode
 	 * get next link
 	 * @return
 	 */
-	public Map<BigInteger, PrimeTreeNode> getNext()
+	public MutableLongObjectMap<PrimeTreeNode> getNext()
 	{
 		return next.getAcquire();
 	}

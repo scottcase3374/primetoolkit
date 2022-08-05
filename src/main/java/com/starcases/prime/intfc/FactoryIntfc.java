@@ -1,10 +1,12 @@
 package com.starcases.prime.intfc;
 
-import java.math.BigInteger;
-import java.util.List;
-import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
+import org.eclipse.collections.api.list.ImmutableList;
+import org.eclipse.collections.api.list.MutableList;
 
 /**
  * This interface is a helper for the CLI support - helps simplify the
@@ -34,5 +36,12 @@ public interface FactoryIntfc
 	 * Need better desc.
 	 * @return
 	 */
-	BiFunction<Long, List<Set<BigInteger>>, PrimeRefIntfc> getPrimeRefRawConstructor();
+	BiFunction<Long, MutableList<ImmutableLongCollection>, PrimeRefIntfc> getPrimeRefRawConstructor();
+
+	/**
+	 * Provides a means of providing alternative configuration via different factories
+	 *
+	 * @return
+	 */
+	ImmutableList<Consumer<PrimeSourceIntfc>> getConsumersSetPrimeSrc();
 }

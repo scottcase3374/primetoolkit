@@ -1,22 +1,23 @@
 package com.starcases.prime.base.primetree;
 
-import java.math.BigInteger;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.LongPredicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.eclipse.collections.impl.list.mutable.MultiReaderFastList;
-import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
+import org.eclipse.collections.api.list.primitive.ImmutableLongList;
+import org.eclipse.collections.api.map.primitive.MutableLongObjectMap;
+import org.eclipse.collections.impl.list.mutable.MutableListFactoryImpl;
+import org.eclipse.collections.impl.map.mutable.primitive.MutableLongObjectMapFactoryImpl;
 
+import com.codahale.metrics.Timer;
 import com.starcases.prime.PrimeToolKit;
 import com.starcases.prime.base.AbstractPrimeBaseGenerator;
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.impl.PData;
 import com.starcases.prime.intfc.CollectionTrackerIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
+import com.starcases.prime.metrics.MetricMonitor;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -26,8 +27,11 @@ import lombok.NonNull;
 /**
  * Represents a potentially partial or complete set of primes that sums to a prime
  * in combination with one or more other distinct primes or by itself.
+ *
+ * Used both internally in the initial base/prime creation as part of an efficiency
+ * improvement and also as another base representation by itself.
+ *
  */
-@SuppressWarnings("PMD.LongVariable")
 public class PrimeTree extends AbstractPrimeBaseGenerator
 {
 	/**
@@ -39,7 +43,7 @@ public class PrimeTree extends AbstractPrimeBaseGenerator
 	 * prefix mape
 	 */
 	@Getter(AccessLevel.PACKAGE)
-	private final Map<BigInteger, PrimeTreeNode> prefixMap = new ConcurrentHashMap<>();
+	private final MutableLongObjectMap<PrimeTreeNode> prefixMap =  MutableLongObjectMapFactoryImpl.INSTANCE.empty();
 
 	/**
 	 * container for tracking the unique set of prefixes/trees
@@ -72,6 +76,8 @@ public class PrimeTree extends AbstractPrimeBaseGenerator
 	 * if the predicate is matched. Looking for key for
 	 * a prime sum that when added to a new prime results in a new prime.
 	 *
+	 * NOTE: Desire lowest matching value found
+	 *
 	 * @param biFunc
 	 * @return
 	 */
@@ -84,7 +90,6 @@ public class PrimeTree extends AbstractPrimeBaseGenerator
 	 * top-level function; iterate over entire dataset to reduce every Prime
 	 * @param maxReduce
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
 	@Override
 	protected void genBasesImpl()
 	{
@@ -94,32 +99,36 @@ public class PrimeTree extends AbstractPrimeBaseGenerator
 			LOG.info("PrimeTree genBases()");
 		}
 
-		primeSrc.
-		getPrimeRefStream(2L, this.preferParallel)
-		.forEach(
-			curPrime ->
-			{
-				if (this.baseGenerationOutput && LOG.isLoggable(Level.INFO))
+		MetricMonitor.addTimer(BaseTypes.PRIME_TREE,"Gen PrimeTree");
+		primeSrc
+			.getPrimeRefStream(2L, this.preferParallel)
+			.forEach(
+				curPrime ->
 				{
-					LOG.info("genBases() - prime " + curPrime.getPrime());
-				}
-
-				final var origBaseBases = curPrime.getPrimeBaseData().getPrimeBases().get(0);
-				final List<BigInteger> curPrimePrefixBases = MultiReaderFastList.newList(origBaseBases);
-
-				final var curPrefixIt = this.iterator();
-				curPrimePrefixBases.forEach(basePrime ->
+					if (this.baseGenerationOutput && LOG.isLoggable(Level.INFO))
 					{
-						final var prime = basePrime;
-						if (this.isBaseGenerationOutput() && LOG.isLoggable(Level.INFO))
-						{
-							LOG.info(String.format("handling prime[%d] base-index [%d] base-prime [%d]", curPrime.getPrime(), basePrime, prime));
-						}
+						LOG.info("genBases() - prime " + curPrime.getPrime());
+					}
 
-						curPrefixIt.add(prime);
-					});
+					try (Timer.Context context = MetricMonitor.time(BaseTypes.PRIME_TREE).orElse(null))
+					{
+						final var origBaseBases = curPrime.getPrimeBaseData().getPrimeBases().get(0);
+						final ImmutableLongList curPrimePrefixBases = origBaseBases.toList().toImmutable();
 
-			curPrime.getPrimeBaseData().addPrimeBases(List.of(curPrefixIt.toSet()), BaseTypes.PRIME_TREE);
-		});
+						final var curPrefixIt = this.iterator();
+						curPrimePrefixBases.forEach(basePrime ->
+							{
+								final var prime = basePrime;
+								if (this.isBaseGenerationOutput() && LOG.isLoggable(Level.INFO))
+								{
+									LOG.info(String.format("handling prime[%d] base-index [%d] base-prime [%d]", curPrime.getPrime(), basePrime, prime));
+								}
+
+								curPrefixIt.add(prime);
+							});
+
+						curPrime.getPrimeBaseData().addPrimeBases(MutableListFactoryImpl.INSTANCE.of(curPrefixIt.toCollection()), BaseTypes.PRIME_TREE);
+					}
+				});
 	}
 }

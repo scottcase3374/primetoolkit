@@ -7,7 +7,7 @@ import com.starcases.prime.intfc.OutputableIntfc;
  * enumerations naming the available base types and other data that can be output
  *
  */
-enum OutputOper implements OutputableIntfc
+public enum OutputOper implements OutputableIntfc
 {
 	/**
 	 * Logs the default node structure of the dataset including default bases

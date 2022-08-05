@@ -1,9 +1,7 @@
 package com.starcases.prime.log;
 
-import java.math.BigInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import com.starcases.prime.PrimeToolKit;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
@@ -33,7 +31,6 @@ public class LogNodeStructure extends AbstractLogBase
 		super(primeSrc);
 	}
 
-	@SuppressWarnings({"PMD.LawOfDemeter"})
 	@Override
 	public void outputLogs()
 	{
@@ -41,42 +38,47 @@ public class LogNodeStructure extends AbstractLogBase
 		{
 			LOG.info("LogNodeStructure l()");
 		}
-		var idx = 0;
-		final var prIt = primeSrc.getPrimeRefIter();
-		final var outputStr = new StringBuilder("\t");
-		while (prIt.hasNext())
-		{
-			final var primeRef = prIt.next();
-			final long [] cnt = {0};
-			outputStr.append(String.format("%nPrime [%d] idx[%d]  %n\t",
-					primeRef.getPrime(),
-					idx++
-					));
+		final int [] idx = {0};
 
-			primeRef.getPrimeBaseData().getPrimeBases()
-					.stream()
-					.filter( p -> !p.contains(BigInteger.ZERO))
-					.reduce((s1, s2) -> { s1.addAll(s2); return s1; })
-					.stream()
-					.<String>mapMulti((basePrimes, consumer) ->
+		final var primeIt = primeSrc.getPrimeRefIter();
+		primeIt.forEachRemaining(
+				primeRef ->
+					{
+						// A good question is the effect of moving this out of
+						// this block and into the outer block of the method.
+						// That implies same string builder is used and
+						// any memory allocations made would remain for each
+						// of the iterations that follow.  Would that
+						// improve speed by reducing memory allocation or
+						// possible have little effect.  May reduce garbage
+						// generated but maybe other consequences.
+						final var outputStr = new StringBuilder("\t");
+
+						final long [] cnt = {0};
+						PrimeToolKit.output(String.format("%nPrime [%d] idx[%d]",
+								primeRef.getPrime(),
+								idx[0]++
+								));
+
+						primeRef
+							.getPrimeBaseData()
+							.getPrimeBases()
+							.collect(p -> p.makeString("[", ",", "]"))
+							.forEach( s ->
 										{
-											outputStr.append(
-											 	basePrimes
-											 	.stream()
-											 	.map(BigInteger::toString)
-											 	.collect(Collectors.joining(",","[","]"))
-											 	);
-
+											cnt[0]++;
+											outputStr.append(s);
 											if (cnt[0] % 5 == 0 || cnt[0] >= primeRef.getPrimeBaseData().getPrimeBases().get(0).size())
 											{
-												consumer.accept(outputStr.toString());
+												PrimeToolKit.output( "\t%s", outputStr);
 												outputStr.setLength(0);
-												outputStr.append('\t');
 											}
-											cnt[0]++;
+											else
+											{
+												outputStr.append(',');
+											}
 										}
-							)
-					.forEach(str -> PrimeToolKit.output( "%s", str));
-		}
+									);
+					});
 	}
 }

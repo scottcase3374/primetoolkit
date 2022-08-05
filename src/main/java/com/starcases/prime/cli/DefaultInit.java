@@ -3,7 +3,6 @@ package com.starcases.prime.cli;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -11,6 +10,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -38,11 +38,13 @@ import com.starcases.prime.graph.export.ExportGML;
 import com.starcases.prime.graph.log.LogGraphStructure;
 import com.starcases.prime.graph.visualize.MetaDataTable;
 import com.starcases.prime.graph.visualize.ViewDefault;
+import com.starcases.prime.impl.GenerationProgress;
 import com.starcases.prime.impl.PrimeRef;
 import com.starcases.prime.intfc.FactoryIntfc;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import com.starcases.prime.log.LogNodeStructure;
+import com.starcases.prime.metrics.MetricMonitor;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -67,14 +69,14 @@ import picocli.CommandLine.Command;
  * interface function is just a dummy value - not used.
  *
  */
-@SuppressWarnings({"PMD.AtLeastOneConstructor", "PMD.CommentSize", "PMD.AvoidFinalLocalVariable", "PMD.AvoidDuplicateLiterals"})
-@Command(name = "init", description = "initial setup")
-public class Init implements Runnable
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals"})
+@Command(name = "init", description = "Default initial setup")
+public class DefaultInit implements Runnable
 {
 	/**
 	 * default logger
 	 */
-	private static final Logger LOG = Logger.getLogger(Init.class.getName());
+	private static final Logger LOG = Logger.getLogger(DefaultInit.class.getName());
 
 	/**
 	 * prime source - for prime/prime ref lookups
@@ -84,7 +86,7 @@ public class Init implements Runnable
 	private PrimeSourceIntfc primeSrc;
 
 	/**
-	 * Init opts info from picocli
+	 * DefaultInit opts info from picocli
 	 */
 	@Getter
 	@ArgGroup(exclusive = false, validate = false)
@@ -142,6 +144,8 @@ public class Init implements Runnable
 		}
 
 		setFactoryDefaults();
+
+		actionInitMetrics();
 
 		actionInitDefaultPrimeContent();
 
@@ -206,18 +210,19 @@ public class Init implements Runnable
 		}
 	}
 
-	@SuppressWarnings("PMD.LawOfDemeter")
 	private Path decorateFileName(final String base, final String fileName, final String extension)
 	{
+		Path ret = null;
 		try
 		{
 			final File folder = new File(initOpts.getOutputFolder().replaceFirst("^.*~", System.getenv("HOME")));
-			return Path.of(folder.getCanonicalPath().toLowerCase(), String.format("%s-%s-%s.%s", fileName, base ,DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()) , extension).toLowerCase() );
+			ret = Path.of(folder.getCanonicalPath().toLowerCase(Locale.getDefault()), String.format("%s-%s-%s.%s", fileName, base ,DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()) , extension).toLowerCase(Locale.getDefault()) );
 		}
 		catch(final IOException e)
 		{
-			return null;
+			// nothing to do; returns null
 		}
+		return ret;
 	}
 
 	private void setFactoryDefaults()
@@ -232,7 +237,6 @@ public class Init implements Runnable
 		PTKFactory.setPrimeRefRawCtor( (i, base) -> new PrimeRef(i).init(PTKFactory.getPrimeBaseCtor(), base) );
 	}
 
-	@SuppressWarnings("PMD.LawOfDemeter")
 	private boolean ensureOutputFolder()
 	{
 		boolean ret;
@@ -252,7 +256,6 @@ public class Init implements Runnable
 		return ret;
 	}
 
-	@SuppressWarnings("PMD.LawOfDemeter")
 	private void stdOutRedirect()
 	{
 		if (!initOpts.isStdOuputRedir())
@@ -282,19 +285,35 @@ public class Init implements Runnable
 			primeSrc = factory.getPrimeSource();
 			if (LOG.isLoggable(Level.INFO))
 			{
-				LOG.info("Init::actionInitDefaultPrimeContent - primeSource init");
+				LOG.info("DefaultInit::actionInitDefaultPrimeContent - primeSource init");
 			}
 
-			primeSrc.setDisplayProgress(outputOpts.getOutputOpers().contains(OutputOper.PROGRESS));
+			if (outputOpts.getOutputOpers().contains(OutputOper.PROGRESS))
+			{
+				// Just temporary - want more configurability still
+				primeSrc.setDisplayProgress(new GenerationProgress());
+			}
 
 			primeSrc.setDisplayPrimeTreeMetrics(outputOpts.getOutputOpers().contains(OutputOper.PRIMETREE_METRICS));
 
+			if (initOpts.getLoadPrimes() != null)
+			{
+				primeSrc.load(initOpts.getLoadPrimes());
+			}
 			primeSrc.init();
+
+			if (initOpts.getStorePrimes() != null)
+			{
+				primeSrc.store(initOpts.getStorePrimes());
+			}
 		});
 	}
 
+	private void actionInitMetrics()
+	{
+		MetricMonitor.startReport();
+	}
 
-	@SuppressWarnings("PMD.LawOfDemeter")
 	private void actionHandleAdditionalBases()
 	{
 		if (baseOpts != null && baseOpts.getBases() != null)
@@ -302,12 +321,12 @@ public class Init implements Runnable
 			baseOpts.getBases().forEach(baseType ->
 			{
 				final var trackGenTime = true;
-				final var method = "Init::actionHandleAdditionalBases - base ";
-				Supplier<AbstractPrimeBaseGenerator> baseSupplier = null;
+				final var method = "DefaultInit::actionHandleAdditionalBases - base ";
+				final Supplier<AbstractPrimeBaseGenerator> baseSupplier;
 				switch(baseType)
 				{
 					case NPRIME:
-						baseSupplier = () -> new BaseReduceNPrime(primeSrc).assignMaxReduce(BigInteger.valueOf(baseOpts.getMaxReduce()));
+						baseSupplier = () -> new BaseReduceNPrime(primeSrc).assignMaxReduce(baseOpts.getMaxReduce());
 						break;
 
 					case THREETRIPLE:
@@ -323,6 +342,7 @@ public class Init implements Runnable
 						break;
 
 					default:
+						baseSupplier = null;
 						if(LOG.isLoggable(Level.INFO))
 						{
 							LOG.info(String.format("%s%s",method, baseOpts.getBases()));
@@ -332,7 +352,6 @@ public class Init implements Runnable
 
 				if (null != baseSupplier)
 				{
-					final var tmpBaseSupplier = baseSupplier;
 					actions.add(s ->
 									{
 										if (LOG.isLoggable(Level.INFO))
@@ -344,7 +363,7 @@ public class Init implements Runnable
 										{
 											PrimeToolKit.setOutput(baseType.name(), this.decorateFileName(baseType.name(), "base", "log"));
 										}
-										final var base = tmpBaseSupplier.get();
+										final var base = baseSupplier.get();
 										base.setTrackTime(trackGenTime);
 										base.doPreferParallel(initOpts.isPreferParallel());
 										base.setBaseGenerationOutput(outputOpts.getOutputOpers().contains(OutputOper.CREATE));
@@ -357,14 +376,13 @@ public class Init implements Runnable
 		}
 	}
 
-	@SuppressWarnings("PMD.LawOfDemeter")
 	private void actionHandleOutputs()
 	{
 		if (outputOpts != null && outputOpts.getOutputOpers() != null && !outputOpts.getOutputOpers().isEmpty())
 		{
 			if (LOG.isLoggable(Level.INFO))
 			{
-				final var method = "Init::actionHandleLogging - logOper ";
+				final var method = "DefaultInit::actionHandleLogging - logOper ";
 				LOG.info(String.format("%s%s", method, outputOpts.getOutputOpers().stream().map(Object::toString).collect(Collectors.joining(","))));
 			}
 			outputOpts.getOutputOpers().forEach(oo ->
@@ -437,7 +455,6 @@ public class Init implements Runnable
 		}
 	}
 
-	@SuppressWarnings("PMD.LawOfDemeter")
 	private boolean isBaseSelected(final BaseTypes baseType)
 	{
 		return baseOpts != null && baseOpts.getBases().contains(baseType);

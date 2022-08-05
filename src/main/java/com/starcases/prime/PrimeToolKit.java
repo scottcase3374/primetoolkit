@@ -9,10 +9,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.starcases.prime.base.BaseTypes;
-import com.starcases.prime.cli.Init;
-
+import com.starcases.prime.cdi.CDIFactory;
+import com.starcases.prime.cli.DefaultInit;
 import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
+import org.jboss.weld.environment.se.Weld;
 
+import jakarta.enterprise.inject.se.SeContainer;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -26,10 +28,9 @@ import picocli.CommandLine.Model.CommandSpec;
  * CLI Driver
  *
  */
-@SuppressWarnings("PMD.AtLeastOneConstructor")
 @Getter
 @Setter
-@Command(name = "ptk", subcommands = { Init.class, CommandLine.HelpCommand.class }  , description="Prime Tool Kit")
+@Command(name = "ptk", subcommands = { DefaultInit.class, CommandLine.HelpCommand.class }  , description="Prime Tool Kit")
 public final class PrimeToolKit
 {
 	/**
@@ -47,7 +48,6 @@ public final class PrimeToolKit
 	 */
 	private static Map<String, Path> outputs = new ConcurrentHashMap<>();
 
-
 	/**
 	 * Associate a path instance to a key where the path is
 	 * used to sink output data for that key.
@@ -55,7 +55,6 @@ public final class PrimeToolKit
 	 * @param key
 	 * @param outputPath
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
 	public static void setOutput(final String key, final Path outputPath)
 	{
 		if (LOG.isLoggable(Level.INFO))
@@ -74,12 +73,18 @@ public final class PrimeToolKit
 	 */
 	public static void main(@NonNull final String [] args)
 	{
-		final var ptk = new PrimeToolKit();
-		final var commandLine = new CommandLine(ptk);
-		commandLine.registerConverter(Level.class, Level::parse);
-		final var exitCode = commandLine.execute(args);
+		final CommandLine commandLine;
+		try (SeContainer container = Weld.newInstance().initialize())
+		{
+			final CDIFactory cdiFactory = container.select(CDIFactory.class).get();
 
-		System.exit(exitCode);
+			final var ptk = new PrimeToolKit();
+			commandLine = new CommandLine(ptk, cdiFactory);
+			commandLine.registerConverter(Level.class, Level::parse);
+			final var exitCode = commandLine.execute(args);
+			System.exit(exitCode);
+		}
+
 		LOG.info("exited");
 	}
 
@@ -104,6 +109,7 @@ public final class PrimeToolKit
 	 * @param params
 	 * @throws IOException
 	 */
+	@SuppressWarnings("PMD.SystemPrintln")
 	public static void output(final String baseType, final String format, final Object...params)
 	{
 		final var path = outputs.get(baseType);
@@ -127,7 +133,8 @@ public final class PrimeToolKit
 		}
 		else
 		{
-			System.out.printf(format + "\n", params);
+			System.out.printf(String.format(format, params));
+			System.out.printf("%n");
 		}
 	}
 

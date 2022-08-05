@@ -1,11 +1,11 @@
 package com.starcases.prime.intfc;
 
-import java.math.BigInteger;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.LongPredicate;
 
 import com.starcases.prime.impl.PData;
+
+import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
 
 /**
  * Interface for use with managing collections and handing out consistent
@@ -13,19 +13,18 @@ import com.starcases.prime.impl.PData;
  * are the same instead of having multiple copies of large collections
  * in memory.
  */
-@SuppressWarnings("PMD.CommentSize")
 public interface CollectionTrackerIntfc
 {
 	/**
-	 * Specify set of Big integers to track as group.
-	 * @param collection
+	 * Specify set of primes to track as group.
+	 * @param sp1
 	 * @return
 	 */
-	PData track(Set<BigInteger> collection);
+	PData track(ImmutableLongCollection sp1);
 
 	/**
 	 * Get tracking information associated with the set
-	 * of big integers at specified numerical key.
+	 * of primes at specified numerical key.
 	 * @param key
 	 * @return
 	 */
@@ -34,7 +33,7 @@ public interface CollectionTrackerIntfc
 	/**
 	 * Select set/collection from the tracked
 	 * info based upon a predicate provided.
-	 * Expecting only 1 mactching collection
+	 * Expecting only 1 matching collection
 	 * maximumly.
 	 *
 	 * @param pred

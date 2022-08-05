@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.starcases.prime.base.PrimeBaseContainer;
 import com.starcases.prime.impl.PrimeRef;
+import com.starcases.prime.impl.PrimeSource;
 import com.starcases.prime.intfc.FactoryIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 
@@ -24,7 +25,7 @@ import lombok.Setter;
  * Prime source unit tests
  * Lookup prime / prime refs.
  */
-@SuppressWarnings({"PMD.AtLeastOneConstructor", "PMD.CommentDefaultAccessModifier"})
+@SuppressWarnings({"PMD.CommentDefaultAccessModifier"})
 @ExtendWith(MockitoExtension.class)
 class PrimeSourceUnitTest
 {
@@ -66,6 +67,11 @@ class PrimeSourceUnitTest
 		fail("Not yet implemented");
 	}
 
+	@Test
+	void checkGetBitsRequired()
+	{
+		assertEquals(12, ((PrimeSource)primeSrc).getBitsRequired(0x01000), "Value should require 12 bits.");
+	}
 	/**
 	 * Unit test - unused
 	 */
@@ -83,7 +89,7 @@ class PrimeSourceUnitTest
 	void canGetPrime()
 	{
 		final var bi101 = Optional.of(BigInteger.valueOf(101L));
-		assertEquals(bi101, primeSrc.getPrime(26));
+		assertEquals(bi101, primeSrc.getPrimeForIdx(26).getAsLong(), "Prime at index 26 should be 101.");
 	}
 
 	/**
