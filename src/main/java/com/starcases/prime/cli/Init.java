@@ -206,15 +206,17 @@ public class Init implements Runnable
 
 	private Path decorateFileName(final String base, final String fileName, final String extension)
 	{
+		Path path = null;
 		try
 		{
 			final File folder = new File(initOpts.getOutputFolder().replaceFirst("^.*~", System.getenv("HOME")));
-			return Path.of(folder.getCanonicalPath().toLowerCase(), String.format("%s-%s-%s.%s", fileName, base ,DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()) , extension).toLowerCase() );
+			path = Path.of(folder.getCanonicalPath().toLowerCase(), String.format("%s-%s-%s.%s", fileName, base ,DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()) , extension).toLowerCase() );
 		}
 		catch(final IOException e)
 		{
-			return null;
+			// Path can't be set if we get here so just expect it is null.
 		}
+		return path;
 	}
 
 	private void setFactoryDefaults()
@@ -319,7 +321,7 @@ public class Init implements Runnable
 					{
 						LOG.info(String.format("%s%s",method, baseOpts.getBases()));
 					}
-				};
+				}
 
 				if (null != baseSupplier)
 				{
