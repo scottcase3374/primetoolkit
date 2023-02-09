@@ -42,7 +42,6 @@ public final class PTKFactory
 	@Getter
 	private static EmbeddedCacheManager cacheMgr;
 
-
 	static
 	{
 		try

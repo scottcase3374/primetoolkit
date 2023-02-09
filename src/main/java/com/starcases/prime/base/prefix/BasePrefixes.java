@@ -3,13 +3,13 @@ package com.starcases.prime.base.prefix;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.collections.api.factory.Lists;
+
 import com.codahale.metrics.Timer;
 import com.starcases.prime.base.AbstractPrimeBaseGenerator;
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import com.starcases.prime.metrics.MetricMonitor;
-
-import org.eclipse.collections.api.factory.Lists;
 
 import lombok.NonNull;
 
@@ -42,12 +42,15 @@ public class BasePrefixes extends AbstractPrimeBaseGenerator
 
 		MetricMonitor.addTimer(BaseTypes.PREFIX,"Gen Prefix");
 
+		LOG.info("BasePrefixes - get stream");
 		final var prStream = primeSrc.getPrimeRefStream(preferParallel);
 		prStream.forEach(pr ->
 				{
+					LOG.info("basePrefixes stream - for each: " + pr.getPrime());
 					try (Timer.Context context = MetricMonitor.time(BaseTypes.PREFIX).orElse(null))
 					{
 						final var origBases = pr.getPrimeBaseData().getPrimeBases().get(0);
+						LOG.info("basePrefixes stream - add prime base: " + origBases);
 						pr.getPrimeBaseData().addPrimeBases(Lists.mutable.of(origBases), BaseTypes.PREFIX);
 					}
 				});

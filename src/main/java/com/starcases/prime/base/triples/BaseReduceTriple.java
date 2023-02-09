@@ -113,17 +113,18 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 		MetricMonitor.addTimer(BaseTypes.THREETRIPLE,"Gen 3Triple");
 
 		// handle Bootstrap values - can't really represent < 11 with a sum of 3 primes
+		final long skipInitialPrimes = 5L;
+
 		primeSrc
 		.getPrimeRefStream(false)
-		.limit(5) // primes 1,2,3,5,7
+		.limit(skipInitialPrimes) // primes 1,2,3,5,7
 		.forEach(curPrime ->
 					curPrime
 					.getPrimeBaseData()
 					.addPrimeBases(MutableListFactoryImpl.INSTANCE.of(curPrime.getPrimeBaseData().getPrimeBases(BaseTypes.DEFAULT).get(0)), BaseTypes.THREETRIPLE)
 		);
 
-
-		primeSrc.getPrimeRefStream(5L, true).forEach(curPrime ->
+		primeSrc.getPrimeRefStream(skipInitialPrimes, this.preferParallel).forEach(curPrime ->
 						{
 							try (Timer.Context context = MetricMonitor.time(BaseTypes.THREETRIPLE).orElse(null))
 							{

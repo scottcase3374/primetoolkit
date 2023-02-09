@@ -13,6 +13,17 @@
 		        <write-behind modification-queue-size="100000" />
 		     </file-store>
 		  </persistence>
+		  <transaction
+   locking="OPTIMISTIC"
+   auto-commit="true"
+   complete-timeout="60000"
+   mode="NONE"
+   notifications="true"
+   reaper-interval="30000"
+   recovery-cache="__recoveryInfoCacheName__"
+   stop-timeout="30000"
+   transaction-manager-lookup="org.infinispan.transaction.lookup.GenericTransactionManagerLookup"/>
+
 	</local-cache>
 
 	<local-cache name="DEFAULT" >

@@ -2,17 +2,20 @@ package com.starcases.prime.graph.impl;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Comparator;
+import java.util.List;
+import java.util.logging.Logger;
+
 import org.jgrapht.Graph;
-import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.event.GraphListener;
+import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.builder.GraphBuilder;
 import org.jgrapht.graph.DefaultListenableGraph;
-import com.starcases.prime.intfc.PrimeSourceIntfc;
+import org.jgrapht.graph.builder.GraphBuilder;
+
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
+import com.starcases.prime.intfc.PrimeSourceIntfc;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -24,6 +27,11 @@ import lombok.NonNull;
  */
 public class PrimeGrapherBase
 {
+	/**
+	 * default logger
+	 */
+	private static final Logger LOG = Logger.getLogger(PrimeGrapherBase.class.getName());
+
 	/**
 	 * A comparator for node objects.
 	 */
@@ -73,6 +81,7 @@ public class PrimeGrapherBase
 	 */
 	protected PrimeGrapherBase(@NonNull final PrimeSourceIntfc primeSrc, @NonNull final BaseTypes baseType, @NonNull final List<GraphListener<PrimeRefIntfc, DefaultEdge>> graphs)
 	{
+		LOG.info("PrimeGrapherBase()");
 		this.primeSrc = primeSrc;
 		this.baseType = baseType;
 		this.primeSrc.init();

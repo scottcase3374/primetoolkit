@@ -9,7 +9,6 @@ import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
 import org.eclipse.collections.api.factory.Lists;
 
 import org.eclipse.collections.impl.factory.Sets;
-import org.eclipse.collections.impl.set.immutable.primitive.ImmutableLongSetFactoryImpl;
 
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
@@ -165,6 +164,25 @@ enum ConditionConstraintState
 	}
 }
 
+enum TripleMember
+{
+	/**
+	 * Index for bottom item
+	 */
+	BOT,
+
+	/**
+	 * index for middle item
+	 */
+    MID,
+
+    /**
+     * index for top item
+     */
+	TOP
+	;
+}
+
 /**
  *
  * Class implementing the logic for finding all viable triples.
@@ -185,29 +203,15 @@ public class AllTriples
 	 */
 	private static  final EnumSet<SumConstraintState> GOOD_SUM_STATE =
 			EnumSet.of(SumConstraintState.MATCH,
+					SumConstraintState.NONMATCH,
 					SumConstraintState.INCREMENT_SUM);
 
-	/**
-	 * Index for bottom item
-	 */
-	private static final  int BOT = 0;
-
-	/**
-	 * index for middle item
-	 */
-    private static final  int MID = 1;
-
-    /**
-     * index for top item
-     */
-	private static final  int TOP = 2;
-
-	/**
-	 * Target prime to equal
-	 */
-	@Getter(AccessLevel.PRIVATE)
-	@NonNull
-	private  final PrimeRefIntfc targetPrime;
+//	/**
+//	 * Target prime to equal
+//	 */
+//	@Getter(AccessLevel.PRIVATE)
+//	@NonNull
+//	private  final PrimeRefIntfc targetPrime;
 
 	/**
 	 * prime source ref for lookup of prime/prime refs.
@@ -221,9 +225,9 @@ public class AllTriples
 	 * @param primeSrc
 	 * @param targetPrime
 	 */
-	public AllTriples(@NonNull final PrimeSourceIntfc primeSrc, @NonNull final PrimeRefIntfc targetPrime)
+	public AllTriples(@NonNull final PrimeSourceIntfc primeSrc) //, @NonNull final PrimeRefIntfc targetPrime)
 	{
-		this.targetPrime = targetPrime;
+		//this.targetPrime = targetPrime;
 		this.primeSrc = primeSrc;
 	}
 
@@ -236,14 +240,14 @@ public class AllTriples
 	 * @param conditionConstraint
 	 */
 	private void nextPrimeRef(
-						final int idx,
+						@NonNull final TripleMember tripleMember,
 						@NonNull final PrimeRefIntfc [] triple,
 						@NonNull final SumConstraintState [] sumConstraint,
 						@NonNull final ConditionConstraintState...conditionConstraint)
 	{
-		if (triple[idx] != null)
+		if (triple[tripleMember.ordinal()] != null)
 		{
-			triple[idx].getNextPrimeRef().ifPresent( pr ->  triple[idx] = pr);
+			triple[tripleMember.ordinal()].getNextPrimeRef().ifPresent( pr ->  triple[tripleMember.ordinal()] = pr);
 		}
 		sumConstraint[0] = SumConstraintState.checkSumConstraints(triple, targetPrime);
 		conditionConstraint[0] = ConditionConstraintState.checkConditionConstraints(triple);
@@ -264,8 +268,8 @@ public class AllTriples
 		final PrimeRefIntfc [] triple =
 			{
 				primeSrc.getPrimeRefForIdx(0).orElse(null),  // Prime 1
-				primeSrc.getPrimeRefForIdx(2).orElse(null), // Prime 3
-				primeSrc.getPrimeRefForIdx(4).orElse(null) // Prime 7
+				primeSrc.getPrimeRefForIdx(1).orElse(null), // Prime 3
+				primeSrc.getPrimeRefForIdx(2).orElse(null) // Prime 5
 			};
 
 		final SumConstraintState [] sumConstraint = {SumConstraintState.checkSumConstraints(triple, targetPrime)};
@@ -282,31 +286,30 @@ public class AllTriples
 						addPrimeBases(targetPrime, triple);
 						break;
 					}
-					this.nextPrimeRef(BOT, triple, sumConstraint, conditionConstraint);
+					this.nextPrimeRef(TripleMember.BOT, triple, sumConstraint, conditionConstraint);
 				}
 				while(GOOD_SUM_STATE.contains(sumConstraint[0]) && !BAD_CONDITION_STATE.contains(conditionConstraint[0]));
 
 				// reset inner loop
-				triple[BOT] =  primeSrc.getPrimeRefForPrime(0).orElse(null);
+				triple[TripleMember.BOT.ordinal()] =  primeSrc.getPrimeRefForIdx(0).orElse(null);
 
-				this.nextPrimeRef(MID, triple, sumConstraint, conditionConstraint);
+				this.nextPrimeRef(TripleMember.MID, triple, sumConstraint, conditionConstraint);
 			}
 			while(GOOD_SUM_STATE.contains(sumConstraint[0]) && !BAD_CONDITION_STATE.contains(conditionConstraint[0]));
 
 			// reset inner loops
-			triple[MID] = primeSrc.getPrimeRefForPrime(1).orElse(null);
-			triple[BOT] = primeSrc.getPrimeRefForPrime(0).orElse(null);
+			triple[TripleMember.MID.ordinal()] = primeSrc.getPrimeRefForIdx(1).orElse(null);
+			triple[TripleMember.BOT.ordinal()] = primeSrc.getPrimeRefForIdx(0).orElse(null);
 
-			this.nextPrimeRef(TOP, triple, sumConstraint, conditionConstraint);
+			this.nextPrimeRef(TripleMember.TOP, triple, sumConstraint, conditionConstraint);
 		}
 		while(GOOD_SUM_STATE.contains(sumConstraint[0]) && !BAD_CONDITION_STATE.contains(conditionConstraint[0]));
 	}
 
 	private void addPrimeBases(final @NonNull PrimeRefIntfc prime, final @NonNull PrimeRefIntfc [] vals)
 	{
-		final ImmutableLongCollection primeColl = ImmutableLongSetFactoryImpl.INSTANCE.of(prime.getPrime());
 		final ImmutableLongCollection primesColl = Sets.immutable.of(vals).collectLong(PrimeRefIntfc::getPrime);
 
-		prime.getPrimeBaseData().addPrimeBases(Lists.mutable.of(primeColl, primesColl), BaseTypes.THREETRIPLE);
+		prime.getPrimeBaseData().addPrimeBases(Lists.mutable.of(primesColl), BaseTypes.THREETRIPLE);
 	}
 }

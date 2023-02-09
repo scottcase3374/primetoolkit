@@ -25,7 +25,7 @@ import lombok.Setter;
  * Typically loaded from files sourced from various internet
  * sites.
  */
-public class PrePrimed
+public final class PrePrimed
 {
 	/**
 	 * Define the number of bits to batch together to reduce the number of
@@ -53,7 +53,7 @@ public class PrePrimed
 	 * Cache object - both in-memory and persisted data
 	 */
 	@Getter(AccessLevel.PRIVATE)
-	private final Cache<Integer,PrimeSubset> cache = cacheMgr.getCache("primes");
+	private final Cache<Integer,PrimeSubset> cache;
 
 	/**
 	 * Paths to source folders containing files of any pre-computed prime/base info.
@@ -76,6 +76,8 @@ public class PrePrimed
 	@Setter(AccessLevel.PRIVATE)
 	private int subsetIdx;
 
+	private final static String ZIP_FOLDER_ISSUE_MSG = "Problem with input zip-file or folder";
+
 	static
 	{
 		try
@@ -96,8 +98,7 @@ public class PrePrimed
 	public static void main(final String [] args)
 	{
 		final Path [] srcPaths =  {
-				Path.of("/home/scott/src/eclipse/primes-ws/PrimeToolKit/data/1"),
-				Path.of("/home/scott/src/eclipse/primes-ws/PrimeToolKit/data/DEFAULT")
+				Path.of(String.format("%s/DEFAULT", System.getenv("PTK_DEFAULT_DATA_DIR")))
 		};
 
 		final PrePrimed preprimedInst = new PrePrimed(srcPaths);
@@ -111,6 +112,7 @@ public class PrePrimed
 	 */
 	public PrePrimed(final Path ... sourceFolders)
 	{
+		this.cache = cacheMgr.getCache("primes");
 		this.sourceFolders = sourceFolders;
 		subset.alloc(SUBSET_SIZE);
 	}
@@ -160,7 +162,14 @@ public class PrePrimed
 	{
 		final int [] index = {0};
 
-		cache.getAdvancedCache().getStats().setStatisticsEnabled(true);
+		cache
+			.getAdvancedCache()
+			.getStats()
+			.setStatisticsEnabled(true);
+
+		// Hard-code 1 into the set of values - it isn't part of the standard dataset (1 is not considered prime).
+		assign(index[0]++, 1L);
+
 		Arrays.stream(sourceFolders).forEach(
 					folder ->
 					{
@@ -168,6 +177,8 @@ public class PrePrimed
 							{
 					 			stream
 					 				.filter(file -> !Files.isDirectory(file)) // filter out directories
+									.sorted( (a, b) -> Integer.valueOf(a.getFileName().toString().split("(s|\\.)")[1]).compareTo(   // sort by #; i.e. primes2.zip , primes23.zip, etc
+													   Integer.valueOf(b.getFileName().toString().split("(s|\\.)")[1]) ))
 					 				.forEach( fileRef ->
 					 				{
 					 					PrimeToolKit.dbgOutput("file: %s", fileRef.toString());
@@ -213,20 +224,20 @@ public class PrePrimed
 					 											}
 					 											catch(IOException e2)
 					 											{
-					 												// TODO ignore for now
+					 												PrimeToolKit.output("%s", ZIP_FOLDER_ISSUE_MSG);
 					 											}
 															});
 	 										}}
 	 									}
 	 									catch(IOException e)
 	 									{
-	 									// TODO ignore for now
+	 										PrimeToolKit.output("%s", ZIP_FOLDER_ISSUE_MSG);
 	 									}
 					 				});
 							}
 						catch(IOException e1)
 						{
-							// TODO ignore for now
+							PrimeToolKit.output("%s", ZIP_FOLDER_ISSUE_MSG);
 						}
 					}
 				);

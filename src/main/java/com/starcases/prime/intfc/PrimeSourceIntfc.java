@@ -10,6 +10,7 @@ import javax.validation.constraints.Min;
 
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.impl.GenerationProgress;
+import com.starcases.prime.preload.PrePrimed;
 
 /**
  *
@@ -56,7 +57,7 @@ public interface PrimeSourceIntfc extends Serializable
 	 * Currently not used.
 	 * @param baseTypes
 	 */
-	void load(BaseTypes ... baseTypes);
+	void load(PrePrimed prePrimed,  BaseTypes ... baseTypes);
 
 	/**
 	 * Iterator to PrimeRefIntfc instances.

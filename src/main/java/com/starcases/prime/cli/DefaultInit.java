@@ -11,6 +11,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -45,6 +46,7 @@ import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import com.starcases.prime.log.LogNodeStructure;
 import com.starcases.prime.metrics.MetricMonitor;
+import com.starcases.prime.preload.PrePrimed;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -137,7 +139,7 @@ public class DefaultInit implements Runnable
 	@Override
 	public void run()
 	{
-		final var outputFolderOk = ensureOutputFolder();
+		final var outputFolderOk = ensureFolderExist(initOpts.getOutputFolder());
 		if (outputFolderOk)
 		{
 			stdOutRedirect();
@@ -210,12 +212,17 @@ public class DefaultInit implements Runnable
 		}
 	}
 
+	private String replaceTildeHome(String path)
+	{
+		return path.replaceFirst("^.*~", System.getenv("HOME"));
+	}
+
 	private Path decorateFileName(final String base, final String fileName, final String extension)
 	{
 		Path ret = null;
 		try
 		{
-			final File folder = new File(initOpts.getOutputFolder().replaceFirst("^.*~", System.getenv("HOME")));
+			final File folder = new File(replaceTildeHome(initOpts.getOutputFolder()));
 			ret = Path.of(folder.getCanonicalPath().toLowerCase(Locale.getDefault()), String.format("%s-%s-%s.%s", fileName, base ,DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()) , extension).toLowerCase(Locale.getDefault()) );
 		}
 		catch(final IOException e)
@@ -237,23 +244,23 @@ public class DefaultInit implements Runnable
 		PTKFactory.setPrimeRefRawCtor( (i, base) -> new PrimeRef(i).init(PTKFactory.getPrimeBaseCtor(), base) );
 	}
 
-	private boolean ensureOutputFolder()
+	private boolean ensureFolderExist(final String folderPath)
 	{
-		boolean ret;
-		final File folder = new File(initOpts.getOutputFolder().replaceFirst("^.*~", System.getenv("HOME")));
+		Optional<File> optFolder = Optional.empty();
+		final File folder = new File(replaceTildeHome(folderPath));
 		if (folder.exists() || folder.mkdirs())
 		{
-			ret = true;
+			optFolder = Optional.ofNullable(folder);
 		}
-		else
+
+		if (optFolder.isEmpty())
 		{
 			if (LOG.isLoggable(Level.SEVERE))
 			{
 				LOG.severe("ERROR: could not create base folder: " + initOpts.getOutputFolder());
 			}
-			ret = false;
 		}
-		return ret;
+		return optFolder.isPresent();
 	}
 
 	private void stdOutRedirect()
@@ -280,6 +287,7 @@ public class DefaultInit implements Runnable
 
 	private void actionInitDefaultPrimeContent()
 	{
+		LOG.info("enter actionInitDefaultPrimeContent");
 		actions.add(s -> {
 			final FactoryIntfc factory = PTKFactory.getFactory();
 			primeSrc = factory.getPrimeSource();
@@ -298,7 +306,18 @@ public class DefaultInit implements Runnable
 
 			if (initOpts.getLoadPrimes() != null)
 			{
-				primeSrc.load(initOpts.getLoadPrimes());
+				final String inputFolderPath = initOpts.getInputDataFolder();
+				if (ensureFolderExist(inputFolderPath))
+				{
+					LOG.info("Load-primes option specified");
+					final PrePrimed prePrimed = new PrePrimed(Path.of(inputFolderPath));
+					prePrimed.load();
+					primeSrc.load(prePrimed, initOpts.getLoadPrimes());
+				}
+			}
+			else
+			{
+				LOG.info("No load-primes option specified (--load-primes");
 			}
 			primeSrc.init();
 

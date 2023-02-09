@@ -50,6 +50,14 @@ class InitOpts
 	private String outputFolder;
 
 	/**
+	 * Folder input data
+	 */
+	@Getter
+	@Setter
+	@Option(names = {"--input-data-folder"}, description = "Base folder for preload of prime data", defaultValue = "~/ptk-data", required = true)
+	private String inputDataFolder;
+
+	/**
 	 * flag indicating whether stdout should redirect to a file
 	 */
 	@Getter

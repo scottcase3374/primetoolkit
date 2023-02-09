@@ -9,7 +9,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.starcases.prime.base.BaseTypes;
-import com.starcases.prime.cli.Init;
+import com.starcases.prime.cli.DefaultInit;
 
 import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 
@@ -29,7 +29,7 @@ import picocli.CommandLine.Model.CommandSpec;
 @SuppressWarnings("PMD.AtLeastOneConstructor")
 @Getter
 @Setter
-@Command(name = "ptk", subcommands = { Init.class, CommandLine.HelpCommand.class }  , description="Prime Tool Kit")
+@Command(name = "ptk", subcommands = { DefaultInit.class, CommandLine.HelpCommand.class }  , description="Prime Tool Kit")
 public final class PrimeToolKit
 {
 	/**

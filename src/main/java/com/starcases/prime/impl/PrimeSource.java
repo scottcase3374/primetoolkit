@@ -1,7 +1,6 @@
 package com.starcases.prime.impl;
 
 import java.math.BigInteger;
-import java.nio.file.Path;
 import java.util.BitSet;
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -124,7 +123,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	 * Container of pre-generated prime/base data.
 	 */
 	@Getter(AccessLevel.PRIVATE)
-	private final PrePrimed prePrimed;
+	private PrePrimed prePrimed;
 
 	/**
 	 * single-level structure to manage a unique references to each unique
@@ -184,15 +183,6 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	{
 		super();
 
-		final Path [] paths =  {
-				Path.of("/home/scott/src/eclipse/primes-ws/PrimeToolKit/data/1"),
-				Path.of("/home/scott/src/eclipse/primes-ws/PrimeToolKit/data/DEFAULT")
-		};
-
-		prePrimed = new PrePrimed(paths);
-		prePrimed.load();
-
-
 		// yes, this seems odd - maybe refactor later.
 		super.primeSrc = this;
 
@@ -247,11 +237,14 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	 */
 	private void checkMismatch(final String src, final long idx, final long newPrime)
 	{
-		final long expectedPrime = prePrimed.retrieve((int)idx);
-
-		if (newPrime != expectedPrime && LOG.isLoggable(Level.SEVERE) && logMismatch.compareAndSet(true, false) )
+		if (prePrimed != null)
 		{
-			LOG.severe(String.format("Mismatch: [%s]  idx [%d] newPrime[%d] pre-primed@idx [%d]", src,  idx, newPrime, expectedPrime));
+			final long expectedPrime = prePrimed.retrieve((int)idx);
+
+			if (newPrime != expectedPrime && LOG.isLoggable(Level.SEVERE) && logMismatch.compareAndSet(true, false) )
+			{
+				LOG.severe(String.format("Mismatch: [%s]  idx [%d] newPrime[%d] pre-primed@idx [%d]", src,  idx, newPrime, expectedPrime));
+			}
 		}
 	}
 
@@ -302,7 +295,10 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 		}
 		while (nextPrimeTmpIdx < targetPrimeCount);
 
-		this.prePrimed.dumpStats();
+		if (this.prePrimed != null)
+		{
+			this.prePrimed.dumpStats();
+		}
 	}
 
 	/**
@@ -508,13 +504,13 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	}
 
 	@Override
-	public void load(final BaseTypes ... baseTypes)
+	public void load(final PrePrimed prePrimed, final BaseTypes ... baseTypes)
 	{
 		if (doInit.getPlain())
 		{
 
 		}
-
+		this.prePrimed = prePrimed;
 		//Map<Integer, BigInteger>  prCache = cacheMgr.getCache("primes");
 		//if (!prCache.isEmpty())
 		//	{
