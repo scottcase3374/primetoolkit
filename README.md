@@ -66,17 +66,11 @@ Initial work searched for triples for each prime within the specified max range.
 - init --max-count=750 --base=THREETRIPLE --output=THREETRIPLE --output-folder=~/ptk-out --stdout-redirect --use-base-file
 The last record processed was: Prime [5693] idx[750] #-bases[17144].  Current code completes in 34 sec 771 ms (excluding output) while the original code took 7 min 17 sec. The output results file was 75,289,288 bytes in size.
 
-
 For a command line of:
-- init --max-count=25000 --output=BASES --base=NPRIME --max-reduce=4 --prefer-parallel=true --user-base-file
+- init --max-count=25000 --output=BASES --base=NPRIME --max-reduce=4 --prefer-parallel=true --use-base-file
 
-The run times when changing the "--prefer-parallel" boolean were.
-- false: 4m 8s
-- true: 1m 5s.
-
-That flag applies to several base-logging and base-generation methods now. It generally drives either the use of parallel streams or aspects of the use of completableFutures.
-
-
+The original implementation ran for 4m 8s.
+The current code now completes in 28 sec 73 ms.
 
 ## Observations
 - My current prime/base selection method misses a few primes. The issue seems rooted in my data having a solution for the value after the currently desired item but not the current item. So when using prefixes, I can find the next prime but since the prefix which would produce the current prime hasn't been encountered yet it misses it and selects the next one which was found.  This seems like some sort of backtracking need. One thought involves looking at the order items within in a prefix and trying to determine if there is a relationship of some sort with the fact that certain sums of prefix values will be less than the previous prefix sum if using a straight sequential ordering of the items vs the resulting sum.  i.e. An algorithm may look at potential prefixes in an order such of {1}, {1,2}, {1,2,3}, {1,2,3,5}... {5} but because of that the {1,2,3} is encountered prior to prefixes with fewer members - resulting in missing a few values.  This is hard to describe in just a sentence or 2. Maybe breadth first data vs depth first data would be an adequate description for what seems like the need.
