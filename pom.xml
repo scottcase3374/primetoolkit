@@ -94,14 +94,6 @@
 	</dependencies>
 	<build>
 		<plugins>
-<!--			<plugin>-->
-<!--				<groupId>org.codehaus.mojo</groupId>-->
-<!--				<artifactId>versions-maven-plugin</artifactId>-->
-<!--				<version>${maven.versions.plugin.version}</version>-->
-<!--				<configuration>-->
-<!--					<generateBackupPoms>false</generateBackupPoms>-->
-<!--				</configuration>-->
-<!--			</plugin>-->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
