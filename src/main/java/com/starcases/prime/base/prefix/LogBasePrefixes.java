@@ -56,7 +56,7 @@ public class LogBasePrefixes extends AbstractLogBase
 
 									primeBases.appendString(outputStr, "[", ",", "]");
 
-									PrimeToolKit.output(BaseTypes.PREFIX, "%s", outputStr);
+									PrimeToolKit.output(BaseTypes.PREFIX, "%s%n", outputStr);
 									outputStr.setLength(0);
 									itemIdx[0]++;
 								}

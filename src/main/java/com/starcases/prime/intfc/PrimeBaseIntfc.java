@@ -52,6 +52,13 @@ public interface PrimeBaseIntfc extends Serializable
 	void addPrimeBases(@NonNull MutableList<ImmutableLongCollection> primeBase, @NonNull BaseTypes baseType);
 
 	/**
+	 * Add sets of primes for specified base.
+	 * @param primeBase
+	 * @param baseType
+	 */
+	void addPrimeBases(@NonNull ImmutableLongCollection primeBase, @NonNull BaseTypes baseType);
+
+	/**
 	 * Get the base meta data container for the specified base type.
 	 * @param baseType
 	 * @return

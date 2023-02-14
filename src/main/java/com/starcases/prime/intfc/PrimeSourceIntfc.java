@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.function.LongSupplier;
 import java.util.stream.Stream;
 
 import javax.validation.constraints.Min;
@@ -95,13 +96,22 @@ public interface PrimeSourceIntfc extends Serializable
 	Optional<PrimeRefIntfc> getPrimeRefForIdx(@Min(0) long primeIdx);
 
 	/**
-	 * Get prime ref associated with the specified BigInteger
+	 * Get prime ref associated with the specified long
 	 * if it is a prime.
 	 *
 	 * @param prime
 	 * @return
 	 */
 	Optional<PrimeRefIntfc> getPrimeRefForPrime(@Min(0) long prime);
+
+	/**
+	 * Get prime ref associated with the long produced by the supplier
+	 * if it is a prime.
+	 *
+	 * @param longSupplier
+	 * @return
+	 */
+	Optional<PrimeRefIntfc> getPrimeRefForPrime(final LongSupplier longSupplier);
 
 	/**
 	 * Get the big integer [prime] from the prime ref associated with

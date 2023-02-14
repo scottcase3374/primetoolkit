@@ -214,7 +214,7 @@ public class DefaultInit implements Runnable
 
 	private String replaceTildeHome(String path)
 	{
-		return path.replaceFirst("^.*~", System.getenv("HOME"));
+		return path.replaceFirst("^~", System.getenv("HOME"));
 	}
 
 	private Path decorateFileName(final String base, final String fileName, final String extension)
@@ -310,7 +310,7 @@ public class DefaultInit implements Runnable
 				if (ensureFolderExist(inputFolderPath))
 				{
 					LOG.info("Load-primes option specified");
-					final PrePrimed prePrimed = new PrePrimed(Path.of(inputFolderPath));
+					final PrePrimed prePrimed = new PrePrimed(Path.of(replaceTildeHome(inputFolderPath)));
 					prePrimed.load();
 					primeSrc.load(prePrimed, initOpts.getLoadPrimes());
 				}

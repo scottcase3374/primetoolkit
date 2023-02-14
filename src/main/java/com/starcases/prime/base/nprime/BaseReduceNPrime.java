@@ -5,6 +5,8 @@ import java.util.logging.Logger;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+
+import org.eclipse.collections.api.bag.primitive.MutableLongBag;
 import org.eclipse.collections.api.collection.MutableCollection;
 import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
 import org.eclipse.collections.api.collection.primitive.MutableLongCollection;
@@ -82,40 +84,49 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 	}
 
 	/**
-	 * Non-recursive algo to go through bases of bases to
-	 * count those that we want counts for.
+	 * Non-recursive algo to subdivide bases into sub-bases and
+	 * count those in our desired range upto the "reduce to <base>" value selected.
 	 *
 	 * @param primeRef cur Prime being reduced
 	 */
 	private void primeReduction(@NonNull final PrimeRefIntfc primeRef, @NonNull final MutableLongCollection retBases)
 	{
 		// want to process initial bases for Prime
-		MutableLongCollection bases = primeRef
-				.getPrimeBaseData()
-				.getPrimeBases()
-				.stream()
-				.map(ImmutableLongCollection::longIterator)
-				.collect(null)
-				;
+
+		MutableLongCollection bases = MutableLongBagFactoryImpl.INSTANCE.empty();
+		MutableLongCollection subBases = MutableLongBagFactoryImpl.INSTANCE.empty();
+
+		primeRef
+			.getPrimeBaseData()
+			.getPrimeBases()
+			.flatCollectLong(c -> c, bases)
+			;
 
 		while (!bases.isEmpty())
 		{
+			// Keep the desired values
 			bases.select( bi -> ( bi - maxReduce) < 0 ,retBases);
+			bases.removeIf(bi -> ( bi - maxReduce) < 0);
 
-			final MutableLongCollection tmp = bases
-					.select(bi ->  (bi - maxReduce) >= 0)
-					/*.collect(bi1 -> primeSrc.getPrimeRefByPrime(bi1)
-								.orElseThrow()
+			final MutableLongCollection tmpSubBases = subBases;
+			// process larger bases into a set of smaller bases for further processing
+			bases.forEach(
+				l ->
+					primeSrc
+						.getPrimeRefForPrime(l)
+						.ifPresent(b1 ->
+								b1
 								.getPrimeBaseData()
-								.getPrimeBases()) */
+								.getPrimeBases()
+								.flatCollectLong(c1 -> c1, tmpSubBases)
+						  ));
 
-					//.flatCollect(Collection::stream)	// List of Set of BigInteger  -> Stream of Set of BigInteger
-					//.flatMap(Collection::stream)	// Stream of Set of BigInteger to Stream of BigInteger
-					//.collect(Collectors2.toList())	// Stream of BigIntegers -> List of BigInteger
-					;
-			bases = tmp;
+			// Reuse storage instead of new collection allocations
+			MutableLongCollection tmpBases = bases;
+			bases = subBases;
+			subBases = tmpBases;
+			subBases.clear();
 		}
-
 	}
 
 	/**
@@ -139,17 +150,18 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 
 		primeSrc.getPrimeRefStream(this.preferParallel)
 			.filter(pr -> isNonNullEmpty(pr.getPrimeBaseData().getPrimeBases()))
-				.forEach( curPrime ->
+			.forEach( curPrime ->
 				{
 					try (Timer.Context context = MetricMonitor.time(BaseTypes.NPRIME).orElse(null))
 					{
-						final MutableLongCollection retBases = MutableLongBagFactoryImpl.INSTANCE.empty();
+						final MutableLongBag retBases = MutableLongBagFactoryImpl.INSTANCE.empty();
 						primeReduction(curPrime, retBases);
 						final MutableList<ImmutableLongCollection> lst = MutableListFactoryImpl.INSTANCE.of(retBases.toImmutable(), ImmutableLongBagFactoryImpl.INSTANCE.with(curPrime.getPrime()));
+						final NPrimeBaseMetadata npbmd = new NPrimeBaseMetadata(retBases.toImmutable());
 
 						curPrime
 							.getPrimeBaseData()
-							.addPrimeBases(BaseTypes.NPRIME, lst, new NPrimeBaseMetadata(retBases.toImmutable()));
+							.addPrimeBases(BaseTypes.NPRIME, lst, npbmd);
 					}
 				});
 	}

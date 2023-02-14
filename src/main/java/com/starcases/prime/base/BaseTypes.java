@@ -27,6 +27,9 @@ public enum BaseTypes implements OutputableIntfc
 	PREFIX,
 
 
+	/**
+	 * Similar to PREFIX.
+	 */
 	PRIME_TREE,
 
 	/**

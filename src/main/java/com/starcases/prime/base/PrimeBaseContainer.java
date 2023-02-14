@@ -80,6 +80,23 @@ public class PrimeBaseContainer implements PrimeBaseIntfc
 		this.baseMetadata.computeIfAbsent(baseType, a -> baseMetadata);
 	}
 
+	@Override
+	public void addPrimeBases(@NonNull ImmutableLongCollection primeBase, @NonNull BaseTypes baseType)
+	{
+		this.primeBases.compute(baseType,
+				(k, v) ->
+					{
+						if (v == null)
+						{
+							v = MutableListFactoryImpl.INSTANCE.of();
+						}
+
+						v.add(primeBase);
+
+						return v;
+					});
+	}
+
 	/**
 	 * Include a set of primes in the set of Prime bases for the current Prime.
 	 * @param primeBase

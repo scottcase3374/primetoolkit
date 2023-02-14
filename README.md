@@ -30,16 +30,27 @@ Current processing on my i7 with 64Gb RAM reaches about 3-5 million (cmd line ar
 The codebase uses Java 17 with Java 17 preview features enabled. This is mostly for switch statements using pattern matching.
 
 ## Execution - command line argument examples
-- init --max-count=100000 --base=DEFAULT --export=GML
+- init --help
+
 - init --max-count=100000 --export=GML
-    - Outputs prime node/edge info as GML into a file in the ~/ptk-output folder.
-- init --max-count=100 --base=PRIME_TREE --output=BASES  --prefer-parallel=true
-- init --max-count=100 --base=PREFIX --output=BASES  --prefer-parallel=true
-    - Parallel gen then output prime and calculated prefix/tree for the prime; (Prefix or tree) + Prime[n-1] = Prime
+    - Outputs prime node/edge info as GML into a file in the ~/ptk/output folder.
+
 - init --max-count=100 --base=THREETRIPLE --output=BASES
     - Output the prime, index, #bases(triples) and each triple.
-- init --max-count=100 --base=PREFIX --output=PRIMETREE_METRICS --output=BASES
-     -  Outputs the prefix data as before but also includes prefix / count data.
+
+- init --max-count=100 --load-primes  DEFAULT
+	- Loads primes from files / zip-files
+		- NOTE: requires providing a path to the folder containing the files.
+		-  1. You can symlink from default input folder to the example files in this project which are in the 'data' folder.
+		-    mkdir \~/ptk/input-data;  ln -s \~/path-to-zip-file-folder/\* \~/ptk/input-data
+		-  2. you can provide the CLI argument for the desired input data path with something like the following.
+		-    --input-data-dir=~/dev/eclipse/primes-workspace/PrimeToolKit/data
+
+- init --max-count=100 --base=PRIME_TREE --output=BASES   --use-base-file   --prefer-parallel=true
+- init --max-count=100 --base=PREFIX     --output=BASES   --use-base-file   --prefer-parallel=true
+    - Parallel gen then output prime and calculated prefix/tree for the prime; Prime = (Prefix or tree) + Prime[n-1]
+
+- init --max-count=100 --base=NPRIME --output=BASES   --use-base-file   --prefer-parallel=true
 
 Adding option:
 
@@ -50,13 +61,10 @@ You may need the following Java VM arguments depending on JDK version and setup/
 
 
 ## Performance
-I made some improvements when performance was so poor as to prevent running default base creation for any meaningful number of primes. I'm very interested in improvements at the data structure selection level so that will be the focus for now.
+Initial work searched for triples for each prime within the specified max range. This executed the search for each prime. I'm not sure why I didn't think about it initially but it is massively more efficient to simply iterate through all triples for the prime range and then simply assign any valid triple to its correct prime.
 
-The initial design of triples used CompletableFuture (1 per target prime) which did reduce run times - running for 500 primes still took ~1m 30s minutes though. The logging to console out is a large time consumers (especially when running in an IDE such as Eclipse) - the "--use-base-file" flag helps by forcing base info to a file rather than console/stdout.
-
-I switched from CompletableFuture to a parallel stream which appeared to self tune better.  A few other changes were made - running triples with args of:
-- init --max-count 750 --base=THREETRIPLE --output=BASES  --use-base-file
-initially took 7m 17s and produced an output log file of 75,289,288 bytes. The last record processed was: Prime [5693] idx[750] #-bases[17144].  Current code completes in just under 6m.
+- init --max-count=750 --base=THREETRIPLE --output=THREETRIPLE --output-folder=~/ptk-out --stdout-redirect --use-base-file
+The last record processed was: Prime [5693] idx[750] #-bases[17144].  Current code completes in 34 sec 771 ms (excluding output) while the original code took 7 min 17 sec. The output results file was 75,289,288 bytes in size.
 
 
 For a command line of:

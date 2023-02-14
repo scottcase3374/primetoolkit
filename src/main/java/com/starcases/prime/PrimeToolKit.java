@@ -128,7 +128,7 @@ public final class PrimeToolKit
 		}
 		else
 		{
-			System.out.printf(format + "\n", params);
+			System.out.printf(String.format("%s%n", format), params);
 		}
 	}
 

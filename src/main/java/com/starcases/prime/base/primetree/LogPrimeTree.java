@@ -58,7 +58,7 @@ public class LogPrimeTree extends AbstractLogBase
 									.getPrimeBases(BaseTypes.PRIME_TREE)
 									.iterator()
 									.forEachRemaining( primeBases -> primeBases.appendString(outputStr, "[", ",", "]"));
-								PrimeToolKit.output(BaseTypes.PRIME_TREE, "\t%s", outputStr);
+								PrimeToolKit.output(BaseTypes.PRIME_TREE, "\t%s%n", outputStr);
 								outputStr.setLength(0);
 								itemIdx[0]++;
 

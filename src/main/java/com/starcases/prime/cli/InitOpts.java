@@ -46,15 +46,19 @@ class InitOpts
 	 */
 	@Getter
 	@Setter
-	@Option(names = {"--output-folder"}, description = "Base folder for all files generated", defaultValue = "~/ptk-output", required = true)
+	@Option(names = {"--output-folder"}, description = "Base folder for all files generated", defaultValue = "~/ptk/output", required = true)
 	private String outputFolder;
 
 	/**
 	 * Folder input data
+	 *
+	 *  For the sample data included in this project; use something like:
+	 *  	~/<eclipse-workspace-path>/PrimeToolKit/data
+	 *
 	 */
 	@Getter
 	@Setter
-	@Option(names = {"--input-data-folder"}, description = "Base folder for preload of prime data", defaultValue = "~/ptk-data", required = true)
+	@Option(names = {"--input-data-folder"}, description = "Base folder for preload of prime data", defaultValue = "~/ptk/input-data", required = true)
 	private String inputDataFolder;
 
 	/**

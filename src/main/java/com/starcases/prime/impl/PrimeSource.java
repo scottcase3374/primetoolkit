@@ -7,6 +7,7 @@ import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.LongSupplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -450,6 +451,12 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	public Optional<PrimeRefIntfc> getPrimeRefForPrime(@Min(0) final long prime)
 	{
 		return this.getPrimeRefForIdx(primeToIdxMap.get(prime));
+	}
+
+	@Override
+	public Optional<PrimeRefIntfc> getPrimeRefForPrime(LongSupplier longSupplier)
+	{
+		return this.getPrimeRefForIdx(primeToIdxMap.get(longSupplier.getAsLong()));
 	}
 
 	@Override

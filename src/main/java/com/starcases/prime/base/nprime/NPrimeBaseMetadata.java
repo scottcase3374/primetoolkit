@@ -1,7 +1,6 @@
 package com.starcases.prime.base.nprime;
 
-import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
-
+import org.eclipse.collections.api.bag.primitive.ImmutableLongBag;
 import com.starcases.prime.intfc.BaseMetadataIntfc;
 
 import lombok.Getter;
@@ -22,13 +21,13 @@ public class NPrimeBaseMetadata implements BaseMetadataIntfc
 	 * Track count for subset of bases
 	 */
 	@Getter
-	private final ImmutableLongCollection countForBaseIdx;
+	private final ImmutableLongBag countForBaseIdx;
 
 	/**
 	 * Create the count metadata
 	 * @param countForBaseIdx
 	 */
-	public NPrimeBaseMetadata(@NonNull final ImmutableLongCollection countForBaseIdx)
+	public NPrimeBaseMetadata(@NonNull final ImmutableLongBag countForBaseIdx)
 	{
 		this.countForBaseIdx = countForBaseIdx;
 	}

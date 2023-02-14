@@ -1,20 +1,14 @@
 package com.starcases.prime.base.triples;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.validation.constraints.Min;
 
 import com.codahale.metrics.Timer;
 import com.starcases.prime.base.AbstractPrimeBaseGenerator;
 import com.starcases.prime.base.BaseTypes;
-import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import com.starcases.prime.metrics.MetricMonitor;
-
-import org.eclipse.collections.impl.list.mutable.MutableListFactoryImpl;
-
 import lombok.NonNull;
 
 /*
@@ -88,62 +82,22 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 	}
 
 	/**
-	 * Main method responsible for producing the triples for a single Prime.
-	 * @param Prime
-	 */
-	private void reducePrime(@NonNull final PrimeRefIntfc prime)
-	{
-		new AllTriples(primeSrc, prime).process();
-	}
-
-	/**
 	 * top-level function; iterate over entire dataset to reduce every Prime
 	 * @param maxReduce
 	 */
 	@Override
 	protected void genBasesImpl()
 	{
-		final var counter = new AtomicInteger(0);
 		if (isBaseGenerationOutput())
 		{
 			LOG.entering("BaseReduce3Triple", "genBases()");
 			LOG.info("BaseReduce3Triple genBases()");
 		}
-
 		MetricMonitor.addTimer(BaseTypes.THREETRIPLE,"Gen 3Triple");
 
-		// handle Bootstrap values - can't really represent < 11 with a sum of 3 primes
-		final long skipInitialPrimes = 5L;
-
-		primeSrc
-		.getPrimeRefStream(false)
-		.limit(skipInitialPrimes) // primes 1,2,3,5,7
-		.forEach(curPrime ->
-					curPrime
-					.getPrimeBaseData()
-					.addPrimeBases(MutableListFactoryImpl.INSTANCE.of(curPrime.getPrimeBaseData().getPrimeBases(BaseTypes.DEFAULT).get(0)), BaseTypes.THREETRIPLE)
-		);
-
-		primeSrc.getPrimeRefStream(skipInitialPrimes, this.preferParallel).forEach(curPrime ->
-						{
-							try (Timer.Context context = MetricMonitor.time(BaseTypes.THREETRIPLE).orElse(null))
-							{
-								 handlePrime(curPrime, counter.incrementAndGet());
-							}
-						}
-				);
-
-		if (LOG.isLoggable(Level.INFO))
+		try (Timer.Context context = MetricMonitor.time(BaseTypes.THREETRIPLE).orElse(null))
 		{
-			LOG.info(String.format("Total entries: %d;", counter.get()));
+			new AllTriples(primeSrc, this.preferParallel).process();
 		}
-	}
-
-	private String handlePrime(final PrimeRefIntfc curPrime, final int counter)
-	{
-		final var retVal = String.format("p[%d]idx[%d] good=", curPrime.getPrime(), counter);
-
-		reducePrime(curPrime);
-		return retVal + good.getAndIncrement();
 	}
 }

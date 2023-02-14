@@ -76,7 +76,7 @@ public final class PrePrimed
 	@Setter(AccessLevel.PRIVATE)
 	private int subsetIdx;
 
-	private final static String ZIP_FOLDER_ISSUE_MSG = "Problem with input zip-file or folder";
+	private static final String ZIP_FOLDER_ISSUE_MSG = "Problem with input zip-file or folder";
 
 	static
 	{
@@ -89,20 +89,6 @@ public final class PrePrimed
 		{
 			PrimeToolKit.output("Error starting pre-prime cache: %s",e);
 		}
-	}
-
-	/**
-	 * main method for testing purposes
-	 * @param args
-	 */
-	public static void main(final String [] args)
-	{
-		final Path [] srcPaths =  {
-				Path.of(String.format("%s/DEFAULT", System.getenv("PTK_DEFAULT_DATA_DIR")))
-		};
-
-		final PrePrimed preprimedInst = new PrePrimed(srcPaths);
-		preprimedInst.load();
 	}
 
 	/**
