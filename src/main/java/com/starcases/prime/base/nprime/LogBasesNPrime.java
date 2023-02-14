@@ -7,6 +7,7 @@ import org.eclipse.collections.api.bag.primitive.ImmutableLongBag;
 
 import com.starcases.prime.PrimeToolKit;
 import com.starcases.prime.base.BaseTypes;
+import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import com.starcases.prime.log.AbstractLogBase;
 
@@ -44,29 +45,29 @@ public class LogBasesNPrime extends AbstractLogBase
 		final var prIt = primeSrc.getPrimeRefStream(5L, false).iterator();
 
 
-		prIt.forEachRemaining(pr ->
-		{
-			{
-				var bmd = pr.getPrimeBaseData().getBaseMetadata(BaseTypes.NPRIME);
-				if (bmd instanceof NPrimeBaseMetadata nprimemd)
-				{
-					final ImmutableLongBag counts = nprimemd.getCountForBaseIdx();
-					final String itemCountsStr = counts.toStringOfItemToCount();
+		prIt.forEachRemaining(this::logData);
+	}
 
-					// Handle "header" info for the current Prime
-					PrimeToolKit.output(BaseTypes.NPRIME, "%nPrime [%d] %s%n",
-														pr.getPrime(),
-														itemCountsStr
-														);
-				}
-				else
-				{
-					if (log.isLoggable(Level.SEVERE))
-					{
-						log.severe(String.format("Can't show bases for Prime [%d] index[%d] : invalid NPrimeBaseMetadata", pr.getPrime(), pr.getPrimeRefIdx()));
-					}
-				}
+	private void logData(PrimeRefIntfc pr)
+	{
+		var bmd = pr.getPrimeBaseData().getBaseMetadata(BaseTypes.NPRIME);
+		if (bmd instanceof NPrimeBaseMetadata nprimemd)
+		{
+			final ImmutableLongBag counts = nprimemd.getCountForBaseIdx();
+			final String itemCountsStr = counts.toStringOfItemToCount();
+
+			// Handle "header" info for the current Prime
+			PrimeToolKit.output(BaseTypes.NPRIME, "%nPrime [%d] %s%n",
+												pr.getPrime(),
+												itemCountsStr
+												);
+		}
+		else
+		{
+			if (log.isLoggable(Level.SEVERE))
+			{
+				log.severe(String.format("Can't show bases for Prime [%d] index[%d] : invalid NPrimeBaseMetadata", pr.getPrime(), pr.getPrimeRefIdx()));
 			}
-		});
+		}
 	}
 }

@@ -49,7 +49,6 @@ public abstract class AbstractPrimeBaseGenerator implements PrimeBaseGenerateInt
 	 * Flag indicating whether base construction can use multiple CPU cores
 	 */
 	@Getter(AccessLevel.PROTECTED)
-	@Setter
 	protected boolean preferParallel;
 
 	/**
