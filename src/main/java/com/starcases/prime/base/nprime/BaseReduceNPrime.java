@@ -3,8 +3,8 @@ package com.starcases.prime.base.nprime;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 import org.eclipse.collections.api.bag.primitive.MutableLongBag;
 import org.eclipse.collections.api.collection.MutableCollection;

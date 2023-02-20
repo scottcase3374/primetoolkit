@@ -29,7 +29,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 
-import javax.validation.constraints.Min;
+import jakarta.validation.constraints.Min;
 
 import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
 import org.eclipse.collections.api.list.ImmutableList;

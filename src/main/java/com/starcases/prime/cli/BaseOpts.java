@@ -3,7 +3,7 @@ package com.starcases.prime.cli;
 import java.util.Collections;
 import java.util.Set;
 
-import javax.validation.constraints.Min;
+import jakarta.validation.constraints.Min;
 
 import com.starcases.prime.base.BaseTypes;
 

@@ -5,8 +5,8 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 import com.starcases.prime.impl.CollectionTrackerImpl;
 import com.starcases.prime.impl.PrimeSource;

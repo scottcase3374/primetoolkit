@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
-import javax.validation.constraints.Min;
+import jakarta.validation.constraints.Min;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 

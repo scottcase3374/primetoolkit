@@ -7,7 +7,7 @@ import java.util.OptionalLong;
 import java.util.function.LongSupplier;
 import java.util.stream.Stream;
 
-import javax.validation.constraints.Min;
+import jakarta.validation.constraints.Min;
 
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.impl.GenerationProgress;

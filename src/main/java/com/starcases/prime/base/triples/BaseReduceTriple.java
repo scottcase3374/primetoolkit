@@ -2,7 +2,7 @@ package com.starcases.prime.base.triples;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
-import javax.validation.constraints.Min;
+import jakarta.validation.constraints.Min;
 
 import com.codahale.metrics.Timer;
 import com.starcases.prime.base.AbstractPrimeBaseGenerator;

@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.starcases</groupId>
 		<artifactId>raw-java-base-pom</artifactId>
-		<version>1.0.3</version>
+		<version>1.0.4</version>
 	</parent>
 	<groupId>com.starcases.prime</groupId>
 	<artifactId>prime-tool-kit</artifactId>
@@ -20,7 +20,6 @@
 		<dependency>
 			<groupId>org.jboss.weld.se</groupId>
 			<artifactId>weld-se-shaded</artifactId>
-			<version>${jboss.weld.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>info.picocli</groupId>
@@ -80,12 +79,11 @@
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-junit-jupiter</artifactId>
-			<version>${mockito.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>javax.validation</groupId>
-			<artifactId>validation-api</artifactId>
+			<groupId>jakarta.validation</groupId>
+			<artifactId>jakarta.validation-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.dropwizard.metrics</groupId>
