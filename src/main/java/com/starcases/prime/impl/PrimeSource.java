@@ -344,7 +344,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	/**
 	 * At the moment, this is only public because I want to ensure
 	 * this logic is correct through some unit tests.  This is
-	 * fundamentally calculating log-base-2 for the value. Slightly
+	 * fundamentally calculating log-base-2 (+1) for the value. Slightly
 	 * different implementations can have different performance
 	 * impacts. This can be called a very large number of times
 	 * in total so ability to tune it may be useful.

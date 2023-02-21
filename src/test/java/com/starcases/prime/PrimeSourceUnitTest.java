@@ -2,11 +2,8 @@ package com.starcases.prime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.math.BigInteger;
-import java.util.Optional;
-
-import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -57,30 +54,13 @@ class PrimeSourceUnitTest
 		primeSrc.init();
 	}
 
-	/**
-	 * Unit test - unused
-	 */
-	@Ignore
-	@Test
-	void checkGetNextLowPrimeBigInteger()
-	{
-		fail("Not yet implemented");
-	}
-
 	@Test
 	void checkGetBitsRequired()
 	{
-		assertEquals(12, ((PrimeSource)primeSrc).getBitsRequired(0x01000), "Value should require 12 bits.");
+		assertEquals(13, Math.log(0x01000) / Math.log(2) + 1, "Math - base2 + 1 should be 13");
+		assertEquals(13, ((PrimeSource)primeSrc).getBitsRequired(0x01000), "Value should require 13 bits.");
 	}
-	/**
-	 * Unit test - unused
-	 */
-	@Ignore
-	@Test
-	void testGetNextHighPrimeBigInteger()
-	{
-		fail("Not yet implemented");
-	}
+
 
 	/**
 	 * Unit test - get prime
@@ -88,14 +68,14 @@ class PrimeSourceUnitTest
 	@Test
 	void canGetPrime()
 	{
-		final var bi101 = Optional.of(BigInteger.valueOf(101L));
+		final var bi101 = 101L;
 		assertEquals(bi101, primeSrc.getPrimeForIdx(26).getAsLong(), "Prime at index 26 should be 101.");
 	}
 
 	/**
 	 * unit test - unused
 	 */
-	@Ignore
+	@Disabled
 	@Test
 	void testGetPrimeRef()
 	{
