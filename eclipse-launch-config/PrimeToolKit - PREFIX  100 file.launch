@@ -14,7 +14,7 @@
     <stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="org.eclipse.m2e.launchconfig.classpathProvider"/>
     <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.starcases.prime.PrimeToolKit"/>
     <stringAttribute key="org.eclipse.jdt.launching.MODULE_NAME" value="PrimeToolKit"/>
-    <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="init --max-count=100 --base=PREFIX --output=BASES  --use-base-file  --prefer-parallel=true"/>
+    <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="init --max-count=100 --base=PREFIX --output=BASES  --use-base-file --enable-cmd-listener --prefer-parallel=true"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="PrimeToolKit"/>
     <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.m2e.launchconfig.sourcepathProvider"/>
 </launchConfiguration>

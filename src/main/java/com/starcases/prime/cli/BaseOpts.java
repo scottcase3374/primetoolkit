@@ -43,6 +43,14 @@ class BaseOpts
 	private boolean useBaseFile;
 
 	/**
+	 * flag for enabling listening for remote commands based on a SQL like grammar.
+	 */
+	@Getter
+	@Setter
+	@Option(names = {"--enable-cmd-listener"}, description = "Listen for remote commands", required = false)
+	private boolean enableCmmandListener;
+
+	/**
 	 * Get bases to process
 	 * @return
 	 */

@@ -11,6 +11,9 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>PrimeToolKit</name>
 	<description>Prime Tool Kit</description>
+	<properties>
+		<antlr4.visitor>true</antlr4.visitor>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -89,9 +92,13 @@
 			<groupId>io.dropwizard.metrics</groupId>
 			<artifactId>metrics-core</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-all</artifactId>
+		</dependency>
 	</dependencies>
 	<build>
-		
+
 		<plugins>
 			<plugin>
 				<groupId>org.antlr</groupId>

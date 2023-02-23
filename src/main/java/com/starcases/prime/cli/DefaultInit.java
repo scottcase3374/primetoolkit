@@ -47,6 +47,7 @@ import com.starcases.prime.intfc.PrimeSourceIntfc;
 import com.starcases.prime.log.LogNodeStructure;
 import com.starcases.prime.metrics.MetricMonitor;
 import com.starcases.prime.preload.PrePrimed;
+import com.starcases.prime.remote.CmdServer;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -158,6 +159,8 @@ public class DefaultInit implements Runnable
 		actionHandleGraphing();
 
 		actionHandleExports();
+
+		actionEnableCmdListener();
 
 		executeActions();
 	}
@@ -281,6 +284,29 @@ public class DefaultInit implements Runnable
 			if (LOG.isLoggable(Level.SEVERE))
 			{
 				LOG.severe("ERROR: could not set standard out to provided destination. " );
+			}
+		}
+	}
+
+	private void actionEnableCmdListener()
+	{
+		if (baseOpts.isEnableCmmandListener())
+		{
+			if (LOG.isLoggable(Level.INFO))
+			{
+				LOG.info("enter actionEnableCmdListener");
+				actions.add(s -> {
+					try
+					{
+						LOG.info("DefaultInit::actionEnableCmdListener - creating CmdServer; primeSrc:" + primeSrc.toString() + " port:" + 8690);
+						new CmdServer(primeSrc, 8690).run();
+					}
+					catch(final Exception e)
+					{
+						LOG.severe(e.toString());
+					}
+				});
+
 			}
 		}
 	}
