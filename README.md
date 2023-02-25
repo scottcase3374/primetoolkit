@@ -2,24 +2,70 @@
 
 ## Personal Project involving prime numbers
 
-## Goals
+## Preface
+This is a pet project of mine. I have interests in some math related areas and this is the type of personal project I like to work on. This also serves as both a skills demonstration and a platform for trying out new technologies.
 
-1. Experimentation with various graph libraries for data visualization
-2. Experiment with Picocli command line interface library
-3. Experiment with Java features in versions > Java 11
-4. Research properties of prime numbers
-5. Research representations of prime numbers
-	- Sets of 3 unique primes that sum to a prime
-	- Multiples of a few low primes such as 1,2,3
-4. Research data structures for use as primes numbers become very large
-	- BitSets, Lists, BigInteger are the main starting points
-	- Further work into other items including
-		- Greater than Base-10 representations
-		- Run length encoding (of binary probably)
-		- Predefined patterns (repeating)
-		- Trie style structure
-		- Additive method (P-1000 = P-999 + n)
-		- Possible combinations of subset of the above
+## Technology Summary
+Here are some highlights regarding technology tried/used.
+1. Java 18
+2. Picocli - command line handling
+3. JBoss Infinispan - caching
+4. Protobuf - related to caching
+5. Eclipse Collections - alternative for standard java for lower memory usage, etc.
+6. Antlr4 - parsing and processing a very simple "SQL like" language for primes.
+7. Netty - provide remote access to the PrimeSQL processing (via telnet as first POC)
+8. DropWizard - metrics info
+9. Jakarta Validation - as replacement for javax validation.
+10. JGrapht / JGraphx - some graphing POC
+11. JUnit Jupiter - as replacement for JUnit4
+12. JBoss Weld - some POC work for dependency injection with plain Java apps.
+13. Lombok - code generation / simplification
+14. Maven
+
+Here are some of the tools used.
+1. Eclipse plugins
+	- git
+	- pmd
+	- sonar
+	- m2e
+	- AnyEditTools
+	- SpotBugs
+
+2. Maven plugins
+	- Antlr
+
+## Skills demonstrated
+1. Complex data structure design
+2. Lexical analysis / parsing
+3. Network application aspects
+4. Object Oriented design
+5. Java Lambda and Stream usage
+
+## Examples of Design Patterns used
+- Singleton 		- example: enum BaseTypes
+- Interpreter		- Antlr generated code plus PrimeSqlVisitor / PrimeSQLChannelHander classes
+- Iterator 			- PrimeTreeIterator / PrimeTreeIteratorIntfc classes
+- Strategy 			- "Base" handling classes; BaseReduceNPrime, PrimeTree, BaseReduceTriple, BasePrefixes
+- Template Method	- AbstractPrimeBaseGenerator.genBases()
+- Command			- DefaultInit.action*() methods
+
+## Misc items
+- Manual check of some libraries against online Veracode vulnerability data.
+	- https://sca.analysiscenter.veracode.com/vulnerability-database/search#query=language:java
+		- Lombok ; clean
+		- Infinispan ; potential security issues depending on use.
+		- Eclipse Collections ; clean
+		- Picocli ; clean
+
+## Goals
+- Experimentation with various graph libraries for data visualization
+- Experiment with Picocli command line interface library
+- Experiment with Eclipse collections
+- Experiment with Java features in versions > Java 11
+- Research properties of prime numbers
+- Research data structures for use as primes numbers become very large
+	- Track bases of primes (sums of primes that add to current prime)
+	- Track and use shared lists or other structures of subsets of bases
 
 ## Reasons
 Given a reasonably powerful desktop computer with 64Gb of memory; Some of the above goals can be done with several million primes and the related data *in memory*. A question is - can a dynamic mix of data representations allow processing significantly more data in memory efficiently? In the process of determining that, some interesting properties of primes may also be found.  Minimum goal would be 15 million primes + associated data with a stretch goal of probably 50-70 million.
@@ -27,7 +73,7 @@ Given a reasonably powerful desktop computer with 64Gb of memory; Some of the ab
 Current processing on my i7 with 64Gb RAM reaches about 3-5 million (cmd line args of:  init --max-count=3000000 --log=NODESTRUCT) before system speed / stability / etc start to suffer. Graph visualizations slow once you get into the low thousands. Exporting and using other external tools (GML format) performed better for visualizations.
 
 ## Build requirements
-The codebase uses Java 17 with Java 17 preview features enabled. This is mostly for switch statements using pattern matching.
+The codebase uses Java 18.
 
 ## Execution - command line argument examples
 - init --help
@@ -263,19 +309,13 @@ are processed, each of the Consumer<> objects is evaluated.  The first actions g
 information and then new base generation, logging and graphing actions are added as needed.
 
 ## Challenges
-- Using pre-computed lists to speed up the search/selection process for the prime bases is useful but one aspect was
-unexpected. There are times when the pre-computed lists can construct a desirable item but the problem is that
-it might not be the actual next item that should be found if going in increasing order. A method to identify
-and resolve this is needed yet.  So as of now, some primes are missed in the creation/selection process
-but they are logged for those under the index count of 50mm.  A pre-computed list for the first ~50mm items
-is loaded into memory/persistent cache and used to identify when the real "next item" doesn't match what
-I found. It isn't a huge number of items in a fixed range but it does add up.
+- The internal algorithm for generating the "next prime" has a flaw where a prime is skipped once in a while. This is part of the reason that caching plus loading of 50 million known primes is implemented - which allows comparison with known primes to enable identification of missed primes. Of course, this only works when you are working within the limits of the known primes that are loaded.
 
 ## ToDo
-	- More test coverage
-	- More metrics
-	- More / improved cache support
+	- Increase test coverage.
+	- Additional metrics.
+	- Improved cache support.
 	- More generic / useful methods for identifying patterns in the bases/data.
-	- Create a simple REPL for using the system.
-	- Research migrating progress monitor to use MetricMonitor (DropWizard metrics)
 	- Enable more metric reporting options (like Graphite).
+	- More remote command support.
+	- Improved reporting / visualization.
