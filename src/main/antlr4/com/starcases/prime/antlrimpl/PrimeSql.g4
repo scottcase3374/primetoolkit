@@ -41,6 +41,6 @@ sel_where :
 	;
 
 expr :
-		ID GT INT
-	| 	ID LT INT
+		GT INT	# GreaterThan
+	| 	LT INT	# LessThan
 	;

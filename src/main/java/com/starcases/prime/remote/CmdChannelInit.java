@@ -4,6 +4,8 @@ import com.starcases.prime.intfc.PrimeSourceIntfc;
 
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.codec.http.HttpServerExpectContinueHandler;
 
 /**
  * Handle channel init. If system gets more complex, additional
@@ -14,7 +16,7 @@ import io.netty.channel.socket.SocketChannel;
  */
 public class CmdChannelInit extends ChannelInitializer<SocketChannel>
 {
-	final private PrimeSourceIntfc primeSrc;
+	private final PrimeSourceIntfc primeSrc;
 
 	public CmdChannelInit(final PrimeSourceIntfc primeSrc)
 	{
@@ -24,6 +26,10 @@ public class CmdChannelInit extends ChannelInitializer<SocketChannel>
 	@Override
     public void initChannel(SocketChannel ch) throws Exception
 	{
-        ch.pipeline().addLast(new ChannelHandler(primeSrc));
+        ch
+        	.pipeline()
+        	.addLast(new HttpServerCodec())
+        	.addLast(new HttpServerExpectContinueHandler())
+        	.addLast(new PrimeSQLChannelHandler(primeSrc));
     }
 }
