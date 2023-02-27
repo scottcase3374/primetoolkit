@@ -52,7 +52,7 @@ public class ViewDefault extends PrimeGrapherBase
 	{
 		if (LOG.isLoggable(Level.INFO))
 		{
-			LOG.info("Display default View");
+			LOG.fine("Display default View");
 		}
 		final var defaultGraph = new CircularLayoutPrimesGraph(this.graph);
 		defaultGraph.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);

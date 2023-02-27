@@ -107,7 +107,7 @@ public class PrimeTree extends AbstractPrimeBaseGenerator
 				{
 					if (this.baseGenerationOutput && LOG.isLoggable(Level.INFO))
 					{
-						LOG.info("genBases() - prime " + curPrime.getPrime());
+						LOG.fine("genBases() - prime " + curPrime.getPrime());
 					}
 
 					try (Timer.Context context = MetricMonitor.time(BaseTypes.PRIME_TREE).orElse(null))
@@ -121,7 +121,7 @@ public class PrimeTree extends AbstractPrimeBaseGenerator
 								final var prime = basePrime;
 								if (this.isBaseGenerationOutput() && LOG.isLoggable(Level.INFO))
 								{
-									LOG.info(String.format("handling prime[%d] base-index [%d] base-prime [%d]", curPrime.getPrime(), basePrime, prime));
+									LOG.fine(String.format("handling prime[%d] base-index [%d] base-prime [%d]", curPrime.getPrime(), basePrime, prime));
 								}
 
 								curPrefixIt.add(prime);

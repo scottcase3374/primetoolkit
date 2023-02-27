@@ -3,14 +3,14 @@ package com.starcases.prime.metrics;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
+import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Slf4jReporter;
 import com.codahale.metrics.Timer;
 import com.starcases.prime.intfc.OutputableIntfc;
 
 import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
-import org.slf4j.LoggerFactory;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -20,6 +20,8 @@ import lombok.Getter;
  */
 public final class MetricMonitor
 {
+	private static final Logger LOG = Logger.getLogger(MetricMonitor.class.getName());
+
 	/**
 	 *  Metrics data registry (drop wizard)
 	 */
@@ -67,12 +69,19 @@ public final class MetricMonitor
 	 */
 	public static void startReport()
 	{
-		final Slf4jReporter reporter = Slf4jReporter.forRegistry(metrics)
-                .outputTo(LoggerFactory.getLogger("com.starcases.prime.metrics"))
-                .convertRatesTo(TimeUnit.SECONDS)
-                .convertDurationsTo(TimeUnit.MILLISECONDS)
-                .build();
+		LOG.info("Metrics Enabled");
+//		final Slf4jReporter reporter = Slf4jReporter.forRegistry(metrics)
+//                .outputTo(LoggerFactory.getLogger("com.starcases.prime.metrics"))
+//                .convertRatesTo(TimeUnit.SECONDS)
+//                .convertDurationsTo(TimeUnit.MILLISECONDS)
+//                .build();
+
+		final ConsoleReporter reporter = ConsoleReporter.forRegistry(metrics)
+		          .convertRatesTo(TimeUnit.SECONDS)
+		          .convertDurationsTo(TimeUnit.MILLISECONDS)
+		          .build();
+
 		reporter.start(15, TimeUnit.SECONDS);
-	  }
+	}
 
 }

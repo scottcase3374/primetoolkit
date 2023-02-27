@@ -4,11 +4,14 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
+import com.codahale.metrics.Timer;
 import com.starcases.prime.antlr.PrimeSqlResult;
 import com.starcases.prime.antlr.PrimeSqlVisitor;
 import com.starcases.prime.antlrimpl.PrimeSqlLexer;
 import com.starcases.prime.antlrimpl.PrimeSqlParser;
+import com.starcases.prime.intfc.OutputableIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
+import com.starcases.prime.metrics.MetricMonitor;
 
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
@@ -41,6 +44,12 @@ public class PrimeSQLChannelHandler extends SimpleChannelInboundHandler<Object>
 	private final PrimeSourceIntfc primeSrc;
 
 	private HttpRequest httpRequest;
+
+	private enum MetricType implements OutputableIntfc
+	{
+		SQLCOMMAND;
+	}
+
 	public PrimeSQLChannelHandler(final PrimeSourceIntfc primeSrc)
 	{
 		this.primeSrc = primeSrc;
@@ -63,6 +72,7 @@ public class PrimeSQLChannelHandler extends SimpleChannelInboundHandler<Object>
 	@Override
 	protected void channelRead0(final ChannelHandlerContext ctx, final Object msg) throws Exception
 	{
+
 		if (msg instanceof HttpRequest httpReq)
 		{
 			this.httpRequest = httpReq;
@@ -101,15 +111,21 @@ public class PrimeSQLChannelHandler extends SimpleChannelInboundHandler<Object>
 		return keepAlive;
 	}
 
+
 	private PrimeSqlResult processRequest(final String request)
 	{
-		final PrimeSqlLexer psl = new PrimeSqlLexer(CharStreams.fromString(request));
-		final CommonTokenStream tokenStream = new CommonTokenStream(psl);
-		final PrimeSqlParser psp = new PrimeSqlParser(tokenStream);
+		MetricMonitor.addTimer(MetricType.SQLCOMMAND, request);
 
-		final ParseTree parseTree = psp.root();
-		final PrimeSqlVisitor visitor = new PrimeSqlVisitor(primeSrc);
+		try (Timer.Context context = MetricMonitor.time(MetricType.SQLCOMMAND).orElse(null))
+		{
+			final PrimeSqlLexer psl = new PrimeSqlLexer(CharStreams.fromString(request));
+			final CommonTokenStream tokenStream = new CommonTokenStream(psl);
+			final PrimeSqlParser psp = new PrimeSqlParser(tokenStream);
 
-		return visitor.visit(parseTree);
+			final ParseTree parseTree = psp.root();
+			final PrimeSqlVisitor visitor = new PrimeSqlVisitor(primeSrc);
+			return visitor.visit(parseTree);
+		}
+
 	}
 }

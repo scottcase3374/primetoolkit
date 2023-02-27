@@ -34,9 +34,9 @@ public class LogNodeStructure extends AbstractLogBase
 	@Override
 	public void outputLogs()
 	{
-		if (LOG.isLoggable(Level.INFO))
+		if (LOG.isLoggable(Level.FINE))
 		{
-			LOG.info("LogNodeStructure l()");
+			LOG.fine("LogNodeStructure l()");
 		}
 		final int [] idx = {0};
 

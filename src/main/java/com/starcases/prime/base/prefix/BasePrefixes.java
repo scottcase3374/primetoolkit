@@ -42,15 +42,15 @@ public class BasePrefixes extends AbstractPrimeBaseGenerator
 
 		MetricMonitor.addTimer(BaseTypes.PREFIX,"Gen Prefix");
 
-		LOG.info("BasePrefixes - get stream");
+		LOG.fine("BasePrefixes - get stream");
 		final var prStream = primeSrc.getPrimeRefStream(preferParallel);
 		prStream.forEach(pr ->
 				{
-					LOG.info("basePrefixes stream - for each: " + pr.getPrime());
+					LOG.fine("basePrefixes stream - for each: " + pr.getPrime());
 					try (Timer.Context context = MetricMonitor.time(BaseTypes.PREFIX).orElse(null))
 					{
 						final var origBases = pr.getPrimeBaseData().getPrimeBases().get(0);
-						LOG.info("basePrefixes stream - add prime base: " + origBases);
+						LOG.fine("basePrefixes stream - add prime base: " + origBases);
 						pr.getPrimeBaseData().addPrimeBases(Lists.mutable.of(origBases), BaseTypes.PREFIX);
 					}
 				});

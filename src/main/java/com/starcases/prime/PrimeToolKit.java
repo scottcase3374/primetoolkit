@@ -80,7 +80,6 @@ public final class PrimeToolKit
 		final var exitCode = commandLine.execute(args);
 
 		System.exit(exitCode);
-		LOG.info("exited");
 	}
 
 	/**

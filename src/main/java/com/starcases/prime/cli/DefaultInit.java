@@ -292,22 +292,17 @@ public class DefaultInit implements Runnable
 	{
 		if (baseOpts.isEnableCmmandListener())
 		{
-			if (LOG.isLoggable(Level.INFO))
-			{
-				LOG.info("enter actionEnableCmdListener");
-				actions.add(s -> {
-					try
-					{
-						LOG.info("DefaultInit::actionEnableCmdListener - creating CmdServer; primeSrc:" + primeSrc.toString() + " port:" + 8690);
-						new CmdServer(primeSrc, 8690).run();
-					}
-					catch(final Exception e)
-					{
-						LOG.severe(e.toString());
-					}
-				});
-
-			}
+			actions.add(s -> {
+				try
+				{
+					LOG.info("DefaultInit::actionEnableCmdListener - SQL command listener port:" + 8690);
+					new CmdServer(primeSrc, 8690).run();
+				}
+				catch(final Exception e)
+				{
+					LOG.severe(e.toString());
+				}
+			});
 		}
 	}
 
@@ -317,9 +312,9 @@ public class DefaultInit implements Runnable
 		actions.add(s -> {
 			final FactoryIntfc factory = PTKFactory.getFactory();
 			primeSrc = factory.getPrimeSource();
-			if (LOG.isLoggable(Level.INFO))
+			if (LOG.isLoggable(Level.FINE))
 			{
-				LOG.info("DefaultInit::actionInitDefaultPrimeContent - primeSource init");
+				LOG.fine("DefaultInit::actionInitDefaultPrimeContent - primeSource init");
 			}
 
 			if (outputOpts.getOutputOpers().contains(OutputOper.PROGRESS))
@@ -335,7 +330,7 @@ public class DefaultInit implements Runnable
 				final String inputFolderPath = initOpts.getInputDataFolder();
 				if (ensureFolderExist(inputFolderPath))
 				{
-					LOG.info("Load-primes option specified");
+					LOG.fine("Load-primes option specified");
 					final PrePrimed prePrimed = new PrePrimed(Path.of(replaceTildeHome(inputFolderPath)));
 					prePrimed.load();
 					primeSrc.load(prePrimed, initOpts.getLoadPrimes());
@@ -343,7 +338,7 @@ public class DefaultInit implements Runnable
 			}
 			else
 			{
-				LOG.info("No load-primes option specified (--load-primes");
+				LOG.fine("No load-primes option specified (--load-primes");
 			}
 			primeSrc.init();
 
@@ -388,9 +383,9 @@ public class DefaultInit implements Runnable
 
 					default:
 						baseSupplier = null;
-						if(LOG.isLoggable(Level.INFO))
+						if(LOG.isLoggable(Level.FINE))
 						{
-							LOG.info(String.format("%s%s",method, baseOpts.getBases()));
+							LOG.fine(String.format("%s%s",method, baseOpts.getBases()));
 						}
 						break;
 				}

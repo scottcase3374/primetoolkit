@@ -136,9 +136,9 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 	@Override
 	protected void genBasesImpl()
 	{
-		if (LOG.isLoggable(Level.INFO))
+		if (LOG.isLoggable(Level.FINE))
 		{
-			LOG.info(String.format("genBases(): maxReduce[%d] parallel=%b", maxReduce, this.preferParallel));
+			LOG.fine(String.format("genBases(): maxReduce[%d] parallel=%b", maxReduce, this.preferParallel));
 		}
 
 		MetricMonitor.addTimer(BaseTypes.NPRIME,"Gen NPrime");
