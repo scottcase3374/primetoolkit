@@ -29,6 +29,13 @@ import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_LENGTH;
 import static io.netty.handler.codec.http.HttpHeaderValues.CLOSE;
 import static io.netty.handler.codec.http.HttpHeaderValues.KEEP_ALIVE;
 
+/**
+ * Handles processing the raw networking aspects and HTTP protocol. This also
+ * takes the network message and provides it so the SQL parser / visitor
+ * implementation which processes the message and provides the repsponse data.
+ * @author scott
+ *
+ */
 public class PrimeSQLChannelHandler extends SimpleChannelInboundHandler<Object>
 {
 	private final PrimeSourceIntfc primeSrc;
@@ -56,8 +63,6 @@ public class PrimeSQLChannelHandler extends SimpleChannelInboundHandler<Object>
 	@Override
 	protected void channelRead0(final ChannelHandlerContext ctx, final Object msg) throws Exception
 	{
-		System.out.println("channelRead0 - enter");
-
 		if (msg instanceof HttpRequest httpReq)
 		{
 			this.httpRequest = httpReq;
@@ -67,14 +72,11 @@ public class PrimeSQLChannelHandler extends SimpleChannelInboundHandler<Object>
 			final var content = httpContent.content().readCharSequence(httpContent.content().readableBytes(), Charset.defaultCharset());
 			final StringBuilder respBuf = new StringBuilder(processRequest(String.valueOf(content)).getResult());
 
-			System.out.println("channelRead0 - request: [" + content +"] response: [" + respBuf + "]");
 			if (!writeResponse(ctx, httpRequest, respBuf))
 			{
 				ctx.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
 			}
 		}
-
-		System.out.println("channelRead0 - exit");
 	}
 
 	private boolean writeResponse(final ChannelHandlerContext ctx, final HttpRequest req, final CharSequence respBuf)
@@ -87,16 +89,13 @@ public class PrimeSQLChannelHandler extends SimpleChannelInboundHandler<Object>
 
 		if (keepAlive)
 		{
-			System.out.println("channelRead0 - keepalive - set content/keep-alive");
 			response.headers().set(CONTENT_LENGTH, response.content().readableBytes());
 			response.headers().set(CONNECTION, KEEP_ALIVE);
 		}
 		else
 		{
-			System.out.println("channelRead0 - no keepalive so close");
 			response.headers().set(CONNECTION, CLOSE);
 		}
-		System.out.println("channelRead0 - write response");
 		ctx.writeAndFlush(response);
 
 		return keepAlive;
@@ -104,15 +103,12 @@ public class PrimeSQLChannelHandler extends SimpleChannelInboundHandler<Object>
 
 	private PrimeSqlResult processRequest(final String request)
 	{
-		System.out.println("processRequest - enter");
 		final PrimeSqlLexer psl = new PrimeSqlLexer(CharStreams.fromString(request));
 		final CommonTokenStream tokenStream = new CommonTokenStream(psl);
 		final PrimeSqlParser psp = new PrimeSqlParser(tokenStream);
 
 		final ParseTree parseTree = psp.root();
 		final PrimeSqlVisitor visitor = new PrimeSqlVisitor(primeSrc);
-
-		System.out.println("processRequest - visit");
 
 		return visitor.visit(parseTree);
 	}

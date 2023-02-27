@@ -10,8 +10,9 @@ LT		: '<' ;
 GT		: '>' ;
 SEMI	: ';' ;
 
-SELECT 	: 'select' ;
-WHERE	: 'where' ;
+SELECT 	: [sS][eE][lL][eE][cC][tT] ;
+WHERE	: [wW][hH][eE][rR][eE] ;
+INDEX	: [iI][nN][dD][eE][xX] ;
 
 ID		: [a-zA-Z]+[a-zA-Z0-9]* ;
 WS 		: [ \t\r\n]+ -> skip ;
@@ -29,18 +30,21 @@ stmt :
 	;
 
 select :
-	SELECT sel_ret sel_where
+	SELECT sel_where_index
 	;
 
-sel_ret :
-	ID
-	;
-
-sel_where :
-	WHERE expr
+sel_where_index :
+	WHERE INDEX expr
 	;
 
 expr :
-		GT INT	# GreaterThan
-	| 	LT INT	# LessThan
+	lobound? hibound?
 	;
+
+lobound :
+	GT INT	# GreaterThan // Index INT starts at 0
+	;
+hibound :
+	LT INT	# LessThan // Index INT starts at 0
+	;
+
