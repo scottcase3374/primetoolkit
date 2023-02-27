@@ -16,7 +16,13 @@ import lombok.AccessLevel;
 import lombok.Getter;
 
 /**
- * Class for handling metric data gathered by various processes
+ * Class for handling metric data gathered by various processes.
+ *
+ * TODO Some revamp needed. Use logger instead of console. Remove
+ * "one time" metrics after produced (i.e. once a base generation is complete
+ * then remove metric so it doesn't keep repeating needlessly).
+ * Another possible option is to simple perform the reporter.start()
+ * when all the processing is complete and the app is preparing to end.
  */
 public final class MetricMonitor
 {

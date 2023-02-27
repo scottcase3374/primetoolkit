@@ -318,7 +318,7 @@ information and then new base generation, logging and graphing actions are added
 
 ## ToDo
 	- Increase test coverage.
-	- Additional metrics.
+	- Improve metrics.
 	- Improved cache support.
 	- More generic / useful methods for identifying patterns in the bases/data.
 	- Enable more metric reporting options (like Graphite).

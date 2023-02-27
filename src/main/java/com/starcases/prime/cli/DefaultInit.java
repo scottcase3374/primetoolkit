@@ -485,6 +485,7 @@ public class DefaultInit implements Runnable
 					break;
 
 
+				// TODO Some revamp needed - use logger instead of console.
 				case "PROGRESS",
 					 "CREATE",
 					 "PRIMETREE_METRICS":
