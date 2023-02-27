@@ -51,7 +51,7 @@ Here are some of the tools used.
 
 ## Misc items
 - Manual check of some libraries against online Veracode vulnerability data.
-	- https://sca.analysiscenter.veracode.com/vulnerability-database/search#query=language:java
+	- https://sca.analysiscenter.veracode.com/vulnerability-database/search
 		- Lombok ; clean
 		- Infinispan ; potential security issues depending on use.
 		- Eclipse Collections ; clean
@@ -86,7 +86,7 @@ The codebase uses Java 18.
 
 - init --max-count=100 --load-primes  DEFAULT
 	- Loads primes from files / zip-files
-		- NOTE: requires providing a path to the folder containing the files.
+		- NOTE\: requires providing a path to the folder containing the files.
 		-  1. You can symlink from default input folder to the example files in this project which are in the 'data' folder.
 		-    mkdir \~/ptk/input-data;  ln -s \~/path-to-zip-file-folder/\* \~/ptk/input-data
 		-  2. you can provide the CLI argument for the desired input data path with something like the following.
@@ -120,7 +120,7 @@ The current code now completes in 28 sec 73 ms.
 
 ## Observations
 - My current prime/base selection method misses a few primes. The issue seems rooted in my data having a solution for the value after the currently desired item but not the current item. So when using prefixes, I can find the next prime but since the prefix which would produce the current prime hasn't been encountered yet it misses it and selects the next one which was found.  This seems like some sort of backtracking need. One thought involves looking at the order items within in a prefix and trying to determine if there is a relationship of some sort with the fact that certain sums of prefix values will be less than the previous prefix sum if using a straight sequential ordering of the items vs the resulting sum.  i.e. An algorithm may look at potential prefixes in an order such of {1}, {1,2}, {1,2,3}, {1,2,3,5}... {5} but because of that the {1,2,3} is encountered prior to prefixes with fewer members - resulting in missing a few values.  This is hard to describe in just a sentence or 2. Maybe breadth first data vs depth first data would be an adequate description for what seems like the need.
-- When logging 3 million node structs with other settings set to default - meaning you get a target prime # and a set of bases which includes the previous prime plus some subset of lower primes that sum to the target prime. The largest value in the subset of small primes in each base is usually less than 23 from a quick look at the data.  Example output: Prime 49979681 bases [[1,2,3,5,7,49979663]]  <dist[6], nextPrime[49979687]> idx[2999999]
+- When logging 3 million node structs with other settings set to default - meaning you get a target prime # and a set of bases which includes the previous prime plus some subset of lower primes that sum to the target prime. The largest value in the subset of small primes in each base is usually less than 23 from a quick look at the data.  Example output, Prime 49979681 bases [[1,2,3,5,7,49979663]]  <dist[6], nextPrime[49979687]> idx[2999999]
 - When working with logging triples, the number of triples that all sum to the target prime starts to exceed the target prime # itself at around the 137th prime.  Partial output:
 
 Prime [773] idx[137] #-bases[796]
