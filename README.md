@@ -42,12 +42,17 @@ Here are some of the tools used.
 5. Java Lambda and Stream usage
 
 ## Examples of Design Patterns used
-- Singleton 		- example: enum BaseTypes
-- Interpreter		- Antlr generated code plus PrimeSqlVisitor / PrimeSQLChannelHander classes
-- Iterator 			- PrimeTreeIterator / PrimeTreeIteratorIntfc classes
-- Strategy 			- "Base" handling classes; BaseReduceNPrime, PrimeTree, BaseReduceTriple, BasePrefixes
-- Template Method	- AbstractPrimeBaseGenerator.genBases()
-- Command			- DefaultInit.action*() methods
+- Gang of Four (GOF)
+	- Singleton 		- enum BaseTypes
+	- Interpreter		- Antlr generated code plus PrimeSqlVisitor / PrimeSQLChannelHander classes
+	- Iterator 			- PrimeTreeIterator / PrimeTreeIteratorIntfc classes
+	- Strategy 			- "Base" handling classes; BaseReduceNPrime, PrimeTree, BaseReduceTriple, BasePrefixes
+	- Template Method	- AbstractPrimeBaseGenerator.genBases()
+	- Command			- DefaultInit.action*() methods
+- Martin Fowler
+	- Identity Map - Fundamentally implemented by PrimeSource using members; primeToIdxMap and
+	idxToPrimeMap
+	-	Separated Interfaces - package com.starcases.prime.intfc vs com.starcases.prime.impl
 
 ## Misc items
 - Manual check of some libraries against online Veracode vulnerability data.
