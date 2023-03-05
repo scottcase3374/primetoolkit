@@ -1,14 +1,16 @@
 package com.starcases.prime.base.triples;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 import jakarta.validation.constraints.Min;
 
-import com.codahale.metrics.Timer;
 import com.starcases.prime.base.AbstractPrimeBaseGenerator;
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import com.starcases.prime.metrics.MetricMonitor;
+
+import io.micrometer.core.instrument.LongTaskTimer;
 import lombok.NonNull;
 
 /*
@@ -93,11 +95,14 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 			LOG.entering("BaseReduce3Triple", "genBases()");
 			LOG.info("BaseReduce3Triple genBases()");
 		}
-		MetricMonitor.addTimer(BaseTypes.THREETRIPLE,"Gen 3Triple");
-
-		try (Timer.Context context = MetricMonitor.time(BaseTypes.THREETRIPLE).orElse(null))
+		final Optional<LongTaskTimer.Sample> timer = MetricMonitor.longTimer(BaseTypes.THREETRIPLE);
+		try
 		{
 			new AllTriples(primeSrc, this.preferParallel).process();
+		}
+		finally
+		{
+			timer.ifPresent(t -> t.stop());
 		}
 	}
 }

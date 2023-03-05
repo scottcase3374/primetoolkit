@@ -1,5 +1,6 @@
 package com.starcases.prime.base.nprime;
 
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,13 +16,13 @@ import org.eclipse.collections.impl.bag.immutable.primitive.ImmutableLongBagFact
 import org.eclipse.collections.impl.bag.mutable.primitive.MutableLongBagFactoryImpl;
 import org.eclipse.collections.impl.list.mutable.MutableListFactoryImpl;
 
-import com.codahale.metrics.Timer;
 import com.starcases.prime.base.AbstractPrimeBaseGenerator;
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.intfc.PrimeRefIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import com.starcases.prime.metrics.MetricMonitor;
 
+import io.micrometer.core.instrument.LongTaskTimer;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
@@ -141,13 +142,12 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 			LOG.fine(String.format("genBases(): maxReduce[%d] parallel=%b", maxReduce, this.preferParallel));
 		}
 
-		MetricMonitor.addTimer(BaseTypes.NPRIME,"Gen NPrime");
-
 		primeSrc.getPrimeRefStream(this.preferParallel)
 			.filter(pr -> isNonNullEmpty(pr.getPrimeBaseData().getPrimeBases()))
 			.forEach( curPrime ->
 				{
-					try (Timer.Context context = MetricMonitor.time(BaseTypes.NPRIME).orElse(null))
+					final Optional<LongTaskTimer.Sample> timer = MetricMonitor.longTimer(BaseTypes.NPRIME);
+					try
 					{
 						final MutableLongBag retBases = MutableLongBagFactoryImpl.INSTANCE.empty();
 						primeReduction(curPrime, retBases);
@@ -157,6 +157,10 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 						curPrime
 							.getPrimeBaseData()
 							.addPrimeBases(BaseTypes.NPRIME, lst, npbmd);
+					}
+					finally
+					{
+						timer.ifPresent(t -> t.stop());
 					}
 				});
 	}

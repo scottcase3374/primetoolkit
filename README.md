@@ -3,26 +3,47 @@
 ## Personal Project involving prime numbers
 
 ## Preface
-This is a pet project of mine. I have interests in some math related areas and this is the type of personal project I like to work on. This also serves as both a skills demonstration and a platform for trying out new technologies.
+This is a pet project. It is an example of my IT skills applied to an area of math
+in which I am interested. It serves as both a skills demonstration and a platform for trying out new technologies.
+
+## Description
+Primes can have bases generated via different methodologies, etc - such as where Prime N is the sum of Prime N-1 + some small set of primes in the range Prime 1 to N-2. So a base can be a set of primes summed. Primes can also be represented as 2 parts where one part is Prime[n-1] and the other part is a reference to collection of primes (aka a prefix or tree of primes) and both parts are summed.
+
+## Goals
+- Experimentation with various graph libraries for data visualization
+- Experiment with Picocli command line interface library
+- Experiment with Eclipse collections
+- Experiment with Java features in versions > Java 11
+- Research properties of prime numbers
+- Research data structures for use as primes numbers become very large
+	- Track bases of primes (sums of primes that add to current prime)
+	- Track and use shared lists or other structures of subsets of bases
+
+## Other info
+Given a reasonably powerful desktop computer with 64Gb of memory; Some of the above goals can be done with several million primes and the related data *in memory*. A question is - can a dynamic mix of data representations allow processing significantly more data in memory efficiently? In the process of determining that, some interesting properties of primes may also be found.  Minimum goal would be 15 million primes + associated data with a stretch goal of probably 50-70 million.
+
+Current processing on my i7 with 64Gb RAM reaches about 3-5 million (cmd line args of:  init --max-count=3000000 --log=NODESTRUCT) before system speed / stability / etc start to suffer. Graph visualizations slow once you get into the low thousands. Exporting and using other external tools (GML format) performed better for visualizations.
 
 ## Technology Summary
-Here are some highlights regarding technology tried/used.
-1. Java 18
-2. Picocli - command line handling
-3. JBoss Infinispan - caching
-4. Protobuf - related to caching
-5. Eclipse Collections - alternative for standard java for lower memory usage, etc.
-6. Antlr4 - parsing and processing a very simple "SQL like" language for primes.
-7. Netty - provide remote access to the PrimeSQL processing (via telnet as first POC)
-8. DropWizard - metrics info
-9. Jakarta Validation - as replacement for javax validation.
-10. JGrapht / JGraphx - some graphing POC
-11. JUnit Jupiter - as replacement for JUnit4
-12. JBoss Weld - some POC work for dependency injection with plain Java apps.
-13. Lombok - code generation / simplification
-14. Maven
+Some of the technology tried/used.
+- Java 18
+- Picocli - command line handling
+- JBoss Infinispan - caching
+- Protobuf - related to caching
+- Gson - PrimeSQL language results output as json
+- Eclipse Collections - alternative for standard java for lower memory usage, etc.
+- Antlr4 - parsing and processing a very simple "SQL like" language for primes that
+I created..
+- Netty - provide remote access to the PrimeSQL processing (via telnet as first POC)
+- Micrometer & DropWizard - metrics info - converting from DropWizard to Micrometer
+- Jakarta Validation - as replacement for javax validation.
+- JGrapht / JGraphx - some graphing POC
+- JUnit Jupiter - as replacement for JUnit4
+- JBoss Weld - some POC work for dependency injection with plain Java apps.
+- Lombok - code generation / simplification
+- Maven
 
-Here are some of the tools used.
+Some of the tools used.
 1. Eclipse plugins
 	- git
 	- pmd
@@ -35,14 +56,17 @@ Here are some of the tools used.
 	- Antlr
 
 ## Skills demonstrated
-1. Complex data structure design
-2. Lexical analysis / parsing
-3. Network application aspects
-4. Object Oriented design
-5. Java Lambda and Stream usage
+- Complex data structure design
+- Lexical analysis / parsing
+- Network application aspects
+- Object Oriented design
+- Java Lambda and Stream usage
+- Functional Programming aspects (i.e. Lambdas)
+- Streams
+- Use of JSON
 
 ## Examples of Design Patterns used
-- Gang of Four (GOF)
+- Gang of Four (GoF)
 	- Singleton 		- enum BaseTypes
 	- Interpreter		- Antlr generated code plus PrimeSqlVisitor / PrimeSQLChannelHander classes
 	- Iterator 			- PrimeTreeIterator / PrimeTreeIteratorIntfc classes
@@ -61,21 +85,6 @@ Here are some of the tools used.
 		- Infinispan ; potential security issues depending on use.
 		- Eclipse Collections ; clean
 		- Picocli ; clean
-
-## Goals
-- Experimentation with various graph libraries for data visualization
-- Experiment with Picocli command line interface library
-- Experiment with Eclipse collections
-- Experiment with Java features in versions > Java 11
-- Research properties of prime numbers
-- Research data structures for use as primes numbers become very large
-	- Track bases of primes (sums of primes that add to current prime)
-	- Track and use shared lists or other structures of subsets of bases
-
-## Reasons
-Given a reasonably powerful desktop computer with 64Gb of memory; Some of the above goals can be done with several million primes and the related data *in memory*. A question is - can a dynamic mix of data representations allow processing significantly more data in memory efficiently? In the process of determining that, some interesting properties of primes may also be found.  Minimum goal would be 15 million primes + associated data with a stretch goal of probably 50-70 million.
-
-Current processing on my i7 with 64Gb RAM reaches about 3-5 million (cmd line args of:  init --max-count=3000000 --log=NODESTRUCT) before system speed / stability / etc start to suffer. Graph visualizations slow once you get into the low thousands. Exporting and using other external tools (GML format) performed better for visualizations.
 
 ## Build requirements
 The codebase uses Java 18.
@@ -103,8 +112,11 @@ The codebase uses Java 18.
 
 - init --max-count=100 --base=NPRIME --output=BASES   --use-base-file   --prefer-parallel=true
 
-Adding option:
-
+- init --max-count=75 --base=THREETRIPLE --output=BASES  --use-base-file --enable-cmd-listener
+  	- Enables using Postman or similar to pass SQL-like commands for prime data manipulation.
+  	- Example of command is "select where index >=5 < 25 base THREETRIPLE contains [ 11, 13] ;"
+  		- This queries for primes great/equal than at index 5 and less than prime at index
+  		  25 and where one or more of the base triples contains both 11 and 13.
 You may need the following Java VM arguments depending on JDK version and setup/defaults for some variations/branches of the code;
 - --add-exports java.base/java.lang=ALL-UNNAMED
 - --add-exports java.desktop/sun.awt=ALL-UNNAMED
@@ -300,12 +312,7 @@ Prime [1583] idx[250]
 which is interpreted as: Prime value 1583 is represented by: 1 x 155 + 2 x 318 + 3 x 264
 
 ## Design
-The current design is extensible to a degree. Primes can have bases generated via different methodologies, etc - such as where Prime N is the sum of Prime N-1 + some small set of primes in the range Prime 1 to N-2. So a base can be a set of primes summed. Primes can also be represented as 2 parts where one part is Prime[n-1] and the other part is a reference to collection of primes (aka a prefix or tree of primes) and both parts are summed.
-
-Currently, I'm mostly using the 2-part representation now and maintaining unique sets/trees of primes.
-
-As the initial design used sequential processes; when I started to add in support for more parallel/concurrent processing I should have immediately reviewed my data structures to identify any potential issues. I ended up using Eclipse collections which were not always faster data structures but they did reduce memory consumption which allowed scaling to larger sets of primes. I also used the concurrent versions as needed to prevent race conditions.
-
+The current design is extensible to a degree but is monolithic in nature.
 
 ## Implementation
 - Command line parsing is handled using the picocli library and the resulting options processed; resulting in
@@ -313,7 +320,18 @@ adding a Consumer<> instance to a list of actions for each pertinent action.  On
 are processed, each of the Consumer<> objects is evaluated.  The first actions generate the default prime
 information and then new base generation, logging and graphing actions are added as needed.
 
-## Challenges
+## Limitations / issues
+There are some limitations in with the current design.
+- The cache isn't leveraged very well. It was only used to validate that no gaps in
+primes existed.
+- Running the application implies regenerating all the primes each time.
+- The current data structures are fairly memory efficient but still drastically limit the
+maximum number of primes that can be manipulated. The total number of primes managed
+is related to the amount of system memory on a single computer.
+- The processing is limited to a single computer (but can leverage multiple cores for
+some processing).
+
+Issues
 - The internal algorithm for generating the "next prime" has a flaw where a prime is skipped once in a while. This is part of the reason that caching plus loading of 50 million known primes is implemented - which allows comparison with known primes to enable identification of missed primes. Of course, this only works when you are working within the limits of the known primes that are loaded.
 
 ## ToDo
@@ -321,6 +339,7 @@ information and then new base generation, logging and graphing actions are added
 	- Improve metrics.
 	- Improved cache support.
 	- More generic / useful methods for identifying patterns in the bases/data.
-	- Enable more metric reporting options (like Graphite).
 	- More remote command support.
 	- Improved reporting / visualization.
+	- Break up the monolith and use a more event oriented design.
+		- Use Zeromq (Java implementation) to enable higher scaling.

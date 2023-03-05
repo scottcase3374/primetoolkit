@@ -51,6 +51,16 @@ class BaseOpts
 	private boolean enableCmmandListener;
 
 	/**
+	 * flag for setting port of command listener (which processes SQL-like commands, etc).
+	 */
+	@Getter
+	@Setter
+	@Option(names = {"--cmd-listener-port"}, description = "Port for the command (SQL) listener", defaultValue = "8690", required = false )
+	private int cmdListenerPort;
+
+
+
+	/**
 	 * Get bases to process
 	 * @return
 	 */

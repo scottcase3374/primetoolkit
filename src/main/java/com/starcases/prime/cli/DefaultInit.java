@@ -9,6 +9,7 @@ import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -35,6 +36,7 @@ import com.starcases.prime.base.primetree.LogPrimeTree;
 import com.starcases.prime.base.primetree.PrimeTree;
 import com.starcases.prime.base.triples.BaseReduceTriple;
 import com.starcases.prime.base.triples.LogBases3AllTriples;
+import com.starcases.prime.cli.MetricsOpts.MetricOpt;
 import com.starcases.prime.graph.export.ExportGML;
 import com.starcases.prime.graph.log.LogGraphStructure;
 import com.starcases.prime.graph.visualize.MetaDataTable;
@@ -120,6 +122,15 @@ public class DefaultInit implements Runnable
 	private GraphOpts graphOpts;
 
 	/**
+	 * flags indicating metrics to manage
+	 */
+	@Getter
+	@Setter
+	@ArgGroup(exclusive = false, validate = false)
+	private MetricsOpts metricOpts;
+
+
+	/**
 	 * flags indicating to export GML
 	 */
 	@Getter
@@ -148,8 +159,6 @@ public class DefaultInit implements Runnable
 
 		setFactoryDefaults();
 
-		actionInitMetrics();
-
 		actionInitDefaultPrimeContent();
 
 		actionHandleAdditionalBases();
@@ -161,6 +170,8 @@ public class DefaultInit implements Runnable
 		actionHandleExports();
 
 		actionEnableCmdListener();
+
+		actionEnableMetrics();
 
 		executeActions();
 	}
@@ -288,6 +299,17 @@ public class DefaultInit implements Runnable
 		}
 	}
 
+	private final static MetricOpt [] NULL_OPTS = new MetricOpt[0];
+
+	private void actionEnableMetrics()
+	{
+
+		if (Arrays.asList((metricOpts != null) ? metricOpts.getMetricType() : NULL_OPTS).contains(MetricOpt.ALL))
+		{
+			actions.add(s -> MetricMonitor.enableAll(true) );
+		}
+	}
+
 	private void actionEnableCmdListener()
 	{
 		if (baseOpts.isEnableCmmandListener())
@@ -295,8 +317,8 @@ public class DefaultInit implements Runnable
 			actions.add(s -> {
 				try
 				{
-					LOG.info("DefaultInit::actionEnableCmdListener - SQL command listener port:" + 8690);
-					new CmdServer(primeSrc, 8690).run();
+					LOG.info("DefaultInit::actionEnableCmdListener - SQL command listener port:" + baseOpts.getCmdListenerPort());
+					new CmdServer(primeSrc, baseOpts.getCmdListenerPort()).run();
 				}
 				catch(final Exception e)
 				{
@@ -349,11 +371,6 @@ public class DefaultInit implements Runnable
 		});
 	}
 
-	private void actionInitMetrics()
-	{
-		MetricMonitor.startReport();
-	}
-
 	private void actionHandleAdditionalBases()
 	{
 		if (baseOpts != null && baseOpts.getBases() != null)
@@ -389,33 +406,37 @@ public class DefaultInit implements Runnable
 						}
 						break;
 				}
-
-				if (null != baseSupplier)
-				{
-					actions.add(s ->
-									{
-										if (LOG.isLoggable(Level.INFO))
-										{
-											LOG.info(method + baseType.name());
-										}
-
-										if (baseOpts.isUseBaseFile())
-										{
-											PrimeToolKit.setOutput(baseType.name(), this.decorateFileName(baseType.name(), "base", "log"));
-										}
-										final var base = baseSupplier.get();
-										base.setTrackTime(trackGenTime);
-										base.doPreferParallel(initOpts.isPreferParallel());
-										base.setBaseGenerationOutput(outputOpts.getOutputOpers().contains(OutputOper.CREATE));
-
-										base.genBases();
-									});
-				}
+				addBaseSupplierAction(baseSupplier, trackGenTime, baseType);
 			}
 		);
 		}
 	}
 
+	private void addBaseSupplierAction(final Supplier<AbstractPrimeBaseGenerator> baseSupplier, final boolean trackGenTime, final BaseTypes baseType)
+	{
+		final var method = "DefaultInit::addBaseSupplierAction - base ";
+		if (null != baseSupplier)
+		{
+			actions.add(s ->
+				{
+					if (LOG.isLoggable(Level.INFO))
+					{
+						LOG.info(method + baseType.name());
+					}
+
+					if (baseOpts.isUseBaseFile())
+					{
+						PrimeToolKit.setOutput(baseType.name(), this.decorateFileName(baseType.name(), "base", "log"));
+					}
+					final var base = baseSupplier.get();
+					base.setTrackTime(trackGenTime);
+					base.doPreferParallel(initOpts.isPreferParallel());
+					base.setBaseGenerationOutput(outputOpts.getOutputOpers().contains(OutputOper.CREATE));
+
+					base.genBases();
+				});
+		}
+	}
 	private void actionHandleOutputs()
 	{
 		if (outputOpts != null && outputOpts.getOutputOpers() != null && !outputOpts.getOutputOpers().isEmpty())
@@ -483,7 +504,6 @@ public class DefaultInit implements Runnable
 				case "NODESTRUCT":
 					actions.add(s -> new LogNodeStructure(primeSrc).doPreferParallel(initOpts.isPreferParallel()).outputLogs() );
 					break;
-
 
 				// TODO Some revamp needed - use logger instead of console.
 				case "PROGRESS",

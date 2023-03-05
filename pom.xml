@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.starcases</groupId>
 		<artifactId>raw-java-base-pom</artifactId>
-		<version>1.0.5</version>
+		<version>1.0.6.1</version>
 	</parent>
 	<groupId>com.starcases.prime</groupId>
 	<artifactId>prime-tool-kit</artifactId>
@@ -89,12 +89,25 @@
 			<artifactId>jakarta.validation-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>io.dropwizard.metrics</groupId>
-			<artifactId>metrics-core</artifactId>
+		    <groupId>io.micrometer</groupId>
+		    <artifactId>micrometer-registry-atlas</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-graphite</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-all</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.zeromq</groupId>
+			<artifactId>jeromq</artifactId>
 		</dependency>
 	</dependencies>
 	<build>

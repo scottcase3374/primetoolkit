@@ -1,93 +1,142 @@
 package com.starcases.prime.metrics;
 
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-import com.codahale.metrics.ConsoleReporter;
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
 import com.starcases.prime.intfc.OutputableIntfc;
 
-import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
-
+import io.micrometer.core.instrument.Clock;
+import io.micrometer.core.instrument.LongTaskTimer;
+import io.micrometer.core.instrument.Timer;
+import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics;
+import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
+import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics;
+import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
+import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
+import io.micrometer.core.instrument.logging.LoggingMeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import io.micrometer.core.instrument.util.HierarchicalNameMapper;
+import io.micrometer.graphite.GraphiteConfig;
+import io.micrometer.graphite.GraphiteMeterRegistry;
 import lombok.AccessLevel;
 import lombok.Getter;
 
 /**
  * Class for handling metric data gathered by various processes.
  *
- * TODO Some revamp needed. Use logger instead of console. Remove
- * "one time" metrics after produced (i.e. once a base generation is complete
- * then remove metric so it doesn't keep repeating needlessly).
- * Another possible option is to simple perform the reporter.start()
- * when all the processing is complete and the app is preparing to end.
+ * TODO Still deciding on requirements for this.
+ *
  */
 public final class MetricMonitor
 {
 	private static final Logger LOG = Logger.getLogger(MetricMonitor.class.getName());
 
+
+	public static void enableGraphiteRegistry(boolean enable)
+	{
+		GraphiteConfig graphiteConfig = new GraphiteConfig()
+		{
+		    @Override
+		    public String host()
+		    {
+		        return "localhost";
+		    }
+
+		    @Override
+		    public String get(String k)
+		    {
+		        return null; // accept the rest of the defaults
+		    }
+
+		    public String [] tagsAsPrefix()
+		    {
+		    	return new String[] {"TASK" };
+		    }
+		};
+
+		metricsRegistry.add(new GraphiteMeterRegistry(graphiteConfig, Clock.SYSTEM, HierarchicalNameMapper.DEFAULT));
+	}
+
+	public static void enableSimpleRegistry(boolean enable)
+	{
+		metricsRegistry.add(new SimpleMeterRegistry());
+	}
+
+	public static void enableLoggerRegistry(boolean enable)
+	{
+		final var loggingRegistry = new LoggingMeterRegistry();
+		metricsRegistry.add(loggingRegistry);
+	}
+
+	public static void enableJvmMemoryMetric(boolean enable)
+	{
+		new JvmMemoryMetrics().bindTo(metricsRegistry);
+	}
+
+	public static void enableJvmGcMetric(boolean enable)
+	{
+		new JvmGcMetrics().bindTo(metricsRegistry);
+	}
+
+	public static void enableJvmThreadMetric(boolean enable)
+	{
+		new JvmThreadMetrics().bindTo(metricsRegistry);
+	}
+
+	public static void enableProcessorMetric(boolean enable)
+	{
+		new ProcessorMetrics().bindTo(metricsRegistry);
+	}
+
+	public static void enableAll(boolean enable)
+	{
+		enableSimpleRegistry(enable);
+		enableLoggerRegistry(enable);
+		enableGraphiteRegistry(enable);
+
+		enableJvmMemoryMetric(enable);
+		enableJvmGcMetric(enable);
+		enableJvmThreadMetric(enable);
+		enableProcessorMetric(enable);
+	}
+
 	/**
 	 *  Metrics data registry (drop wizard)
 	 */
 	@Getter(AccessLevel.PRIVATE)
-	private static final MetricRegistry metrics = new MetricRegistry();
+	private static final CompositeMeterRegistry metricsRegistry;
 
-	/**
-	 * map from some framework identity type to a timer.
-	 */
-	@Getter(AccessLevel.PRIVATE)
-	private static final Map<OutputableIntfc, Timer> timers = new ConcurrentHashMap<>();
+	static
+	{
+		metricsRegistry = new CompositeMeterRegistry();
+	}
 
 	/**
 	 * Empty constructor
 	 */
 	private MetricMonitor()
 	{
-		// nothing else to do
+		// Nothing to do; uses static interfaces
 	}
 
 	/**
-	 * Create a mapping for a timer.
-	 *
-	 * @param outputable
-	 * @param desc
-	 */
-	public static void addTimer(final OutputableIntfc outputable, final String desc)
-	{
-		timers.put(outputable, metrics.timer(desc));
-	}
-
-	/**
-	 * Perform a timing using a specify timer.  Use try-with-resources.
+	 * Perform a timing using a specific timer.  Use try-with-resources.
 	 *
 	 * @param outputable
 	 * @return
 	 */
-	public static Optional<Timer.Context> time(final OutputableIntfc outputable)
+	public static Optional<Timer> timer(final OutputableIntfc outputable, final String...tags)
 	{
-		return Optional.ofNullable(timers.get(outputable).time());
+		return Optional.ofNullable(metricsRegistry.timer(outputable.toString(), tags));
 	}
 
 	/**
-	 * Start output
+	 * Perform a timing using a specific long timer.
+	 * @param outputable
+	 * @return
 	 */
-	public static void startReport()
+	public static Optional<LongTaskTimer.Sample> longTimer(final OutputableIntfc outputable, final String...tags)
 	{
-		LOG.info("Metrics Enabled");
-//		final Slf4jReporter reporter = Slf4jReporter.forRegistry(metrics)
-//                .outputTo(LoggerFactory.getLogger("com.starcases.prime.metrics"))
-//                .convertRatesTo(TimeUnit.SECONDS)
-//                .convertDurationsTo(TimeUnit.MILLISECONDS)
-//                .build();
-
-		final ConsoleReporter reporter = ConsoleReporter.forRegistry(metrics)
-		          .convertRatesTo(TimeUnit.SECONDS)
-		          .convertDurationsTo(TimeUnit.MILLISECONDS)
-		          .build();
-
-		reporter.start(15, TimeUnit.SECONDS);
+		return Optional.ofNullable(LongTaskTimer.builder(outputable.toString()).register(metricsRegistry).start());
 	}
-
 }

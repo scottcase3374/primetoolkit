@@ -13,7 +13,6 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.codahale.metrics.Timer;
 import com.starcases.prime.base.AbstractPrimeBaseGenerator;
 import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.base.primetree.PrimeTree;
@@ -24,6 +23,8 @@ import com.starcases.prime.intfc.PrimeSourceIntfc;
 import com.starcases.prime.metrics.MetricMonitor;
 import com.starcases.prime.preload.PrePrimed;
 
+import io.micrometer.core.instrument.LongTaskTimer;
+import io.micrometer.core.instrument.LongTaskTimer.Sample;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
@@ -269,12 +270,11 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 
 		primeTree = new PrimeTree(this, collTrack);
 
-		MetricMonitor.addTimer(OutputOper.CREATE,"Gen Bases");
-
 		long nextPrimeTmpIdx;
 		do
 		{
-			try (Timer.Context context = MetricMonitor.time(OutputOper.CREATE).orElse(null))
+			final Optional<LongTaskTimer.Sample> timer = MetricMonitor.longTimer(OutputOper.CREATE);
+			try
 			{
 				final int nextPrimeIdx = (int) nextIdx.incrementAndGet();
 				final var lastPrimeIdx = nextPrimeIdx -1;
@@ -292,6 +292,10 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 				}
 
 				nextPrimeTmpIdx = nextPrimeIdx;
+			}
+			finally
+			{
+				timer.ifPresent(Sample::stop);
 			}
 		}
 		while (nextPrimeTmpIdx < targetPrimeCount);

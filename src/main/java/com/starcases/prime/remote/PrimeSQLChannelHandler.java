@@ -4,7 +4,6 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
-import com.codahale.metrics.Timer;
 import com.starcases.prime.antlr.PrimeSqlResult;
 import com.starcases.prime.antlr.PrimeSqlVisitor;
 import com.starcases.prime.antlrimpl.PrimeSqlLexer;
@@ -13,6 +12,7 @@ import com.starcases.prime.intfc.OutputableIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import com.starcases.prime.metrics.MetricMonitor;
 
+import io.micrometer.core.instrument.LongTaskTimer;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -25,6 +25,7 @@ import io.netty.handler.codec.http.HttpUtil;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 
 import java.nio.charset.Charset;
+import java.util.Optional;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static io.netty.handler.codec.http.HttpHeaderNames.CONNECTION;
@@ -114,9 +115,10 @@ public class PrimeSQLChannelHandler extends SimpleChannelInboundHandler<Object>
 
 	private PrimeSqlResult processRequest(final String request)
 	{
-		MetricMonitor.addTimer(MetricType.SQLCOMMAND, request);
 
-		try (Timer.Context context = MetricMonitor.time(MetricType.SQLCOMMAND).orElse(null))
+		final Optional<LongTaskTimer.Sample> timer = MetricMonitor.longTimer(MetricType.SQLCOMMAND);
+
+		try
 		{
 			final PrimeSqlLexer psl = new PrimeSqlLexer(CharStreams.fromString(request));
 			final CommonTokenStream tokenStream = new CommonTokenStream(psl);
@@ -126,6 +128,9 @@ public class PrimeSQLChannelHandler extends SimpleChannelInboundHandler<Object>
 			final PrimeSqlVisitor visitor = new PrimeSqlVisitor(primeSrc);
 			return visitor.visit(parseTree);
 		}
-
+		finally
+		{
+			timer.ifPresent(t -> t.stop());
+		}
 	}
 }

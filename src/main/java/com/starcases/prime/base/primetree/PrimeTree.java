@@ -10,7 +10,6 @@ import org.eclipse.collections.api.map.primitive.MutableLongObjectMap;
 import org.eclipse.collections.impl.list.mutable.MutableListFactoryImpl;
 import org.eclipse.collections.impl.map.mutable.primitive.MutableLongObjectMapFactoryImpl;
 
-import com.codahale.metrics.Timer;
 import com.starcases.prime.PrimeToolKit;
 import com.starcases.prime.base.AbstractPrimeBaseGenerator;
 import com.starcases.prime.base.BaseTypes;
@@ -19,6 +18,8 @@ import com.starcases.prime.intfc.CollectionTrackerIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import com.starcases.prime.metrics.MetricMonitor;
 
+import io.micrometer.core.instrument.LongTaskTimer;
+import io.micrometer.core.instrument.LongTaskTimer.Sample;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
@@ -99,7 +100,8 @@ public class PrimeTree extends AbstractPrimeBaseGenerator
 			LOG.info("PrimeTree genBases()");
 		}
 
-		MetricMonitor.addTimer(BaseTypes.PRIME_TREE,"Gen PrimeTree");
+		final Optional<LongTaskTimer.Sample> timer = MetricMonitor.longTimer(BaseTypes.PRIME_TREE);
+
 		primeSrc
 			.getPrimeRefStream(2L, this.preferParallel)
 			.forEach(
@@ -110,25 +112,23 @@ public class PrimeTree extends AbstractPrimeBaseGenerator
 						LOG.fine("genBases() - prime " + curPrime.getPrime());
 					}
 
-					try (Timer.Context context = MetricMonitor.time(BaseTypes.PRIME_TREE).orElse(null))
-					{
-						final var origBaseBases = curPrime.getPrimeBaseData().getPrimeBases().get(0);
-						final ImmutableLongList curPrimePrefixBases = origBaseBases.toList().toImmutable();
+					final var origBaseBases = curPrime.getPrimeBaseData().getPrimeBases().get(0);
+					final ImmutableLongList curPrimePrefixBases = origBaseBases.toList().toImmutable();
 
-						final var curPrefixIt = this.iterator();
-						curPrimePrefixBases.forEach(basePrime ->
+					final var curPrefixIt = this.iterator();
+					curPrimePrefixBases.forEach(basePrime ->
+						{
+							final var prime = basePrime;
+							if (this.isBaseGenerationOutput() && LOG.isLoggable(Level.INFO))
 							{
-								final var prime = basePrime;
-								if (this.isBaseGenerationOutput() && LOG.isLoggable(Level.INFO))
-								{
-									LOG.fine(String.format("handling prime[%d] base-index [%d] base-prime [%d]", curPrime.getPrime(), basePrime, prime));
-								}
+								LOG.fine(String.format("handling prime[%d] base-index [%d] base-prime [%d]", curPrime.getPrime(), basePrime, prime));
+							}
 
-								curPrefixIt.add(prime);
-							});
+							curPrefixIt.add(prime);
+						});
 
-						curPrime.getPrimeBaseData().addPrimeBases(MutableListFactoryImpl.INSTANCE.of(curPrefixIt.toCollection()), BaseTypes.PRIME_TREE);
-					}
+					curPrime.getPrimeBaseData().addPrimeBases(MutableListFactoryImpl.INSTANCE.of(curPrefixIt.toCollection()), BaseTypes.PRIME_TREE);
 				});
+		timer.ifPresent(Sample::stop);
 	}
 }
