@@ -23,6 +23,7 @@ import com.starcases.prime.intfc.PrimeSourceIntfc;
 import com.starcases.prime.metrics.MetricMonitor;
 
 import io.micrometer.core.instrument.LongTaskTimer;
+import io.micrometer.core.instrument.LongTaskTimer.Sample;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
@@ -160,7 +161,7 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 					}
 					finally
 					{
-						timer.ifPresent(t -> t.stop());
+						timer.ifPresent(Sample::stop);
 					}
 				});
 	}

@@ -67,12 +67,18 @@ Some of the tools used.
 
 ## Examples of Design Patterns used
 - Gang of Four (GoF)
-	- Singleton 		- enum BaseTypes
-	- Interpreter		- Antlr generated code plus PrimeSqlVisitor / PrimeSQLChannelHander classes
-	- Iterator 			- PrimeTreeIterator / PrimeTreeIteratorIntfc classes
-	- Strategy 			- "Base" handling classes; BaseReduceNPrime, PrimeTree, BaseReduceTriple, BasePrefixes
-	- Template Method	- AbstractPrimeBaseGenerator.genBases()
-	- Command			- DefaultInit.action*() methods
+	- Singleton
+		- enum BaseTypes
+	- Interpreter
+		- Antlr generated code plus PrimeSqlVisitor / PrimeSQLChannelHander classes
+	- Iterator
+		- PrimeTreeIterator / PrimeTreeIteratorIntfc classes
+	- Strategy
+		- "Base" handling classes; BaseReduceNPrime, PrimeTree, BaseReduceTriple, BasePrefixes
+	- Template Method
+		- AbstractPrimeBaseGenerator.genBases()
+	- Command
+		- DefaultInit.action*() methods
 - Martin Fowler
 	- Identity Map - Fundamentally implemented by PrimeSource using members; primeToIdxMap and
 	idxToPrimeMap

@@ -51,7 +51,7 @@ public class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 	}
 
 	record RetData (long prime, Object [] bases)
-	{};
+	{}
 
 	/**
 	 * This method overrides the default and applies filters for the prime set

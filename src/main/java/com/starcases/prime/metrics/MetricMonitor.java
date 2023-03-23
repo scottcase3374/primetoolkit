@@ -24,7 +24,8 @@ import lombok.Getter;
 /**
  * Class for handling metric data gathered by various processes.
  *
- * TODO Still deciding on requirements for this.
+ * TODO Still deciding on requirements for this. This generates
+ * some metrics to the log but there is plenty of work to do.
  *
  */
 public final class MetricMonitor
@@ -34,58 +35,80 @@ public final class MetricMonitor
 
 	public static void enableGraphiteRegistry(boolean enable)
 	{
-		GraphiteConfig graphiteConfig = new GraphiteConfig()
+		if (enable)
 		{
-		    @Override
-		    public String host()
-		    {
-		        return "localhost";
-		    }
+			GraphiteConfig graphiteConfig = new GraphiteConfig()
+			{
+			    @Override
+			    public String host()
+			    {
+			        return "localhost";
+			    }
 
-		    @Override
-		    public String get(String k)
-		    {
-		        return null; // accept the rest of the defaults
-		    }
+			    @Override
+			    public String get(String k)
+			    {
+			        return null; // accept the rest of the defaults
+			    }
 
-		    public String [] tagsAsPrefix()
-		    {
-		    	return new String[] {"TASK" };
-		    }
-		};
+			    @Override
+			    public String [] tagsAsPrefix()
+			    {
+			    	return new String[] {"TASK" };
+			    }
+			};
 
-		metricsRegistry.add(new GraphiteMeterRegistry(graphiteConfig, Clock.SYSTEM, HierarchicalNameMapper.DEFAULT));
+			metricsRegistry.add(new GraphiteMeterRegistry(graphiteConfig, Clock.SYSTEM, HierarchicalNameMapper.DEFAULT));
+		}
 	}
 
 	public static void enableSimpleRegistry(boolean enable)
 	{
-		metricsRegistry.add(new SimpleMeterRegistry());
+		if (enable)
+		{
+			metricsRegistry.add(new SimpleMeterRegistry());
+		}
 	}
 
 	public static void enableLoggerRegistry(boolean enable)
 	{
-		final var loggingRegistry = new LoggingMeterRegistry();
-		metricsRegistry.add(loggingRegistry);
+		if (enable)
+		{
+			final var loggingRegistry = new LoggingMeterRegistry();
+			metricsRegistry.add(loggingRegistry);
+		}
 	}
 
 	public static void enableJvmMemoryMetric(boolean enable)
 	{
-		new JvmMemoryMetrics().bindTo(metricsRegistry);
+		if (enable)
+		{
+			new JvmMemoryMetrics().bindTo(metricsRegistry);
+		}
 	}
 
 	public static void enableJvmGcMetric(boolean enable)
 	{
-		new JvmGcMetrics().bindTo(metricsRegistry);
+		if (enable)
+		{
+			new JvmGcMetrics().bindTo(metricsRegistry);
+		}
 	}
 
 	public static void enableJvmThreadMetric(boolean enable)
 	{
-		new JvmThreadMetrics().bindTo(metricsRegistry);
+		if (enable)
+		{
+			new JvmThreadMetrics().bindTo(metricsRegistry);
+		}
 	}
 
 	public static void enableProcessorMetric(boolean enable)
 	{
-		new ProcessorMetrics().bindTo(metricsRegistry);
+		if (enable)
+		{
+			new ProcessorMetrics().bindTo(metricsRegistry);
+		}
 	}
 
 	public static void enableAll(boolean enable)

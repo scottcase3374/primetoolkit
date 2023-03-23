@@ -267,12 +267,9 @@ public class DefaultInit implements Runnable
 			optFolder = Optional.ofNullable(folder);
 		}
 
-		if (optFolder.isEmpty())
+		if (optFolder.isEmpty() && LOG.isLoggable(Level.SEVERE))
 		{
-			if (LOG.isLoggable(Level.SEVERE))
-			{
-				LOG.severe("ERROR: could not create base folder: " + initOpts.getOutputFolder());
-			}
+			LOG.severe("ERROR: could not create base folder: " + initOpts.getOutputFolder());
 		}
 		return optFolder.isPresent();
 	}
@@ -299,7 +296,7 @@ public class DefaultInit implements Runnable
 		}
 	}
 
-	private final static MetricOpt [] NULL_OPTS = new MetricOpt[0];
+	private static final  MetricOpt [] NULL_OPTS = new MetricOpt[0];
 
 	private void actionEnableMetrics()
 	{
@@ -320,9 +317,9 @@ public class DefaultInit implements Runnable
 					LOG.info("DefaultInit::actionEnableCmdListener - SQL command listener port:" + baseOpts.getCmdListenerPort());
 					new CmdServer(primeSrc, baseOpts.getCmdListenerPort()).run();
 				}
-				catch(final Exception e)
+				catch(final InterruptedException e)
 				{
-					LOG.severe(e.toString());
+					throw new RuntimeException(e.toString());
 				}
 			});
 		}

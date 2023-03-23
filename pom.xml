@@ -109,6 +109,13 @@
 			<groupId>org.zeromq</groupId>
 			<artifactId>jeromq</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>org.lwjgl</groupId>
+			<artifactId>lwjgl</artifactId>
+			<version>3.3.1</version>
+		</dependency>
+
 	</dependencies>
 	<build>
 

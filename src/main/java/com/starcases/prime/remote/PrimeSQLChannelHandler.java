@@ -13,6 +13,7 @@ import com.starcases.prime.intfc.PrimeSourceIntfc;
 import com.starcases.prime.metrics.MetricMonitor;
 
 import io.micrometer.core.instrument.LongTaskTimer;
+import io.micrometer.core.instrument.LongTaskTimer.Sample;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -130,7 +131,7 @@ public class PrimeSQLChannelHandler extends SimpleChannelInboundHandler<Object>
 		}
 		finally
 		{
-			timer.ifPresent(t -> t.stop());
+			timer.ifPresent(Sample::stop);
 		}
 	}
 }
