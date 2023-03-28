@@ -22,7 +22,7 @@ public class LogBasesNPrime extends AbstractLogBase
 	/**
 	 * default logger
 	 */
-	private static final Logger log = Logger.getLogger(LogBasesNPrime.class.getName());
+	private static final Logger LOG = Logger.getLogger(LogBasesNPrime.class.getName());
 
 	/**
 	 * Constructor for logging of NPrime base
@@ -37,9 +37,9 @@ public class LogBasesNPrime extends AbstractLogBase
 	@Command
 	public void outputLogs()
 	{
-		if (log.isLoggable(Level.INFO))
+		if (LOG.isLoggable(Level.INFO))
 		{
-			log.info(String.format("%nLogging NPrime%n"));
+			LOG.info(String.format("%nLogging NPrime%n"));
 		}
 
 		final var prIt = primeSrc.getPrimeRefStream(5L, false).iterator();
@@ -48,9 +48,9 @@ public class LogBasesNPrime extends AbstractLogBase
 		prIt.forEachRemaining(this::logData);
 	}
 
-	private void logData(final PrimeRefIntfc pr)
+	private void logData(final PrimeRefIntfc primeRef)
 	{
-		final var bmd = pr.getPrimeBaseData().getBaseMetadata(BaseTypes.NPRIME);
+		final var bmd = primeRef.getPrimeBaseData().getBaseMetadata(BaseTypes.NPRIME);
 		if (bmd instanceof NPrimeBaseMetadata nprimemd)
 		{
 			final ImmutableLongBag counts = nprimemd.getCountForBaseIdx();
@@ -58,15 +58,15 @@ public class LogBasesNPrime extends AbstractLogBase
 
 			// Handle "header" info for the current Prime
 			PrimeToolKit.output(BaseTypes.NPRIME, "%nPrime [%d] %s%n",
-												pr.getPrime(),
+												primeRef.getPrime(),
 												itemCountsStr
 												);
 		}
 		else
 		{
-			if (log.isLoggable(Level.SEVERE))
+			if (LOG.isLoggable(Level.SEVERE))
 			{
-				log.severe(String.format("Can't show bases for Prime [%d] index[%d] : invalid NPrimeBaseMetadata", pr.getPrime(), pr.getPrimeRefIdx()));
+				LOG.severe(String.format("Can't show bases for Prime [%d] index[%d] : invalid NPrimeBaseMetadata", primeRef.getPrime(), primeRef.getPrimeRefIdx()));
 			}
 		}
 	}

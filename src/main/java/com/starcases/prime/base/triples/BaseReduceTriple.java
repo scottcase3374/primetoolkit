@@ -71,7 +71,7 @@ public class BaseReduceTriple extends AbstractPrimeBaseGenerator
 	 * Track items in numerical order by incrementing this in an atomic fashion.
 	 */
 	@Min(0)
-	private static final AtomicInteger good = new AtomicInteger(0);
+	private static final AtomicInteger GOOD = new AtomicInteger(0);
 
 	/**
 	 * Constructor

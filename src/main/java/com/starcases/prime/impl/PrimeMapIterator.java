@@ -15,7 +15,7 @@ class PrimeMapIterator implements Iterator<PrimeRefIntfc>
 	/**
 	 * Entry for tracking the prime prefix / map info.
 	 *
-	 * FIXME Need better description
+	 *  Add better description here..
 	 */
 	@Getter(AccessLevel.PRIVATE)
 	private final Iterator<PrimeMapEntry> entry;

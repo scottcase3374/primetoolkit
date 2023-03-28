@@ -2,6 +2,7 @@ package com.starcases.prime.antlr;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Stream;
 import org.eclipse.collections.api.block.predicate.Predicate;
 import org.eclipse.collections.api.list.MutableList;
@@ -183,7 +184,7 @@ public class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 		predList.add(
 				p ->
 					p.getPrimeBaseData()
-					 .getPrimeBases(BaseTypes.valueOf(result.getBaseType().toUpperCase()))
+					 .getPrimeBases(BaseTypes.valueOf(result.getBaseType().toUpperCase(Locale.ENGLISH)))
 					 .parallelStream()
 					 .anyMatch(c -> c.containsAll(vals)));
 		return result;

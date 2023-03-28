@@ -13,8 +13,6 @@ import java.util.zip.ZipFile;
 import com.starcases.prime.PrimeToolKit;
 
 import org.infinispan.Cache;
-import org.infinispan.manager.DefaultCacheManager;
-import org.infinispan.manager.EmbeddedCacheManager;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -43,17 +41,7 @@ public final class PrePrimed
 	@Getter(AccessLevel.PRIVATE)
 	private static final int SUBSET_SIZE = 1 << SUBSET_BITS;
 
-	/**
-	 * manage any/all caching to files
-	 */
-	@Getter
-	private static EmbeddedCacheManager cacheMgr;
 
-	/**
-	 * Cache object - both in-memory and persisted data
-	 */
-	@Getter(AccessLevel.PRIVATE)
-	private final Cache<Integer,PrimeSubset> cache;
 
 	/**
 	 * Paths to source folders containing files of any pre-computed prime/base info.
@@ -70,6 +58,12 @@ public final class PrePrimed
 	private PrimeSubset subset = new PrimeSubset();
 
 	/**
+	 * Cache object - both in-memory and persisted data
+	 */
+	@Getter(AccessLevel.PRIVATE)
+	private final Cache<Integer,PrimeSubset> cache;
+
+	/**
 	 * Break linear index range into indexed batches of indexed items.
 	 */
 	@Getter(AccessLevel.PRIVATE)
@@ -78,28 +72,15 @@ public final class PrePrimed
 
 	private static final String ZIP_FOLDER_ISSUE_MSG = "Problem with input zip-file or folder";
 
-	static
-	{
-		try
-		{
-			cacheMgr = new DefaultCacheManager("infinispan.xml");
-			cacheMgr.startCaches("primes");
-		}
-		catch (final IOException e)
-		{
-			PrimeToolKit.output("Error starting pre-prime cache: %s",e);
-		}
-	}
-
 	/**
 	 * Constructor for class responsible for loading pre-generated prime/base info.
 	 *
 	 * @param sourceFolders
 	 */
-	public PrePrimed(final Path ... sourceFolders)
+	public PrePrimed(final Cache<Integer, PrimeSubset> cache, final Path ... sourceFolders)
 	{
-		this.cache = cacheMgr.getCache("primes");
-		this.sourceFolders = sourceFolders;
+		this.cache = cache;
+		this.sourceFolders = sourceFolders.clone();
 		subset.alloc(SUBSET_SIZE);
 	}
 
@@ -153,7 +134,7 @@ public final class PrePrimed
 			.getStats()
 			.setStatisticsEnabled(true);
 
-		// Hard-code 1 into the set of values - it isn't part of the standard dataset (1 is not considered prime).
+		// Hard-code 1 into the set of values - it isn't part of the standard dataset (1t is not considered prime).
 		assign(index[0]++, 1L);
 
 		Arrays.stream(sourceFolders).forEach(
@@ -229,8 +210,6 @@ public final class PrePrimed
 				);
 
 		cache.put(subsetIdx++, subset);
-
-		dumpStats();
 
 		return true;
 	}

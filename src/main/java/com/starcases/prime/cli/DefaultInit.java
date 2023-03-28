@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.eclipse.collections.impl.list.mutable.FastList;
+import org.infinispan.Cache;
 import org.jgrapht.event.GraphListener;
 import org.jgrapht.graph.DefaultEdge;
 
@@ -45,10 +46,12 @@ import com.starcases.prime.impl.GenerationProgress;
 import com.starcases.prime.impl.PrimeRef;
 import com.starcases.prime.intfc.FactoryIntfc;
 import com.starcases.prime.intfc.PrimeRefIntfc;
+import com.starcases.prime.intfc.PrimeSourceFactoryIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import com.starcases.prime.log.LogNodeStructure;
 import com.starcases.prime.metrics.MetricMonitor;
 import com.starcases.prime.preload.PrePrimed;
+import com.starcases.prime.preload.PrimeSubset;
 import com.starcases.prime.remote.CmdServer;
 
 import lombok.Getter;
@@ -88,7 +91,7 @@ public class DefaultInit implements Runnable
 	 */
 	@Getter
 	@Setter
-	private PrimeSourceIntfc primeSrc;
+	private PrimeSourceFactoryIntfc primeSrc;
 
 	/**
 	 * DefaultInit opts info from picocli
@@ -328,8 +331,32 @@ public class DefaultInit implements Runnable
 	{
 		LOG.info("enter actionInitDefaultPrimeContent");
 		actions.add(s -> {
+
 			final FactoryIntfc factory = PTKFactory.getFactory();
-			primeSrc = factory.getPrimeSource();
+
+			final String inputFolderPath = initOpts.getInputDataFolder();
+
+			final Cache<Integer,PrimeSubset> cache = factory.getCacheMgr().getCache("primes", initOpts.isClearCachedPrimes());
+
+			final var alreadyLoaded = cache.get(1) != null;
+			final var inputFoldExist = ensureFolderExist(inputFolderPath);
+			final var loadRawPrimes = initOpts.isLoadPrimes();
+
+			if (alreadyLoaded || !inputFoldExist || !loadRawPrimes)
+			{
+				LOG.info(String.format("Not loading raw primes. Previously persisted: [%b], Input folder exists: [%b], load-raw-primes[%b]",  alreadyLoaded, inputFoldExist, loadRawPrimes));
+				primeSrc = factory.getPrimeSource();
+			}
+			else if (loadRawPrimes)
+			{
+				LOG.info("Cache primes from raw files");
+
+					final PrePrimed prePrimed = new PrePrimed(cache, Path.of(replaceTildeHome(inputFolderPath)));
+					prePrimed.load();
+
+					primeSrc = factory.getPrimeSource(prePrimed);
+			}
+
 			if (LOG.isLoggable(Level.FINE))
 			{
 				LOG.fine("DefaultInit::actionInitDefaultPrimeContent - primeSource init");
@@ -343,27 +370,7 @@ public class DefaultInit implements Runnable
 
 			primeSrc.setDisplayPrimeTreeMetrics(outputOpts.getOutputOpers().contains(OutputOper.PRIMETREE_METRICS));
 
-			if (initOpts.getLoadPrimes() != null)
-			{
-				final String inputFolderPath = initOpts.getInputDataFolder();
-				if (ensureFolderExist(inputFolderPath))
-				{
-					LOG.fine("Load-primes option specified");
-					final PrePrimed prePrimed = new PrePrimed(Path.of(replaceTildeHome(inputFolderPath)));
-					prePrimed.load();
-					primeSrc.load(prePrimed, initOpts.getLoadPrimes());
-				}
-			}
-			else
-			{
-				LOG.fine("No load-primes option specified (--load-primes");
-			}
 			primeSrc.init();
-
-			if (initOpts.getStorePrimes() != null)
-			{
-				primeSrc.store(initOpts.getStorePrimes());
-			}
 		});
 	}
 

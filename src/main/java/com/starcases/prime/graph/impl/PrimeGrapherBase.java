@@ -117,10 +117,8 @@ public class PrimeGrapherBase
 		final var primeNodeGenerator = new PrimeNodeGenerator(primeSrc, graph, baseType);
 		primeNodeGenerator.begin();
 
-		while(primeNodeGenerator.nextEvents())
-		{
+		while(primeNodeGenerator.nextEvents());
 			 // iterates through the events which are processed elsewhere.
 			 // nextEvents() performs the work.
-		}
 	}
 }

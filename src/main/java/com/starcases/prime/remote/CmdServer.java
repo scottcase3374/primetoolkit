@@ -15,8 +15,8 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
  */
 public class CmdServer
 {
-	private int port = 8690;
-	private PrimeSourceIntfc primeSrc;
+	private final int port;
+	private final PrimeSourceIntfc primeSrc;
 
 	public CmdServer(final PrimeSourceIntfc primeSrc, final int port)
 	{
@@ -31,14 +31,14 @@ public class CmdServer
 
 		try
 		{
-			final ServerBootstrap bs = new ServerBootstrap();
-			bs
+			final ServerBootstrap bootStrap = new ServerBootstrap();
+			bootStrap
 				.group(listenGroup, workerGroup)
 				.channel(NioServerSocketChannel.class)
 				.childHandler(new CmdChannelInit(primeSrc))
 				;
 
-			final ChannelFuture future = bs.bind(port).sync();
+			final ChannelFuture future = bootStrap.bind(port).sync();
 			future.channel().closeFuture().sync();
 		}
 		finally

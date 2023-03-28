@@ -66,9 +66,7 @@ public class ViewDefault extends PrimeGrapherBase
 		compactTreeGraph.setVisible(true);
 		compactTreeGraph.getRootPane().grabFocus();
 
-		do
-		{
-			// cause exit when window closes
-		} while (System.in.read() != -1);
+		// cause exit when window closes
+		while (System.in.read() != -1);
 	}
 }

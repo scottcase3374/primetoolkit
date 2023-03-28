@@ -5,7 +5,6 @@ import org.infinispan.protostream.annotations.ProtoFactory;
 import org.infinispan.protostream.annotations.ProtoField;
 
 import lombok.Getter;
-import lombok.Setter;
 
 import org.infinispan.protostream.SerializationContext;
 import org.infinispan.protostream.SerializationContextInitializer;
@@ -26,7 +25,6 @@ public class PrimeSubset implements SerializationContextInitializer
 	 * Array of entries bundled together
 	 */
 	@Getter
-	@Setter
 	@ProtoField(number = 1)
 	protected long [] entries;
 
@@ -37,14 +35,15 @@ public class PrimeSubset implements SerializationContextInitializer
 	@ProtoFactory
 	public PrimeSubset(final long ... entries)
 	{
-		this.entries = entries;
+		this.entries = entries.clone();
 	}
 
 	/**
 	 * No arg constructor to appease code-analysis/metrics
 	 */
 	public PrimeSubset()
-	{}
+	{
+	}
 
 	/**
 	 * Method for runtime allocation of the desired container size.

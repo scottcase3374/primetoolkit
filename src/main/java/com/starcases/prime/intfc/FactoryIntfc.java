@@ -8,6 +8,9 @@ import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
 import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.list.MutableList;
 
+import com.starcases.prime.cache.CacheMgr;
+import com.starcases.prime.preload.PrePrimed;
+
 /**
  * This interface is a helper for the CLI support - helps simplify the
  * constructions of a valid set of actions from the command line
@@ -21,7 +24,9 @@ public interface FactoryIntfc
 	 * provide prime/primeref lookups
 	 * @return
 	 */
-	PrimeSourceIntfc getPrimeSource();
+	PrimeSourceFactoryIntfc getPrimeSource();
+
+	PrimeSourceFactoryIntfc getPrimeSource(final PrePrimed preprimed);
 
 	/**
 	 * Get a supplier of the base constructor.
@@ -44,4 +49,10 @@ public interface FactoryIntfc
 	 * @return
 	 */
 	ImmutableList<Consumer<PrimeSourceIntfc>> getConsumersSetPrimeSrc();
+
+	/**
+	 * Provides method to gain access to the object managing cache instance access.
+	 * @return
+	 */
+	CacheMgr getCacheMgr();
 }

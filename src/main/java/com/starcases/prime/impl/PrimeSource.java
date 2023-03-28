@@ -14,11 +14,11 @@ import java.util.stream.Stream;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.starcases.prime.base.AbstractPrimeBaseGenerator;
-import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.base.primetree.PrimeTree;
 import com.starcases.prime.cli.OutputOper;
 import com.starcases.prime.intfc.CollectionTrackerIntfc;
 import com.starcases.prime.intfc.PrimeRefIntfc;
+import com.starcases.prime.intfc.PrimeSourceFactoryIntfc;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
 import com.starcases.prime.metrics.MetricMonitor;
 import com.starcases.prime.preload.PrePrimed;
@@ -51,7 +51,7 @@ import org.eclipse.collections.impl.set.immutable.primitive.ImmutableLongSetFact
  *
  */
 @SuppressWarnings({ "PMD.AvoidDuplicateLiterals"})
-public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSourceIntfc
+public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSourceFactoryIntfc
 {
 	private static final long serialVersionUID = 1L;
 
@@ -299,11 +299,6 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 			}
 		}
 		while (nextPrimeTmpIdx < targetPrimeCount);
-
-		if (this.prePrimed != null)
-		{
-			this.prePrimed.dumpStats();
-		}
 	}
 
 	/**
@@ -506,34 +501,17 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 			return;
 		}
 
+		if (this.prePrimed != null)
+		{
+			this.prePrimed.dumpStats();
+		}
+
 		genBases();
 
 		if (displayPrimeTreeMetrics)
 		{
 			collTrack.log();
 		}
-	}
-
-	@Override
-	public void load(final PrePrimed prePrimed, final BaseTypes ... baseTypes)
-	{
-		// TODO Determine what I want to do regarding cache - being factored.
-		if (doInit.getPlain())
-		{
-
-		}
-		this.prePrimed = prePrimed;
-		//Map<Integer, BigInteger>  prCache = cacheMgr.getCache("primes");
-		//if (!prCache.isEmpty())
-		//	{
-		//	primes.putAll(prCache);
-		//	primes.forEach((k, v) -> addPrimeRef(v, Collections.emptyList()));
-		//	LOG.info(String.format("cached entries loaded: %d ", primes.size()));
-		//}
-		//else
-		//{
-		//	LOG.info("cache empty");
-		//}
 	}
 
 	@Override
@@ -550,17 +528,6 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	public void setDisplayProgress(final GenerationProgress progress)
 	{
 		this.progress = progress;
-	}
-
-	/**
-	 * Flags for bases to store in disk cache.
-	 */
-	@Override
-	public void store(final BaseTypes ... baseTypes)
-	{
-		//	cacheMgr.getCache("primes").putAll(primes);
-		//if (baseTypes != null)
-		//	cacheMgr.getCache(BaseTypes.DEFAULT.name()).putAll(primeRefs.get(BaseTypes.DEFAULT));
 	}
 
 	private void updateMaps(final long idx, final long newPrime, final PrimeRefIntfc ref)
@@ -592,5 +559,11 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 				// If possible, this block should be removed and allow the
 				// remaining blocks to determine next Prime.
 				BigInteger.valueOf(primeSum).isProbablePrime(confidenceLevel);
+	}
+
+	@Override
+	public void setPrePrimed(final PrePrimed prePrimed)
+	{
+		this.prePrimed = prePrimed;
 	}
 }

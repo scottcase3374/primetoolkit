@@ -9,9 +9,7 @@ import java.util.stream.Stream;
 
 import jakarta.validation.constraints.Min;
 
-import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.impl.GenerationProgress;
-import com.starcases.prime.preload.PrePrimed;
 
 /**
  *
@@ -19,7 +17,7 @@ import com.starcases.prime.preload.PrePrimed;
  * generation and alternative algs.
  *
  * Implementations of this interface generally contain the
- * primes data and directly data
+ * primes data and data
  * directly related to the primes.  This allows near direct
  * access to the individual primes
  * and data for navigating amongst the primes.
@@ -44,21 +42,6 @@ public interface PrimeSourceIntfc extends Serializable
 	 * DefaultInit base info.
 	 */
 	void init();
-
-	/**
-	 * Store base info in cache.
-	 * Currently not used.
-	 *
-	 * @param baseTypes
-	 */
-	void store(BaseTypes ... baseTypes);
-
-	/**
-	 * Load base info from cache.
-	 * Currently not used.
-	 * @param baseTypes
-	 */
-	void load(PrePrimed prePrimed,  BaseTypes ... baseTypes);
 
 	/**
 	 * Iterator to PrimeRefIntfc instances.

@@ -20,10 +20,9 @@ public final class GenerationProgress
 		// display some progress info
 		final var primesProcessed = newPrimeIndex;
 		int unitIdx = -1;
-		while ((primesProcessed & mask[++unitIdx]) != 0 && unitIdx <  mask.length-1)
-		{
-			 // loop expression does the work
-		}
+
+		while ((primesProcessed & mask[++unitIdx]) != 0 && unitIdx <  mask.length-1);
+			// loop expression does the work
 
 		final var num = (int)(primesProcessed / mask[unitIdx]);
 		if (unitIdx != units.length-1 || num <= 2)

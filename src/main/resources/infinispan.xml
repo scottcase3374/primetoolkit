@@ -6,7 +6,7 @@
 		  <persistence passivation="true">
 		     <file-store
 		     			shared="false"
-		     			purge="true"
+		     			purge="false"
 		     			>
 		        <data path="data"/>
 		        <index path="index"/>

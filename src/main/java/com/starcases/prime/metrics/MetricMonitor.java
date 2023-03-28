@@ -36,17 +36,18 @@ public final class MetricMonitor
 	 *  Metrics data registry (drop wizard)
 	 */
 	@Getter(AccessLevel.PRIVATE)
-	private static final CompositeMeterRegistry metricsRegistry;
+	private static final CompositeMeterRegistry METRICS_REGISTRY;
 
 	static
 	{
-		metricsRegistry = new CompositeMeterRegistry();
+		METRICS_REGISTRY = new CompositeMeterRegistry();
 	}
 
 	public static void enableGraphiteRegistry(final boolean enable)
 	{
 		if (enable)
 		{
+			LOG.fine("Enabling Graphite registry");
 			final GraphiteConfig graphiteConfig = new GraphiteConfig()
 			{
 			    @Override
@@ -68,7 +69,7 @@ public final class MetricMonitor
 			    }
 			};
 
-			metricsRegistry.add(new GraphiteMeterRegistry(graphiteConfig, Clock.SYSTEM, HierarchicalNameMapper.DEFAULT));
+			METRICS_REGISTRY.add(new GraphiteMeterRegistry(graphiteConfig, Clock.SYSTEM, HierarchicalNameMapper.DEFAULT));
 		}
 	}
 
@@ -76,7 +77,7 @@ public final class MetricMonitor
 	{
 		if (enable)
 		{
-			metricsRegistry.add(new SimpleMeterRegistry());
+			METRICS_REGISTRY.add(new SimpleMeterRegistry());
 		}
 	}
 
@@ -85,7 +86,7 @@ public final class MetricMonitor
 		if (enable)
 		{
 			final var loggingRegistry = new LoggingMeterRegistry();
-			metricsRegistry.add(loggingRegistry);
+			METRICS_REGISTRY.add(loggingRegistry);
 		}
 	}
 
@@ -93,7 +94,7 @@ public final class MetricMonitor
 	{
 		if (enable)
 		{
-			new JvmMemoryMetrics().bindTo(metricsRegistry);
+			new JvmMemoryMetrics().bindTo(METRICS_REGISTRY);
 		}
 	}
 
@@ -101,7 +102,7 @@ public final class MetricMonitor
 	{
 		if (enable)
 		{
-			new JvmGcMetrics().bindTo(metricsRegistry);
+			new JvmGcMetrics().bindTo(METRICS_REGISTRY);
 		}
 	}
 
@@ -109,7 +110,7 @@ public final class MetricMonitor
 	{
 		if (enable)
 		{
-			new JvmThreadMetrics().bindTo(metricsRegistry);
+			new JvmThreadMetrics().bindTo(METRICS_REGISTRY);
 		}
 	}
 
@@ -117,7 +118,7 @@ public final class MetricMonitor
 	{
 		if (enable)
 		{
-			new ProcessorMetrics().bindTo(metricsRegistry);
+			new ProcessorMetrics().bindTo(METRICS_REGISTRY);
 		}
 	}
 
@@ -132,8 +133,6 @@ public final class MetricMonitor
 		enableJvmThreadMetric(enable);
 		enableProcessorMetric(enable);
 	}
-
-
 
 	/**
 	 * Empty constructor
@@ -151,7 +150,7 @@ public final class MetricMonitor
 	 */
 	public static Optional<Timer> timer(final OutputableIntfc outputable, final String...tags)
 	{
-		return Optional.ofNullable(metricsRegistry.timer(outputable.toString(), tags));
+		return Optional.ofNullable(METRICS_REGISTRY.timer(outputable.toString(), tags));
 	}
 
 	/**
@@ -161,6 +160,6 @@ public final class MetricMonitor
 	 */
 	public static Optional<LongTaskTimer.Sample> longTimer(final OutputableIntfc outputable, final String...tags)
 	{
-		return Optional.ofNullable(LongTaskTimer.builder(outputable.toString()).register(metricsRegistry).start());
+		return Optional.ofNullable(LongTaskTimer.builder(outputable.toString()).register(METRICS_REGISTRY).start());
 	}
 }

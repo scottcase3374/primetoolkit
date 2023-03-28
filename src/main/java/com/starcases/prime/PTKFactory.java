@@ -1,6 +1,5 @@
 package com.starcases.prime;
 
-import java.io.IOException;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -8,16 +7,16 @@ import java.util.function.Supplier;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
+import com.starcases.prime.cache.CacheMgr;
 import com.starcases.prime.impl.CollectionTrackerImpl;
 import com.starcases.prime.impl.PrimeSource;
 import com.starcases.prime.intfc.PrimeSourceIntfc;
+import com.starcases.prime.preload.PrePrimed;
 
 import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
 import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.impl.list.immutable.ImmutableListFactoryImpl;
-import org.infinispan.manager.DefaultCacheManager;
-import org.infinispan.manager.EmbeddedCacheManager;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -27,6 +26,7 @@ import com.starcases.prime.intfc.CollectionTrackerIntfc;
 import com.starcases.prime.intfc.FactoryIntfc;
 import com.starcases.prime.intfc.PrimeBaseIntfc;
 import com.starcases.prime.intfc.PrimeRefIntfc;
+import com.starcases.prime.intfc.PrimeSourceFactoryIntfc;
 
 /**
  *
@@ -37,24 +37,10 @@ import com.starcases.prime.intfc.PrimeRefIntfc;
 public final class PTKFactory
 {
 	/**
-	 * manage any/all caching to files
+	 * manage any/all caching
 	 */
 	@Getter
-	private static EmbeddedCacheManager cacheMgr;
-
-	static
-	{
-		try
-		{
-			cacheMgr = new DefaultCacheManager("infinispan.xml");
-			cacheMgr.startCaches("primes");
-			// "PREFIX", "PREFIX_TREE", "NPRIME", "THREETRIPLE" , "DEFAULT"
-		}
-		catch(IOException e)
-		{
-			System.out.println("couldn't create cache mgr from classpath:infinispan.xm");
-		}
-	}
+	private static final CacheMgr CACHE_MGR = new CacheMgr();
 
 	/**
 	 * Maximum number of primes to handle.
@@ -126,12 +112,26 @@ public final class PTKFactory
 		return new FactoryIntfc()
 				{
 					@Override
-					public PrimeSourceIntfc getPrimeSource()
+					public PrimeSourceFactoryIntfc getPrimeSource()
 					{
 						return primeSource(	maxCount,
 											confidenceLevel,
 											getPrimeRefRawConstructor(),
 											getConsumersSetPrimeSrc());
+					}
+
+					@Override
+					public PrimeSourceFactoryIntfc getPrimeSource(final PrePrimed prePrimed)
+					{
+						final var primeSrc = getPrimeSource();
+						primeSrc.setPrePrimed(prePrimed);
+						return primeSrc;
+					}
+
+					@Override
+					public CacheMgr getCacheMgr()
+					{
+						return CACHE_MGR;
 					}
 
 					@Override
@@ -151,7 +151,6 @@ public final class PTKFactory
 					{
 						return ImmutableListFactoryImpl.INSTANCE.of(primeRefSetPrimeSource, baseSetPrimeSource);
 					}
-
 				};
 	}
 
@@ -165,7 +164,7 @@ public final class PTKFactory
 	 * @param baseSetPrimeSource
 	 * @return
 	 */
-	private static PrimeSourceIntfc primeSource(
+	private static PrimeSourceFactoryIntfc primeSource(
 			@Min(1) final long maxCount,
 			@Min(1) final int confidenceLevel,
 			@NonNull final BiFunction<Long, MutableList<ImmutableLongCollection>, PrimeRefIntfc> primeRefRawCtor,

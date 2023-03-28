@@ -2,8 +2,6 @@ package com.starcases.prime.cli;
 
 import java.util.logging.Level;
 
-import com.starcases.prime.base.BaseTypes;
-
 import lombok.Getter;
 import lombok.Setter;
 import picocli.CommandLine.Option;
@@ -78,18 +76,18 @@ class InitOpts
 	private boolean preferParallel;
 
 	/**
-	 * flag indicating whether to cache primes.  Unused right now.
+	 * flag indicating whether to clear previously cache primes.
 	 */
 	@Getter
 	@Setter
-	@Option(names = {"--store-primes"}, arity = "0..4", description = "Store types: ${COMPLETION-CANDIDATES}", required = false)
-	private BaseTypes storePrimes;
+	@Option(names = {"--clear-cached-primes"}, description = "Remove persisted cached primes [usually prep for fresh reload]", required = false)
+	private boolean clearCachedPrimes;
 
 	/**
-	 * flag indicating whether to load cached primes - unused right now.
+	 * flag indicating whether to load cached primes.
 	 */
 	@Getter
 	@Setter
-	@Option(names = {"--load-primes"}, arity = "0..4", description = "Load types: ${COMPLETION-CANDIDATES}", required = false)
-	private BaseTypes loadPrimes;
+	@Option(names = {"--load-primes"},  description = "Load and cache raw primes from files", required = false)
+	private boolean loadPrimes;
 }

@@ -25,9 +25,9 @@ public class CmdChannelInit extends ChannelInitializer<SocketChannel>
 	}
 
 	@Override
-    public void initChannel(final SocketChannel ch) throws Exception
+    public void initChannel(final SocketChannel channel) throws Exception
 	{
-        ch
+        channel
         	.pipeline()
         	.addLast(new HttpServerCodec())
         	.addLast(new HttpServerExpectContinueHandler())

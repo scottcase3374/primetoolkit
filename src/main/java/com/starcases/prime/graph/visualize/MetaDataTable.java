@@ -36,26 +36,26 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * metric - Index into column/data fields
+	 * metric - Index into COLUMNS/data fields
 	 */
 	private static final int PRIME_MAX_DIST_PREV_PRIME = 1;
 
 	/**
-	 * metric - index into column/data fields
+	 * metric - index into COLUMNS/data fields
 	 */
 	private static final int AVG_BASE_SIZE = 2;
 
 
 	/**
-	 * metric - index into column/data fields
+	 * metric - index into COLUMNS/data fields
 	 */
 	private static final int AVG_DIST_PREV_PRIME = 3;
 
 	/**
-	 * represent a set of column header values for various metrics
+	 * represent a set of COLUMNS header values for various metrics
 	 */
 	@NonNull
-	private static final String [] column = {
+	private static final String [] COLUMNS = {
 			"Prime / max num-bases (Default type)",
 			"Prime / max dist to prev Prime",
 			"avg base size",
@@ -107,7 +107,7 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 		super();
 
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		table = new JTable(data, column);
+		table = new JTable(data, COLUMNS);
 		final var scrollPane = new JScrollPane(table);
 		table.setFillsViewportHeight(true);
 		getContentPane().add(scrollPane);
