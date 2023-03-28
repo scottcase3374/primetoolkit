@@ -50,7 +50,9 @@ Some of the tools used.
 	- sonar
 	- m2e
 	- AnyEditTools
-	- SpotBugs
+	- FindBugs / SpotBugs
+	- Checkstyle
+	- PMD
 
 2. Maven plugins
 	- Antlr
@@ -64,6 +66,7 @@ Some of the tools used.
 - Functional Programming aspects (i.e. Lambdas)
 - Streams
 - Use of JSON
+- Use of Eclipse / maven plugins to improve code quality/security and perform tasks
 
 ## Examples of Design Patterns used
 - Gang of Four (GoF)
