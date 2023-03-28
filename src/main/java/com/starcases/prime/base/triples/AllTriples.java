@@ -60,6 +60,21 @@ public class AllTriples
 	private final PrimeSourceIntfc primeSrc;
 
 	/**
+	 * at least 1 non-null component
+	 */
+	private final Predicate<PrimeRefIntfc[]> partialTriple =
+			prefArray -> Arrays.stream(prefArray).anyMatch(Objects::nonNull);
+
+	/**
+	 * no components null
+	 */
+	private final Predicate<PrimeRefIntfc[]> nonNullTriple =
+			prefArray -> Arrays.stream(prefArray).allMatch(Objects::nonNull);
+
+	private final Function<PrimeRefIntfc[], Long> sumTriple =
+			prefArray -> Arrays.stream(prefArray).collect(Collectors.summingLong(p -> p.getPrime()));
+
+	/**
 	 * constructor for creating base type of "triples".
 	 * @param primeSrc
 	 * @param targetPrime
@@ -115,20 +130,7 @@ public class AllTriples
 			);
 	}
 
-	/**
-	 * at least 1 non-null component
-	 */
-	private final Predicate<PrimeRefIntfc[]> partialTriple =
-			prefArray -> Arrays.stream(prefArray).anyMatch(Objects::nonNull);
 
-	/**
-	 * no components null
-	 */
-	private final Predicate<PrimeRefIntfc[]> nonNullTriple =
-			prefArray -> Arrays.stream(prefArray).allMatch(Objects::nonNull);
-
-	private final Function<PrimeRefIntfc[], Long> sumTriple =
-			prefArray -> Arrays.stream(prefArray).collect(Collectors.summingLong(p -> p.getPrime()));
 
 	/**
 	 * Main entry point to this processing - produce all viable triples and add each to the corresponding prime base.

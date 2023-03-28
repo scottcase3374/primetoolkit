@@ -129,7 +129,6 @@ public class DefaultInit implements Runnable
 	@ArgGroup(exclusive = false, validate = false)
 	private MetricsOpts metricOpts;
 
-
 	/**
 	 * flags indicating to export GML
 	 */
@@ -137,6 +136,8 @@ public class DefaultInit implements Runnable
 	@Setter
 	@ArgGroup(exclusive = false, validate = false)
 	private ExportOpts exportOpts;
+
+	private static final  MetricOpt [] NULL_OPTS = new MetricOpt[0];
 
 	/**
 	 * list/container for actions to execute - is never null or replaced.
@@ -226,7 +227,7 @@ public class DefaultInit implements Runnable
 		}
 	}
 
-	private String replaceTildeHome(String path)
+	private String replaceTildeHome(final String path)
 	{
 		return path.replaceFirst("^~", System.getenv("HOME"));
 	}
@@ -296,8 +297,6 @@ public class DefaultInit implements Runnable
 		}
 	}
 
-	private static final  MetricOpt [] NULL_OPTS = new MetricOpt[0];
-
 	private void actionEnableMetrics()
 	{
 
@@ -319,7 +318,7 @@ public class DefaultInit implements Runnable
 				}
 				catch(final InterruptedException e)
 				{
-					throw new RuntimeException(e.toString());
+					throw new RuntimeException(e);
 				}
 			});
 		}

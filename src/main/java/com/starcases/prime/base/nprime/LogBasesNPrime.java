@@ -48,9 +48,9 @@ public class LogBasesNPrime extends AbstractLogBase
 		prIt.forEachRemaining(this::logData);
 	}
 
-	private void logData(PrimeRefIntfc pr)
+	private void logData(final PrimeRefIntfc pr)
 	{
-		var bmd = pr.getPrimeBaseData().getBaseMetadata(BaseTypes.NPRIME);
+		final var bmd = pr.getPrimeBaseData().getBaseMetadata(BaseTypes.NPRIME);
 		if (bmd instanceof NPrimeBaseMetadata nprimemd)
 		{
 			final ImmutableLongBag counts = nprimemd.getCountForBaseIdx();

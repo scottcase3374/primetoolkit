@@ -15,8 +15,8 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
  */
 public class CmdServer
 {
-	int port = 8690;
-	PrimeSourceIntfc primeSrc;
+	private int port = 8690;
+	private PrimeSourceIntfc primeSrc;
 
 	public CmdServer(final PrimeSourceIntfc primeSrc, final int port)
 	{
@@ -26,19 +26,19 @@ public class CmdServer
 
 	public void run() throws InterruptedException
 	{
-		EventLoopGroup listenGroup = new NioEventLoopGroup();
-		EventLoopGroup workerGroup = new NioEventLoopGroup();
+		final EventLoopGroup listenGroup = new NioEventLoopGroup();
+		final EventLoopGroup workerGroup = new NioEventLoopGroup();
 
 		try
 		{
-			ServerBootstrap bs = new ServerBootstrap();
+			final ServerBootstrap bs = new ServerBootstrap();
 			bs
 				.group(listenGroup, workerGroup)
 				.channel(NioServerSocketChannel.class)
 				.childHandler(new CmdChannelInit(primeSrc))
 				;
 
-			ChannelFuture future = bs.bind(port).sync();
+			final ChannelFuture future = bs.bind(port).sync();
 			future.channel().closeFuture().sync();
 		}
 		finally

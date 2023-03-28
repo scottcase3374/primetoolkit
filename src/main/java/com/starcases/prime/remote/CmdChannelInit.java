@@ -20,11 +20,12 @@ public class CmdChannelInit extends ChannelInitializer<SocketChannel>
 
 	public CmdChannelInit(final PrimeSourceIntfc primeSrc)
 	{
+		super();
 		this.primeSrc = primeSrc;
 	}
 
 	@Override
-    public void initChannel(SocketChannel ch) throws Exception
+    public void initChannel(final SocketChannel ch) throws Exception
 	{
         ch
         	.pipeline()

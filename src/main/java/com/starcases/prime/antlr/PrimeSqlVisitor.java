@@ -47,6 +47,7 @@ public class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 	 */
 	public PrimeSqlVisitor(final PrimeSourceIntfc primeSrc)
 	{
+		super();
 		this.primeSrc = primeSrc;
 	}
 
@@ -164,7 +165,7 @@ public class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 	 * The predicate is saved for later processing.
 	 */
 	@Override
-	public PrimeSqlResult visitArray(ArrayContext ctx)
+	public PrimeSqlResult visitArray(final ArrayContext ctx)
 	{
 		this.visitChildren(ctx);
 
@@ -193,7 +194,7 @@ public class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 	 * The predicate is saved for later processing.
 	 */
 	@Override
-	public PrimeSqlResult visitMatchArray(MatchArrayContext ctx)
+	public PrimeSqlResult visitMatchArray(final MatchArrayContext ctx)
 	{
 		this.visitChildren(ctx);
 

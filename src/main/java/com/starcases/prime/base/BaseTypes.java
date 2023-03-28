@@ -21,8 +21,8 @@ public enum BaseTypes implements OutputableIntfc
 	DEFAULT,
 
 	/**
-	 * default is case where bases of Prime Pn consist of:  [Pn-1,
-	 * subset of other primes < Pn-1 which in total sum to Pn]
+	 * Prefix is case where bases of Prime Pn consist of:
+	 *  [Pn-1, subset of other primes < Pn-1 which in total sum to Pn]
 	 */
 	PREFIX,
 
@@ -40,8 +40,7 @@ public enum BaseTypes implements OutputableIntfc
 	NPRIME,
 
 	/**
-	 * Limit bases to a total of 3 values and try to avoid the small
-	 *  values(1,2,3) when possible.
+	 * Base entries are a total of exactly 3 prime values; handle ALL combinations by default.
 	 *
 	 * List of 3 primes makes 1 base.  There are X bases (combinations) per prime.
 	 *

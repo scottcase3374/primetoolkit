@@ -124,7 +124,7 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 						  ));
 
 			// Reuse storage instead of new collection allocations
-			MutableLongCollection tmpBases = bases;
+			final MutableLongCollection tmpBases = bases;
 			bases = subBases;
 			subBases = tmpBases;
 			subBases.clear();

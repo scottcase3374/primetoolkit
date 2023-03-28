@@ -68,7 +68,7 @@ public class ViewDefault extends PrimeGrapherBase
 
 		do
 		{
-			// will exit when window closes
+			// cause exit when window closes
 		} while (System.in.read() != -1);
 	}
 }

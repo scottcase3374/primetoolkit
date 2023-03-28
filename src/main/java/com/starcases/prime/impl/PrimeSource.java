@@ -458,7 +458,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	}
 
 	@Override
-	public Optional<PrimeRefIntfc> getPrimeRefForPrime(LongSupplier longSupplier)
+	public Optional<PrimeRefIntfc> getPrimeRefForPrime(final LongSupplier longSupplier)
 	{
 		return this.getPrimeRefForIdx(primeToIdxMap.get(longSupplier.getAsLong()));
 	}
@@ -517,6 +517,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	@Override
 	public void load(final PrePrimed prePrimed, final BaseTypes ... baseTypes)
 	{
+		// TODO Determine what I want to do regarding cache - being factored.
 		if (doInit.getPlain())
 		{
 

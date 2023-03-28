@@ -120,6 +120,7 @@ public class PrimeGrapherBase
 		while(primeNodeGenerator.nextEvents())
 		{
 			 // iterates through the events which are processed elsewhere.
+			 // nextEvents() performs the work.
 		}
 	}
 }

@@ -81,7 +81,7 @@ public class PrimeBaseContainer implements PrimeBaseIntfc
 	}
 
 	@Override
-	public void addPrimeBases(@NonNull ImmutableLongCollection primeBase, @NonNull BaseTypes baseType)
+	public void addPrimeBases(@NonNull final ImmutableLongCollection primeBase, @NonNull final BaseTypes baseType)
 	{
 		this.primeBases.compute(baseType,
 				(k, v) ->

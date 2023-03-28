@@ -32,12 +32,22 @@ public final class MetricMonitor
 {
 	private static final Logger LOG = Logger.getLogger(MetricMonitor.class.getName());
 
+	/**
+	 *  Metrics data registry (drop wizard)
+	 */
+	@Getter(AccessLevel.PRIVATE)
+	private static final CompositeMeterRegistry metricsRegistry;
 
-	public static void enableGraphiteRegistry(boolean enable)
+	static
+	{
+		metricsRegistry = new CompositeMeterRegistry();
+	}
+
+	public static void enableGraphiteRegistry(final boolean enable)
 	{
 		if (enable)
 		{
-			GraphiteConfig graphiteConfig = new GraphiteConfig()
+			final GraphiteConfig graphiteConfig = new GraphiteConfig()
 			{
 			    @Override
 			    public String host()
@@ -46,7 +56,7 @@ public final class MetricMonitor
 			    }
 
 			    @Override
-			    public String get(String k)
+			    public String get(final String k)
 			    {
 			        return null; // accept the rest of the defaults
 			    }
@@ -62,7 +72,7 @@ public final class MetricMonitor
 		}
 	}
 
-	public static void enableSimpleRegistry(boolean enable)
+	public static void enableSimpleRegistry(final boolean enable)
 	{
 		if (enable)
 		{
@@ -70,7 +80,7 @@ public final class MetricMonitor
 		}
 	}
 
-	public static void enableLoggerRegistry(boolean enable)
+	public static void enableLoggerRegistry(final boolean enable)
 	{
 		if (enable)
 		{
@@ -79,7 +89,7 @@ public final class MetricMonitor
 		}
 	}
 
-	public static void enableJvmMemoryMetric(boolean enable)
+	public static void enableJvmMemoryMetric(final boolean enable)
 	{
 		if (enable)
 		{
@@ -87,7 +97,7 @@ public final class MetricMonitor
 		}
 	}
 
-	public static void enableJvmGcMetric(boolean enable)
+	public static void enableJvmGcMetric(final boolean enable)
 	{
 		if (enable)
 		{
@@ -95,7 +105,7 @@ public final class MetricMonitor
 		}
 	}
 
-	public static void enableJvmThreadMetric(boolean enable)
+	public static void enableJvmThreadMetric(final boolean enable)
 	{
 		if (enable)
 		{
@@ -103,7 +113,7 @@ public final class MetricMonitor
 		}
 	}
 
-	public static void enableProcessorMetric(boolean enable)
+	public static void enableProcessorMetric(final boolean enable)
 	{
 		if (enable)
 		{
@@ -111,7 +121,7 @@ public final class MetricMonitor
 		}
 	}
 
-	public static void enableAll(boolean enable)
+	public static void enableAll(final boolean enable)
 	{
 		enableSimpleRegistry(enable);
 		enableLoggerRegistry(enable);
@@ -123,16 +133,7 @@ public final class MetricMonitor
 		enableProcessorMetric(enable);
 	}
 
-	/**
-	 *  Metrics data registry (drop wizard)
-	 */
-	@Getter(AccessLevel.PRIVATE)
-	private static final CompositeMeterRegistry metricsRegistry;
 
-	static
-	{
-		metricsRegistry = new CompositeMeterRegistry();
-	}
 
 	/**
 	 * Empty constructor

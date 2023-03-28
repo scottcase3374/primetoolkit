@@ -54,6 +54,7 @@ public class PrimeSQLChannelHandler extends SimpleChannelInboundHandler<Object>
 
 	public PrimeSQLChannelHandler(final PrimeSourceIntfc primeSrc)
 	{
+		super();
 		this.primeSrc = primeSrc;
 	}
 
