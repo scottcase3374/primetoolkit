@@ -49,10 +49,4 @@ public interface FactoryIntfc
 	 * @return
 	 */
 	ImmutableList<Consumer<PrimeSourceIntfc>> getConsumersSetPrimeSrc();
-
-	/**
-	 * Provides method to gain access to the object managing cache instance access.
-	 * @return
-	 */
-	CacheMgr getCacheMgr();
 }

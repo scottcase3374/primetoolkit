@@ -14,7 +14,7 @@ import com.starcases.prime.PrimeToolKit;
  * @author scott
  *
  */
-public class CacheMgr
+public final class CacheMgr
 {
 	/**
 	 * manage any/all caching to files
@@ -34,23 +34,32 @@ public class CacheMgr
 		}
 	}
 
-	public CacheMgr()
-	{
-
-	}
+	private CacheMgr()
+	{}
 
 	/**
 	 *
 	 * @param <K>
 	 * @param <V>
-	 * @param name
+	 * @param cacheName
 	 * @param clearCache Remove all existing entries (at startup after persisted entries were reloaded).
 	 * @return
 	 */
-	public <K,V> Cache<K, V> getCache(final String name, final boolean clearCache)
+	public static <K,V> Cache<K, V> getCache(final String cacheName, final boolean clearCache)
 	{
-		final Cache<K,V> cache = embCacheMgr.getCache(name);
-		cache.clear();
+		final Cache<K,V> cache = embCacheMgr.getCache(cacheName);
+		if (clearCache)
+		{
+			cache.clear();
+		}
 		return cache;
+	}
+
+	/**
+	 * Dump cache statistics
+	 */
+	public static void dumpStats(final String cacheName)
+	{
+		PrimeToolKit.output("Cache [%s] stats() : %s", new Object[] {cacheName, embCacheMgr.getCache(cacheName).getAdvancedCache().getStats().toJson()});
 	}
 }

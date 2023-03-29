@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.starcases.prime.base.AbstractPrimeBaseGenerator;
 import com.starcases.prime.base.primetree.PrimeTree;
+import com.starcases.prime.cache.CacheMgr;
 import com.starcases.prime.cli.OutputOper;
 import com.starcases.prime.intfc.CollectionTrackerIntfc;
 import com.starcases.prime.intfc.PrimeRefIntfc;
@@ -499,11 +500,6 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 		{
 			// Prevent double init - various valid combinations of code can attempt that.
 			return;
-		}
-
-		if (this.prePrimed != null)
-		{
-			this.prePrimed.dumpStats();
 		}
 
 		genBases();

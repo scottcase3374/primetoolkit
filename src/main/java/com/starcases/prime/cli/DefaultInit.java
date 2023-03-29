@@ -37,6 +37,7 @@ import com.starcases.prime.base.primetree.LogPrimeTree;
 import com.starcases.prime.base.primetree.PrimeTree;
 import com.starcases.prime.base.triples.BaseReduceTriple;
 import com.starcases.prime.base.triples.LogBases3AllTriples;
+import com.starcases.prime.cache.CacheMgr;
 import com.starcases.prime.cli.MetricsOpts.MetricOpt;
 import com.starcases.prime.graph.export.ExportGML;
 import com.starcases.prime.graph.log.LogGraphStructure;
@@ -329,6 +330,8 @@ public class DefaultInit implements Runnable
 
 	private void actionInitDefaultPrimeContent()
 	{
+		final String CACHE_NAME = "primes";
+
 		LOG.info("enter actionInitDefaultPrimeContent");
 		actions.add(s -> {
 
@@ -336,26 +339,31 @@ public class DefaultInit implements Runnable
 
 			final String inputFolderPath = initOpts.getInputDataFolder();
 
-			final Cache<Integer,PrimeSubset> cache = factory.getCacheMgr().getCache("primes", initOpts.isClearCachedPrimes());
+			final Cache<Integer,PrimeSubset> cache = CacheMgr.getCache(CACHE_NAME, initOpts.isClearCachedPrimes());
 
-			final var alreadyLoaded = cache.get(1) != null;
+			// Use idx 2 which would be prime 3 for determining if cache was loaded / pre-loaded propertly. Since Primes 1 and 2 may be hardcoded in
+			// places, it is safer to use the 1st item which is never hardcoded.
+			final var cacheIdx0 = cache.get(0);
+			final var cacheIdx0idx2 = cacheIdx0 != null ? cacheIdx0.get(2) : -1;
+			final var alreadyLoaded = cacheIdx0idx2 == 3;
 			final var inputFoldExist = ensureFolderExist(inputFolderPath);
 			final var loadRawPrimes = initOpts.isLoadPrimes();
 
 			if (alreadyLoaded || !inputFoldExist || !loadRawPrimes)
 			{
-				LOG.info(String.format("Not loading raw primes. Previously persisted: [%b], Input folder exists: [%b], load-raw-primes[%b]",  alreadyLoaded, inputFoldExist, loadRawPrimes));
+				LOG.info(String.format("Cache NOT loading raw primes ; Cache Loaded: [%b], Input folder exists: [%b], load-raw-primes[%b]",  alreadyLoaded, inputFoldExist, loadRawPrimes));
 				primeSrc = factory.getPrimeSource();
 			}
 			else if (loadRawPrimes)
 			{
-				LOG.info("Cache primes from raw files");
+				LOG.info(String.format("Cache primes from raw files ; Cache Loaded: [%b], Input folder exists: [%b], load-raw-primes[%b]",  alreadyLoaded, inputFoldExist, loadRawPrimes));
+				final PrePrimed prePrimed = new PrePrimed(cache, Path.of(replaceTildeHome(inputFolderPath)));
+				prePrimed.load();
 
-					final PrePrimed prePrimed = new PrePrimed(cache, Path.of(replaceTildeHome(inputFolderPath)));
-					prePrimed.load();
-
-					primeSrc = factory.getPrimeSource(prePrimed);
+				primeSrc = factory.getPrimeSource(prePrimed);
 			}
+
+			// "CacheMgr dumpStats(CACHE_NAME);"
 
 			if (LOG.isLoggable(Level.FINE))
 			{

@@ -37,12 +37,6 @@ import com.starcases.prime.intfc.PrimeSourceFactoryIntfc;
 public final class PTKFactory
 {
 	/**
-	 * manage any/all caching
-	 */
-	@Getter
-	private static final CacheMgr CACHE_MGR = new CacheMgr();
-
-	/**
 	 * Maximum number of primes to handle.
 	 */
 	@Getter
@@ -126,12 +120,6 @@ public final class PTKFactory
 						final var primeSrc = getPrimeSource();
 						primeSrc.setPrePrimed(prePrimed);
 						return primeSrc;
-					}
-
-					@Override
-					public CacheMgr getCacheMgr()
-					{
-						return CACHE_MGR;
 					}
 
 					@Override

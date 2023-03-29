@@ -111,14 +111,6 @@ public final class PrePrimed
 	}
 
 	/**
-	 * Dump cache statistics
-	 */
-	public void dumpStats()
-	{
-		PrimeToolKit.output("PrePrimed: stats() : %s", cache.getAdvancedCache().getStats().toJson());
-	}
-
-	/**
 	 * Load pre-generated primes.
 	 *
 	 *  NOTE: NOT an example of good programming style... too dense / hard to read.
