@@ -1,0 +1,29 @@
+{
+	"info": {
+		"_postman_id": "8c695a62-06fb-4390-9777-7f36ee1d66e9",
+		"name": "primesql",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "10810314"
+	},
+	"item": [
+		{
+			"name": "localhost:8690",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "select * where index >=4 < 10 BASE THREETRIPLE contains [ 3] ;"
+				},
+				"url": {
+					"raw": "localhost:8690",
+					"host": [
+						"localhost"
+					],
+					"port": "8690"
+				}
+			},
+			"response": []
+		}
+	]
+}
