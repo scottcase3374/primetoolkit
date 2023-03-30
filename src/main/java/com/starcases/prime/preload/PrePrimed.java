@@ -103,10 +103,10 @@ public final class PrePrimed
 	 * @param idx
 	 * @return
 	 */
-	public long retrieve(final int idx)
+	public long retrieve(final long idx)
 	{
-		final int offset = idx % SUBSET_SIZE;
-		final int subsetId = Math.max(idx >> SUBSET_BITS, 0);
+		final int offset = (int)(idx % SUBSET_SIZE);
+		final long subsetId = Math.max(idx >> SUBSET_BITS, 0);
 		return cache.get(subsetId).get(offset);
 	}
 

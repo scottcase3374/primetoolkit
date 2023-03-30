@@ -13,9 +13,5 @@ public class PrimeSqlResult
 
 	@Getter
 	@Setter
-	private String baseType;
-
-	@Getter
-	@Setter
 	private long [] longArray;
 }

@@ -242,7 +242,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	{
 		if (prePrimed != null)
 		{
-			final long expectedPrime = prePrimed.retrieve((int)idx);
+			final long expectedPrime = prePrimed.retrieve(idx);
 
 			if (newPrime != expectedPrime && LOG.isLoggable(Level.SEVERE) && logMismatch.compareAndSet(true, false) )
 			{
@@ -557,6 +557,12 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 				BigInteger.valueOf(primeSum).isProbablePrime(confidenceLevel);
 	}
 
+	/**
+	 * This comes from the PrimeSourceFactoryIntfc so it will not be available
+	 * once initial factory processing completes the construction / initializaiton
+	 * of the prime source instance. The "factory" interface was an
+	 * intentional choice over using additional constructor args.
+	 */
 	@Override
 	public void setPrePrimed(final PrePrimed prePrimed)
 	{

@@ -19,12 +19,15 @@ LBRACKET	: '['		;
 RBRACKET	: ']'		;
 COMMA		: ','		;
 
-MAX			: [mM][aA][xX];
-SELECT 		: [sS][eE][lL][eE][cC][tT];
-WHERE		: [wW][hH][eE][rR][eE];
-INDEX		: [iI][nN][dD][eE][xX];
+ALL			: [aA][lL][lL];
+BASES		: [bB][aA][sS][eE][sS];
 BASE		: [bB][aA][sS][eE];
 CONTAINS	: [cC][oO][nN][tT][aA][iI][nN][sS];
+INDEX		: [iI][nN][dD][eE][xX];
+MAX			: [mM][aA][xX];
+PRIMES		: [pP][rR][iI][mM][eE][sS];
+SELECT 		: [sS][eE][lL][eE][cC][tT];
+WHERE		: [wW][hH][eE][rR][eE];
 
 ID			: [a-zA-Z]+[a-zA-Z0-9]*;
 WS 			: [ \t\r\n]+ -> skip;
@@ -42,7 +45,13 @@ stmt :
 	;
 
 select :
-		SELECT SPLAT? WHERE idx_bounds base_match?
+		SELECT select_scope WHERE idx_bounds base_match?
+	;
+
+select_scope :
+		SPLAT
+	|	PRIMES
+	|	BASES
 	;
 
 idx_bounds :
