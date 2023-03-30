@@ -193,16 +193,18 @@ public class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 	{
 		switch(ctx.getChild(0).getText().toUpperCase(Locale.ENGLISH))
 		{
-			case "*":
-				exclude = excludeNothing;
-				break;
-
 			case "PRIMES":
 				exclude = excludeBases;
 				break;
 
 			case "BASES":
 				exclude = excludePrime;
+				break;
+
+			case "*":
+			default:
+				exclude = excludeNothing;
+				break;
 		}
 		return visitChildren(ctx);
 	}

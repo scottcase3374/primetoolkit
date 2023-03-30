@@ -29,7 +29,7 @@ PRIMES		: [pP][rR][iI][mM][eE][sS];
 SELECT 		: [sS][eE][lL][eE][cC][tT];
 WHERE		: [wW][hH][eE][rR][eE];
 
-ID			: [a-zA-Z]+[a-zA-Z0-9]*;
+ID			: [a-zA-Z]+[a-zA-Z0-9_]*;
 WS 			: [ \t\r\n]+ -> skip;
 
 root :

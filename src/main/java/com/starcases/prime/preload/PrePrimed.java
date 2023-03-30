@@ -107,7 +107,9 @@ public final class PrePrimed
 	{
 		final int offset = (int)(idx % SUBSET_SIZE);
 		final long subsetId = Math.max(idx >> SUBSET_BITS, 0);
-		return cache.get(subsetId).get(offset);
+		return cache
+				.get(subsetId)
+				.get(offset);
 	}
 
 	/**
