@@ -1,4 +1,4 @@
-package com.starcases.prime;
+package com.starcases.prime.impl;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -8,11 +8,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.starcases.prime.PTKFactory;
 import com.starcases.prime.base.PrimeBaseContainer;
-import com.starcases.prime.impl.PrimeRef;
-import com.starcases.prime.impl.PrimeSource;
 import com.starcases.prime.intfc.FactoryIntfc;
-import com.starcases.prime.intfc.PrimeSourceIntfc;
+import com.starcases.prime.intfc.PrimeSourceFactoryIntfc;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -32,7 +31,7 @@ class PrimeSourceUnitTest
 	@Setter
 	@Getter
 	@NonNull
-	private PrimeSourceIntfc primeSrc;
+	private PrimeSourceFactoryIntfc primeSrc;
 
 	/**
 	 * unit test pre-init

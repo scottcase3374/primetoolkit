@@ -111,7 +111,6 @@ public class ExportGML
 	 */
 	public void export()
 	{
-		primeSrc.init();
 		if (LOG.isLoggable(Level.INFO))
 		{
 			LOG.info("Running Export");

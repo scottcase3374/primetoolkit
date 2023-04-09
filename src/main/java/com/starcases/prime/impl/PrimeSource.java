@@ -15,7 +15,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.starcases.prime.base.AbstractPrimeBaseGenerator;
 import com.starcases.prime.base.primetree.PrimeTree;
-import com.starcases.prime.cache.CacheMgr;
 import com.starcases.prime.cli.OutputOper;
 import com.starcases.prime.intfc.CollectionTrackerIntfc;
 import com.starcases.prime.intfc.PrimeRefIntfc;
@@ -242,7 +241,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	{
 		if (prePrimed != null)
 		{
-			final long expectedPrime = prePrimed.retrieve(idx);
+			final long expectedPrime = this.getPrimeForIdx(newPrime).orElse(-1L);
 
 			if (newPrime != expectedPrime && LOG.isLoggable(Level.SEVERE) && logMismatch.compareAndSet(true, false) )
 			{
@@ -342,8 +341,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	}
 
 	/**
-	 * At the moment, this is only public because I want to ensure
-	 * this logic is correct through some unit tests.  This is
+	 * This is
 	 * fundamentally calculating log-base-2 (+1) for the value. Slightly
 	 * different implementations can have different performance
 	 * impacts. This can be called a very large number of times
@@ -352,7 +350,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	 * @param value
 	 * @return
 	 */
-	public int getBitsRequired(@Min(0) final long value)
+	int getBitsRequired(@Min(0) final long value)
 	{
 		final long [] masks = { 0xFFL, 0xFF00L, 0xFF000000L,  0xFF00000000000000L };
 		final int [] bitStart = {7, 15, 31, 63};
@@ -373,6 +371,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 		}
 		return ret;
 	}
+
 
 	/**
 	 * Generate primes/bases through permutations of existing primes/bases.
@@ -405,7 +404,12 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 					.map(OptionalLong::getAsLong)
 					.reduce(optCurPrime.orElse(0), (a, b) -> a+b);
 
-			// if exceed known prime then iteration is done - limits useless work
+			// FIXME There is a problem with a few primes getting missed related to the comment
+			// that follows this related to "limits useless work". The permutation
+			// process based on a binary bitmask of primes to sum doesn't produce a stable sum
+			// by simply incrementing the binary bitmask value by 1 across all values.
+
+			// If exceed known prime then iteration is done - limits useless work
 			doLoop = permutationSum - sumCeiling <= 0;
 			if (doLoop)
 			{

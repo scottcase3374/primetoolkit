@@ -9,8 +9,6 @@ import java.util.stream.Stream;
 
 import jakarta.validation.constraints.Min;
 
-import com.starcases.prime.impl.GenerationProgress;
-
 /**
  *
  * Main interface for needs related to Prime / base
@@ -25,23 +23,7 @@ import com.starcases.prime.impl.GenerationProgress;
  */
 public interface PrimeSourceIntfc extends Serializable
 {
-	/**
-	 * output progress of initial base creation.
-	 * @param doDisplay
-	 */
-	void setDisplayProgress(GenerationProgress progress);
 
-	/**
-	 * set flag indicating whether to output metrics regarding the
-	 * prime trees generated for initial base.
-	 * @param doDisplay
-	 */
-	void setDisplayPrimeTreeMetrics(boolean doDisplay);
-
-	/**
-	 * DefaultInit base info.
-	 */
-	void init();
 
 	/**
 	 * Iterator to PrimeRefIntfc instances.

@@ -7,7 +7,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.starcases.prime.base.PrimeBaseContainer;
 import com.starcases.prime.impl.PrimeRef;
 import com.starcases.prime.intfc.FactoryIntfc;
-import com.starcases.prime.intfc.PrimeSourceIntfc;
+import com.starcases.prime.intfc.PrimeSourceFactoryIntfc;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -25,7 +25,7 @@ class TripleUnitTest
 	@Getter
 	@Setter
 	@NonNull
-	private PrimeSourceIntfc primeSrc;
+	private PrimeSourceFactoryIntfc primeSrc;
 
 	/**
 	 * pre-Initialize test

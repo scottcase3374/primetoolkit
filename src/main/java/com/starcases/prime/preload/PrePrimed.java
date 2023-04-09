@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.OptionalLong;
 import java.util.StringTokenizer;
 import java.util.stream.Stream;
 import java.util.zip.ZipFile;
@@ -98,18 +99,17 @@ public final class PrePrimed
 	}
 
 	/**
-	 * get item from batches of indexed containers in cache
+	 * get prime/factor from batches of indexed containers in cache
 	 *
 	 * @param idx
-	 * @return
+	 * @return prime or -1
 	 */
-	public long retrieve(final long idx)
+	public OptionalLong retrieve(final long idx)
 	{
 		final int offset = (int)(idx % SUBSET_SIZE);
 		final long subsetId = Math.max(idx >> SUBSET_BITS, 0);
-		return cache
-				.get(subsetId)
-				.get(offset);
+		final var subset = cache.get(subsetId);
+		return subset != null ? OptionalLong.of(subset.get(offset)) : OptionalLong.empty();
 	}
 
 	/**

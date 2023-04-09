@@ -6,6 +6,11 @@
 This is a pet project. It is an example of my IT skills applied to an area of math
 in which I am interested. It serves as both a skills demonstration and a platform for trying out new technologies.
 
+## Terminology
+The term 'Prime Base' or the shorter version of just 'base' represents some combination of data that represents a particular prime number. The 2 general representations are:
+- The sum of M unique prime factors (which includes 1 and any prime number) which result in a prime number. i.e. [1, 7, 11] is a base for the prime number 19.
+- The same general constraint as the previous item but each prime in the base has a multiplier.  This representation is generally used to reduce the primes in the base to some set of small primes such as primes [1,2,3] with multipliers of [1,3,4] for the prime 19. Other constraints can be added to decide the exact reduction method.
+
 ## Description
 Primes can have bases generated via different methodologies, etc - such as where Prime N is the sum of Prime N-1 + some small set of primes in the range Prime 1 to N-2. So a base can be a set of primes summed. Primes can also be represented as 2 parts where one part is Prime[n-1] and the other part is a reference to collection of primes (aka a prefix or tree of primes) and both parts are summed.
 
@@ -344,11 +349,12 @@ Issues
 - The internal algorithm for generating the "next prime" has a flaw where a prime is skipped once in a while. This is part of the reason that caching plus loading of 50 million known primes is implemented - which allows comparison with known primes to enable identification of missed primes. Of course, this only works when you are working within the limits of the known primes that are loaded.
 
 ## ToDo
+	- Improve package organization, use module system and implement service loader
+	- Should not generate default base as part of prime selection/load; construct default base just like other bases.
 	- Increase test coverage.
-	- Improve metrics.
+	- Improve metrics handling.
 	- Improved cache support.
 	- More generic / useful methods for identifying patterns in the bases/data.
 	- More remote command support.
 	- Improved reporting / visualization.
-	- Break up the monolith and use a more event oriented design.
-		- Use Zeromq (Java implementation) to enable higher scaling.
+	- Break up the monolith and use a more event oriented design. Details TBD.

@@ -84,7 +84,6 @@ public class PrimeGrapherBase
 		LOG.fine("PrimeGrapherBase()");
 		this.primeSrc = primeSrc;
 		this.baseType = baseType;
-		this.primeSrc.init();
 
 		final var lgraph = new DefaultListenableGraph<PrimeRefIntfc, DefaultEdge>(primeGraphBuilder.build(), true);
 		graphs.stream().forEach(lgraph::addGraphListener);

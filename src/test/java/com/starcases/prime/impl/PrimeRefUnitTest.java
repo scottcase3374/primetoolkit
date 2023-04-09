@@ -1,13 +1,13 @@
-package com.starcases.prime;
+package com.starcases.prime.impl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.starcases.prime.PTKFactory;
 import com.starcases.prime.base.PrimeBaseContainer;
-import com.starcases.prime.impl.PrimeRef;
 import com.starcases.prime.intfc.FactoryIntfc;
-import com.starcases.prime.intfc.PrimeSourceIntfc;
+import com.starcases.prime.intfc.PrimeSourceFactoryIntfc;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -25,7 +25,7 @@ class PrimeRefUnitTest
 	@Getter
 	@Setter
 	@NonNull
-	private PrimeSourceIntfc primeSrc;
+	private PrimeSourceFactoryIntfc primeSrc;
 
 	/**
 	 * unit test pre-init
