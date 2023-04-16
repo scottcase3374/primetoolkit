@@ -49,7 +49,7 @@ public class CompactTreeLayoutPrimesGraph extends JFrame
         final var component = new mxGraphComponent(jgxAdapter);
         component.setConnectable(false);
         component.getGraph().setAllowDanglingEdges(false);
-        getContentPane().add(component);
+        super.getContentPane().add(component);
 
         final var layout = new mxCompactTreeLayout(jgxAdapter, false, false);
         layout.setEdgeRouting(true);

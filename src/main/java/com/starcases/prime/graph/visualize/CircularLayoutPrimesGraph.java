@@ -48,7 +48,7 @@ public class CircularLayoutPrimesGraph extends JFrame
         final mxGraphComponent component = new mxGraphComponent(jgxAdapter);
         component.setConnectable(false);
         component.getGraph().setAllowDanglingEdges(false);
-        getContentPane().add(component);
+        super.getContentPane().add(component);
 
         // circle layout
         final var radius = 100;

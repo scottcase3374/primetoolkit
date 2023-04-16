@@ -9,6 +9,7 @@ import com.starcases.prime.PrimeToolKit;
 import com.starcases.prime.intfc.CollectionTrackerIntfc;
 
 import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
+import org.eclipse.collections.api.map.ConcurrentMutableMap;
 import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -30,13 +31,13 @@ public class CollectionTrackerImpl implements CollectionTrackerIntfc
 	 * Track source primes (tree/prefix)
 	 */
 	@Getter(AccessLevel.PRIVATE)
-	private final ConcurrentHashMap<Long, PData> sourcePrimes = new ConcurrentHashMap<>(500);
+	private final ConcurrentMutableMap<Long, PData> sourcePrimes = new ConcurrentHashMap<>(500);
 
 	/**
 	 * Track counts of each source prime entry
 	 */
 	@Getter(AccessLevel.PRIVATE)
-	private final ConcurrentHashMap<Long, Long> useCounts = new ConcurrentHashMap<>(500);
+	private final ConcurrentMutableMap<Long, Long> useCounts = new ConcurrentHashMap<>(500);
 
 	/**
 	 * Track the specified collection

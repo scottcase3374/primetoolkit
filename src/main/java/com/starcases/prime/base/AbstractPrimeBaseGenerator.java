@@ -146,8 +146,8 @@ public abstract class AbstractPrimeBaseGenerator implements PrimeBaseGenerateInt
 					ABSTRACT_LOG.info("Base generation end time: " + end);
 					final var diff = ChronoUnit.MILLIS.between(start, end);
 					final var milliRemain = diff % 1_000;
-					final var secondRemain = (diff / 1_000) % 60;
-					final var minuteRemain = (diff / 60_000) % 60;
+					final var secondRemain = diff / 1_000 % 60;
+					final var minuteRemain = diff / 60_000 % 60;
 
 					final var timeDisplayFmt = new DecimalFormat("###,###");
 					ABSTRACT_LOG.info(String.format("Base generation: %s min %s sec %s milli",

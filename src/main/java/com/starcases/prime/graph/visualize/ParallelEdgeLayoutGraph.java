@@ -43,7 +43,7 @@ public class ParallelEdgeLayoutGraph extends JFrame
         final var component = new mxGraphComponent(jgxAdapter);
         component.setConnectable(false);
         component.getGraph().setAllowDanglingEdges(false);
-        getContentPane().add(component);
+        super.getContentPane().add(component);
 
         //parallel edge layout - not useful at moment
         final var layout = new mxParallelEdgeLayout(jgxAdapter, 120);

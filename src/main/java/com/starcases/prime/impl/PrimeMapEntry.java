@@ -8,21 +8,21 @@ import lombok.Setter;
 /**
  * Provides a mapping from a prime to a prime ref.
  */
-class PrimeMapEntry
+public class PrimeMapEntry
 {
 	/**
 	 * Current prime
 	 */
 	@Getter
 	@Setter
-	private long prime;
+	protected long prime = -1;
 
 	/**
 	 * related prime ref.
 	 */
 	@Getter
 	@Setter
-	private PrimeRefIntfc primeRef;
+	protected PrimeRefIntfc primeRef;
 
 	/**
 	 * Constructor
@@ -33,5 +33,12 @@ class PrimeMapEntry
 	{
 		this.prime = prime;
 		this.primeRef = primeRef;
+	}
+
+	/**
+	 * No arg constructor to appease code-analysis/metrics
+	 */
+	public PrimeMapEntry()
+	{
 	}
 }

@@ -11,8 +11,8 @@
 	</rule>
 
 	<rule ref="category/java/errorprone.xml" >
-	 <exclude name="DataflowAnomalyAnalysis"/>
-	  <exclude name="EmptyStatementNotInLoop"/>
+	 	<exclude name="DataflowAnomalyAnalysis"/>
+	  	<exclude name="EmptyStatementNotInLoop"/>
 	</rule>
 
 	 <rule ref="category/java/bestpractices.xml">
@@ -21,10 +21,17 @@
 	  </rule>
 
 	  <rule ref="category/java/codestyle.xml" >
-	  <exclude name="LongVariable"/>
-	  <exclude name="AvoidFinalLocalVariable"/>
-	  <exclude name="AtLeastOneConstructor"/>
-	   <exclude name="UnnecessaryConstructor"/>
+<!-- General work in progress to ignore items for generate artifacts; workaround in Eclipse by selecting flag to exclude generated items for codestyle, etc.
+	<properties>
+	      	<property name="violationSuppressXPath" value="./ancestor::ClassOrInterfaceDeclaration[contains(@Image, 'antlrimpl')]"/>
+	    </properties> -->
+	  	<exclude name="LongVariable"/>
+	  	<exclude name="AvoidFinalLocalVariable"/>
+	  	<exclude name="AtLeastOneConstructor"/>
+	   	<exclude name="UnnecessaryConstructor"/>
+	   	<exclude name="FinalParameterInAbstractMethod"/>
+	   	<exclude name="ShortVariable"/>
+	   	<exclude name="TooManyStaticImports"/>
 	  </rule>
 
 </ruleset>

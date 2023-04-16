@@ -62,14 +62,14 @@ public final class PrePrimed
 	 * Cache object - both in-memory and persisted data
 	 */
 	@Getter(AccessLevel.PRIVATE)
-	private final Cache<Integer,PrimeSubset> cache;
+	private final Cache<Long,PrimeSubset> cache;
 
 	/**
 	 * Break linear index range into indexed batches of indexed items.
 	 */
 	@Getter(AccessLevel.PRIVATE)
 	@Setter(AccessLevel.PRIVATE)
-	private int subsetIdx;
+	private long subsetIdx;
 
 	private static final String ZIP_FOLDER_ISSUE_MSG = "Problem with input zip-file or folder";
 
@@ -78,17 +78,17 @@ public final class PrePrimed
 	 *
 	 * @param sourceFolders
 	 */
-	public PrePrimed(final Cache<Integer, PrimeSubset> cache, final Path ... sourceFolders)
+	public PrePrimed(final Cache<Long, PrimeSubset> cache, final Path ... sourceFolders)
 	{
 		this.cache = cache;
 		this.sourceFolders = sourceFolders.clone();
 		subset.alloc(SUBSET_SIZE);
 	}
 
-	private void assign(final int idx, final long val)
+	private void assign(final long idx, final long val)
 	{
-		final int offset = idx % SUBSET_SIZE;
-		final int subsetId = Math.max(idx >> SUBSET_BITS, 0);
+		final int offset = (int)(idx % SUBSET_SIZE);
+		final long subsetId = Math.max(idx >> SUBSET_BITS, 0);
 		if (subsetId != subsetIdx)
 		{
 			cache.put(subsetIdx++, subset);
@@ -128,7 +128,7 @@ public final class PrePrimed
 			.getStats()
 			.setStatisticsEnabled(true);
 
-		// Hard-code 1 into the set of values - it isn't part of the standard dataset (1t is not considered prime).
+		// Hard-code 1 into the set of values - it isn't part of the standard dataset (it is not considered prime per modern definitions).
 		assign(index[0]++, 1L);
 
 		Arrays.stream(sourceFolders).forEach(
@@ -146,21 +146,7 @@ public final class PrePrimed
 	 									try
 	 									{
 	 										final Path tmpPath = fileRef;
-	 										if (!tmpPath.getFileName().toString().endsWith(".zip"))
-	 										{
-		 										Files
-		 											.lines(tmpPath)
-		 											.skip(1)
-		 											.forEach( line ->
-		 											{
-														final StringTokenizer tokenizer = new StringTokenizer(line);
-														while(tokenizer.hasMoreTokens())
-														{
-															assign(index[0]++, Long.valueOf(tokenizer.nextToken()));
-														}
-		 											});
-	 										}
-	 										else
+	 										if (tmpPath.getFileName().toString().endsWith(".zip"))
 	 										{
 	 											try (ZipFile tmpZipFile = new ZipFile(tmpPath.toFile()))
 	 											{
@@ -179,16 +165,31 @@ public final class PrePrimed
 																			final StringTokenizer tokenizer = new StringTokenizer(line);
 																			while(tokenizer.hasMoreTokens())
 																			{
-																				assign(index[0]++, Long.valueOf(tokenizer.nextToken()));
+																				assign(index[0]++, Long.parseLong(tokenizer.nextToken()));
 																			}
 							 											});
 					 											}
-					 											catch(IOException e2)
+					 											catch(final IOException e2)
 					 											{
 					 												PrimeToolKit.output("%s", ZIP_FOLDER_ISSUE_MSG);
 					 											}
 															});
-	 										}}
+	 											}
+	 										}
+	 										else
+	 										{
+		 										Files
+		 											.lines(tmpPath)
+		 											.skip(1)
+		 											.forEach( line ->
+		 											{
+														final StringTokenizer tokenizer = new StringTokenizer(line);
+														while(tokenizer.hasMoreTokens())
+														{
+															assign(index[0]++, Long.parseLong(tokenizer.nextToken()));
+														}
+		 											});
+	 										}
 	 									}
 	 									catch(IOException e)
 	 									{

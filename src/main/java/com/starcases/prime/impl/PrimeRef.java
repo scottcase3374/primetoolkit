@@ -88,6 +88,7 @@ public class PrimeRef implements PrimeRefIntfc
 		primeSrc = primeSrcIntfc;
 	}
 
+	@SuppressWarnings("PMD.ConfusingTernary")
 	@Override
 	public boolean equals(final Object obj)
 	{

@@ -247,6 +247,10 @@ public class DefaultInit implements Runnable
 		catch(final IOException e)
 		{
 			// nothing to do; returns null
+			if (LOG.isLoggable(Level.SEVERE))
+			{
+				LOG.severe(e.toString());
+			}
 		}
 		return ret;
 	}
@@ -317,7 +321,10 @@ public class DefaultInit implements Runnable
 			actions.add(s -> {
 				try
 				{
-					LOG.info("DefaultInit::actionEnableCmdListener - SQL command listener port:" + baseOpts.getCmdListenerPort());
+					if (LOG.isLoggable(Level.INFO))
+					{
+						LOG.info("DefaultInit::actionEnableCmdListener - SQL command listener port:" + baseOpts.getCmdListenerPort());
+					}
 					new CmdServer(primeSrc, baseOpts.getCmdListenerPort()).run();
 				}
 				catch(final InterruptedException e)
@@ -339,24 +346,30 @@ public class DefaultInit implements Runnable
 
 			final String inputFolderPath = initOpts.getInputDataFolder();
 
-			final Cache<Integer,PrimeSubset> cache = CacheMgr.getCache(CACHE_NAME, initOpts.isClearCachedPrimes());
+			final Cache<Long,PrimeSubset> cache = CacheMgr.getCache(CACHE_NAME, initOpts.isClearCachedPrimes());
 
 			// Use idx 2 which would be prime 3 for determining if cache was loaded / pre-loaded propertly. Since Primes 1 and 2 may be hardcoded in
 			// places, it is safer to use the 1st item which is never hardcoded.
-			final var cacheIdx0 = cache.get(0);
-			final var cacheIdx0idx2 = cacheIdx0 != null ? cacheIdx0.get(2) : -1;
+			final var cacheIdx0 = cache.get(0L);
+			final var cacheIdx0idx2 = cacheIdx0 != null ? cacheIdx0.get(2) : -1L;
 			final var alreadyLoaded = cacheIdx0idx2 == 3;
 			final var inputFoldExist = ensureFolderExist(inputFolderPath);
 			final var loadRawPrimes = initOpts.isLoadPrimes();
 
 			if (alreadyLoaded || !inputFoldExist || !loadRawPrimes)
 			{
-				LOG.info(String.format("Cache NOT loading raw primes ; Cache Loaded: [%b], Input folder exists: [%b], load-raw-primes[%b]",  alreadyLoaded, inputFoldExist, loadRawPrimes));
+				if (LOG.isLoggable(Level.INFO))
+				{
+					LOG.info(String.format("Cache NOT loading raw primes ; Cache Loaded: [%b], Input folder exists: [%b], load-raw-primes[%b]",  alreadyLoaded, inputFoldExist, loadRawPrimes));
+				}
 				primeSrc = factory.getPrimeSource();
 			}
 			else if (loadRawPrimes)
 			{
-				LOG.info(String.format("Cache primes from raw files ; Cache Loaded: [%b], Input folder exists: [%b], load-raw-primes[%b]",  alreadyLoaded, inputFoldExist, loadRawPrimes));
+				if (LOG.isLoggable(Level.INFO))
+				{
+					LOG.info(String.format("Cache primes from raw files ; Cache Loaded: [%b], Input folder exists: [%b], load-raw-primes[%b]",  alreadyLoaded, inputFoldExist, loadRawPrimes));
+				}
 				final PrePrimed prePrimed = new PrePrimed(cache, Path.of(replaceTildeHome(inputFolderPath)));
 				prePrimed.load();
 
@@ -367,7 +380,10 @@ public class DefaultInit implements Runnable
 
 			if (LOG.isLoggable(Level.FINE))
 			{
-				LOG.fine("DefaultInit::actionInitDefaultPrimeContent - primeSource init");
+				if (LOG.isLoggable(Level.INFO))
+				{
+					LOG.fine("DefaultInit::actionInitDefaultPrimeContent - primeSource init");
+				}
 			}
 
 			if (outputOpts.getOutputOpers().contains(OutputOper.PROGRESS))

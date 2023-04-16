@@ -140,7 +140,7 @@ public final class PrimeToolKit
 	 */
 	public static void output(final String format, final Object...params)
 	{
-		PrimeToolKit.output("stdout", format, params);
+		output("stdout", format, params);
 	}
 
 	/**
@@ -166,7 +166,7 @@ public final class PrimeToolKit
 	 */
 	public static void dbgOutput(final String format, final Object...params)
 	{
-		PrimeToolKit.output(BaseTypes.DEFAULT,format, params);
+		output(BaseTypes.DEFAULT,format, params);
 	}
 }
 

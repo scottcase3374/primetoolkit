@@ -45,13 +45,19 @@ public class BasePrefixes extends AbstractPrimeBaseGenerator
 		final var prStream = primeSrc.getPrimeRefStream(preferParallel);
 		prStream.forEach(pr ->
 				{
-					LOG.fine("basePrefixes stream - for each: " + pr.getPrime());
+					if (LOG.isLoggable(Level.FINE))
+					{
+						LOG.fine("basePrefixes stream - for each: " + pr.getPrime());
+					}
 
 					final Optional<LongTaskTimer.Sample> timer = MetricMonitor.longTimer(BaseTypes.PREFIX);
 					try
 					{
 						final var origBases = pr.getPrimeBaseData().getPrimeBases().get(0);
-						LOG.fine("basePrefixes stream - add prime base: " + origBases);
+						if (LOG.isLoggable(Level.FINE))
+						{
+							LOG.fine("basePrefixes stream - add prime base: " + origBases);
+						}
 						pr.getPrimeBaseData().addPrimeBases(Lists.mutable.of(origBases), BaseTypes.PREFIX);
 					}
 					finally

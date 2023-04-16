@@ -107,7 +107,7 @@ public class PrimeTree extends AbstractPrimeBaseGenerator
 			.forEach(
 				curPrime ->
 				{
-					if (this.baseGenerationOutput && LOG.isLoggable(Level.INFO))
+					if (this.baseGenerationOutput && LOG.isLoggable(Level.FINE))
 					{
 						LOG.fine("genBases() - prime " + curPrime.getPrime());
 					}
@@ -119,7 +119,7 @@ public class PrimeTree extends AbstractPrimeBaseGenerator
 					curPrimePrefixBases.forEach(basePrime ->
 						{
 							final var prime = basePrime;
-							if (this.isBaseGenerationOutput() && LOG.isLoggable(Level.INFO))
+							if (this.isBaseGenerationOutput() && LOG.isLoggable(Level.FINE))
 							{
 								LOG.fine(String.format("handling prime[%d] base-index [%d] base-prime [%d]", curPrime.getPrime(), basePrime, prime));
 							}

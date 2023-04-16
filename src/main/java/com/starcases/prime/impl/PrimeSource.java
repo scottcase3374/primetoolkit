@@ -161,7 +161,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	 * Multi-level container for the tree of primes.
 	 */
 	@Getter(AccessLevel.PRIVATE)
-	private PrimeTree primeTree;
+	private PrimeTree primeTree = null;
 
 	//
 	// initialization
@@ -180,7 +180,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 			@NonNull final ImmutableList<Consumer<PrimeSourceIntfc>> consumersSetPrimeSrc,
 			@Min(1) final int confidenceLevel,
 			@NonNull final BiFunction<Long, MutableList<ImmutableLongCollection>, PrimeRefIntfc> primeRefRawCtor,
-			final CollectionTrackerIntfc collTrack
+			@NonNull final CollectionTrackerIntfc collTrack
 			)
 	{
 		super();
@@ -216,7 +216,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 			final MutableList<ImmutableLongCollection> baseSets
 			)
 	{
-		final PrimeRefIntfc ret = primeRefRawCtor.apply(Long.valueOf(nextPrimeIdx), baseSets);
+		final PrimeRefIntfc ret = primeRefRawCtor.apply(nextPrimeIdx, baseSets);
 
 		checkMismatch("addPrimeRef", nextPrimeIdx, newPrime);
 
@@ -237,7 +237,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	 * @param idx
 	 * @param newPrime
 	 */
-	private void checkMismatch(final String src, final long idx, final long newPrime)
+	private void checkMismatch(final String src, @Min(0) final long idx, @Min(1) final long newPrime)
 	{
 		if (prePrimed != null)
 		{
@@ -312,9 +312,9 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	 * @param optCurPrime
 	 * @return
 	 */
-	private boolean genByListPermutation(final int nextPrimeIdx, final OptionalLong optCurPrime)
+	private boolean genByListPermutation(@Min(0) final int nextPrimeIdx, @Min(1) final OptionalLong optCurPrime)
 	{
-		boolean [] found = {false};
+		final boolean [] found = {false};
 		optCurPrime.ifPresent(curPrime ->
 						{
 							// NOTE: Selection process must pick lowest item
@@ -337,6 +337,10 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 									);
 							});
 
+		if (LOG.isLoggable(Level.INFO))
+		{
+			LOG.info("gen by list permutation - foundPrime idx:" + nextPrimeIdx + " prime:" + optCurPrime.getAsLong());
+		}
 		return found[0];
 	}
 
@@ -378,7 +382,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	 * @param optCurPrime
 	 * @return
 	 */
-	private boolean genByPrimePermutation(final int idx, final OptionalLong optCurPrime)
+	private boolean genByPrimePermutation(@Min(0) final int idx, @Min(1) final OptionalLong optCurPrime)
 	{
 		// Represents a X-bit search space of indexes for primes to add for next Prime.
 		final var numBitsForPrimeCount =  getBitsRequired(optCurPrime.getAsLong());
@@ -394,7 +398,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 
 		boolean foundPrime = false;
 
-		var doLoop = !(primeIndexPermutation.equals(primeIndexMaxPermutation));
+		var doLoop = !primeIndexPermutation.equals(primeIndexMaxPermutation);
 		while (doLoop)
 		{
 			final long permutationSum = primeIndexPermutation
@@ -434,6 +438,11 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 				}
 			}
 		}
+
+		if (LOG.isLoggable(Level.INFO))
+		{
+			LOG.info("gen by prime permutation - foundPrime idx:" + idx + " prime:" + optCurPrime.getAsLong());
+		}
 		return foundPrime;
 	}
 
@@ -458,7 +467,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	}
 
 	@Override
-	public Optional<PrimeRefIntfc> getPrimeRefForPrime(final LongSupplier longSupplier)
+	public Optional<PrimeRefIntfc> getPrimeRefForPrime(@NonNull final LongSupplier longSupplier)
 	{
 		return this.getPrimeRefForIdx(primeToIdxMap.get(longSupplier.getAsLong()));
 	}
@@ -476,7 +485,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	}
 
 	@Override
-	public Stream<PrimeRefIntfc> getPrimeRefStream(final long skipCount, final boolean preferParallel)
+	public Stream<PrimeRefIntfc> getPrimeRefStream(@Min(1) final long skipCount, final boolean preferParallel)
 	{
 		return (preferParallel ? idxToPrimeMap.values().stream().skip(skipCount).parallel() : idxToPrimeMap.values().stream().skip(skipCount)).map(PrimeMapEntry::getPrimeRef);
 	}
@@ -525,12 +534,12 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	 * for base prime generation.
 	 */
 	@Override
-	public void setDisplayProgress(final GenerationProgress progress)
+	public void setDisplayProgress(@NonNull final GenerationProgress progress)
 	{
 		this.progress = progress;
 	}
 
-	private void updateMaps(final long idx, final long newPrime, final PrimeRefIntfc ref)
+	private void updateMaps(@Min(0) final long idx, @Min(1) final long newPrime, @NonNull final PrimeRefIntfc ref)
 	{
 		this.idxToPrimeMap.put(idx, new PrimeMapEntry(newPrime, ref));
 		this.primeToIdxMap.put(newPrime, idx);

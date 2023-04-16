@@ -27,6 +27,8 @@ import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 
 import java.nio.charset.Charset;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static io.netty.handler.codec.http.HttpHeaderNames.CONNECTION;
@@ -43,6 +45,8 @@ import static io.netty.handler.codec.http.HttpHeaderValues.KEEP_ALIVE;
  */
 public class PrimeSQLChannelHandler extends SimpleChannelInboundHandler<Object>
 {
+	private static final Logger LOG = Logger.getLogger(PrimeSQLChannelHandler.class.getName());
+
 	private final PrimeSourceIntfc primeSrc;
 
 	private HttpRequest httpRequest;
@@ -62,7 +66,10 @@ public class PrimeSQLChannelHandler extends SimpleChannelInboundHandler<Object>
 	public void exceptionCaught(final ChannelHandlerContext ctx, final Throwable cause)
 	{
 		// Close the connection when an exception is raised.
-		cause.printStackTrace();
+		if (LOG.isLoggable(Level.SEVERE))
+		{
+			LOG.severe(cause.toString());
+		}
 		ctx.close();
 	}
 

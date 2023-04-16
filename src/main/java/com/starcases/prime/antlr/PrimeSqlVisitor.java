@@ -3,6 +3,7 @@ package com.starcases.prime.antlr;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import org.eclipse.collections.api.block.predicate.Predicate;
@@ -70,41 +71,76 @@ public class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 		this.primeSrc = primeSrc;
 	}
 
-	  class ExclFieldNameStrategy implements ExclusionStrategy
-	  {
+	/**
+	 * Class which enables excluding specific field names
+	 * from json output.
+	 */
+	private class ExclFieldNameStrategy implements ExclusionStrategy
+	{
+		  @Getter
 		  private final String fieldName;
 
-		  ExclFieldNameStrategy(final String fieldName)
+		  /**
+		   * Constructors for the field name exclusion class.
+		   * @param fieldName
+		   */
+		  public ExclFieldNameStrategy(final String fieldName)
 		  {
 		    this.fieldName = fieldName;
 		  }
 
 		  @Override
-		  public boolean shouldSkipClass(Class<?> clazz)
+		  public boolean shouldSkipClass(final Class<?> clazz)
 		  {
 		    return false;
 		  }
 
 		  @Override
-		  public boolean shouldSkipField(FieldAttributes f)
+		  public boolean shouldSkipField(final FieldAttributes f)
 		  {
 		    return f.getName().equals(fieldName);
 		  }
 		}
 
-	interface RetBase {}
+	/**
+	 * Base Interface defined as root interface for determining which data members
+	 * should be converted to json for output.
+	 * @author scott
+	 *
+	 */
+	private interface RetBase {}
 
-	interface RetBases extends RetBase
+	/**
+	 * Interface defined for use when base data should be converted to json
+	 * for output.
+	 * @author scott
+	 *
+	 */
+	private interface RetBases extends RetBase
 	{
 		Object [] getBases();
 	}
 
-	interface RetPrime extends RetBase
+	/**
+	 * Interface defined for use when prime data should be converted to json
+	 * for output.
+	 * @author scott
+	 *
+	 */
+	private interface RetPrime extends RetBase
 	{
 		long getPrime();
 	}
 
-	class RetData implements RetPrime, RetBases
+	/**
+	 * Class defining possible data values to return to caller of the SQL-like
+	 * processor. The specific fields returned are filtered based upon the
+	 * query received.
+	 *
+	 * @author scott
+	 *
+	 */
+	private class RetData implements RetPrime, RetBases
 	{
 		@Setter
 		private long prime;
@@ -115,11 +151,8 @@ public class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 		public RetData(final long prime, final Object [] bases)
 		{
 			this.prime = prime;
-			this.bases = bases;
+			this.bases = bases.clone();
 		}
-
-		public RetData()
-		{}
 
 		@Override
 		public long getPrime()
@@ -130,7 +163,7 @@ public class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 		@Override
 		public Object [] getBases()
 		{
-			return bases;
+			return bases.clone();
 		}
 	}
 
@@ -182,14 +215,17 @@ public class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 					| SecurityException e)
 		{
 
-			LOG.severe(e.toString());
+			if (LOG.isLoggable(Level.SEVERE))
+			{
+				LOG.severe(e.toString());
+			}
 		}
 
 		return result;
 	}
 
 	@Override
-	public PrimeSqlResult visitSelect_scope(PrimeSqlParser.Select_scopeContext ctx)
+	public PrimeSqlResult visitSelect_scope(final PrimeSqlParser.Select_scopeContext ctx)
 	{
 		switch(ctx.getChild(0).getText().toUpperCase(Locale.ENGLISH))
 		{
@@ -297,7 +333,7 @@ public class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 		for (int i=0; i<baseCnt ; i++)
 		{
 			final var primeTxt = ctx.getChild(i*2+1).getText();
-			vals[i] = Long.valueOf(primeTxt);
+			vals[i] = Long.parseLong(primeTxt);
 		}
 
 		predList.add(

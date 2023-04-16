@@ -15,7 +15,6 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import javax.swing.JFrame;
 import javax.swing.JTable;
-import javax.swing.WindowConstants;
 import javax.swing.JScrollPane;
 
 /**
@@ -106,11 +105,11 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 	{
 		super();
 
-		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		super.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		table = new JTable(data, COLUMNS);
 		final var scrollPane = new JScrollPane(table);
 		table.setFillsViewportHeight(true);
-		getContentPane().add(scrollPane);
+		super.getContentPane().add(scrollPane);
 	}
 
 	/**

@@ -42,8 +42,7 @@ public class PrimeSubset implements SerializationContextInitializer
 	 * No arg constructor to appease code-analysis/metrics
 	 */
 	public PrimeSubset()
-	{
-	}
+	{}
 
 	/**
 	 * Method for runtime allocation of the desired container size.
