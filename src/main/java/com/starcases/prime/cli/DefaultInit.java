@@ -412,7 +412,7 @@ public class DefaultInit implements Runnable
 				switch(baseType)
 				{
 					case NPRIME:
-						Map<String, Object> nPrimeSettings = new HashMap<>();
+						final Map<String, Object> nPrimeSettings = new HashMap<>();
 						nPrimeSettings.put("maxReduce", baseOpts.getMaxReduce());
 
 						baseSupplier = () -> baseProvider.provider(new String [] {baseType.name()}).create(primeSrc, nPrimeSettings);
@@ -427,7 +427,7 @@ public class DefaultInit implements Runnable
 						break;
 
 					case PRIME_TREE:
-						Map<String, Object> primeTreesettings = new HashMap<>();
+						final Map<String, Object> primeTreesettings = new HashMap<>();
 						primeTreesettings.put("collTrack", PTKFactory.getCollTrack());
 						baseSupplier = () -> baseProvider.provider(new String [] {baseType.name()}).create(primeSrc, primeTreesettings);
 						break;
