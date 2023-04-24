@@ -1,7 +1,7 @@
 package com.starcases.prime.log;
 
-import com.starcases.prime.intfc.LogGraphIntfc;
-import com.starcases.prime.intfc.PrimeSourceIntfc;
+import com.starcases.prime.core_api.LogGraphIntfc;
+import com.starcases.prime.core_api.PrimeSourceIntfc;
 
 import lombok.AccessLevel;
 import lombok.Getter;

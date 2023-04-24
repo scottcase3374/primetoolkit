@@ -4,10 +4,10 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.starcases.prime.PrimeToolKit;
-import com.starcases.prime.base.BaseTypes;
+import com.starcases.prime.base_api.BaseTypes;
 import com.starcases.prime.graph.impl.PrimeGrapherBase;
-import com.starcases.prime.intfc.LogGraphIntfc;
-import com.starcases.prime.intfc.PrimeSourceIntfc;
+import com.starcases.prime.core_api.LogGraphIntfc;
+import com.starcases.prime.core_api.PrimeSourceIntfc;
 
 import lombok.NonNull;
 import picocli.CommandLine.Command;

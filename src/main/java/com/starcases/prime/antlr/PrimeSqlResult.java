@@ -13,5 +13,5 @@ public class PrimeSqlResult
 
 	@Getter
 	@Setter
-	private long [] longArray;
+	private String error = null;
 }

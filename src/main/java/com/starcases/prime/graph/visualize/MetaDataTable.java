@@ -1,11 +1,12 @@
 package com.starcases.prime.graph.visualize;
 
 import org.jgrapht.graph.DefaultEdge;
+
+import com.starcases.prime.core_api.PrimeRefIntfc;
+
 import org.jgrapht.event.GraphEdgeChangeEvent;
 import org.jgrapht.event.GraphListener;
 import org.jgrapht.event.GraphVertexChangeEvent;
-
-import com.starcases.prime.intfc.PrimeRefIntfc;
 
 import lombok.AccessLevel;
 import lombok.Getter;

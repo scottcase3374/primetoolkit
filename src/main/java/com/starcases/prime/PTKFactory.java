@@ -7,10 +7,15 @@ import java.util.function.Supplier;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
-import com.starcases.prime.impl.CollectionTrackerImpl;
-import com.starcases.prime.impl.PrimeSource;
-import com.starcases.prime.intfc.PrimeSourceIntfc;
+import com.starcases.prime.core_impl.CollectionTrackerImpl;
+import com.starcases.prime.core_impl.PrimeSource;
 import com.starcases.prime.preload.PrePrimed;
+import com.starcases.prime.base_api.PrimeBaseIntfc;
+import com.starcases.prime.core_api.CollectionTrackerIntfc;
+import com.starcases.prime.core_api.FactoryIntfc;
+import com.starcases.prime.core_api.PrimeRefIntfc;
+import com.starcases.prime.core_api.PrimeSourceFactoryIntfc;
+import com.starcases.prime.core_api.PrimeSourceIntfc;
 
 import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
 import org.eclipse.collections.api.list.ImmutableList;
@@ -20,12 +25,6 @@ import org.eclipse.collections.impl.list.immutable.ImmutableListFactoryImpl;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
-
-import com.starcases.prime.intfc.CollectionTrackerIntfc;
-import com.starcases.prime.intfc.FactoryIntfc;
-import com.starcases.prime.intfc.PrimeBaseIntfc;
-import com.starcases.prime.intfc.PrimeRefIntfc;
-import com.starcases.prime.intfc.PrimeSourceFactoryIntfc;
 
 /**
  *

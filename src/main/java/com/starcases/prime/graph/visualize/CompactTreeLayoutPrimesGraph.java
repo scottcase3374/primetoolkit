@@ -4,7 +4,6 @@ import javax.swing.JFrame;
 import org.jgrapht.Graph;
 import org.jgrapht.ext.JGraphXAdapter;
 import org.jgrapht.graph.DefaultEdge;
-import com.starcases.prime.intfc.PrimeRefIntfc;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -12,6 +11,7 @@ import lombok.NonNull;
 
 import com.mxgraph.layout.mxCompactTreeLayout;
 import com.mxgraph.swing.mxGraphComponent;
+import com.starcases.prime.core_api.PrimeRefIntfc;
 
 /**
  * Visualization example

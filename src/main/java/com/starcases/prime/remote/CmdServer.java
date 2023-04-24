@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.starcases.prime.intfc.PrimeSourceIntfc;
+import com.starcases.prime.core_api.PrimeSourceIntfc;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;

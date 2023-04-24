@@ -90,7 +90,7 @@ Some of the tools used.
 - Martin Fowler
 	- Identity Map - Fundamentally implemented by PrimeSource using members; primeToIdxMap and
 	idxToPrimeMap
-	-	Separated Interfaces - package com.starcases.prime.intfc vs com.starcases.prime.impl
+	-	Separated Interfaces - package com.starcases.prime.spi vs com.starcases.prime.impl
 
 ## Misc items
 - Manual check of some libraries against online Veracode vulnerability data.

@@ -10,10 +10,10 @@ import java.util.logging.Logger;
 import org.jgrapht.event.GraphListener;
 import org.jgrapht.graph.DefaultEdge;
 
-import com.starcases.prime.base.BaseTypes;
 import com.starcases.prime.graph.impl.PrimeGrapherBase;
-import com.starcases.prime.intfc.PrimeSourceIntfc;
-import com.starcases.prime.intfc.PrimeRefIntfc;
+import com.starcases.prime.base_api.BaseTypes;
+import com.starcases.prime.core_api.PrimeRefIntfc;
+import com.starcases.prime.core_api.PrimeSourceIntfc;
 
 import lombok.NonNull;
 

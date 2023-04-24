@@ -1,16 +1,19 @@
 package com.starcases.prime.remote;
 
+import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import com.starcases.prime.antlr.PrimeSqlResult;
 import com.starcases.prime.antlr.PrimeSqlVisitor;
 import com.starcases.prime.antlrimpl.PrimeSqlLexer;
 import com.starcases.prime.antlrimpl.PrimeSqlParser;
-import com.starcases.prime.intfc.OutputableIntfc;
-import com.starcases.prime.intfc.PrimeSourceIntfc;
 import com.starcases.prime.metrics.MetricMonitor;
+import com.starcases.prime.core_api.OutputableIntfc;
+import com.starcases.prime.core_api.PrimeSourceIntfc;
 
 import io.micrometer.core.instrument.LongTaskTimer;
 import io.micrometer.core.instrument.LongTaskTimer.Sample;
@@ -23,18 +26,20 @@ import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpUtil;
-import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 
 import java.nio.charset.Charset;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.io.StringWriter;
+import java.io.PrintWriter;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static io.netty.handler.codec.http.HttpHeaderNames.CONNECTION;
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_LENGTH;
 import static io.netty.handler.codec.http.HttpHeaderValues.CLOSE;
 import static io.netty.handler.codec.http.HttpHeaderValues.KEEP_ALIVE;
+import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 
 /**
  * Handles processing the raw networking aspects and HTTP protocol. This also
@@ -56,6 +61,30 @@ public class PrimeSQLChannelHandler extends SimpleChannelInboundHandler<Object>
 		SQLCOMMAND;
 	}
 
+	private static class PrimeSQLErrorListener extends BaseErrorListener
+	{
+		private final PrimeSqlVisitor visitor;
+
+		public PrimeSQLErrorListener(final PrimeSqlVisitor visitor)
+		{
+			super();
+			this.visitor = visitor;
+		}
+
+		@Override
+		public void syntaxError(final Recognizer<?,?> recognizer,
+				final Object offendingSymbol,
+				final int line,
+				final int charPositionInLine,
+				final String msgs,
+				final RecognitionException e)
+		{
+			final String msg = String.format("Line[%d] Char-position[%d] msg:%s", line, charPositionInLine, msgs);
+			LOG.severe(msg);
+			visitor.getResult().setError(msg);
+		}
+	}
+
 	public PrimeSQLChannelHandler(final PrimeSourceIntfc primeSrc)
 	{
 		super();
@@ -66,9 +95,13 @@ public class PrimeSQLChannelHandler extends SimpleChannelInboundHandler<Object>
 	public void exceptionCaught(final ChannelHandlerContext ctx, final Throwable cause)
 	{
 		// Close the connection when an exception is raised.
-		if (LOG.isLoggable(Level.SEVERE))
+		if (LOG.isLoggable(Level.WARNING))
 		{
-			LOG.severe(cause.toString());
+			final StringWriter strWriter = new StringWriter();
+			final PrintWriter prtWriter = new PrintWriter(strWriter);
+			cause.printStackTrace(prtWriter);
+
+			LOG.warning(strWriter.getBuffer().toString());
 		}
 		ctx.close();
 	}
@@ -82,7 +115,6 @@ public class PrimeSQLChannelHandler extends SimpleChannelInboundHandler<Object>
 	@Override
 	protected void channelRead0(final ChannelHandlerContext ctx, final Object msg) throws Exception
 	{
-
 		if (msg instanceof HttpRequest httpReq)
 		{
 			this.httpRequest = httpReq;
@@ -90,7 +122,11 @@ public class PrimeSQLChannelHandler extends SimpleChannelInboundHandler<Object>
 		if (msg instanceof HttpContent httpContent)
 		{
 			final var content = httpContent.content().readCharSequence(httpContent.content().readableBytes(), Charset.defaultCharset());
-			final StringBuilder respBuf = new StringBuilder(processRequest(String.valueOf(content)).getResult());
+			final var res = processRequest(String.valueOf(content));
+			final StringBuilder respBuf = new StringBuilder(
+					res.getError() == null
+						? String.format("{ \"resp\": %s }", res.getResult())
+						: String.format("{ \"resp\": %s, %n\"error\": \"%s\" }",res.getResult(),res.getError()));
 
 			if (!writeResponse(ctx, httpRequest, respBuf))
 			{
@@ -121,10 +157,8 @@ public class PrimeSQLChannelHandler extends SimpleChannelInboundHandler<Object>
 		return keepAlive;
 	}
 
-
 	private PrimeSqlResult processRequest(final String request)
 	{
-
 		final Optional<LongTaskTimer.Sample> timer = MetricMonitor.longTimer(MetricType.SQLCOMMAND);
 
 		try
@@ -132,9 +166,11 @@ public class PrimeSQLChannelHandler extends SimpleChannelInboundHandler<Object>
 			final PrimeSqlLexer psl = new PrimeSqlLexer(CharStreams.fromString(request));
 			final CommonTokenStream tokenStream = new CommonTokenStream(psl);
 			final PrimeSqlParser psp = new PrimeSqlParser(tokenStream);
-
-			final ParseTree parseTree = psp.root();
 			final PrimeSqlVisitor visitor = new PrimeSqlVisitor(primeSrc);
+			psp.removeErrorListeners();
+			psp.addErrorListener(new PrimeSQLErrorListener(visitor));
+			final ParseTree parseTree = psp.root();
+
 			return visitor.visit(parseTree);
 		}
 		finally

@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.starcases.prime.base.BaseTypes;
+import com.starcases.prime.base_api.BaseTypes;
 import com.starcases.prime.cli.DefaultInit;
 
 import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;

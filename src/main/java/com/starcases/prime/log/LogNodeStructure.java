@@ -4,7 +4,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.starcases.prime.PrimeToolKit;
-import com.starcases.prime.intfc.PrimeSourceIntfc;
+import com.starcases.prime.core_api.PrimeSourceIntfc;
 
 import lombok.NonNull;
 

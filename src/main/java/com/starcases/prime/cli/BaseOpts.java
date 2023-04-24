@@ -3,10 +3,9 @@ package com.starcases.prime.cli;
 import java.util.Collections;
 import java.util.Set;
 
+import com.starcases.prime.base_api.BaseTypes;
+
 import jakarta.validation.constraints.Min;
-
-import com.starcases.prime.base.BaseTypes;
-
 import lombok.Getter;
 import lombok.Setter;
 import picocli.CommandLine.Option;

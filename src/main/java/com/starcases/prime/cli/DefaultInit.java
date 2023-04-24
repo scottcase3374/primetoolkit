@@ -11,6 +11,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -26,34 +28,35 @@ import org.jgrapht.graph.DefaultEdge;
 
 import com.starcases.prime.PTKFactory;
 import com.starcases.prime.PrimeToolKit;
-import com.starcases.prime.base.AbstractPrimeBaseGenerator;
-import com.starcases.prime.base.BaseTypes;
-import com.starcases.prime.base.PrimeMultiBaseContainer;
-import com.starcases.prime.base.nprime.BaseReduceNPrime;
-import com.starcases.prime.base.nprime.LogBasesNPrime;
-import com.starcases.prime.base.prefix.BasePrefixes;
-import com.starcases.prime.base.prefix.LogBasePrefixes;
-import com.starcases.prime.base.primetree.LogPrimeTree;
-import com.starcases.prime.base.primetree.PrimeTree;
-import com.starcases.prime.base.triples.BaseReduceTriple;
-import com.starcases.prime.base.triples.LogBases3AllTriples;
+import com.starcases.prime.base.nprime_impl.LogBasesNPrime;
+import com.starcases.prime.base.prefix_impl.BasePrefixes;
+import com.starcases.prime.base.prefix_impl.LogBasePrefixes;
+import com.starcases.prime.base.primetree_impl.LogPrimeTree;
+import com.starcases.prime.base.primetree_impl.PrimeTree;
+import com.starcases.prime.base.triples_impl.BaseReduceTriple;
+import com.starcases.prime.base.triples_impl.LogBases3AllTriples;
+import com.starcases.prime.base_api.BaseProviderIntfc;
+import com.starcases.prime.base_api.BaseTypes;
+import com.starcases.prime.base_impl.AbstractPrimeBaseGenerator;
+import com.starcases.prime.base_impl.PrimeMultiBaseContainer;
 import com.starcases.prime.cache.CacheMgr;
 import com.starcases.prime.cli.MetricsOpts.MetricOpt;
-import com.starcases.prime.graph.export.ExportGML;
+import com.starcases.prime.graph.export_impl.ExportGML;
 import com.starcases.prime.graph.log.LogGraphStructure;
 import com.starcases.prime.graph.visualize.MetaDataTable;
 import com.starcases.prime.graph.visualize.ViewDefault;
-import com.starcases.prime.impl.GenerationProgress;
-import com.starcases.prime.impl.PrimeRef;
-import com.starcases.prime.intfc.FactoryIntfc;
-import com.starcases.prime.intfc.PrimeRefIntfc;
-import com.starcases.prime.intfc.PrimeSourceFactoryIntfc;
-import com.starcases.prime.intfc.PrimeSourceIntfc;
+import com.starcases.prime.core_impl.GenerationProgress;
+import com.starcases.prime.core_impl.PrimeRef;
 import com.starcases.prime.log.LogNodeStructure;
 import com.starcases.prime.metrics.MetricMonitor;
 import com.starcases.prime.preload.PrePrimed;
 import com.starcases.prime.preload.PrimeSubset;
 import com.starcases.prime.remote.CmdServer;
+import com.starcases.prime.core_api.FactoryIntfc;
+import com.starcases.prime.core_api.PrimeRefIntfc;
+import com.starcases.prime.core_api.PrimeSourceFactoryIntfc;
+import com.starcases.prime.core_api.PrimeSourceIntfc;
+import com.starcases.prime.service.SvcLoader;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -400,6 +403,8 @@ public class DefaultInit implements Runnable
 
 	private void actionHandleAdditionalBases()
 	{
+		final SvcLoader<BaseProviderIntfc, Class<BaseProviderIntfc>> baseProvider = new SvcLoader< >(BaseProviderIntfc.class);
+
 		if (baseOpts != null && baseOpts.getBases() != null)
 		{
 			baseOpts.getBases().forEach(baseType ->
@@ -410,7 +415,10 @@ public class DefaultInit implements Runnable
 				switch(baseType)
 				{
 					case NPRIME:
-						baseSupplier = () -> new BaseReduceNPrime(primeSrc).assignMaxReduce(baseOpts.getMaxReduce());
+						Map<String, Object> settings = new HashMap<>();
+						settings.put("maxReduce", baseOpts.getMaxReduce());
+
+						baseSupplier = () -> baseProvider.provider(new String [] {"NPRIME"}).create(primeSrc, settings);
 						break;
 
 					case THREETRIPLE:

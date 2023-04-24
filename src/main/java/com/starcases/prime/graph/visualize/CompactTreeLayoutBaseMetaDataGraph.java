@@ -6,7 +6,7 @@ import org.jgrapht.ext.JGraphXAdapter;
 import org.jgrapht.graph.DefaultEdge;
 import com.mxgraph.layout.mxCompactTreeLayout;
 import com.mxgraph.swing.mxGraphComponent;
-import com.starcases.prime.intfc.PrimeRefIntfc;
+import com.starcases.prime.core_api.PrimeRefIntfc;
 
 import lombok.AccessLevel;
 import lombok.Getter;

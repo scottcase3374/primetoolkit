@@ -1,6 +1,6 @@
 package com.starcases.prime.remote;
 
-import com.starcases.prime.intfc.PrimeSourceIntfc;
+import com.starcases.prime.core_api.PrimeSourceIntfc;
 
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;

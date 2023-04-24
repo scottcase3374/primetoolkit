@@ -3,7 +3,7 @@ package com.starcases.prime.metrics;
 import java.util.Optional;
 import java.util.logging.Logger;
 
-import com.starcases.prime.intfc.OutputableIntfc;
+import com.starcases.prime.core_api.OutputableIntfc;
 
 import io.micrometer.core.instrument.Clock;
 import io.micrometer.core.instrument.LongTaskTimer;
