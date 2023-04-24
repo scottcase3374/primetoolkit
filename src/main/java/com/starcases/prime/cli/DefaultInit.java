@@ -29,11 +29,8 @@ import org.jgrapht.graph.DefaultEdge;
 import com.starcases.prime.PTKFactory;
 import com.starcases.prime.PrimeToolKit;
 import com.starcases.prime.base.nprime_impl.LogBasesNPrime;
-import com.starcases.prime.base.prefix_impl.BasePrefixes;
 import com.starcases.prime.base.prefix_impl.LogBasePrefixes;
 import com.starcases.prime.base.primetree_impl.LogPrimeTree;
-import com.starcases.prime.base.primetree_impl.PrimeTree;
-import com.starcases.prime.base.triples_impl.BaseReduceTriple;
 import com.starcases.prime.base.triples_impl.LogBases3AllTriples;
 import com.starcases.prime.base_api.BaseProviderIntfc;
 import com.starcases.prime.base_api.BaseTypes;
@@ -415,22 +412,24 @@ public class DefaultInit implements Runnable
 				switch(baseType)
 				{
 					case NPRIME:
-						Map<String, Object> settings = new HashMap<>();
-						settings.put("maxReduce", baseOpts.getMaxReduce());
+						Map<String, Object> nPrimeSettings = new HashMap<>();
+						nPrimeSettings.put("maxReduce", baseOpts.getMaxReduce());
 
-						baseSupplier = () -> baseProvider.provider(new String [] {"NPRIME"}).create(primeSrc, settings);
+						baseSupplier = () -> baseProvider.provider(new String [] {baseType.name()}).create(primeSrc, nPrimeSettings);
 						break;
 
 					case THREETRIPLE:
-						baseSupplier = () -> new BaseReduceTriple(primeSrc);
+						baseSupplier = () -> baseProvider.provider(new String [] {baseType.name()}).create(primeSrc, null);
 						break;
 
 					case PREFIX:
-						baseSupplier = () -> new BasePrefixes(primeSrc);
+						baseSupplier = () -> baseProvider.provider(new String [] {baseType.name()}).create(primeSrc, null);
 						break;
 
 					case PRIME_TREE:
-						baseSupplier = () -> new PrimeTree(primeSrc, PTKFactory.getCollTrack());
+						Map<String, Object> primeTreesettings = new HashMap<>();
+						primeTreesettings.put("collTrack", PTKFactory.getCollTrack());
+						baseSupplier = () -> baseProvider.provider(new String [] {baseType.name()}).create(primeSrc, primeTreesettings);
 						break;
 
 					default:

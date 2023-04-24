@@ -31,7 +31,7 @@ Current processing on my i7 with 64Gb RAM reaches about 3-5 million (cmd line ar
 
 ## Technology Summary
 Some of the technology tried/used.
-- Java 18
+- Java 18+
 - Picocli - command line handling
 - JBoss Infinispan - caching
 - Protobuf - related to caching
@@ -46,6 +46,7 @@ I created..
 - JUnit Jupiter - as replacement for JUnit4
 - JBoss Weld - some POC work for dependency injection with plain Java apps.
 - Lombok - code generation / simplification
+- Java ServiceLoader support
 - Maven
 
 Some of the tools used.
@@ -70,6 +71,7 @@ Some of the tools used.
 - Java Lambda and Stream usage
 - Functional Programming aspects (i.e. Lambdas)
 - Streams
+- Use of caching
 - Use of JSON
 - Use of Eclipse / maven plugins to improve code quality/security and perform tasks
 
@@ -90,7 +92,7 @@ Some of the tools used.
 - Martin Fowler
 	- Identity Map - Fundamentally implemented by PrimeSource using members; primeToIdxMap and
 	idxToPrimeMap
-	-	Separated Interfaces - package com.starcases.prime.spi vs com.starcases.prime.impl
+	-	Separated Interfaces - package *_api vs *_impl
 
 ## Misc items
 - Manual check of some libraries against online Veracode vulnerability data.
@@ -326,7 +328,7 @@ Prime [1583] idx[250]
 which is interpreted as: Prime value 1583 is represented by: 1 x 155 + 2 x 318 + 3 x 264
 
 ## Design
-The current design is extensible to a degree but is monolithic in nature.
+The current design is extensible (Java ServiceLoader mechanism implemented for the different "bases").
 
 ## Implementation
 - Command line parsing is handled using the picocli library and the resulting options processed; resulting in
@@ -349,12 +351,13 @@ Issues
 - The internal algorithm for generating the "next prime" has a flaw where a prime is skipped once in a while. This is part of the reason that caching plus loading of 50 million known primes is implemented - which allows comparison with known primes to enable identification of missed primes. Of course, this only works when you are working within the limits of the known primes that are loaded.
 
 ## ToDo
-	- Improve package organization, use module system and implement service loader
+	- Improve package organization, use module system and implement service loader ; IMPLEMENTED / ON-GOING
 	- Should not generate default base as part of prime selection/load; construct default base just like other bases.
 	- Increase test coverage.
 	- Improve metrics handling.
 	- Improved cache support.
 	- More generic / useful methods for identifying patterns in the bases/data.
-	- More remote command support.
+	- More remote command support; ON-GOING
 	- Improved reporting / visualization.
 	- Break up the monolith and use a more event oriented design. Details TBD.
+
