@@ -199,9 +199,6 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 		this.primeRefRawCtor = primeRefRawCtor;
 		consumersSetPrimeSrc.forEach(c -> c.accept(this));
 
-		addPrimeRef(0L, 1L, MutableListFactoryImpl.INSTANCE.of(ImmutableLongSetFactoryImpl.INSTANCE.with(1L), ImmutableLongSetFactoryImpl.INSTANCE.with(0L)));
-		addPrimeRef(1L, 2L, MutableListFactoryImpl.INSTANCE.of(ImmutableLongSetFactoryImpl.INSTANCE.with(2L), ImmutableLongSetFactoryImpl.INSTANCE.with(0L)));
-
 		this.confidenceLevel = confidenceLevel;
 	}
 
@@ -514,6 +511,9 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 			// Prevent double init - various valid combinations of code can attempt that.
 			return;
 		}
+
+		addPrimeRef(0L, 1L, MutableListFactoryImpl.INSTANCE.of(ImmutableLongSetFactoryImpl.INSTANCE.with(1L), ImmutableLongSetFactoryImpl.INSTANCE.with(0L)));
+		addPrimeRef(1L, 2L, MutableListFactoryImpl.INSTANCE.of(ImmutableLongSetFactoryImpl.INSTANCE.with(2L), ImmutableLongSetFactoryImpl.INSTANCE.with(0L)));
 
 		genBases();
 

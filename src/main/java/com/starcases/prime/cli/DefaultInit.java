@@ -21,6 +21,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import org.eclipse.collections.api.factory.Lists;
+import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.infinispan.Cache;
 import org.jgrapht.event.GraphListener;
@@ -337,6 +339,7 @@ public class DefaultInit implements Runnable
 
 	private void actionInitDefaultPrimeContent()
 	{
+		@SuppressWarnings({"PMD.LocalVariableNamingConventions"})
 		final String CACHE_NAME = "primes";
 
 		LOG.info("enter actionInitDefaultPrimeContent");
@@ -409,27 +412,28 @@ public class DefaultInit implements Runnable
 				final var trackGenTime = true;
 				final var method = "DefaultInit::actionHandleAdditionalBases - base ";
 				final Supplier<AbstractPrimeBaseGenerator> baseSupplier;
+				final ImmutableList<String> baseTypeName = Lists.immutable.of(baseType.name());
 				switch(baseType)
 				{
 					case NPRIME:
 						final Map<String, Object> nPrimeSettings = new HashMap<>();
 						nPrimeSettings.put("maxReduce", baseOpts.getMaxReduce());
 
-						baseSupplier = () -> baseProvider.provider(new String [] {baseType.name()}).create(primeSrc, nPrimeSettings);
+						baseSupplier = () -> baseProvider.provider(baseTypeName).create(primeSrc, nPrimeSettings);
 						break;
 
 					case THREETRIPLE:
-						baseSupplier = () -> baseProvider.provider(new String [] {baseType.name()}).create(primeSrc, null);
+						baseSupplier = () -> baseProvider.provider(baseTypeName).create(primeSrc, null);
 						break;
 
 					case PREFIX:
-						baseSupplier = () -> baseProvider.provider(new String [] {baseType.name()}).create(primeSrc, null);
+						baseSupplier = () -> baseProvider.provider(baseTypeName).create(primeSrc, null);
 						break;
 
 					case PRIME_TREE:
 						final Map<String, Object> primeTreesettings = new HashMap<>();
 						primeTreesettings.put("collTrack", PTKFactory.getCollTrack());
-						baseSupplier = () -> baseProvider.provider(new String [] {baseType.name()}).create(primeSrc, primeTreesettings);
+						baseSupplier = () -> baseProvider.provider(baseTypeName).create(primeSrc, primeTreesettings);
 						break;
 
 					default:

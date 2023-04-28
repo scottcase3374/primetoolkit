@@ -86,6 +86,7 @@ public class CmdServer
 	 */
 	private CmdEventLoopGroup createEventLoopGroup()
 	{
+		@SuppressWarnings({"PMD.LocalVariableNamingConventions"})
 		final String CLOSE_METHOD = "close";
 		final NioEventLoopGroup evtLoopGrp = new NioEventLoopGroup();
 
