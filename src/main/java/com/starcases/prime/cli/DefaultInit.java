@@ -11,8 +11,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -22,7 +20,9 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.eclipse.collections.api.factory.Lists;
+import org.eclipse.collections.api.factory.Maps;
 import org.eclipse.collections.api.list.ImmutableList;
+import org.eclipse.collections.api.map.ImmutableMap;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.infinispan.Cache;
 import org.jgrapht.event.GraphListener;
@@ -412,28 +412,30 @@ public class DefaultInit implements Runnable
 				final var trackGenTime = true;
 				final var method = "DefaultInit::actionHandleAdditionalBases - base ";
 				final Supplier<AbstractPrimeBaseGenerator> baseSupplier;
-				final ImmutableList<String> baseTypeName = Lists.immutable.of(baseType.name());
+				final ImmutableList<String> baseProviderAttributes = Lists.immutable.of(baseType.name(), "DEFAULT");
+
 				switch(baseType)
 				{
 					case NPRIME:
-						final Map<String, Object> nPrimeSettings = new HashMap<>();
-						nPrimeSettings.put("maxReduce", baseOpts.getMaxReduce());
-
-						baseSupplier = () -> baseProvider.provider(baseTypeName).create(primeSrc, nPrimeSettings);
+						{	// braces creates a local scope for "settings" variable here and in PRIME_TREE option below.
+							final ImmutableMap<String, Object> settings = Maps.immutable.of("maxReduce", baseOpts.getMaxReduce());
+							baseSupplier = () -> baseProvider.provider(baseProviderAttributes).create(primeSrc, settings);
+						}
 						break;
 
 					case THREETRIPLE:
-						baseSupplier = () -> baseProvider.provider(baseTypeName).create(primeSrc, null);
+						baseSupplier = () -> baseProvider.provider(baseProviderAttributes).create(primeSrc, null);
 						break;
 
 					case PREFIX:
-						baseSupplier = () -> baseProvider.provider(baseTypeName).create(primeSrc, null);
+						baseSupplier = () -> baseProvider.provider(baseProviderAttributes).create(primeSrc, null);
 						break;
 
 					case PRIME_TREE:
-						final Map<String, Object> primeTreesettings = new HashMap<>();
-						primeTreesettings.put("collTrack", PTKFactory.getCollTrack());
-						baseSupplier = () -> baseProvider.provider(baseTypeName).create(primeSrc, primeTreesettings);
+						{ 	// braces creates a local scope for "settings" variable here and in NPRIME option above.
+							final ImmutableMap<String, Object> settings = Maps.immutable.of("collTrack", PTKFactory.getCollTrack());
+							baseSupplier = () -> baseProvider.provider(baseProviderAttributes).create(primeSrc, settings);
+						}
 						break;
 
 					default:

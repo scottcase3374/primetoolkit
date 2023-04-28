@@ -2,6 +2,8 @@ package com.starcases.prime.graph.export_api;
 
 import java.io.PrintWriter;
 
+import org.eclipse.collections.api.collection.ImmutableCollection;
+
 import com.starcases.prime.core_api.PrimeSourceIntfc;
 
 import lombok.NonNull;
@@ -14,5 +16,5 @@ import lombok.NonNull;
  */
 public interface ExportsProviderIntfc
 {
-	ExportIntfc create(final String [] outputAttributes, @NonNull final PrimeSourceIntfc primeSrc, @NonNull final PrintWriter outputWriter);
+	ExportIntfc create(final ImmutableCollection<String> attributes, @NonNull final PrimeSourceIntfc primeSrc, @NonNull final PrintWriter outputWriter);
 }
