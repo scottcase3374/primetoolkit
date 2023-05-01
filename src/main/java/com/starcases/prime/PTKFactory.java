@@ -7,15 +7,15 @@ import java.util.function.Supplier;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
-import com.starcases.prime.core_impl.CollectionTrackerImpl;
-import com.starcases.prime.core_impl.PrimeSource;
-import com.starcases.prime.preload.PrePrimed;
-import com.starcases.prime.base_api.PrimeBaseIntfc;
-import com.starcases.prime.core_api.CollectionTrackerIntfc;
-import com.starcases.prime.core_api.FactoryIntfc;
-import com.starcases.prime.core_api.PrimeRefIntfc;
-import com.starcases.prime.core_api.PrimeSourceFactoryIntfc;
-import com.starcases.prime.core_api.PrimeSourceIntfc;
+import com.starcases.prime.preload.PrimeLoader;
+import com.starcases.prime.base.api.PrimeBaseIntfc;
+import com.starcases.prime.core.api.CollectionTrackerIntfc;
+import com.starcases.prime.core.api.FactoryIntfc;
+import com.starcases.prime.core.api.PrimeRefIntfc;
+import com.starcases.prime.core.api.PrimeSourceFactoryIntfc;
+import com.starcases.prime.core.api.PrimeSourceIntfc;
+import com.starcases.prime.core.impl.CollectionTrackerImpl;
+import com.starcases.prime.core.impl.PrimeSource;
 
 import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
 import org.eclipse.collections.api.list.ImmutableList;
@@ -113,10 +113,10 @@ public final class PTKFactory
 					}
 
 					@Override
-					public PrimeSourceFactoryIntfc getPrimeSource(final PrePrimed prePrimed)
+					public PrimeSourceFactoryIntfc getPrimeSource(final PrimeLoader primeLoader)
 					{
 						final var primeSrc = getPrimeSource();
-						primeSrc.setPrePrimed(prePrimed);
+						primeSrc.setPrePrimed(primeLoader);
 						return primeSrc;
 					}
 

@@ -19,6 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import org.eclipse.collections.api.collection.ImmutableCollection;
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.factory.Maps;
 import org.eclipse.collections.api.list.ImmutableList;
@@ -30,32 +31,32 @@ import org.jgrapht.graph.DefaultEdge;
 
 import com.starcases.prime.PTKFactory;
 import com.starcases.prime.PrimeToolKit;
-import com.starcases.prime.base.nprime_impl.LogBasesNPrime;
-import com.starcases.prime.base.prefix_impl.LogBasePrefixes;
-import com.starcases.prime.base.primetree_impl.LogPrimeTree;
-import com.starcases.prime.base.triples_impl.LogBases3AllTriples;
-import com.starcases.prime.base_api.BaseProviderIntfc;
-import com.starcases.prime.base_api.BaseTypes;
-import com.starcases.prime.base_impl.AbstractPrimeBaseGenerator;
-import com.starcases.prime.base_impl.PrimeMultiBaseContainer;
-import com.starcases.prime.cache.CacheMgr;
+import com.starcases.prime.base.api.BaseProviderIntfc;
+import com.starcases.prime.base.api.BaseTypes;
+import com.starcases.prime.base.impl.AbstractPrimeBaseGenerator;
+import com.starcases.prime.base.impl.PrimeMultiBaseContainer;
+import com.starcases.prime.base.nprime.impl.LogBasesNPrime;
+import com.starcases.prime.base.prefix.impl.LogBasePrefixes;
+import com.starcases.prime.base.primetree.impl.LogPrimeTree;
+import com.starcases.prime.base.triples.impl.LogBases3AllTriples;
+import com.starcases.prime.cache.api.CacheProviderIntfc;
 import com.starcases.prime.cli.MetricsOpts.MetricOpt;
-import com.starcases.prime.graph.export_impl.ExportGML;
+import com.starcases.prime.core.api.FactoryIntfc;
+import com.starcases.prime.core.api.PrimeRefIntfc;
+import com.starcases.prime.core.api.PrimeSourceFactoryIntfc;
+import com.starcases.prime.core.api.PrimeSourceIntfc;
+import com.starcases.prime.core.impl.GenerationProgress;
+import com.starcases.prime.core.impl.PrimeRef;
+import com.starcases.prime.graph.export.api.ExportsProviderIntfc;
 import com.starcases.prime.graph.log.LogGraphStructure;
-import com.starcases.prime.graph.visualize.MetaDataTable;
-import com.starcases.prime.graph.visualize.ViewDefault;
-import com.starcases.prime.core_impl.GenerationProgress;
-import com.starcases.prime.core_impl.PrimeRef;
+import com.starcases.prime.graph.visualize.impl.MetaDataTable;
+import com.starcases.prime.graph.visualize.impl.ViewDefault;
 import com.starcases.prime.log.LogNodeStructure;
-import com.starcases.prime.metrics.MetricMonitor;
-import com.starcases.prime.preload.PrePrimed;
+import com.starcases.prime.metrics.api.MetricsProviderIntfc;
+import com.starcases.prime.preload.PrimeLoader;
 import com.starcases.prime.preload.PrimeSubset;
-import com.starcases.prime.remote.CmdServer;
-import com.starcases.prime.core_api.FactoryIntfc;
-import com.starcases.prime.core_api.PrimeRefIntfc;
-import com.starcases.prime.core_api.PrimeSourceFactoryIntfc;
-import com.starcases.prime.core_api.PrimeSourceIntfc;
 import com.starcases.prime.service.SvcLoader;
+import com.starcases.prime.sql.api.SqlProviderIntfc;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -220,7 +221,9 @@ public class DefaultInit implements Runnable
 	{
 		try (var exportWriter = new PrintWriter(Files.newBufferedWriter(decorateFileName("default", "export", "gml"), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)))
 		{
-			final var exporter = new ExportGML(primeSrc, exportWriter);
+			final SvcLoader<ExportsProviderIntfc, Class<ExportsProviderIntfc>> exportProvider = new SvcLoader< >(ExportsProviderIntfc.class);
+			final ImmutableCollection<String> attributes = Lists.immutable.of("GML", "DEFAULT");
+			final var exporter = exportProvider.provider(attributes).create(primeSrc, exportWriter, null);
 			exporter.export();
 			exportWriter.flush();
 		}
@@ -312,14 +315,19 @@ public class DefaultInit implements Runnable
 
 		if (Arrays.asList((metricOpts != null) ? metricOpts.getMetricType() : NULL_OPTS).contains(MetricOpt.ALL))
 		{
-			actions.add(s -> MetricMonitor.enableAll(true) );
+			final SvcLoader<MetricsProviderIntfc, Class<MetricsProviderIntfc>> registryProviders = new SvcLoader< >(MetricsProviderIntfc.class);
+			final ImmutableCollection<String> attributes = Lists.immutable.of("METRICS");
+			actions.add(s ->  registryProviders.providers(attributes).forEach(p -> p.create(null).enable(true)));
 		}
 	}
 
 	private void actionEnableCmdListener()
 	{
-		if (baseOpts.isEnableCmmandListener())
+		if (baseOpts != null && baseOpts.isEnableCmmandListener())
 		{
+			final ImmutableCollection<String> attributes = Lists.immutable.of("SQLPRIME");
+			final SvcLoader<SqlProviderIntfc, Class<SqlProviderIntfc>> sqlCmdProviders = new SvcLoader< >(SqlProviderIntfc.class);
+
 			actions.add(s -> {
 				try
 				{
@@ -327,7 +335,7 @@ public class DefaultInit implements Runnable
 					{
 						LOG.info("DefaultInit::actionEnableCmdListener - SQL command listener port:" + baseOpts.getCmdListenerPort());
 					}
-					new CmdServer(primeSrc, baseOpts.getCmdListenerPort()).run();
+					sqlCmdProviders.provider(attributes).create(primeSrc, baseOpts.getCmdListenerPort()).run();
 				}
 				catch(final InterruptedException e)
 				{
@@ -341,6 +349,8 @@ public class DefaultInit implements Runnable
 	{
 		@SuppressWarnings({"PMD.LocalVariableNamingConventions"})
 		final String CACHE_NAME = "primes";
+		final SvcLoader<CacheProviderIntfc, Class<CacheProviderIntfc>> cacheProvider = new SvcLoader< >(CacheProviderIntfc.class);
+		final ImmutableList<String> cacheAttributes = Lists.immutable.of("CACHE");
 
 		LOG.info("enter actionInitDefaultPrimeContent");
 		actions.add(s -> {
@@ -349,7 +359,7 @@ public class DefaultInit implements Runnable
 
 			final String inputFolderPath = initOpts.getInputDataFolder();
 
-			final Cache<Long,PrimeSubset> cache = CacheMgr.getCache(CACHE_NAME, initOpts.isClearCachedPrimes());
+			final Cache<Long,PrimeSubset> cache = cacheProvider.provider(cacheAttributes).create(CACHE_NAME, null);
 
 			// Use idx 2 which would be prime 3 for determining if cache was loaded / pre-loaded propertly. Since Primes 1 and 2 may be hardcoded in
 			// places, it is safer to use the 1st item which is never hardcoded.
@@ -373,13 +383,13 @@ public class DefaultInit implements Runnable
 				{
 					LOG.info(String.format("Cache primes from raw files ; Cache Loaded: [%b], Input folder exists: [%b], load-raw-primes[%b]",  alreadyLoaded, inputFoldExist, loadRawPrimes));
 				}
-				final PrePrimed prePrimed = new PrePrimed(cache, Path.of(replaceTildeHome(inputFolderPath)));
-				prePrimed.load();
+				final PrimeLoader primeLoader = new PrimeLoader(cache, Path.of(replaceTildeHome(inputFolderPath)));
+				primeLoader.load();
 
-				primeSrc = factory.getPrimeSource(prePrimed);
+				primeSrc = factory.getPrimeSource(primeLoader);
 			}
 
-			// "CacheMgr dumpStats(CACHE_NAME);"
+			// "CacheProvider dumpStats(CACHE_NAME);"
 
 			if (LOG.isLoggable(Level.FINE))
 			{
@@ -403,14 +413,13 @@ public class DefaultInit implements Runnable
 
 	private void actionHandleAdditionalBases()
 	{
-		final SvcLoader<BaseProviderIntfc, Class<BaseProviderIntfc>> baseProvider = new SvcLoader< >(BaseProviderIntfc.class);
-
 		if (baseOpts != null && baseOpts.getBases() != null)
 		{
+			final SvcLoader<BaseProviderIntfc, Class<BaseProviderIntfc>> baseProvider = new SvcLoader< >(BaseProviderIntfc.class);
 			baseOpts.getBases().forEach(baseType ->
 			{
 				final var trackGenTime = true;
-				final var method = "DefaultInit::actionHandleAdditionalBases - base ";
+				final var method = "DefaultInit::actionHandleAdditionalBases - base :" + baseType.name();
 				final Supplier<AbstractPrimeBaseGenerator> baseSupplier;
 				final ImmutableList<String> baseProviderAttributes = Lists.immutable.of(baseType.name(), "DEFAULT");
 

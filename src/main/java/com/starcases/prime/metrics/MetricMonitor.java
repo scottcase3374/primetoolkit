@@ -1,23 +1,21 @@
 package com.starcases.prime.metrics;
 
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.starcases.prime.core_api.OutputableIntfc;
+import org.eclipse.collections.api.collection.ImmutableCollection;
+import org.eclipse.collections.api.factory.Lists;
 
-import io.micrometer.core.instrument.Clock;
+import com.starcases.prime.core.api.OutputableIntfc;
+import com.starcases.prime.metrics.api.MetricsProviderIntfc;
+import com.starcases.prime.service.SvcLoader;
+
 import io.micrometer.core.instrument.LongTaskTimer;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
-import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics;
-import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
-import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics;
-import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
 import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
-import io.micrometer.core.instrument.logging.LoggingMeterRegistry;
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-import io.micrometer.core.instrument.util.HierarchicalNameMapper;
-import io.micrometer.graphite.GraphiteConfig;
-import io.micrometer.graphite.GraphiteMeterRegistry;
 import lombok.AccessLevel;
 import lombok.Getter;
 
@@ -41,97 +39,27 @@ public final class MetricMonitor
 	static
 	{
 		METRICS_REGISTRY = new CompositeMeterRegistry();
+		final SvcLoader<MetricsProviderIntfc, Class<MetricsProviderIntfc>> registryProviders = new SvcLoader< >(MetricsProviderIntfc.class);
+		final ImmutableCollection<String> attributes = Lists.immutable.of("REGISTRY");
+		registryProviders.providers(attributes).forEach(p -> p.create(null).enable(true));
 	}
 
-	public static void enableGraphiteRegistry(final boolean enable)
+	public static void register(final MeterRegistry registry)
 	{
-		if (enable)
+		if (LOG.isLoggable(Level.FINE))
 		{
-			LOG.fine("Enabling Graphite registry");
-			final GraphiteConfig graphiteConfig = new GraphiteConfig()
-			{
-			    @Override
-			    public String host()
-			    {
-			        return "localhost";
-			    }
-
-			    @Override
-			    public String get(final String k)
-			    {
-			        return null; // accept the rest of the defaults
-			    }
-
-			    @Override
-			    public String [] tagsAsPrefix()
-			    {
-			    	return new String[] {"TASK" };
-			    }
-			};
-
-			METRICS_REGISTRY.add(new GraphiteMeterRegistry(graphiteConfig, Clock.SYSTEM, HierarchicalNameMapper.DEFAULT));
+			LOG.fine("Added a registry");
 		}
+		METRICS_REGISTRY.add(registry);
 	}
 
-	public static void enableSimpleRegistry(final boolean enable)
+	public static void bind(final Consumer<MeterRegistry> bindMetrics)
 	{
-		if (enable)
+		if (LOG.isLoggable(Level.FINE))
 		{
-			METRICS_REGISTRY.add(new SimpleMeterRegistry());
+			LOG.fine("A metric Source was bound.");
 		}
-	}
-
-	public static void enableLoggerRegistry(final boolean enable)
-	{
-		if (enable)
-		{
-			final var loggingRegistry = new LoggingMeterRegistry();
-			METRICS_REGISTRY.add(loggingRegistry);
-		}
-	}
-
-	public static void enableJvmMemoryMetric(final boolean enable)
-	{
-		if (enable)
-		{
-			new JvmMemoryMetrics().bindTo(METRICS_REGISTRY);
-		}
-	}
-
-	public static void enableJvmGcMetric(final boolean enable)
-	{
-		if (enable)
-		{
-			new JvmGcMetrics().bindTo(METRICS_REGISTRY);
-		}
-	}
-
-	public static void enableJvmThreadMetric(final boolean enable)
-	{
-		if (enable)
-		{
-			new JvmThreadMetrics().bindTo(METRICS_REGISTRY);
-		}
-	}
-
-	public static void enableProcessorMetric(final boolean enable)
-	{
-		if (enable)
-		{
-			new ProcessorMetrics().bindTo(METRICS_REGISTRY);
-		}
-	}
-
-	public static void enableAll(final boolean enable)
-	{
-		enableSimpleRegistry(enable);
-		enableLoggerRegistry(enable);
-		enableGraphiteRegistry(enable);
-
-		enableJvmMemoryMetric(enable);
-		enableJvmGcMetric(enable);
-		enableJvmThreadMetric(enable);
-		enableProcessorMetric(enable);
+		bindMetrics.accept(METRICS_REGISTRY);
 	}
 
 	/**

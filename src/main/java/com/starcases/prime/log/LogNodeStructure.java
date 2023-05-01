@@ -4,7 +4,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.starcases.prime.PrimeToolKit;
-import com.starcases.prime.core_api.PrimeSourceIntfc;
+import com.starcases.prime.base.impl.AbstractPrimeBaseLog;
+import com.starcases.prime.core.api.PrimeSourceIntfc;
 
 import lombok.NonNull;
 
@@ -15,7 +16,7 @@ import lombok.NonNull;
  * can be provided.
  *
  */
-public class LogNodeStructure extends AbstractLogBase
+public class LogNodeStructure extends AbstractPrimeBaseLog
 {
 	/**
 	 * default logger

@@ -1,7 +1,7 @@
 package com.starcases.prime.cli;
 
-import com.starcases.prime.base_api.BaseTypes;
-import com.starcases.prime.core_api.OutputableIntfc;
+import com.starcases.prime.base.api.BaseTypes;
+import com.starcases.prime.core.api.OutputableIntfc;
 
 import picocli.CommandLine.ITypeConverter;
 

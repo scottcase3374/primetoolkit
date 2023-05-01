@@ -5,9 +5,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.starcases.prime.PTKFactory;
-import com.starcases.prime.base_impl.PrimeMultiBaseContainer;
-import com.starcases.prime.core_api.FactoryIntfc;
-import com.starcases.prime.core_api.PrimeSourceFactoryIntfc;
+import com.starcases.prime.base.impl.PrimeMultiBaseContainer;
+import com.starcases.prime.core.api.FactoryIntfc;
+import com.starcases.prime.core.api.PrimeSourceFactoryIntfc;
+import com.starcases.prime.core.impl.PrimeRef;
 
 import lombok.Getter;
 import lombok.NonNull;
