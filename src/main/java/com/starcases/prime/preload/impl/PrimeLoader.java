@@ -1,4 +1,4 @@
-package com.starcases.prime.preload;
+package com.starcases.prime.preload.impl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 import java.util.zip.ZipFile;
 
 import com.starcases.prime.PrimeToolKit;
+import com.starcases.prime.preload.api.PreloaderIntfc;
 
 import org.infinispan.Cache;
 
@@ -24,7 +25,7 @@ import lombok.Setter;
  * Typically loaded from files sourced from various internet
  * sites.
  */
-public final class PrimeLoader
+public final class PrimeLoader implements PreloaderIntfc
 {
 	/**
 	 * Define the number of bits to batch together to reduce the number of
@@ -119,6 +120,7 @@ public final class PrimeLoader
 	 *
 	 * @return
 	 */
+	@Override
 	public boolean load()
 	{
 		final int [] index = {0};

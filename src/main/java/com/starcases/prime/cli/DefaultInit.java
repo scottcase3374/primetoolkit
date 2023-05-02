@@ -45,7 +45,7 @@ import com.starcases.prime.core.api.FactoryIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceFactoryIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
-import com.starcases.prime.core.impl.GenerationProgress;
+import com.starcases.prime.core.api.ProgressProviderIntfc;
 import com.starcases.prime.core.impl.PrimeRef;
 import com.starcases.prime.graph.export.api.ExportsProviderIntfc;
 import com.starcases.prime.graph.log.LogGraphStructure;
@@ -53,8 +53,9 @@ import com.starcases.prime.graph.visualize.impl.MetaDataTable;
 import com.starcases.prime.graph.visualize.impl.ViewDefault;
 import com.starcases.prime.log.LogNodeStructure;
 import com.starcases.prime.metrics.api.MetricsProviderIntfc;
-import com.starcases.prime.preload.PrimeLoader;
-import com.starcases.prime.preload.PrimeSubset;
+import com.starcases.prime.preload.api.PreloaderIntfc;
+import com.starcases.prime.preload.api.PreloaderProviderIntfc;
+import com.starcases.prime.preload.impl.PrimeSubset;
 import com.starcases.prime.service.SvcLoader;
 import com.starcases.prime.sql.api.SqlProviderIntfc;
 
@@ -347,8 +348,6 @@ public class DefaultInit implements Runnable
 
 	private void actionInitDefaultPrimeContent()
 	{
-		@SuppressWarnings({"PMD.LocalVariableNamingConventions"})
-		final String CACHE_NAME = "primes";
 		final SvcLoader<CacheProviderIntfc, Class<CacheProviderIntfc>> cacheProvider = new SvcLoader< >(CacheProviderIntfc.class);
 		final ImmutableList<String> cacheAttributes = Lists.immutable.of("CACHE");
 
@@ -357,11 +356,12 @@ public class DefaultInit implements Runnable
 
 			final FactoryIntfc factory = PTKFactory.getFactory();
 
+			@SuppressWarnings({"PMD.LocalVariableNamingConventions"})
+			final String CACHE_NAME = "primes";
 			final String inputFolderPath = initOpts.getInputDataFolder();
-
 			final Cache<Long,PrimeSubset> cache = cacheProvider.provider(cacheAttributes).create(CACHE_NAME, null);
 
-			// Use idx 2 which would be prime 3 for determining if cache was loaded / pre-loaded propertly. Since Primes 1 and 2 may be hardcoded in
+			// Use idx 2 which would be prime 3 for determining if cache was loaded / pre-loaded propertly. Since Primes 1 and 2 may be hard coded in
 			// places, it is safer to use the 1st item which is never hardcoded.
 			final var cacheIdx0 = cache.get(0L);
 			final var cacheIdx0idx2 = cacheIdx0 != null ? cacheIdx0.get(2) : -1L;
@@ -383,13 +383,27 @@ public class DefaultInit implements Runnable
 				{
 					LOG.info(String.format("Cache primes from raw files ; Cache Loaded: [%b], Input folder exists: [%b], load-raw-primes[%b]",  alreadyLoaded, inputFoldExist, loadRawPrimes));
 				}
-				final PrimeLoader primeLoader = new PrimeLoader(cache, Path.of(replaceTildeHome(inputFolderPath)));
-				primeLoader.load();
 
-				primeSrc = factory.getPrimeSource(primeLoader);
+				final SvcLoader<PreloaderProviderIntfc, Class<PreloaderProviderIntfc>> preloadProvider = new SvcLoader< >(PreloaderProviderIntfc.class);
+				final ImmutableCollection<String> attributes = Lists.immutable.of("PRELOADER");
+
+				final PreloaderIntfc primePreloader = preloadProvider
+						.provider(attributes)
+						.create(cache, Path.of(replaceTildeHome(inputFolderPath)), null);
+
+				primePreloader.load();
+
+				primeSrc = factory.getPrimeSource(primePreloader);
 			}
 
-			// "CacheProvider dumpStats(CACHE_NAME);"
+			if (outputOpts.getOutputOpers().contains(OutputOper.PROGRESS))
+			{
+				final SvcLoader<ProgressProviderIntfc, Class<ProgressProviderIntfc>> progressProvider = new SvcLoader< >(ProgressProviderIntfc.class);
+				final ImmutableList<String> attributes = Lists.immutable.of("PROGRESS");
+				primeSrc.setDisplayProgress(progressProvider.provider(attributes).create(null));
+			}
+
+			primeSrc.setDisplayPrimeTreeMetrics(outputOpts.getOutputOpers().contains(OutputOper.PRIMETREE_METRICS));
 
 			if (LOG.isLoggable(Level.FINE))
 			{
@@ -398,15 +412,6 @@ public class DefaultInit implements Runnable
 					LOG.fine("DefaultInit::actionInitDefaultPrimeContent - primeSource init");
 				}
 			}
-
-			if (outputOpts.getOutputOpers().contains(OutputOper.PROGRESS))
-			{
-				// Just temporary - want more configurability still
-				primeSrc.setDisplayProgress(new GenerationProgress());
-			}
-
-			primeSrc.setDisplayPrimeTreeMetrics(outputOpts.getOutputOpers().contains(OutputOper.PRIMETREE_METRICS));
-
 			primeSrc.init();
 		});
 	}

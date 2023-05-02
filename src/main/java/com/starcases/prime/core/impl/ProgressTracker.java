@@ -6,13 +6,14 @@ import com.starcases.prime.core.api.ProgressIntfc;
 /**
  * Class that manages progress info for user.
  */
-public final class GenerationProgress implements ProgressIntfc
+public final class ProgressTracker implements ProgressIntfc
 {
 	/**
 	 * Display/update progress info
 	 *
 	 * @param newPrimeIndex
 	 */
+	@Override
 	public void dispProgress(final long newPrimeIndex)
 	{
 		final String [] units = { "%n[%s x 1024k] ", "%n [%s x 128k] ", "%n [%s x 16k] ", "K"};

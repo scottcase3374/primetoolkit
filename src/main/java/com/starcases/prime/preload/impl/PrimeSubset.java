@@ -1,4 +1,4 @@
-package com.starcases.prime.preload;
+package com.starcases.prime.preload.impl;
 
 import org.infinispan.protostream.annotations.AutoProtoSchemaBuilder;
 import org.infinispan.protostream.annotations.ProtoFactory;

@@ -9,7 +9,7 @@ import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.list.MutableList;
 
 import com.starcases.prime.base.api.PrimeBaseIntfc;
-import com.starcases.prime.preload.PrimeLoader;
+import com.starcases.prime.preload.api.PreloaderIntfc;
 
 /**
  * This interface is a helper for the CLI support - helps simplify the
@@ -26,7 +26,7 @@ public interface FactoryIntfc
 	 */
 	PrimeSourceFactoryIntfc getPrimeSource();
 
-	PrimeSourceFactoryIntfc getPrimeSource(final PrimeLoader preprimed);
+	PrimeSourceFactoryIntfc getPrimeSource(final PreloaderIntfc preprimed);
 
 	/**
 	 * Get a supplier of the base constructor.

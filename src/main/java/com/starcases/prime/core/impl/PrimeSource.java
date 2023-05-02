@@ -20,8 +20,9 @@ import com.starcases.prime.core.api.CollectionTrackerIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceFactoryIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
+import com.starcases.prime.core.api.ProgressIntfc;
 import com.starcases.prime.metrics.MetricMonitor;
-import com.starcases.prime.preload.PrimeLoader;
+import com.starcases.prime.preload.api.PreloaderIntfc;
 
 import io.micrometer.core.instrument.LongTaskTimer;
 import io.micrometer.core.instrument.LongTaskTimer.Sample;
@@ -95,7 +96,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	 */
 	@Getter(AccessLevel.PRIVATE)
 	@Setter(AccessLevel.PRIVATE)
-	private GenerationProgress progress;
+	private ProgressIntfc progress;
 
 	//
 	// Context type info/code for prime/base creation that is conveyed into
@@ -125,7 +126,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	 * Container of pre-generated prime/base data.
 	 */
 	@Getter(AccessLevel.PRIVATE)
-	private PrimeLoader primeLoader;
+	private PreloaderIntfc primeLoader;
 
 	/**
 	 * single-level structure to manage a unique references to each unique
@@ -534,7 +535,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	 * for base prime generation.
 	 */
 	@Override
-	public void setDisplayProgress(@NonNull final GenerationProgress progress)
+	public void setDisplayProgress(@NonNull final ProgressIntfc progress)
 	{
 		this.progress = progress;
 	}
@@ -577,7 +578,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	 * intentional choice over using additional constructor args.
 	 */
 	@Override
-	public void setPrePrimed(final PrimeLoader primeLoader)
+	public void setPrePrimed(final PreloaderIntfc primeLoader)
 	{
 		this.primeLoader = primeLoader;
 	}
