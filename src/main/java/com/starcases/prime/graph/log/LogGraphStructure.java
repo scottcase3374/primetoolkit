@@ -4,10 +4,10 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.starcases.prime.PrimeToolKit;
-import com.starcases.prime.base_api.BaseTypes;
+import com.starcases.prime.base.api.BaseTypes;
+import com.starcases.prime.core.api.LogPrimeDataIntfc;
+import com.starcases.prime.core.api.PrimeSourceIntfc;
 import com.starcases.prime.graph.impl.PrimeGrapherBase;
-import com.starcases.prime.core_api.LogGraphIntfc;
-import com.starcases.prime.core_api.PrimeSourceIntfc;
 
 import lombok.NonNull;
 import picocli.CommandLine.Command;
@@ -18,7 +18,7 @@ import picocli.CommandLine.Command;
  * the main data.
  *
  */
-public class LogGraphStructure extends PrimeGrapherBase implements LogGraphIntfc
+public class LogGraphStructure extends PrimeGrapherBase implements LogPrimeDataIntfc
 {
 	/**
 	 * default logger
@@ -61,7 +61,7 @@ public class LogGraphStructure extends PrimeGrapherBase implements LogGraphIntfc
 	 * Indicate if use of multiple CPU cores is allowed.
 	 */
 	@Override
-	public LogGraphIntfc doPreferParallel(final boolean preferParallel)
+	public LogPrimeDataIntfc doPreferParallel(final boolean preferParallel)
 	{
 		return this;
 	}

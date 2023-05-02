@@ -7,17 +7,20 @@ import java.util.function.Supplier;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
-import com.starcases.prime.core_impl.CollectionTrackerImpl;
-import com.starcases.prime.core_impl.PrimeSource;
-import com.starcases.prime.preload.PrePrimed;
-import com.starcases.prime.base_api.PrimeBaseIntfc;
-import com.starcases.prime.core_api.CollectionTrackerIntfc;
-import com.starcases.prime.core_api.FactoryIntfc;
-import com.starcases.prime.core_api.PrimeRefIntfc;
-import com.starcases.prime.core_api.PrimeSourceFactoryIntfc;
-import com.starcases.prime.core_api.PrimeSourceIntfc;
+import com.starcases.prime.service.SvcLoader;
+import com.starcases.prime.base.api.PrimeBaseIntfc;
+import com.starcases.prime.core.api.CollectionTrackerIntfc;
+import com.starcases.prime.core.api.CollectionTrackerProviderIntfc;
+import com.starcases.prime.core.api.FactoryIntfc;
+import com.starcases.prime.core.api.PrimeRefIntfc;
+import com.starcases.prime.core.api.PrimeSourceFactoryIntfc;
+import com.starcases.prime.core.api.PrimeSourceIntfc;
+import com.starcases.prime.core.impl.PrimeSource;
+import com.starcases.prime.preload.api.PreloaderIntfc;
 
+import org.eclipse.collections.api.collection.ImmutableCollection;
 import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
+import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.impl.list.immutable.ImmutableListFactoryImpl;
@@ -86,8 +89,16 @@ public final class PTKFactory
 	/**
 	 * track collections of primes representing prefix prime sums - maintain single copy per unique set.
 	 */
+	@SuppressWarnings({"PMD.FieldNamingConventions"})
 	@Getter
-	private static @NonNull CollectionTrackerIntfc collTrack = new CollectionTrackerImpl();
+	private static final @NonNull CollectionTrackerIntfc collTrack;
+
+	static
+	{
+		final SvcLoader<CollectionTrackerProviderIntfc, Class<CollectionTrackerProviderIntfc>> collTrackerProvider = new SvcLoader< >(CollectionTrackerProviderIntfc.class);
+		final ImmutableCollection<String> attributes = Lists.immutable.of("COLLECTION_TRACKER");
+		collTrack = collTrackerProvider.provider(attributes).create(null);
+	}
 
 	/**
 	 * default ctor
@@ -113,10 +124,10 @@ public final class PTKFactory
 					}
 
 					@Override
-					public PrimeSourceFactoryIntfc getPrimeSource(final PrePrimed prePrimed)
+					public PrimeSourceFactoryIntfc getPrimeSource(final PreloaderIntfc primeLoader)
 					{
 						final var primeSrc = getPrimeSource();
-						primeSrc.setPrePrimed(prePrimed);
+						primeSrc.setPrePrimed(primeLoader);
 						return primeSrc;
 					}
 

@@ -3,7 +3,7 @@ package com.starcases.prime.cli;
 import java.util.Collections;
 import java.util.Set;
 
-import com.starcases.prime.core_api.OutputableIntfc;
+import com.starcases.prime.core.api.OutputableIntfc;
 
 import lombok.Getter;
 import lombok.Setter;
