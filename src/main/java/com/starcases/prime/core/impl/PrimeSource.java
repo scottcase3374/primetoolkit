@@ -14,13 +14,15 @@ import java.util.stream.Stream;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.starcases.prime.base.impl.AbstractPrimeBaseGenerator;
-import com.starcases.prime.base.primetree.impl.PrimeTree;
 import com.starcases.prime.cli.OutputOper;
-import com.starcases.prime.core.api.CollectionTrackerIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceFactoryIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
 import com.starcases.prime.core.api.ProgressIntfc;
+import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
+import com.starcases.prime.datamgmt.impl.PData;
+import com.starcases.prime.datamgmt.impl.PrimeMapEntry;
+import com.starcases.prime.datamgmt.impl.PrimeMapIterator;
 import com.starcases.prime.metrics.MetricMonitor;
 import com.starcases.prime.preload.api.PreloaderIntfc;
 
@@ -128,14 +130,6 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	@Getter(AccessLevel.PRIVATE)
 	private PreloaderIntfc primeLoader;
 
-	/**
-	 * single-level structure to manage a unique references to each unique
-	 *  collection of primes. Structure is populated during base/prime
-	 *  creation.
-	 */
-	@Getter(AccessLevel.PRIVATE)
-	private final CollectionTrackerIntfc collTrack;
-
 	//
 	// Internal data used/generated during prime/base creation
 	//
@@ -162,7 +156,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	 * Multi-level container for the tree of primes.
 	 */
 	@Getter(AccessLevel.PRIVATE)
-	private PrimeTree primeTree = null;
+	private CollectionTrackerIntfc collTracker;
 
 	//
 	// initialization
@@ -181,7 +175,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 			@NonNull final ImmutableList<Consumer<PrimeSourceIntfc>> consumersSetPrimeSrc,
 			@Min(1) final int confidenceLevel,
 			@NonNull final BiFunction<Long, MutableList<ImmutableLongCollection>, PrimeRefIntfc> primeRefRawCtor,
-			@NonNull final CollectionTrackerIntfc collTrack
+			@NonNull final CollectionTrackerIntfc collTracker
 			)
 	{
 		super();
@@ -189,7 +183,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 		// yes, this seems odd - maybe refactor later.
 		super.primeSrc = this;
 
-		this.collTrack = collTrack;
+		this.collTracker = collTracker;
 
 		final int capacity = (int)(maxCount*1.25);
 		idxToPrimeMap = new LongObjectHashMap<>(capacity);
@@ -266,8 +260,6 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 			LOG.info("PrimeSource::genBasesImpl()");
 		}
 
-		primeTree = new PrimeTree(this, collTrack);
-
 		long nextPrimeTmpIdx;
 		do
 		{
@@ -310,13 +302,13 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	 * @param optCurPrime
 	 * @return
 	 */
-	private boolean genByListPermutation(@Min(0) final int nextPrimeIdx, @Min(1) final OptionalLong optCurPrime)
+	private boolean genByListPermutation(@Min(0) final long nextPrimeIdx, @Min(1) final OptionalLong optCurPrime)
 	{
 		final boolean [] found = {false};
 		optCurPrime.ifPresent(curPrime ->
 						{
 							// NOTE: Selection process must pick lowest item
-							final Optional<PData> pdata = primeTree.select(
+							final Optional<PData> pdata = collTracker.select(
 									primeCollSum ->
 									{
 										final long possibleNextPrime = curPrime + primeCollSum;
@@ -380,7 +372,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	 * @param optCurPrime
 	 * @return
 	 */
-	private boolean genByPrimePermutation(@Min(0) final int idx, @Min(1) final OptionalLong optCurPrime)
+	private boolean genByPrimePermutation(@Min(0) final long idx, @Min(1) final OptionalLong optCurPrime)
 	{
 		// Represents a X-bit search space of indexes for primes to add for next Prime.
 		final var numBitsForPrimeCount =  getBitsRequired(optCurPrime.getAsLong());
@@ -418,11 +410,11 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 				final var optCurPrimeVal = optCurPrime.getAsLong();
 				if (optCurPrime.isPresent() && viablePrime(permutationSum, optCurPrimeVal))
 				{
-					final var prefixTree = primeTree.iterator();
+					final var prefixTree = collTracker.iterator();
 					primeIndexPermutation.stream().forEach(prefixIdx -> getPrimeForIdx(prefixIdx).ifPresent(prefixTree::add) );
 
 					final var primeTreeColl = prefixTree.toCollection();
-					final var canonicalPrimeColl = collTrack.track(primeTreeColl).toCanonicalCollection();
+					final var canonicalPrimeColl = collTracker.track(primeTreeColl).toCanonicalCollection();
 
 					checkMismatch("genByPrimePermutation", idx, permutationSum);
 
@@ -520,7 +512,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 
 		if (displayPrimeTreeMetrics)
 		{
-			collTrack.log();
+			collTracker.log();
 		}
 	}
 

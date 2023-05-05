@@ -1,11 +1,10 @@
-package com.starcases.prime.base.primetree.impl;
+package com.starcases.prime.datamgmt.impl;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.starcases.prime.core.api.CollectionTrackerIntfc;
-import com.starcases.prime.core.impl.PData;
+import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
 
 import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
 import org.eclipse.collections.api.map.primitive.MutableLongObjectMap;
@@ -18,7 +17,7 @@ import lombok.Getter;
  * of unique smaller primes. A tree/graph style
  * representation is used internally.
  */
-public class PrimeTreeNode
+public class CollectionTreeNode
 {
 	/**
 	 *
@@ -28,13 +27,13 @@ public class PrimeTreeNode
 	/**
 	 * next link in tree
 	 */
-	private final AtomicReference<MutableLongObjectMap<PrimeTreeNode>> next = new AtomicReference<>(null);
+	private final AtomicReference<MutableLongObjectMap<CollectionTreeNode>> next = new AtomicReference<>(null);
 
 	/**
 	 * collection tracking
 	 */
 	@Getter(AccessLevel.PRIVATE)
-	private final CollectionTrackerIntfc collTrack;
+	private final CollectionTrackerIntfc collTracker;
 
 	/**
 	 * constructor for the prefix tree / collection tracking
@@ -42,11 +41,11 @@ public class PrimeTreeNode
 	 * @param prefix
 	 * @param collTrack
 	 */
-	public PrimeTreeNode(final long curPrime, final MutableLongObjectMap<PrimeTreeNode> prefix, final CollectionTrackerIntfc collTrack)
+	public CollectionTreeNode(final long curPrime, final MutableLongObjectMap<CollectionTreeNode> prefix, final CollectionTrackerIntfc collTracker)
 	{
 		this.prefixPrime.set(curPrime);
 		this.next.set(prefix);
-		this.collTrack = collTrack;
+		this.collTracker = collTracker;
 	}
 
 	/**
@@ -56,7 +55,7 @@ public class PrimeTreeNode
 	 */
 	public Optional<ImmutableLongCollection> getSourcePrimes(final long key)
 	{
-		return collTrack.get(key).map(PData::toCanonicalCollection);
+		return collTracker.get(key).map(PData::toCanonicalCollection);
 	}
 
 	/**
@@ -66,7 +65,7 @@ public class PrimeTreeNode
 	 */
 	public ImmutableLongCollection assignSourcePrimes(final ImmutableLongCollection sp1)
 	{
-		return collTrack.track(sp1).toCanonicalCollection();
+		return collTracker.track(sp1).toCanonicalCollection();
 	}
 
 	/**
@@ -82,7 +81,7 @@ public class PrimeTreeNode
 	 * get next link
 	 * @return
 	 */
-	public MutableLongObjectMap<PrimeTreeNode> getNext()
+	public MutableLongObjectMap<CollectionTreeNode> getNext()
 	{
 		return next.getAcquire();
 	}

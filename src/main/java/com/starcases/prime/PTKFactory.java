@@ -9,13 +9,13 @@ import jakarta.validation.constraints.Min;
 
 import com.starcases.prime.service.SvcLoader;
 import com.starcases.prime.base.api.PrimeBaseIntfc;
-import com.starcases.prime.core.api.CollectionTrackerIntfc;
-import com.starcases.prime.core.api.CollectionTrackerProviderIntfc;
 import com.starcases.prime.core.api.FactoryIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceFactoryIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
 import com.starcases.prime.core.impl.PrimeSource;
+import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
+import com.starcases.prime.datamgmt.api.CollectionTrackerProviderIntfc;
 import com.starcases.prime.preload.api.PreloaderIntfc;
 
 import org.eclipse.collections.api.collection.ImmutableCollection;
@@ -91,13 +91,13 @@ public final class PTKFactory
 	 */
 	@SuppressWarnings({"PMD.FieldNamingConventions"})
 	@Getter
-	private static final @NonNull CollectionTrackerIntfc collTrack;
+	private static final @NonNull CollectionTrackerIntfc collTracker;
 
 	static
 	{
-		final SvcLoader<CollectionTrackerProviderIntfc, Class<CollectionTrackerProviderIntfc>> collTrackerProvider = new SvcLoader< >(CollectionTrackerProviderIntfc.class);
-		final ImmutableCollection<String> attributes = Lists.immutable.of("COLLECTION_TRACKER");
-		collTrack = collTrackerProvider.provider(attributes).create(null);
+		final SvcLoader<CollectionTrackerProviderIntfc, Class<CollectionTrackerProviderIntfc>> collTreeProvider = new SvcLoader< >(CollectionTrackerProviderIntfc.class);
+		final ImmutableCollection<String> colTreeAttributes = Lists.immutable.of("COLLECTION_TREE");
+		collTracker = collTreeProvider.provider(colTreeAttributes).create(null);
 	}
 
 	/**
@@ -120,7 +120,8 @@ public final class PTKFactory
 						return primeSource(	maxCount,
 											confidenceLevel,
 											getPrimeRefRawConstructor(),
-											getConsumersSetPrimeSrc());
+											getConsumersSetPrimeSrc(),
+											collTracker);
 					}
 
 					@Override
@@ -165,14 +166,16 @@ public final class PTKFactory
 			@Min(1) final long maxCount,
 			@Min(1) final int confidenceLevel,
 			@NonNull final BiFunction<Long, MutableList<ImmutableLongCollection>, PrimeRefIntfc> primeRefRawCtor,
-			@NonNull final ImmutableList<Consumer<PrimeSourceIntfc>> consumersSetPrimeSrc
+			@NonNull final ImmutableList<Consumer<PrimeSourceIntfc>> consumersSetPrimeSrc,
+			@NonNull final CollectionTrackerIntfc collTree
+
 			)
 	{
 		return new PrimeSource(maxCount
 								, consumersSetPrimeSrc
 								, confidenceLevel
 								,primeRefRawCtor,
-								collTrack
+								collTracker
 								);
 	}
 }

@@ -1,4 +1,4 @@
-package com.starcases.prime.core.api;
+package com.starcases.prime.datamgmt.api;
 
 import org.eclipse.collections.api.map.ImmutableMap;
 

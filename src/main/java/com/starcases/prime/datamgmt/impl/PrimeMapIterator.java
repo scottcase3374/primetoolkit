@@ -1,4 +1,4 @@
-package com.starcases.prime.core.impl;
+package com.starcases.prime.datamgmt.impl;
 
 import java.util.Iterator;
 
@@ -10,7 +10,7 @@ import lombok.Getter;
 /**
  * Implementation of iterator returning prime refs.
  */
-class PrimeMapIterator implements Iterator<PrimeRefIntfc>
+public class PrimeMapIterator implements Iterator<PrimeRefIntfc>
 {
 	/**
 	 * Entry for tracking the prime prefix / map info.

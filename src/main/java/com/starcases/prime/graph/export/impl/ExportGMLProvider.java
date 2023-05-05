@@ -17,11 +17,10 @@ public class ExportGMLProvider implements ExportsProviderIntfc
 {
 	private static final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("GML", "DEFAULT");
 
-	/**
-	 * collTrack setting is required.
-	 */
 	@Override
-	public ExportIntfc create(@NonNull final PrimeSourceIntfc primeSrc, @NonNull final PrintWriter printWriter, final ImmutableMap<String,Object> settings)
+	public ExportIntfc create(	@NonNull final PrimeSourceIntfc primeSrc,
+								@NonNull final PrintWriter printWriter,
+								final ImmutableMap<String,Object> settings)
 	{
 		return new ExportGML(primeSrc, printWriter);
 	}

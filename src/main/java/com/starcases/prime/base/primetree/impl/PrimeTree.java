@@ -1,21 +1,17 @@
 package com.starcases.prime.base.primetree.impl;
 
 import java.util.Optional;
-import java.util.function.LongPredicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.collections.api.list.primitive.ImmutableLongList;
-import org.eclipse.collections.api.map.primitive.MutableLongObjectMap;
 import org.eclipse.collections.impl.list.mutable.MutableListFactoryImpl;
-import org.eclipse.collections.impl.map.mutable.primitive.MutableLongObjectMapFactoryImpl;
 
 import com.starcases.prime.PrimeToolKit;
 import com.starcases.prime.base.api.BaseTypes;
 import com.starcases.prime.base.impl.AbstractPrimeBaseGenerator;
-import com.starcases.prime.core.api.CollectionTrackerIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
-import com.starcases.prime.core.impl.PData;
+import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
 import com.starcases.prime.metrics.MetricMonitor;
 
 import io.micrometer.core.instrument.LongTaskTimer;
@@ -41,12 +37,6 @@ public class PrimeTree extends AbstractPrimeBaseGenerator
 	private static final Logger LOG = Logger.getLogger(PrimeTree.class.getName());
 
 	/**
-	 * prefix mape
-	 */
-	@Getter(AccessLevel.PACKAGE)
-	private final MutableLongObjectMap<PrimeTreeNode> prefixMap =  MutableLongObjectMapFactoryImpl.INSTANCE.empty();
-
-	/**
 	 * container for tracking the unique set of prefixes/trees
 	 */
 	@Getter(AccessLevel.PRIVATE)
@@ -61,30 +51,6 @@ public class PrimeTree extends AbstractPrimeBaseGenerator
 	{
 		super(primeSrc);
 		this.collectionTracker = collectionTracker;
-	}
-
-	/**
-	 * get iterator to the tree info
-	 * @return
-	 */
-	public PrimeTreeIteratorIntfc iterator()
-	{
-		return new PrimeTreeIterator(this, collectionTracker);
-	}
-
-	/**
-	 * Execute 'func' against the prime tree data and return a PData
-	 * if the predicate is matched. Looking for key for
-	 * a prime sum that when added to a new prime results in a new prime.
-	 *
-	 * NOTE: Desire lowest matching value found
-	 *
-	 * @param biFunc
-	 * @return
-	 */
-	public Optional<PData> select(final LongPredicate pred)
-	{
-		return collectionTracker.select(pred);
 	}
 
 	/**
@@ -115,7 +81,7 @@ public class PrimeTree extends AbstractPrimeBaseGenerator
 					final var origBaseBases = curPrime.getPrimeBaseData().getPrimeBases().get(0);
 					final ImmutableLongList curPrimePrefixBases = origBaseBases.toList().toImmutable();
 
-					final var curPrefixIt = this.iterator();
+					final var curPrefixIt = collectionTracker.iterator();
 					curPrimePrefixBases.forEach(basePrime ->
 						{
 							final var prime = basePrime;

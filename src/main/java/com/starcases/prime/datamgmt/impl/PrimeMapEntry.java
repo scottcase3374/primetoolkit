@@ -1,4 +1,4 @@
-package com.starcases.prime.core.impl;
+package com.starcases.prime.datamgmt.impl;
 
 import com.starcases.prime.core.api.PrimeRefIntfc;
 

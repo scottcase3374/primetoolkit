@@ -1,8 +1,10 @@
-package com.starcases.prime.base.primetree.impl;
+package com.starcases.prime.datamgmt.api;
 
 import java.util.ListIterator;
 
 import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
+
+import com.starcases.prime.datamgmt.impl.CollectionTreeNode;
 
 /**
  * Represent an iterator for use with tree nodes.  Adds some alternative
@@ -11,7 +13,7 @@ import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
  * needed items.
  */
 @SuppressWarnings("PMD.TooManyMethods")
-public interface PrimeTreeIteratorIntfc extends ListIterator<PrimeTreeNode>
+public interface CollectionTreeIteratorIntfc extends ListIterator<CollectionTreeNode>
 {
 	/**
 	 * Override Remove item.
@@ -41,14 +43,14 @@ public interface PrimeTreeIteratorIntfc extends ListIterator<PrimeTreeNode>
 	/**
 	 * NO-OP
 	 */
-	default PrimeTreeNode next() { return null; }
+	default CollectionTreeNode next() { return null; }
 
 	/**
 	 * Override previous.
 	 * NO-OP
 	 */
 	@Override
-	default PrimeTreeNode previous() { return null; }
+	default CollectionTreeNode previous() { return null; }
 
 	/**
 	 * override hasNext
@@ -65,7 +67,7 @@ public interface PrimeTreeIteratorIntfc extends ListIterator<PrimeTreeNode>
 	 * NO-OP
 	 */
 	@Override
-	default void set(final PrimeTreeNode treeNode)
+	default void set(final CollectionTreeNode treeNode)
 	{
 		// NO-OP
 	}
@@ -75,7 +77,7 @@ public interface PrimeTreeIteratorIntfc extends ListIterator<PrimeTreeNode>
 	 * NO-OP
 	 */
 	@Override
-	default void add(final PrimeTreeNode treeNode)
+	default void add(final CollectionTreeNode treeNode)
 	{
 		// NO-OP
 	}
@@ -92,14 +94,14 @@ public interface PrimeTreeIteratorIntfc extends ListIterator<PrimeTreeNode>
 	 * @param prime
 	 * @return
 	 */
-	PrimeTreeNode next(long prime);
+	CollectionTreeNode next(long prime);
 
 	/**
 	 * Add next prime as next tree node.
 	 * @param prime
 	 * @return
 	 */
-	PrimeTreeNode add(long prime);
+	CollectionTreeNode add(long prime);
 
 	/**
 	 * Get a set representation

@@ -170,17 +170,17 @@ public class DefaultInit implements Runnable
 
 		actionInitDefaultPrimeContent();
 
+		actionEnableMetrics();
+
 		actionHandleAdditionalBases();
 
 		actionHandleOutputs();
-
-		actionHandleGraphing();
 
 		actionHandleExports();
 
 		actionEnableCmdListener();
 
-		actionEnableMetrics();
+		actionHandleGraphing();
 
 		executeActions();
 	}
@@ -220,7 +220,11 @@ public class DefaultInit implements Runnable
 	 */
 	private void export(final PrimeSourceIntfc primeSrc)
 	{
-		try (var exportWriter = new PrintWriter(Files.newBufferedWriter(decorateFileName("default", "export", "gml"), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)))
+		try (var exportWriter = new PrintWriter(
+				Files.newBufferedWriter(decorateFileName("default", "export", "gml"),
+										StandardOpenOption.CREATE,
+										StandardOpenOption.TRUNCATE_EXISTING,
+										StandardOpenOption.WRITE)))
 		{
 			final SvcLoader<ExportsProviderIntfc, Class<ExportsProviderIntfc>> exportProvider = new SvcLoader< >(ExportsProviderIntfc.class);
 			final ImmutableCollection<String> attributes = Lists.immutable.of("GML", "DEFAULT");
@@ -447,7 +451,7 @@ public class DefaultInit implements Runnable
 
 					case PRIME_TREE:
 						{ 	// braces creates a local scope for "settings" variable here and in NPRIME option above.
-							final ImmutableMap<String, Object> settings = Maps.immutable.of("collTrack", PTKFactory.getCollTrack());
+							final ImmutableMap<String, Object> settings = Maps.immutable.of("collTracker", PTKFactory.getCollTracker());
 							baseSupplier = () -> baseProvider.provider(baseProviderAttributes).create(primeSrc, settings);
 						}
 						break;

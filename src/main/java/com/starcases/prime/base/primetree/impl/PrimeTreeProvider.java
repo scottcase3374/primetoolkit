@@ -5,10 +5,13 @@ import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.map.ImmutableMap;
 
+import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
+
 import com.starcases.prime.base.api.BaseProviderIntfc;
 import com.starcases.prime.base.impl.AbstractPrimeBaseGenerator;
-import com.starcases.prime.core.api.CollectionTrackerIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
+
+import lombok.NonNull;
 
 public class PrimeTreeProvider implements BaseProviderIntfc
 {
@@ -18,11 +21,11 @@ public class PrimeTreeProvider implements BaseProviderIntfc
 	 * collTrack setting is required.
 	 */
 	@Override
-	public AbstractPrimeBaseGenerator create(final PrimeSourceIntfc primeSrc, final ImmutableMap<String,Object> settings)
+	public AbstractPrimeBaseGenerator create(@NonNull final PrimeSourceIntfc primeSrc, final ImmutableMap<String,Object> settings)
 	{
-		final CollectionTrackerIntfc collTrack = (CollectionTrackerIntfc)settings.get("collTrack");
+		final CollectionTrackerIntfc collTracker = (CollectionTrackerIntfc)settings.get("collTracker");
 
-		return new PrimeTree(primeSrc, collTrack);
+		return new PrimeTree(primeSrc, collTracker);
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-package com.starcases.prime.core.impl;
+package com.starcases.prime.datamgmt.impl;
 
 import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
 

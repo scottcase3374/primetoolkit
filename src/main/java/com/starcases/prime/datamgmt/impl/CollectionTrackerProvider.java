@@ -1,12 +1,12 @@
-package com.starcases.prime.core.impl;
+package com.starcases.prime.datamgmt.impl;
 
 import org.eclipse.collections.api.collection.ImmutableCollection;
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.map.ImmutableMap;
 
-import com.starcases.prime.core.api.CollectionTrackerIntfc;
-import com.starcases.prime.core.api.CollectionTrackerProviderIntfc;
+import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
+import com.starcases.prime.datamgmt.api.CollectionTrackerProviderIntfc;
 
 public class CollectionTrackerProvider implements CollectionTrackerProviderIntfc
 {

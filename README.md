@@ -351,10 +351,11 @@ Issues
 - The internal algorithm for generating the "next prime" has a flaw where a prime is skipped once in a while. This is part of the reason that caching plus loading of 50 million known primes is implemented - which allows comparison with known primes to enable identification of missed primes. Of course, this only works when you are working within the limits of the known primes that are loaded.
 
 ## ToDo
+	- fix / add API documentation as needed after last major refactoring
 	- Improve package organization; DONE
 	- implement service loader; DONE / IMPROVE AS NEEDED
-	- use module system
-	- Should not generate default base as part of prime selection/load; construct default base just like other bases.
+	- use Java module system
+	- Should not generate default base as part of prime selection/load; construct default base just like other bases.; DONE
 	- Increase test coverage.
 	- Improve metrics handling.
 	- Improved cache support.

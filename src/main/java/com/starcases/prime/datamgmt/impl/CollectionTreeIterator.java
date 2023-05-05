@@ -1,4 +1,4 @@
-package com.starcases.prime.base.primetree.impl;
+package com.starcases.prime.datamgmt.impl;
 
 import java.util.Optional;
 
@@ -9,7 +9,8 @@ import org.eclipse.collections.api.map.primitive.MutableLongObjectMap;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.map.mutable.primitive.MutableLongObjectMapFactoryImpl;
 
-import com.starcases.prime.core.api.CollectionTrackerIntfc;
+import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
+import com.starcases.prime.datamgmt.api.CollectionTreeIteratorIntfc;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -19,32 +20,32 @@ import lombok.Setter;
  * Instances are intended for use in a single thread and NOT
  * shared across threads.
  */
-public class PrimeTreeIterator implements PrimeTreeIteratorIntfc
+public class CollectionTreeIterator implements CollectionTreeIteratorIntfc
 {
 	/**
 	 * Source nodes tracked
 	 */
 	@Getter(AccessLevel.PRIVATE)
-	private final MutableList<PrimeTreeNode> sourceTreeNodes =  FastList.newList();
+	private final MutableList<CollectionTreeNode> sourceTreeNodes =  FastList.newList();
 
 	/**
-	 * Ref to the a tree iterating over
+	 * Ref to the a collTree iterating over
 	 */
 	@Getter(AccessLevel.PRIVATE)
-	private final PrimeTree tree;
+	private final CollectionTrackerIntfc collTracker;
 
 	/**
-	 * container to track unique instances of the unique prefix/tree info
+	 * container to track unique instances of the unique prefix/collTree info
 	 */
-	@Getter(AccessLevel.PRIVATE)
-	private final CollectionTrackerIntfc collTrack;
+	//@Getter(AccessLevel.PRIVATE)
+	//private final CollectionTrackerIntfc collTrack;
 
 	/**
-	 * Ref to next tree node map
+	 * Ref to next collTree node map
 	 */
 	@Getter(AccessLevel.PRIVATE)
 	@Setter(AccessLevel.PRIVATE)
-	private MutableLongObjectMap<PrimeTreeNode> treeNodeMap;
+	private MutableLongObjectMap<CollectionTreeNode> treeNodeMap;
 
 	/**
 	 * Current sum of nodes in iterated path
@@ -53,17 +54,15 @@ public class PrimeTreeIterator implements PrimeTreeIteratorIntfc
 	@Setter(AccessLevel.PRIVATE)
 	private long curSum;
 
-
 	/**
 	 * constructor for the iterator
 	 * @param bpt
 	 * @param collTrack
 	 */
-	public PrimeTreeIterator(final PrimeTree bpt, final CollectionTrackerIntfc collTrack)
+	public CollectionTreeIterator(final CollectionTrackerIntfc bpt)
 	{
-		tree = bpt;
-		treeNodeMap = tree.getPrefixMap();
-		this.collTrack = collTrack;
+		collTracker = bpt;
+		treeNodeMap = collTracker.getPrefixMap();
 	}
 
 	/**
@@ -72,12 +71,12 @@ public class PrimeTreeIterator implements PrimeTreeIteratorIntfc
 	@Override
 	public ImmutableLongCollection toCollection()
 	{
-		 final PrimeTreeNode ptn = sourceTreeNodes.get(sourceTreeNodes.size()-1);
+		 final CollectionTreeNode ptn = sourceTreeNodes.get(sourceTreeNodes.size()-1);
 		 final Optional<ImmutableLongCollection> optSet  = ptn.getSourcePrimes(curSum);
 
 		 return optSet.orElseGet(() ->
 				 		{
-				 			final ImmutableLongCollection sp1 = this.sourceTreeNodes.collectLong(PrimeTreeNode::getPrefixPrime).toImmutable();
+				 			final ImmutableLongCollection sp1 = this.sourceTreeNodes.collectLong(CollectionTreeNode::getPrefixPrime).toImmutable();
 
 							ptn.assignSourcePrimes(sp1);
 							return sp1;
@@ -85,10 +84,10 @@ public class PrimeTreeIterator implements PrimeTreeIteratorIntfc
 	}
 
 	/**
-	 * This walks the tree and tracks the navigated source nodes.
+	 * This walks the collTree and tracks the navigated source nodes.
 	 */
 	@Override
-	public PrimeTreeNode next(final long prime)
+	public CollectionTreeNode next(final long prime)
 	{
 		final var treeNode = treeNodeMap.get(prime);
 		sourceTreeNodes.add(treeNode);
@@ -102,13 +101,13 @@ public class PrimeTreeIterator implements PrimeTreeIteratorIntfc
 	 * return the items representing a prefix.
 	 */
 	@Override
-	public PrimeTreeNode add(final long prime)
+	public CollectionTreeNode add(final long prime)
 	{
 		curSum += prime;
-		final PrimeTreeNode treeNode = treeNodeMap.getIfAbsentPut( prime, () ->
+		final CollectionTreeNode treeNode = treeNodeMap.getIfAbsentPut( prime, () ->
 												{
-													final MutableLongObjectMap<PrimeTreeNode> nextMap = MutableLongObjectMapFactoryImpl.INSTANCE.empty();
-													return  new PrimeTreeNode(prime, nextMap, collTrack);
+													final MutableLongObjectMap<CollectionTreeNode> nextMap = MutableLongObjectMapFactoryImpl.INSTANCE.empty();
+													return  new CollectionTreeNode(prime, nextMap, collTracker);
 												}
 											);
 
