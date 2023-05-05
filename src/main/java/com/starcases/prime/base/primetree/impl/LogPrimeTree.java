@@ -33,7 +33,7 @@ public class LogPrimeTree extends AbstractPrimeBaseLog
 	}
 
 	/**
-	 * Output the informaation regarding the base.
+	 * Output the information regarding the base.
 	 */
 	@Override
 	public void outputLogs()
