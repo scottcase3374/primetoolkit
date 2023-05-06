@@ -10,7 +10,6 @@ import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 import com.starcases.prime.base.api.BaseMetadataIntfc;
 import com.starcases.prime.base.api.BaseTypes;
 import com.starcases.prime.base.api.PrimeBaseIntfc;
-import com.starcases.prime.core.api.PrimeSourceIntfc;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -41,16 +40,6 @@ public class PrimeMultiBaseContainer implements PrimeBaseIntfc
 	@Getter(AccessLevel.PRIVATE)
 	@Setter(AccessLevel.PRIVATE)
 	private Map<BaseTypes, BaseMetadataIntfc> baseMetadata = new ConcurrentHashMap<>();
-
-	/**
-	 * Assign ref of prime src for lookup of prime/primeref's.
-	 * Unused currently.
-	 * @param primeSrcIntfc
-	 */
-	public static void setPrimeSource(@NonNull final PrimeSourceIntfc primeSrcIntfc)
-	{
-		// TODO: unused right now
-	}
 
 	/**
 	 * Get optional meta data regarding a base.

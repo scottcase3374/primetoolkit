@@ -168,7 +168,6 @@ public final class PTKFactory
 			@NonNull final BiFunction<Long, MutableList<ImmutableLongCollection>, PrimeRefIntfc> primeRefRawCtor,
 			@NonNull final ImmutableList<Consumer<PrimeSourceIntfc>> consumersSetPrimeSrc,
 			@NonNull final CollectionTrackerIntfc collTree
-
 			)
 	{
 		return new PrimeSource(maxCount

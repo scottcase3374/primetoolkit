@@ -270,7 +270,6 @@ public class DefaultInit implements Runnable
 		PTKFactory.setMaxCount(initOpts.getMaxCount());
 		PTKFactory.setConfidenceLevel(initOpts.getConfidenceLevel());
 
-		PTKFactory.setBaseSetPrimeSource(PrimeMultiBaseContainer::setPrimeSource);
 		PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
 
 		PTKFactory.setPrimeBaseCtor(PrimeMultiBaseContainer::new);
