@@ -1,0 +1,30 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.starcases.prime</groupId>
+    <artifactId>prime-tool-kit</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+  <artifactId>ptk-base-prefix-impl</artifactId>
+	<dependencies>
+
+		<dependency>
+			<groupId>com.starcases.prime</groupId>
+			<artifactId>ptk-core-impl</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+<!--		<dependency>-->
+<!--			<groupId>com.starcases.prime</groupId>-->
+<!--			<artifactId>ptk-metrics-impl</artifactId>-->
+<!--			<version>0.0.1-SNAPSHOT</version>-->
+<!--		</dependency>-->
+
+		<dependency>
+			<groupId>com.starcases.prime</groupId>
+			<artifactId>ptk-service-api</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+	</dependencies>
+</project>

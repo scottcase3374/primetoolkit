@@ -1,18 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>com.starcases</groupId>
 		<artifactId>raw-java-base-pom</artifactId>
-		<version>1.0.6.1</version>
+		<version>1.0.7</version>
 	</parent>
 	<groupId>com.starcases.prime</groupId>
 	<artifactId>prime-tool-kit</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
 	<name>PrimeToolKit</name>
 	<description>Prime Tool Kit</description>
 	<properties>
 		<antlr4.visitor>true</antlr4.visitor>
+		<antlr4.listener>false</antlr4.listener>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -43,6 +47,10 @@
 		<dependency>
 			<groupId>org.infinispan</groupId>
 			<artifactId>infinispan-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.infinispan</groupId>
+			<artifactId>infinispan-commons</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.infinispan.protostream</groupId>
@@ -89,8 +97,8 @@
 			<artifactId>jakarta.validation-api</artifactId>
 		</dependency>
 		<dependency>
-		    <groupId>io.micrometer</groupId>
-		    <artifactId>micrometer-registry-atlas</artifactId>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-atlas</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.micrometer</groupId>
@@ -117,37 +125,68 @@
 		</dependency>
 
 	</dependencies>
-	<build>
 
-		<plugins>
-			<plugin>
-				<groupId>org.antlr</groupId>
-				<artifactId>antlr4-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>antlr</id>
-						<goals>
-							<goal>antlr4</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
-	<profiles>
-		<profile>
-			<id>native</id>
-			<build>
-				<plugins>
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+
+					<configuration>
+						<annotationProcessorPaths>
+							<path>
+								<groupId>org.projectlombok</groupId>
+								<artifactId>lombok</artifactId>
+								<version>1.18.26</version>
+							</path>
+						</annotationProcessorPaths>
+
+					</configuration>
+				</plugin>
+
 					<plugin>
-						<groupId>org.graalvm.buildtools</groupId>
-						<artifactId>native-maven-plugin</artifactId>
+						<groupId>org.antlr</groupId>
+						<artifactId>antlr4-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>antlr</id>
+								<goals>
+									<goal>antlr4</goal>
+								</goals>
+							</execution>
+						</executions>
 						<configuration>
-							<mainClass>com.starcases.prime.PrimeToolKit</mainClass>
+							<visitor>true</visitor>
+							<listener>true</listener>
 						</configuration>
 					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
+			</plugins>
+		</pluginManagement>
+
+	</build>
+
+	<modules>
+		<module>ptk-service-api</module>
+		<module>ptk-core-api</module>
+		<module>ptk-cache-api</module>
+		<module>ptk-graph-export-api</module>
+		<module>ptk-graph-visualize-api</module>
+		<!--		<module>ptk-metrics-api</module>-->
+		<module>ptk-preload-api</module>
+		<module>ptk-sql-svc-api</module>
+		<module>ptk-base-nprime-impl</module>
+		<module>ptk-base-prefix-impl</module>
+		<module>ptk-base-primetree-impl</module>
+		<module>ptk-base-triples-impl</module>
+		<module>ptk-cache-impl</module>
+		<module>ptk-core-impl</module>
+		<module>ptk-graph-export-gml</module>
+		<module>ptk-graph-impl</module>
+		<module>ptk-graph-visualize-impl</module>
+		<!--		<module>ptk-metrics-impl</module>-->
+		<module>ptk-preload-impl</module>
+		<module>ptk-sql-svc-impl</module>
+		<module>ptk-main</module>
+	</modules>
 </project>

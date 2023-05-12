@@ -1,0 +1,22 @@
+<infinispan>
+<cache-container  shutdown-hook="REGISTER">
+
+		<local-cache name="primes">
+			<encoding media-type="application/x-protostream" />
+			<persistence
+				passivation="false">
+				<file-store
+					read-only="false"
+					purge="false"
+					preload="true"
+					path="./cache">
+					<write-behind
+						modification-queue-size="10000"
+						fail-silently="false" />
+				</file-store>
+			</persistence>
+		</local-cache>
+
+	</cache-container>
+
+</infinispan>
