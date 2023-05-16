@@ -2,8 +2,9 @@ package com.starcases.prime.preload.api;
 
 import java.nio.file.Path;
 
+import javax.cache.Cache;
+
 import org.eclipse.collections.api.map.ImmutableMap;
-import org.infinispan.Cache;
 
 import com.starcases.prime.preload.impl.PrimeSubset;
 import com.starcases.prime.service.api.SvcProviderBaseIntfc;

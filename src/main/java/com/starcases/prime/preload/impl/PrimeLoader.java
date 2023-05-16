@@ -11,10 +11,10 @@ import java.util.StringTokenizer;
 import java.util.stream.Stream;
 import java.util.zip.ZipFile;
 
-import com.starcases.prime.PrimeToolKit;
-import com.starcases.prime.preload.api.PreloaderIntfc;
+import javax.cache.Cache;
 
-import org.infinispan.Cache;
+import com.starcases.prime.core.impl.PTKLogger;
+import com.starcases.prime.preload.api.PreloaderIntfc;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -29,9 +29,9 @@ public final class PrimeLoader implements PreloaderIntfc
 {
 	/**
 	 * Define the number of bits to batch together to reduce the number of
-	 * cache accesses.  This is to reduce the space overhead which is
+	 * idxToPrimeCache accesses.  This is to reduce the space overhead which is
 	 * significant at large scale and to a lesser extent reduce time
-	 * spent in cache activities.
+	 * spent in idxToPrimeCache activities.
 	 */
 	@Getter(AccessLevel.PRIVATE)
 	private static final  int SUBSET_BITS = 17;
@@ -43,7 +43,8 @@ public final class PrimeLoader implements PreloaderIntfc
 	@Getter(AccessLevel.PRIVATE)
 	private static final int SUBSET_SIZE = 1 << SUBSET_BITS;
 
-
+	@Getter
+	private long maxIdx = -1;
 
 	/**
 	 * Paths to source folders containing files of any pre-computed prime/base info.
@@ -57,13 +58,14 @@ public final class PrimeLoader implements PreloaderIntfc
 	 */
 	@Getter
 	@Setter
-	private PrimeSubset subset = new PrimeSubset();
+	private PrimeSubset subsetOfIdxToPrime = new PrimeSubset();
 
 	/**
 	 * Cache object - both in-memory and persisted data
+	 * 	Map index to prime#.
 	 */
 	@Getter(AccessLevel.PRIVATE)
-	private final Cache<Long,PrimeSubset> cache;
+	private final Cache<Long,PrimeSubset> idxToPrimeCache;
 
 	/**
 	 * Break linear index range into indexed batches of indexed items.
@@ -79,11 +81,11 @@ public final class PrimeLoader implements PreloaderIntfc
 	 *
 	 * @param sourceFolders
 	 */
-	public PrimeLoader(final Cache<Long, PrimeSubset> cache, final Path ... sourceFolders)
+	public PrimeLoader(final Cache<Long, PrimeSubset> idxToPrimeCache, final Path ... sourceFolders)
 	{
-		this.cache = cache;
+		this.idxToPrimeCache = idxToPrimeCache;
 		this.sourceFolders = sourceFolders.clone();
-		subset.alloc(SUBSET_SIZE);
+		subsetOfIdxToPrime.alloc(SUBSET_SIZE);
 	}
 
 	private void assign(final long idx, final long val)
@@ -92,24 +94,27 @@ public final class PrimeLoader implements PreloaderIntfc
 		final long subsetId = Math.max(idx >> SUBSET_BITS, 0);
 		if (subsetId != subsetIdx)
 		{
-			cache.put(subsetIdx++, subset);
-			subset = new PrimeSubset();
-			subset.alloc(SUBSET_SIZE);
+			idxToPrimeCache.put(subsetIdx,   subsetOfIdxToPrime);
+
+			subsetOfIdxToPrime = new PrimeSubset();
+			subsetOfIdxToPrime.alloc(SUBSET_SIZE);
 		}
-		subset.set(offset, val);
+		subsetOfIdxToPrime.set(offset, val);
+		maxIdx = idx;
 	}
 
 	/**
-	 * get prime/factor from batches of indexed containers in cache
+	 * get prime/factor from batches of indexed containers in idxToPrimeCache
 	 *
 	 * @param idx
 	 * @return prime or -1
 	 */
+	@Override
 	public OptionalLong retrieve(final long idx)
 	{
 		final int offset = (int)(idx % SUBSET_SIZE);
 		final long subsetId = Math.max(idx >> SUBSET_BITS, 0);
-		final var subset = cache.get(subsetId);
+		final var subset = idxToPrimeCache.get(subsetId);
 		return subset != null ? OptionalLong.of(subset.get(offset)) : OptionalLong.empty();
 	}
 
@@ -125,11 +130,6 @@ public final class PrimeLoader implements PreloaderIntfc
 	{
 		final int [] index = {0};
 
-		cache
-			.getAdvancedCache()
-			.getStats()
-			.setStatisticsEnabled(true);
-
 		// Hard-code 1 into the set of values - it isn't part of the standard dataset (it is not considered prime per modern definitions).
 		assign(index[0]++, 1L);
 
@@ -144,7 +144,7 @@ public final class PrimeLoader implements PreloaderIntfc
 													   Integer.valueOf(b.getFileName().toString().split("(s|\\.)")[1]) ))
 					 				.forEach( fileRef ->
 					 				{
-					 					PrimeToolKit.dbgOutput("file: %s", fileRef.toString());
+					 					PTKLogger.dbgOutput("file: %s", fileRef.toString());
 	 									try
 	 									{
 	 										final Path tmpPath = fileRef;
@@ -173,7 +173,7 @@ public final class PrimeLoader implements PreloaderIntfc
 					 											}
 					 											catch(final IOException e2)
 					 											{
-					 												PrimeToolKit.output("%s", ZIP_FOLDER_ISSUE_MSG);
+					 												PTKLogger.output("%s", ZIP_FOLDER_ISSUE_MSG);
 					 											}
 															});
 	 											}
@@ -195,18 +195,18 @@ public final class PrimeLoader implements PreloaderIntfc
 	 									}
 	 									catch(IOException e)
 	 									{
-	 										PrimeToolKit.output("%s", ZIP_FOLDER_ISSUE_MSG);
+	 										PTKLogger.output("%s", ZIP_FOLDER_ISSUE_MSG);
 	 									}
 					 				});
 							}
 						catch(IOException e1)
 						{
-							PrimeToolKit.output("%s", ZIP_FOLDER_ISSUE_MSG);
+							PTKLogger.output("%s", ZIP_FOLDER_ISSUE_MSG);
 						}
 					}
 				);
 
-		cache.put(subsetIdx++, subset);
+		idxToPrimeCache.put(subsetIdx++, subsetOfIdxToPrime);
 
 		return true;
 	}

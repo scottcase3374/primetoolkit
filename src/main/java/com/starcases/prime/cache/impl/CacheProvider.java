@@ -1,16 +1,16 @@
 package com.starcases.prime.cache.impl;
 
-import java.io.IOException;
+import java.net.URI;
+
+import javax.cache.Cache;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
 
 import org.eclipse.collections.api.collection.ImmutableCollection;
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.map.ImmutableMap;
-import org.infinispan.Cache;
-import org.infinispan.manager.DefaultCacheManager;
-import org.infinispan.manager.EmbeddedCacheManager;
 
-import com.starcases.prime.PrimeToolKit;
 import com.starcases.prime.cache.api.CacheProviderIntfc;
 
 import lombok.NonNull;
@@ -28,19 +28,21 @@ public class CacheProvider implements CacheProviderIntfc
 	/**
 	 * manage any/all caching to files
 	 */
-	private static EmbeddedCacheManager embCacheMgr;
+	//private static EmbeddedCacheManager embCacheMgr;
+	private static CacheManager embCacheMgr;
 
 	static
 	{
-		try
-		{
-			embCacheMgr = new DefaultCacheManager("infinispan.xml");
-			embCacheMgr.startCaches("primes");
-		}
-		catch (final IOException e)
-		{
-			PrimeToolKit.output("Error starting pre-prime cache: %s",e);
-		}
+//		try
+//		{
+			embCacheMgr = Caching.getCachingProvider().getCacheManager(URI.create("infinispan.xml"), Thread.currentThread().getContextClassLoader());
+			//embCacheMgr = new DefaultCacheManager("infinispan.xml");
+			//embCacheMgr.startCaches("primes");
+//		}
+//		catch (final IOException e)
+//		{
+//			PTKLogger.output("Error starting pre-prime cache: %s",e);
+//		}
 	}
 
 	/**
@@ -54,6 +56,7 @@ public class CacheProvider implements CacheProviderIntfc
 	@Override
 	public <K,V> Cache<K,V> create( @NonNull final String cacheName, final ImmutableMap<String,Object> settings)
 	{
+		embCacheMgr = Caching.getCachingProvider().getCacheManager(URI.create("infinispan.xml"), Thread.currentThread().getContextClassLoader());
 		return embCacheMgr.getCache(cacheName);
 	}
 

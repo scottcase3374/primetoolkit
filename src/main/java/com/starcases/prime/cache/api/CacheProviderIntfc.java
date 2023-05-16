@@ -1,7 +1,8 @@
 package com.starcases.prime.cache.api;
 
+import javax.cache.Cache;
+
 import org.eclipse.collections.api.map.ImmutableMap;
-import org.infinispan.Cache;
 
 import com.starcases.prime.service.api.SvcProviderBaseIntfc;
 
