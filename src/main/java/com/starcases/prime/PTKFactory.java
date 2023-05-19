@@ -1,8 +1,12 @@
 package com.starcases.prime;
 
-import java.util.function.BiFunction;
+import java.nio.file.Path;
+
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
+
+import javax.cache.Cache;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -10,19 +14,19 @@ import jakarta.validation.constraints.Min;
 import com.starcases.prime.service.SvcLoader;
 import com.starcases.prime.base.api.PrimeBaseIntfc;
 import com.starcases.prime.core.api.FactoryIntfc;
-import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceFactoryIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
+import com.starcases.prime.core.impl.PrimeRefFactoryIntfc;
 import com.starcases.prime.core.impl.PrimeSource;
 import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
 import com.starcases.prime.datamgmt.api.CollectionTrackerProviderIntfc;
 import com.starcases.prime.preload.api.PreloaderIntfc;
+import com.starcases.prime.preload.api.PreloaderProviderIntfc;
+import com.starcases.prime.preload.impl.PrimeSubset;
 
 import org.eclipse.collections.api.collection.ImmutableCollection;
-import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.ImmutableList;
-import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.impl.list.immutable.ImmutableListFactoryImpl;
 
 import lombok.Getter;
@@ -63,7 +67,7 @@ public final class PTKFactory
 	 */
 	@Getter
 	@Setter
-	private static @NonNull BiFunction<Long, MutableList<ImmutableLongCollection>, PrimeRefIntfc> primeRefRawCtor;
+	private static @NonNull Function<Long, PrimeRefFactoryIntfc> primeRefRawCtor;
 
 	/**
 	 * helper for assigning the primesrc to prime ref.
@@ -77,27 +81,31 @@ public final class PTKFactory
 	 */
 	@Getter
 	@Setter
-	private static @NonNull Consumer<PrimeSourceIntfc> baseSetPrimeSource;
+	private static @NonNull Supplier<PrimeBaseIntfc> primeBaseCtor;
 
-	/**
-	 * helper for assigning the primesrc
-	 */
 	@Getter
 	@Setter
-	private static @NonNull Supplier<PrimeBaseIntfc> primeBaseCtor;
+	private static Path inputFolderPath;
+
+	@Getter
+	@Setter
+	private static Cache<Long,PrimeSubset> cache;
 
 	/**
 	 * track collections of primes representing prefix prime sums - maintain single copy per unique set.
 	 */
 	@SuppressWarnings({"PMD.FieldNamingConventions"})
 	@Getter
-	private static final @NonNull CollectionTrackerIntfc collTracker;
+	private static final CollectionTrackerIntfc collTracker;
 
 	static
 	{
 		final SvcLoader<CollectionTrackerProviderIntfc, Class<CollectionTrackerProviderIntfc>> collTreeProvider = new SvcLoader< >(CollectionTrackerProviderIntfc.class);
-		final ImmutableCollection<String> colTreeAttributes = Lists.immutable.of("COLLECTION_TREE");
-		collTracker = collTreeProvider.provider(colTreeAttributes).create(null);
+		final ImmutableCollection<String> colTreeAttributes = Lists.immutable.of("COLLECTION_TRACKER");
+		collTracker = collTreeProvider
+						.provider(colTreeAttributes)
+						.map(p -> p.create(null))
+						.orElse(null);
 	}
 
 	/**
@@ -115,22 +123,47 @@ public final class PTKFactory
 		return new FactoryIntfc()
 				{
 					@Override
-					public PrimeSourceFactoryIntfc getPrimeSource()
+					public PrimeSourceFactoryIntfc getPrimeSource(final boolean preload)
 					{
-						return primeSource(	maxCount,
-											confidenceLevel,
-											getPrimeRefRawConstructor(),
-											getConsumersSetPrimeSrc(),
-											collTracker);
+						final PrimeSourceFactoryIntfc pSrc;
+						if (preload)
+						{
+							pSrc = getPrimeSourceLoaded();
+						}
+						else
+						{
+							pSrc = getPrimeSourcePlain();
+						}
+						return pSrc;
 					}
 
-					@Override
-					public PrimeSourceFactoryIntfc getPrimeSource(final PreloaderIntfc primeLoader)
+					private PrimeSourceFactoryIntfc getPrimeSourcePlain()
 					{
-						final var primeSrc = getPrimeSource();
-						primeSrc.setPrePrimed(primeLoader);
-						return primeSrc;
+						return primeSource(	maxCount,
+								confidenceLevel,
+								getPrimeRefRawConstructor(),
+								getConsumersSetPrimeSrc(),
+								collTracker,
+								null);
 					}
+
+					private PrimeSourceFactoryIntfc getPrimeSourceLoaded()
+					{
+						final SvcLoader<PreloaderProviderIntfc, Class<PreloaderProviderIntfc>> preloadProvider = new SvcLoader< >(PreloaderProviderIntfc.class);
+						final ImmutableCollection<String> attributes = Lists.immutable.of("PRELOADER");
+
+						final PreloaderIntfc primePreloader = preloadProvider
+								.provider(attributes)
+								.map(p -> p.create(cache, inputFolderPath, null))
+								.orElse(null);
+
+						return primeSource(	maxCount,
+								confidenceLevel,
+								getPrimeRefRawConstructor(),
+								getConsumersSetPrimeSrc(),
+								collTracker,
+								primePreloader);
+						}
 
 					@Override
 					public Supplier<PrimeBaseIntfc> getPrimeBaseConstructor()
@@ -139,7 +172,7 @@ public final class PTKFactory
 					}
 
 					@Override
-					public BiFunction<Long, MutableList<ImmutableLongCollection>, PrimeRefIntfc> getPrimeRefRawConstructor()
+					public Function<Long, PrimeRefFactoryIntfc> getPrimeRefRawConstructor()
 					{
 						return primeRefRawCtor;
 					}
@@ -147,7 +180,7 @@ public final class PTKFactory
 					@Override
 					public ImmutableList<Consumer<PrimeSourceIntfc>> getConsumersSetPrimeSrc()
 					{
-						return ImmutableListFactoryImpl.INSTANCE.of(primeRefSetPrimeSource, baseSetPrimeSource);
+						return ImmutableListFactoryImpl.INSTANCE.of(primeRefSetPrimeSource);
 					}
 				};
 	}
@@ -165,16 +198,18 @@ public final class PTKFactory
 	private static PrimeSourceFactoryIntfc primeSource(
 			@Min(1) final long maxCount,
 			@Min(1) final int confidenceLevel,
-			@NonNull final BiFunction<Long, MutableList<ImmutableLongCollection>, PrimeRefIntfc> primeRefRawCtor,
+			@NonNull final Function<Long, PrimeRefFactoryIntfc> primeRefRawCtor,
 			@NonNull final ImmutableList<Consumer<PrimeSourceIntfc>> consumersSetPrimeSrc,
-			@NonNull final CollectionTrackerIntfc collTree
+			final CollectionTrackerIntfc collTree,
+			final PreloaderIntfc preloader
 			)
 	{
 		return new PrimeSource(maxCount
 								, consumersSetPrimeSrc
 								, confidenceLevel
 								,primeRefRawCtor,
-								collTracker
+								collTree,
+								preloader
 								);
 	}
 }

@@ -1,15 +1,13 @@
 package com.starcases.prime.core.api;
 
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
 import org.eclipse.collections.api.list.ImmutableList;
-import org.eclipse.collections.api.list.MutableList;
 
 import com.starcases.prime.base.api.PrimeBaseIntfc;
-import com.starcases.prime.preload.api.PreloaderIntfc;
+import com.starcases.prime.core.impl.PrimeRefFactoryIntfc;
 
 /**
  * This interface is a helper for the CLI support - helps simplify the
@@ -24,9 +22,7 @@ public interface FactoryIntfc
 	 * provide prime/primeref lookups
 	 * @return
 	 */
-	PrimeSourceFactoryIntfc getPrimeSource();
-
-	PrimeSourceFactoryIntfc getPrimeSource(final PreloaderIntfc preprimed);
+	PrimeSourceFactoryIntfc getPrimeSource(final boolean preload);
 
 	/**
 	 * Get a supplier of the base constructor.
@@ -41,7 +37,7 @@ public interface FactoryIntfc
 	 * Need better desc.
 	 * @return
 	 */
-	BiFunction<Long, MutableList<ImmutableLongCollection>, PrimeRefIntfc> getPrimeRefRawConstructor();
+	Function<Long, PrimeRefFactoryIntfc> getPrimeRefRawConstructor();
 
 	/**
 	 * Provides a means of providing alternative configuration via different factories

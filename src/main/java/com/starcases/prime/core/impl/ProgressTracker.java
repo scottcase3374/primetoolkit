@@ -1,6 +1,5 @@
 package com.starcases.prime.core.impl;
 
-import com.starcases.prime.PrimeToolKit;
 import com.starcases.prime.core.api.ProgressIntfc;
 
 /**
@@ -29,7 +28,7 @@ public final class ProgressTracker implements ProgressIntfc
 		final var num = (int)(primesProcessed / mask[unitIdx]);
 		if (unitIdx != units.length-1 || num <= 2)
 		{
-			PrimeToolKit.output(String.format(units[unitIdx], num));
+			PTKLogger.output(String.format(units[unitIdx], num));
 		}
 	}
 }

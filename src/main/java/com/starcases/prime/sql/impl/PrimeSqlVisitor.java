@@ -18,17 +18,23 @@ import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.starcases.prime.antlrimpl.PrimeSqlBaseVisitor;
-import com.starcases.prime.antlrimpl.PrimeSqlParser;
-import com.starcases.prime.antlrimpl.PrimeSqlParser.ArrayItemContext;
-import com.starcases.prime.antlrimpl.PrimeSqlParser.Array_top_clauseContext;
-import com.starcases.prime.antlrimpl.PrimeSqlParser.BaseMatchContext;
-import com.starcases.prime.antlrimpl.PrimeSqlParser.Idx_boundsContext;
-import com.starcases.prime.antlrimpl.PrimeSqlParser.Sel_optsContext;
-import com.starcases.prime.antlrimpl.PrimeSqlParser.SubArrayContext;
 import com.starcases.prime.base.api.BaseTypes;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
+import com.starcases.prime.sql.antlrimpl.PrimeSqlBaseVisitor;
+import com.starcases.prime.sql.antlrimpl.PrimeSqlParser;
+import com.starcases.prime.sql.antlrimpl.PrimeSqlParser.ArrayItemContext;
+//import com.starcases.prime.sql.impl.PrimeSqlParser.ArrayItemContext;
+//import com.starcases.prime.sql.impl.PrimeSqlParser.Array_top_clauseContext;
+//import com.starcases.prime.sql.impl.PrimeSqlParser.BaseMatchContext;
+//import com.starcases.prime.sql.impl.PrimeSqlParser.Idx_boundsContext;
+//import com.starcases.prime.sql.impl.PrimeSqlParser.Sel_optsContext;
+//import com.starcases.prime.sql.impl.PrimeSqlParser.SubArrayContext;
+import com.starcases.prime.sql.antlrimpl.PrimeSqlParser.Array_top_clauseContext;
+import com.starcases.prime.sql.antlrimpl.PrimeSqlParser.BaseMatchContext;
+import com.starcases.prime.sql.antlrimpl.PrimeSqlParser.Idx_boundsContext;
+import com.starcases.prime.sql.antlrimpl.PrimeSqlParser.Sel_optsContext;
+import com.starcases.prime.sql.antlrimpl.PrimeSqlParser.SubArrayContext;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -168,7 +174,27 @@ public class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 	public PrimeSqlResult visitRoot(final PrimeSqlParser.RootContext ctx)
 	{
 		visitChildren(ctx);
+		return result;
+	}
 
+	@Override
+	public PrimeSqlResult visitStmts(final PrimeSqlParser.StmtsContext ctx)
+	{
+		visitChildren(ctx);
+		return result;
+	}
+
+	@Override
+	public PrimeSqlResult visitStmt(final PrimeSqlParser.StmtContext ctx)
+	{
+		visitChildren(ctx);
+		return result;
+	}
+
+	@Override
+	public PrimeSqlResult visitSelect(final PrimeSqlParser.SelectContext ctx)
+	{
+		visitChildren(ctx);
 		final Gson gson = new GsonBuilder().setExclusionStrategies(fieldExclusionStrategy).serializeNulls().create();
 		try
 		{
@@ -218,6 +244,7 @@ public class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 	@Override
 	public PrimeSqlResult visitSelect_field(final PrimeSqlParser.Select_fieldContext ctx)
 	{
+		visitChildren(ctx);
 		final ExclFieldNameStrategy excludes = new ExclFieldNameStrategy();
 
 		switch (ctx.sel.getType())
@@ -252,12 +279,13 @@ public class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 		}
 
 		fieldExclusionStrategy = excludes;
-		return visitChildren(ctx);
+		return result;
 	}
 
 	@Override
 	public PrimeSqlResult visitSel_opts(final Sel_optsContext ctx)
 	{
+		this.visitChildren(ctx);
 		this.selUseParallel = true;
 		return result;
 	}
@@ -346,6 +374,7 @@ public class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 	@Override
 	public PrimeSqlResult visitSubArray(final SubArrayContext ctx)
 	{
+		visitChildren(ctx);
 		final var childCnt = ctx.getChildCount();
 		final var baseCnt = Math.floorDiv(childCnt, 2);
 		final long[] items = new long[baseCnt];
@@ -363,6 +392,7 @@ public class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 	@Override
 	public PrimeSqlResult visitArrayItem(final ArrayItemContext ctx)
 	{
+		visitChildren(ctx);
 		final String primeTxt = ctx.getChild(0).getText();
 		anyItemsColl.add(Long.parseLong(primeTxt));
 

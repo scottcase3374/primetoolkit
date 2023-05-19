@@ -1,20 +1,18 @@
 package com.starcases.prime.core.api;
 
-import com.starcases.prime.preload.api.PreloaderIntfc;
+import com.starcases.prime.base.api.PrimeBaseGeneratorIntfc;
 
 /**
  * Private interface used by factory. Any prime source implementation
  * must implement this interface.
  *
- * Provides a way to convey
- * any pre-loaded prime data into a prime source instance.
  * The result of completing all the factory processing is an
  * instance where the prime source is handled as a the more
- * generic PrimeSourceIntfc which prevents changing the
- * preprimed reference.
+ * generic PrimeSourceIntfc which prevents changing internal
+ * members that are intended as implementation details.
  *
- * Other methods only needed during the prime/base construction
- * should reside here as well.
+ * Methods only needed during the prime/base construction
+ * should reside here.
  *
  * This is an alternative to simply using more constructor
  * arguments.
@@ -24,7 +22,7 @@ import com.starcases.prime.preload.api.PreloaderIntfc;
  */
 public interface PrimeSourceFactoryIntfc extends PrimeSourceIntfc
 {
-	void setPrePrimed(final PreloaderIntfc primeLoader);
+	void addBaseGenerator(final PrimeBaseGeneratorIntfc baseGenerator);
 
 	/**
 	 * output progress of initial base creation.
@@ -34,10 +32,10 @@ public interface PrimeSourceFactoryIntfc extends PrimeSourceIntfc
 
 	/**
 	 * set flag indicating whether to output metrics regarding the
-	 * prime trees generated for initial base.
+	 * base data generated for initial base.
 	 * @param doDisplay
 	 */
-	void setDisplayPrimeTreeMetrics(final boolean doDisplay);
+	void setDisplayDefaultBaseMetrics(final boolean doDisplay);
 
 	/**
 	 * DefaultInit base info.

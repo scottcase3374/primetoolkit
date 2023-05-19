@@ -3,10 +3,10 @@ package com.starcases.prime.base.primetree.impl;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.starcases.prime.PrimeToolKit;
 import com.starcases.prime.base.api.BaseTypes;
 import com.starcases.prime.base.impl.AbstractPrimeBaseLog;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
+import com.starcases.prime.core.impl.PTKLogger;
 
 import lombok.NonNull;
 
@@ -51,14 +51,14 @@ public class LogPrimeTree extends AbstractPrimeBaseLog
 			.getPrimeRefStream(false)
 			.forEach( primeRef ->
 							{
-								PrimeToolKit.output(BaseTypes.PRIME_TREE, "%s", String.format("Prime [%d] idx[%d] Tree: ", primeRef.getPrime(), itemIdx[0]));
+								PTKLogger.output(BaseTypes.PRIME_TREE, "%s", String.format("Prime [%d] idx[%d] Tree: ", primeRef.getPrime(), itemIdx[0]));
 
 								primeRef
 									.getPrimeBaseData()
 									.getPrimeBases(BaseTypes.PRIME_TREE)
 									.iterator()
 									.forEachRemaining( primeBases -> primeBases.appendString(outputStr, "[", ",", "]"));
-								PrimeToolKit.output(BaseTypes.PRIME_TREE, "\t%s%n", outputStr);
+								PTKLogger.output(BaseTypes.PRIME_TREE, "\t%s%n", outputStr);
 								outputStr.setLength(0);
 								itemIdx[0]++;
 

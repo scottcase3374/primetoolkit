@@ -20,17 +20,6 @@ public class ProcessorMetricProvider implements MetricsProviderIntfc, MetricIntf
 	private static final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("PROCESSOR", "METRICS");
 
 	@Override
-	public int countAttributesMatch(final ImmutableCollection<String> attributes)
-	{
-		int ret = 0;
-		if (ATTRIBUTES.containsAllIterable(attributes))
-		{
-			ret = ATTRIBUTES.size();
-		}
-		return ret;
-	}
-
-	@Override
 	public MetricIntfc create(final ImmutableMap<String, Object> attributes)
 	{
 		return this;
@@ -50,5 +39,11 @@ public class ProcessorMetricProvider implements MetricsProviderIntfc, MetricIntf
 			LOG.fine("Enabling Processor ");
 			MetricMonitor.bind(r -> new ProcessorMetrics().bindTo(r));
 		}
+	}
+
+	@Override
+	public ImmutableCollection<String> getProviderAttributes()
+	{
+		return ATTRIBUTES;
 	}
 }

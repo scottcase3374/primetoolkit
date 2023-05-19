@@ -1,5 +1,6 @@
 package com.starcases.prime.service;
 
+import java.util.Optional;
 import java.util.ServiceLoader;
 
 import org.eclipse.collections.api.collection.ImmutableCollection;
@@ -17,7 +18,6 @@ public class SvcLoader< T extends SvcProviderBaseIntfc, C extends Class<T>>
     public SvcLoader(final C classT)
     {
     	this.loader = ServiceLoader.load(classT);
-    	loader.forEach(System.out::println);
     }
 
     /**
@@ -25,13 +25,13 @@ public class SvcLoader< T extends SvcProviderBaseIntfc, C extends Class<T>>
      * @param attributes
      * @return
      */
-    public T provider(@NonNull final ImmutableCollection<String> attributes)
+    public Optional<T> provider(@NonNull final ImmutableCollection<String> attributes)
     {
-	  return loader
+	  return
+			 providers(attributes)
 			  .stream()
-			  .max((x,y) -> Integer.compare(x.get().countAttributesMatch(attributes), y.get().countAttributesMatch(attributes)) )
-			  .get()
-			  .get();
+			  .max((x,y) -> Integer.compare(x.countAttributesMatch(attributes), y.countAttributesMatch(attributes)) )
+			  ;
     }
 
     /**
@@ -47,6 +47,5 @@ public class SvcLoader< T extends SvcProviderBaseIntfc, C extends Class<T>>
 			  .filter(x -> x.get().countAttributesMatch(attributes) > 0 )
 			  .map(p -> p.get())
 			);
-
     }
 }

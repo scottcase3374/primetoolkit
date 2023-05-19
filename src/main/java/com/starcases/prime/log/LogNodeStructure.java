@@ -3,9 +3,9 @@ package com.starcases.prime.log;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.starcases.prime.PrimeToolKit;
 import com.starcases.prime.base.impl.AbstractPrimeBaseLog;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
+import com.starcases.prime.core.impl.PTKLogger;
 
 import lombok.NonNull;
 
@@ -56,7 +56,7 @@ public class LogNodeStructure extends AbstractPrimeBaseLog
 						final var outputStr = new StringBuilder("\t");
 
 						final long [] cnt = {0};
-						PrimeToolKit.output(String.format("%nPrime [%d] idx[%d]",
+						PTKLogger.output(String.format("%nPrime [%d] idx[%d]",
 								primeRef.getPrime(),
 								idx[0]++
 								));
@@ -71,7 +71,7 @@ public class LogNodeStructure extends AbstractPrimeBaseLog
 											outputStr.append(s);
 											if (cnt[0] % 5 == 0 || cnt[0] >= primeRef.getPrimeBaseData().getPrimeBases().get(0).size())
 											{
-												PrimeToolKit.output( "\t%s", outputStr);
+												PTKLogger.output( "\t%s", outputStr);
 												outputStr.setLength(0);
 											}
 											else

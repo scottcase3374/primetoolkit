@@ -42,17 +42,6 @@ public class CircularLayoutPrimesGraph  extends JFrame implements VisualizationP
     }
 
 	@Override
-	public int countAttributesMatch(final ImmutableCollection<String> attributes)
-	{
-		int ret = 0;
-		if (ATTRIBUTES.containsAllIterable(attributes))
-		{
-			ret = ATTRIBUTES.size();
-		}
-		return ret;
-	}
-
-	@Override
 	public JFrame create(@NonNull final Graph<PrimeRefIntfc,DefaultEdge> graph, final ImmutableMap<String, Object> attributes)
 	{
 
@@ -74,5 +63,11 @@ public class CircularLayoutPrimesGraph  extends JFrame implements VisualizationP
 
         layout.execute(jgxAdapter.getDefaultParent());
 		return this;
+	}
+
+	@Override
+	public ImmutableCollection<String> getProviderAttributes()
+	{
+		return ATTRIBUTES;
 	}
 }

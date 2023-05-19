@@ -10,5 +10,5 @@ import lombok.NonNull;
 
 public interface CacheProviderIntfc extends SvcProviderBaseIntfc
 {
-	<K,V> Cache<K,V> create( @NonNull final String cacheName, final ImmutableMap<String,Object> settings);
+	<X,Y> Cache<X,Y> create( @NonNull final String cacheName, final ImmutableMap<String,Object> settings);
 }

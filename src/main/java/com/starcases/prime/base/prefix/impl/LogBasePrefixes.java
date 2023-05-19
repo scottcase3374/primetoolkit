@@ -3,12 +3,10 @@ package com.starcases.prime.base.prefix.impl;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.starcases.prime.PrimeToolKit;
 import com.starcases.prime.base.api.BaseTypes;
 import com.starcases.prime.base.impl.AbstractPrimeBaseLog;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
-
-import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
+import com.starcases.prime.core.impl.PTKLogger;
 
 import lombok.NonNull;
 
@@ -50,15 +48,21 @@ public class LogBasePrefixes extends AbstractPrimeBaseLog
 			.getPrimeRefStream(false)
 			.forEach( primeRef ->
 								{
-									final ImmutableLongCollection primeBases = primeRef.getPrimeBaseData().getPrimeBases(BaseTypes.PREFIX).get(0);
+									primeRef
+									.getPrimeBaseData()
+									.getPrimeBases(BaseTypes.PREFIX)
+									.forEach(
+											primeBases ->
+											{
 
-									outputStr.append(String.format("Prime [%d] Prefix: \t", primeRef.getPrime()));
+												outputStr.append(String.format("Prime [%d] Prefix: \t", primeRef.getPrime()));
 
-									primeBases.appendString(outputStr, "[", ",", "]");
+												primeBases.appendString(outputStr, "[", ",", "]");
 
-									PrimeToolKit.output(BaseTypes.PREFIX, "%s%n", outputStr);
-									outputStr.setLength(0);
-									itemIdx[0]++;
+												PTKLogger.output(BaseTypes.PREFIX, "%s%n", outputStr);
+												outputStr.setLength(0);
+												itemIdx[0]++;
+											});
 								}
 					);
 	}

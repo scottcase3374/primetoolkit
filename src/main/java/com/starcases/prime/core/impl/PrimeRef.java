@@ -3,10 +3,9 @@ package com.starcases.prime.core.impl;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
-
-import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
-import org.eclipse.collections.api.list.MutableList;
+import java.util.logging.Logger;
 
 import com.starcases.prime.base.api.PrimeBaseIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
@@ -24,8 +23,10 @@ import lombok.Setter;
 *
 **/
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-public class PrimeRef implements PrimeRefIntfc
+public class PrimeRef implements PrimeRefFactoryIntfc
 {
+	private static final Logger LOG = Logger.getLogger(PrimeRef.class.getName());
+
 	/**
 	 *
 	 */
@@ -48,7 +49,6 @@ public class PrimeRef implements PrimeRefIntfc
 	/**
 	 * Base data
 	 */
-	@Getter
 	private PrimeBaseIntfc primeBaseData;
 
 	/**
@@ -68,13 +68,31 @@ public class PrimeRef implements PrimeRefIntfc
 	 * @param primeBases
 	 * @return
 	 */
-	public PrimeRef init(
-			@NonNull final Supplier<PrimeBaseIntfc> primeBaseSupplier,
-			@NonNull final MutableList<ImmutableLongCollection> primeBases)
+	@Override
+	public PrimeRefFactoryIntfc init(
+			 @NonNull final Supplier<PrimeBaseIntfc> primeBaseSupplier
+			)
 	{
 		primeBaseData = primeBaseSupplier.get();
-		getPrimeBaseData().addPrimeBases(primeBases);
 		return this;
+	}
+
+	@Override
+	public PrimeRefFactoryIntfc generateBases(@NonNull final Consumer<PrimeRef> basesGenerate)
+	{
+		basesGenerate.accept(this);
+		return this;
+	}
+
+	@Override
+	public PrimeBaseIntfc getPrimeBaseData()
+	{
+		if (primeBaseData == null)
+		{
+			LOG.info("Prime base data is null :  returning null from getPrimeBaseData()");
+		}
+
+		return primeBaseData;
 	}
 
 	/**

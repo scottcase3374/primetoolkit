@@ -11,7 +11,7 @@ import org.eclipse.collections.api.map.primitive.MutableLongObjectMap;
 import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 import org.eclipse.collections.impl.map.mutable.primitive.MutableLongObjectMapFactoryImpl;
 
-import com.starcases.prime.PrimeToolKit;
+import com.starcases.prime.core.impl.PTKLogger;
 import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
 import com.starcases.prime.datamgmt.api.CollectionTreeIteratorIntfc;
 
@@ -39,11 +39,6 @@ public class CollectionTrackerImpl implements CollectionTrackerIntfc
 	@Getter(AccessLevel.PRIVATE)
 	private final ConcurrentMutableMap<Long, Long> useCounts = new ConcurrentHashMap<>(500);
 
-	/**
-	 * container for tracking the unique set of prefixes/trees
-	 */
-	//@Getter(AccessLevel.PRIVATE)
-	//private final CollectionTrackerIntfc collectionTracker;
 
 	/**
 	 * Constructor for the collection tree
@@ -51,11 +46,6 @@ public class CollectionTrackerImpl implements CollectionTrackerIntfc
 	 */
 	public CollectionTrackerImpl()
 	{}
-
-//	public CollectionTreeImpl(@NonNull final CollectionTrackerIntfc collectionTracker)
-//	{
-//		this.collectionTracker = collectionTracker;
-//	}
 
 	/**
 	 * get iterator to the tree info
@@ -68,31 +58,15 @@ public class CollectionTrackerImpl implements CollectionTrackerIntfc
 	}
 
 	/**
-	 * Execute 'func' against the prime tree data and return a PData
-	 * if the predicate is matched. Looking for key for
-	 * a prime sum that when added to a new prime results in a new prime.
-	 *
-	 * NOTE: Desire lowest matching value found
-	 *
-	 * @param biFunc
-	 * @return
-	 */
-//	@Override
-//	public Optional<PData> select(final LongPredicate pred)
-//	{
-//		return collectionTracker.select(pred);
-//	}
-
-	/**
 	 * output logging for collection tracking.
 	 */
 	@Override
 	public void log()
 	{
-		PrimeToolKit.output("%nCollection tracking:%n", "");
+		PTKLogger.output("%nCollection tracking:%n", "");
 		useCounts.forEach(
 				(l1, l2) ->
-					PrimeToolKit.output("sum: [%d] occurrences: [%d] prefix: [%s]%n",
+				PTKLogger.output("sum: [%d] occurrences: [%d] prefix: [%s]%n",
 							l1,
 							l2,
 							sourcePrimes.get(l1).toCanonicalCollection().makeString()));
@@ -134,5 +108,4 @@ public class CollectionTrackerImpl implements CollectionTrackerIntfc
 	{
 		return Optional.ofNullable(sourcePrimes.get(key));
 	}
-
 }

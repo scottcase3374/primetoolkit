@@ -5,11 +5,11 @@ import java.util.logging.Logger;
 
 import org.eclipse.collections.api.bag.primitive.ImmutableLongBag;
 
-import com.starcases.prime.PrimeToolKit;
 import com.starcases.prime.base.api.BaseTypes;
 import com.starcases.prime.base.impl.AbstractPrimeBaseLog;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
+import com.starcases.prime.core.impl.PTKLogger;
 
 import lombok.NonNull;
 import picocli.CommandLine.Command;
@@ -57,7 +57,7 @@ public class LogBasesNPrime extends AbstractPrimeBaseLog
 			final String itemCountsStr = counts.toStringOfItemToCount();
 
 			// Handle "header" info for the current Prime
-			PrimeToolKit.output(BaseTypes.NPRIME, "%nPrime [%d] %s%n",
+			PTKLogger.output(BaseTypes.NPRIME, "%nPrime [%d] %s%n",
 												primeRef.getPrime(),
 												itemCountsStr
 												);

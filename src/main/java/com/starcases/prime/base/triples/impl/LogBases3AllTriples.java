@@ -3,10 +3,10 @@ package com.starcases.prime.base.triples.impl;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.starcases.prime.PrimeToolKit;
 import com.starcases.prime.base.api.BaseTypes;
 import com.starcases.prime.base.impl.AbstractPrimeBaseLog;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
+import com.starcases.prime.core.impl.PTKLogger;
 
 import lombok.NonNull;
 import picocli.CommandLine.Command;
@@ -54,7 +54,7 @@ public class LogBases3AllTriples  extends AbstractPrimeBaseLog
 			.forEach( primeRef ->
 						{
 							final var size = primeRef.getPrimeBaseData().getPrimeBases(BaseTypes.THREETRIPLE).size();
-							PrimeToolKit.output(BaseTypes.THREETRIPLE,
+							PTKLogger.output(BaseTypes.THREETRIPLE,
 												String.format("%nPrime [%d] idx[%d] #-bases[%d]",
 													primeRef.getPrime(),
 													idx[0]++,
@@ -77,7 +77,7 @@ public class LogBases3AllTriples  extends AbstractPrimeBaseLog
 
 													if (cnt[0] % maxBasesInRow == 0 || cnt[0] >= size)
 													{
-														PrimeToolKit.output(BaseTypes.THREETRIPLE, "\t%s", outputStr);
+														PTKLogger.output(BaseTypes.THREETRIPLE, "\t%s", outputStr);
 														outputStr.setLength(0);
 													}
 												}

@@ -1,16 +1,9 @@
 package com.starcases.prime.base.triples.impl;
 
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Logger;
-import jakarta.validation.constraints.Min;
-
 import com.starcases.prime.base.api.BaseTypes;
-import com.starcases.prime.base.impl.AbstractPrimeBaseGenerator;
-import com.starcases.prime.core.api.PrimeSourceIntfc;
-import com.starcases.prime.metrics.MetricMonitor;
+import com.starcases.prime.base.impl.PrimeBaseGenerator;
+import com.starcases.prime.core.api.PrimeRefIntfc;
 
-import io.micrometer.core.instrument.LongTaskTimer;
 import lombok.NonNull;
 
 /*
@@ -60,49 +53,21 @@ import lombok.NonNull;
 /**
  * Produce "triples" for each prime.
  */
-public class BaseReduceTriple extends AbstractPrimeBaseGenerator
+public class BaseReduceTriple extends PrimeBaseGenerator
 {
-	/**
-	 * default logger
-	 */
-	private static final Logger LOG = Logger.getLogger(BaseReduceTriple.class.getName());
-
-	/**
-	 * Track items in numerical order by incrementing this in an atomic fashion.
-	 */
-	@Min(0)
-	private static final AtomicInteger GOOD = new AtomicInteger(0);
-
 	/**
 	 * Constructor
 	 *
 	 * @param primeSrc
 	 */
-	public BaseReduceTriple(@NonNull final PrimeSourceIntfc primeSrc)
+	public BaseReduceTriple(@NonNull final BaseTypes baseType)
 	{
-		super(primeSrc);
+		super(baseType);
 	}
 
-	/**
-	 * top-level function; iterate over entire dataset to reduce every Prime
-	 * @param maxReduce
-	 */
 	@Override
-	protected void genBasesImpl()
+	public void genBasesForPrimeRef(final PrimeRefIntfc curPrime)
 	{
-		if (isBaseGenerationOutput())
-		{
-			LOG.entering("BaseReduce3Triple", "genBases()");
-			LOG.info("BaseReduce3Triple genBases()");
-		}
-		final Optional<LongTaskTimer.Sample> timer = MetricMonitor.longTimer(BaseTypes.THREETRIPLE);
-		try
-		{
-			new AllTriples(primeSrc, this.preferParallel).process();
-		}
-		finally
-		{
-			timer.ifPresent(t -> t.stop());
-		}
+		new AllTriples(primeSrc, this.preferParallel).process(curPrime);
 	}
 }

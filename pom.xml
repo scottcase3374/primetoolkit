@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.starcases</groupId>
 		<artifactId>raw-java-base-pom</artifactId>
-		<version>1.0.6.1</version>
+		<version>1.0.7.1</version>
 	</parent>
 	<groupId>com.starcases.prime</groupId>
 	<artifactId>prime-tool-kit</artifactId>
@@ -19,10 +19,6 @@
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.weld.se</groupId>
-			<artifactId>weld-se-shaded</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>info.picocli</groupId>
@@ -53,6 +49,28 @@
 			<groupId>org.infinispan</groupId>
 			<artifactId>infinispan-cdi-embedded</artifactId>
 		</dependency>
+
+		<dependency>
+    		<groupId>org.infinispan</groupId>
+    		<artifactId>infinispan-jcache</artifactId>
+		</dependency>
+		<dependency>
+    		<groupId>org.infinispan</groupId>
+    		<artifactId>infinispan-jcache-commons</artifactId>
+		</dependency>
+<dependency>
+    <groupId>org.infinispan.protostream</groupId>
+    <artifactId>protostream</artifactId>
+
+</dependency>
+		<dependency>
+    		<groupId>javax.cache</groupId>
+    		<artifactId>cache-api</artifactId>
+		</dependency>
+<!--		<dependency>
+        	<groupId>org.apache.ignite</groupId>
+        	<artifactId>ignite-core</artifactId>
+    	</dependency>-->
 		<dependency>
 			<groupId>org.eclipse.collections</groupId>
 			<artifactId>eclipse-collections</artifactId>
@@ -105,10 +123,6 @@
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.zeromq</groupId>
-			<artifactId>jeromq</artifactId>
-		</dependency>
 
 		<dependency>
 			<groupId>org.lwjgl</groupId>
@@ -117,12 +131,15 @@
 		</dependency>
 
 	</dependencies>
+
 	<build>
+
 
 		<plugins>
 			<plugin>
 				<groupId>org.antlr</groupId>
 				<artifactId>antlr4-maven-plugin</artifactId>
+				<version>${antlr.version}</version>
 				<executions>
 					<execution>
 						<id>antlr</id>
@@ -131,10 +148,79 @@
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<listener>false</listener>
+					<visitor>true</visitor>
+				</configuration>
 			</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+
+					<configuration>
+						<annotationProcessorPaths>
+							<annotationProcessorPath>
+								<groupId>org.projectlombok</groupId>
+								<artifactId>lombok</artifactId>
+								<version>1.18.26</version>
+							</annotationProcessorPath>
+
+							<annotationProcessorPath>
+								<groupId>org.infinispan.protostream</groupId>
+								<artifactId>protostream-processor</artifactId>
+								<version>4.6.2.Final</version>
+							</annotationProcessorPath>
+
+						</annotationProcessorPaths>
+
+					</configuration>
+				</plugin>
+
 		</plugins>
+
+		<pluginManagement>
+			<plugins>
+				<!--<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+
+					<configuration>
+						<annotationProcessorPaths>
+							<path>
+								<groupId>org.projectlombok</groupId>
+								<artifactId>lombok</artifactId>
+								<version>1.18.26</version>
+							</path>
+						</annotationProcessorPaths>
+
+					</configuration>
+				</plugin>
+-->
+					<plugin>
+						<groupId>org.antlr</groupId>
+						<artifactId>antlr4-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>antlr</id>
+								<goals>
+									<goal>antlr4</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<visitor>true</visitor>
+							<listener>true</listener>
+							
+						</configuration>
+					</plugin>
+			</plugins>
+		</pluginManagement>
+
 	</build>
-	<profiles>
+
+
+<!--	<profiles>
 		<profile>
 			<id>native</id>
 			<build>
@@ -149,5 +235,5 @@
 				</plugins>
 			</build>
 		</profile>
-	</profiles>
+	</profiles>-->
 </project>

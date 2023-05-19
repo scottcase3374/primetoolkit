@@ -5,15 +5,15 @@ import java.util.BitSet;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.LongSupplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.starcases.prime.base.impl.AbstractPrimeBaseGenerator;
+import com.starcases.prime.base.api.PrimeBaseGeneratorIntfc;
 import com.starcases.prime.cli.OutputOper;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceFactoryIntfc;
@@ -36,6 +36,7 @@ import lombok.Setter;
 import jakarta.validation.constraints.Min;
 
 import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
+import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.api.map.primitive.MutableLongLongMap;
@@ -54,7 +55,7 @@ import org.eclipse.collections.impl.set.immutable.primitive.ImmutableLongSetFact
  *
  */
 @SuppressWarnings({ "PMD.AvoidDuplicateLiterals"})
-public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSourceFactoryIntfc
+public class PrimeSource implements PrimeSourceFactoryIntfc
 {
 	private static final long serialVersionUID = 1L;
 
@@ -122,7 +123,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	* constructor  -> param primeRefCtor
 	*/
 	@Getter(AccessLevel.PRIVATE)
-	private final BiFunction<Long, MutableList<ImmutableLongCollection>, PrimeRefIntfc> primeRefRawCtor;
+	private final Function<Long, PrimeRefFactoryIntfc> primeRefRawCtor;
 
 	/**
 	 * Container of pre-generated prime/base data.
@@ -133,6 +134,8 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	//
 	// Internal data used/generated during prime/base creation
 	//
+
+	private MutableList<PrimeBaseGeneratorIntfc> baseGenerators = Lists.mutable.empty();
 
 	/**
 	 * atomic long for next prime index.
@@ -174,16 +177,15 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 			@Min(1) final long maxCount,
 			@NonNull final ImmutableList<Consumer<PrimeSourceIntfc>> consumersSetPrimeSrc,
 			@Min(1) final int confidenceLevel,
-			@NonNull final BiFunction<Long, MutableList<ImmutableLongCollection>, PrimeRefIntfc> primeRefRawCtor,
-			@NonNull final CollectionTrackerIntfc collTracker
+			@NonNull final Function<Long, PrimeRefFactoryIntfc> primeRefRawCtor,
+			final CollectionTrackerIntfc collTracker,
+			final PreloaderIntfc primeLoader
 			)
 	{
 		super();
 
-		// yes, this seems odd - maybe refactor later.
-		super.primeSrc = this;
-
 		this.collTracker = collTracker;
+		this.primeLoader = primeLoader;
 
 		final int capacity = (int)(maxCount*1.25);
 		idxToPrimeMap = new LongObjectHashMap<>(capacity);
@@ -192,7 +194,15 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 		targetPrimeCount = maxCount;
 
 		this.primeRefRawCtor = primeRefRawCtor;
-		consumersSetPrimeSrc.forEach(c -> c.accept(this));
+		consumersSetPrimeSrc
+			.forEach(c ->
+					{
+						if (c != null)
+						{
+							c.accept(this);
+						}
+					}
+						);
 
 		this.confidenceLevel = confidenceLevel;
 	}
@@ -202,17 +212,23 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	 *
 	 * @param aPrime
 	 */
-	private void addPrimeRef(
+	private PrimeRefFactoryIntfc addPrimeRef(
 			@Min(0) final long nextPrimeIdx,
 			@Min(1) final long newPrime,
-			final MutableList<ImmutableLongCollection> baseSets
+			@NonNull final Consumer<PrimeRef> basesGenerator,
+			@NonNull final MutableList<ImmutableLongCollection> defaultBase
 			)
 	{
-		final PrimeRefIntfc ret = primeRefRawCtor.apply(nextPrimeIdx, baseSets);
+		final PrimeRefFactoryIntfc ret = primeRefRawCtor.apply(nextPrimeIdx);
 
 		checkMismatch("addPrimeRef", nextPrimeIdx, newPrime);
 
 		updateMaps(nextPrimeIdx, newPrime, ret);
+
+		ret.getPrimeBaseData().addPrimeBases(defaultBase);
+		ret.generateBases(basesGenerator);
+
+		return ret;
 	}
 
 	private long calcSumCeiling(@Min(3) final long primeSum)
@@ -252,14 +268,8 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	 * something new be learned with regard to factors of numbers created
 	 * from large primes?
 	 */
-	@Override
-	protected void genBasesImpl()
+	protected void genPrimes()
 	{
-		if (LOG.isLoggable(Level.INFO))
-		{
-			LOG.info("PrimeSource::genBasesImpl()");
-		}
-
 		long nextPrimeTmpIdx;
 		do
 		{
@@ -270,11 +280,10 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 				final var lastPrimeIdx = nextPrimeIdx -1;
 				final var lastPrime = getPrimeForIdx(lastPrimeIdx);
 
-				if (!genByListPermutation(nextPrimeIdx, lastPrime) && !genByPrimePermutation(nextPrimeIdx, lastPrime))
-				{
-					LOG.severe("No prime found");
-					throw new IllegalStateException("No prime found");
-				}
+				final PrimeRefIntfc ret =  genByListPermutation(nextPrimeIdx, lastPrime)
+											.orElse(genByPrimePermutation(nextPrimeIdx, lastPrime)
+											.orElseThrow( () -> new IllegalStateException("No prime found")));
+
 
 				if (null != progress)
 				{
@@ -291,6 +300,16 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 		while (nextPrimeTmpIdx < targetPrimeCount);
 	}
 
+	private Consumer<PrimeRef> getBasesGenerator()
+	{
+		return (pRef) -> this
+							.baseGenerators
+							.each(gen ->
+								{
+									gen.genBasesForPrimeRef(pRef);
+								});
+	}
+
 	/**
 	 * Generation of prime/bases through permutations of existing prime base lists.
 	 * The idea behind this is that using lists as determined for past items has
@@ -302,9 +321,10 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	 * @param optCurPrime
 	 * @return
 	 */
-	private boolean genByListPermutation(@Min(0) final long nextPrimeIdx, @Min(1) final OptionalLong optCurPrime)
+	private Optional<PrimeRefIntfc> genByListPermutation(@Min(0) final long nextPrimeIdx, @Min(1) final OptionalLong optCurPrime)
 	{
-		final boolean [] found = {false};
+		final PrimeRefFactoryIntfc [] retPrRef = {null};
+
 		optCurPrime.ifPresent(curPrime ->
 						{
 							// NOTE: Selection process must pick lowest item
@@ -313,16 +333,19 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 									{
 										final long possibleNextPrime = curPrime + primeCollSum;
 										return BigInteger.valueOf(possibleNextPrime).isProbablePrime(100);
-										});
+									});
 
 							pdata.ifPresent( pd ->
 										{
 											final var nextPrime = curPrime + pd.prime();
-											found[0] = true;
 
 											checkMismatch("genByListPermutation", nextPrimeIdx, nextPrime);
 
-											addPrimeRef(nextPrimeIdx, nextPrime, MutableListFactoryImpl.INSTANCE.of(pd.toCanonicalCollection(), ImmutableLongSetFactoryImpl.INSTANCE.with(curPrime)));
+											retPrRef[0] = addPrimeRef(nextPrimeIdx,
+																	nextPrime,
+																	getBasesGenerator(),
+																	MutableListFactoryImpl.INSTANCE.of(pd.toCanonicalCollection(), ImmutableLongSetFactoryImpl.INSTANCE.with(curPrime))
+																	);
 										}
 									);
 							});
@@ -331,7 +354,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 		{
 			LOG.fine("gen by list permutation - foundPrime idx:" + nextPrimeIdx + " prime:" + optCurPrime.getAsLong());
 		}
-		return found[0];
+		return Optional.ofNullable(retPrRef[0]);
 	}
 
 	/**
@@ -372,7 +395,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	 * @param optCurPrime
 	 * @return
 	 */
-	private boolean genByPrimePermutation(@Min(0) final long idx, @Min(1) final OptionalLong optCurPrime)
+	private Optional<PrimeRefIntfc> genByPrimePermutation(@Min(0) final long idx, @Min(1) final OptionalLong optCurPrime)
 	{
 		// Represents a X-bit search space of indexes for primes to add for next Prime.
 		final var numBitsForPrimeCount =  getBitsRequired(optCurPrime.getAsLong());
@@ -386,7 +409,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 
 		final var sumCeiling = optCurPrime.stream().map(this::calcSumCeiling).reduce(0L, (a,b) -> a+b);
 
-		boolean foundPrime = false;
+		PrimeRefIntfc foundPrime = null;
 
 		var doLoop = !primeIndexPermutation.equals(primeIndexMaxPermutation);
 		while (doLoop)
@@ -418,9 +441,13 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 
 					checkMismatch("genByPrimePermutation", idx, permutationSum);
 
-					addPrimeRef(idx, permutationSum, MutableListFactoryImpl.INSTANCE.of(canonicalPrimeColl, ImmutableLongSetFactoryImpl.INSTANCE.with(optCurPrimeVal)));
+					foundPrime = addPrimeRef(idx,
+											permutationSum,
+											getBasesGenerator(),
+											MutableListFactoryImpl.INSTANCE.of(canonicalPrimeColl, ImmutableLongSetFactoryImpl.INSTANCE.with(optCurPrimeVal))
+											);
+
 					doLoop = false;
-					foundPrime = true;
 				}
 				else
 				{
@@ -433,14 +460,20 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 		{
 			LOG.fine("gen by prime permutation - foundPrime idx:" + idx + " prime:" + optCurPrime.getAsLong());
 		}
-		return foundPrime;
+		return Optional.ofNullable(foundPrime);
 	}
 
 	@Override
 	public OptionalLong getPrimeForIdx(@Min(0) final long primeIdx)
 	{
-		final var ret = idxToPrimeMap.get(primeIdx);
-		return ret != null ? OptionalLong.of(ret.getPrime()) : OptionalLong.empty();
+		final var optRet = primeLoader == null ? OptionalLong.empty() : primeLoader.retrieve(primeIdx);
+		final var ret = optRet.orElseGet( () ->
+					{
+						final var r = idxToPrimeMap.get(primeIdx);
+						return r != null ? r.getPrime() : -1L; // so -1 indicates that no prime exists for the given index.d
+					}
+				);
+		return ret == -1L ?  OptionalLong.empty() : OptionalLong.of(ret);
 	}
 
 	@Override
@@ -505,10 +538,26 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 			return;
 		}
 
-		addPrimeRef(0L, 1L, MutableListFactoryImpl.INSTANCE.of(ImmutableLongSetFactoryImpl.INSTANCE.with(1L), ImmutableLongSetFactoryImpl.INSTANCE.with(0L)));
-		addPrimeRef(1L, 2L, MutableListFactoryImpl.INSTANCE.of(ImmutableLongSetFactoryImpl.INSTANCE.with(2L), ImmutableLongSetFactoryImpl.INSTANCE.with(0L)));
+		if (primeLoader != null)
+		{
+			primeLoader.load();
+		}
 
-		genBases();
+		addPrimeRef(0L, 1L,(pRef) -> {/* no-op*/},
+
+								MutableListFactoryImpl
+								.INSTANCE
+								.of(	ImmutableLongSetFactoryImpl.INSTANCE.with(1L),
+										ImmutableLongSetFactoryImpl.INSTANCE.with(0L)));
+
+		addPrimeRef(1L, 2L, (pRef) -> { /* no-op*/},
+
+					MutableListFactoryImpl
+					.INSTANCE
+					.of(	ImmutableLongSetFactoryImpl.INSTANCE.with(2L),
+							ImmutableLongSetFactoryImpl.INSTANCE.with(0L)));
+
+		this.genPrimes();
 
 		if (displayPrimeTreeMetrics)
 		{
@@ -517,7 +566,7 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 	}
 
 	@Override
-	public void setDisplayPrimeTreeMetrics(final boolean display)
+	public void setDisplayDefaultBaseMetrics(final boolean display)
 	{
 		this.displayPrimeTreeMetrics = display;
 	}
@@ -563,15 +612,9 @@ public class PrimeSource extends AbstractPrimeBaseGenerator implements PrimeSour
 				BigInteger.valueOf(primeSum).isProbablePrime(confidenceLevel);
 	}
 
-	/**
-	 * This comes from the PrimeSourceFactoryIntfc so it will not be available
-	 * once initial factory processing completes the construction / initializaiton
-	 * of the prime source instance. The "factory" interface was an
-	 * intentional choice over using additional constructor args.
-	 */
 	@Override
-	public void setPrePrimed(final PreloaderIntfc primeLoader)
+	public void addBaseGenerator(final PrimeBaseGeneratorIntfc baseGenerator)
 	{
-		this.primeLoader = primeLoader;
+		baseGenerators.add(baseGenerator);
 	}
 }

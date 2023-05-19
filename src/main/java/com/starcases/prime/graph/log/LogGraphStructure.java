@@ -3,10 +3,10 @@ package com.starcases.prime.graph.log;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import com.starcases.prime.PrimeToolKit;
 import com.starcases.prime.base.api.BaseTypes;
 import com.starcases.prime.core.api.LogPrimeDataIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
+import com.starcases.prime.core.impl.PTKLogger;
 import com.starcases.prime.graph.impl.PrimeGrapherBase;
 
 import lombok.NonNull;
@@ -48,7 +48,7 @@ public class LogGraphStructure extends PrimeGrapherBase implements LogPrimeDataI
 				.stream()
 				.sorted(NODE_COMPARATOR)
 				.forEach(n ->
-							PrimeToolKit.output(String.format("Prime %s: created-from:[count(%d), %s] creates-primes:[count(%d), %s]",
+						PTKLogger.output(String.format("Prime %s: created-from:[count(%d), %s] creates-primes:[count(%d), %s]",
 						n,
 						graph.inDegreeOf(n),
 						graph.incomingEdgesOf(n).stream().map(e -> graph.getEdgeSource(e).toString()).collect(Collectors.joining(",")),

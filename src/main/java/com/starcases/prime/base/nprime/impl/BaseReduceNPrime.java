@@ -1,14 +1,9 @@
 package com.starcases.prime.base.nprime.impl;
 
-import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
 import org.eclipse.collections.api.bag.primitive.MutableLongBag;
-import org.eclipse.collections.api.collection.MutableCollection;
 import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
 import org.eclipse.collections.api.collection.primitive.MutableLongCollection;
 import org.eclipse.collections.api.list.MutableList;
@@ -17,13 +12,9 @@ import org.eclipse.collections.impl.bag.mutable.primitive.MutableLongBagFactoryI
 import org.eclipse.collections.impl.list.mutable.MutableListFactoryImpl;
 
 import com.starcases.prime.base.api.BaseTypes;
-import com.starcases.prime.base.impl.AbstractPrimeBaseGenerator;
+import com.starcases.prime.base.impl.PrimeBaseGenerator;
 import com.starcases.prime.core.api.PrimeRefIntfc;
-import com.starcases.prime.core.api.PrimeSourceIntfc;
-import com.starcases.prime.metrics.MetricMonitor;
 
-import io.micrometer.core.instrument.LongTaskTimer;
-import io.micrometer.core.instrument.LongTaskTimer.Sample;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
@@ -49,13 +40,8 @@ import lombok.Setter;
  * so result would be: 2(x3) 1(x1),  1(x5) 2(x6),      1(x5) 2(x7)
  *          which reduces to:  1(x11), 2(x16)   =>  1x11 + 2x16 = 43
  */
-public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
+public class BaseReduceNPrime extends PrimeBaseGenerator
 {
-	/**
-	 * default logger
-	 */
-	private static final Logger LOG = Logger.getLogger(BaseReduceNPrime.class.getName());
-
 	/**
 	 * Reduce all values greater than maxReduce - track multiples
 	 */
@@ -69,9 +55,9 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 	 * constructor for Base NPrime construction
 	 * @param primeSrc
 	 */
-	public BaseReduceNPrime(@NonNull final PrimeSourceIntfc primeSrc)
+	public BaseReduceNPrime(@NonNull final BaseTypes baseType)
 	{
-		super(primeSrc);
+		super(baseType);
 	}
 
 	/**
@@ -131,43 +117,16 @@ public class BaseReduceNPrime extends AbstractPrimeBaseGenerator
 		}
 	}
 
-	/**
-	 * top-level function; iterate over entire dataset to reduce every item
-	 * @param maxReduce
-	 */
 	@Override
-	protected void genBasesImpl()
+	public void genBasesForPrimeRef(final PrimeRefIntfc curPrime)
 	{
-		if (LOG.isLoggable(Level.FINE))
-		{
-			LOG.fine(String.format("genBases(): maxReduce[%d] parallel=%b", maxReduce, this.preferParallel));
-		}
+		final MutableLongBag retBases = MutableLongBagFactoryImpl.INSTANCE.empty();
+		primeReduction(curPrime, retBases);
+		final MutableList<ImmutableLongCollection> lst = MutableListFactoryImpl.INSTANCE.of(retBases.toImmutable(), ImmutableLongBagFactoryImpl.INSTANCE.with(curPrime.getPrime()));
+		final NPrimeBaseMetadata npbmd = new NPrimeBaseMetadata(retBases.toImmutable());
 
-		primeSrc.getPrimeRefStream(this.preferParallel)
-			.filter(pr -> isNonNullEmpty(pr.getPrimeBaseData().getPrimeBases()))
-			.forEach( curPrime ->
-				{
-					final Optional<LongTaskTimer.Sample> timer = MetricMonitor.longTimer(BaseTypes.NPRIME);
-					try
-					{
-						final MutableLongBag retBases = MutableLongBagFactoryImpl.INSTANCE.empty();
-						primeReduction(curPrime, retBases);
-						final MutableList<ImmutableLongCollection> lst = MutableListFactoryImpl.INSTANCE.of(retBases.toImmutable(), ImmutableLongBagFactoryImpl.INSTANCE.with(curPrime.getPrime()));
-						final NPrimeBaseMetadata npbmd = new NPrimeBaseMetadata(retBases.toImmutable());
-
-						curPrime
-							.getPrimeBaseData()
-							.addPrimeBases(BaseTypes.NPRIME, lst, npbmd);
-					}
-					finally
-					{
-						timer.ifPresent(Sample::stop);
-					}
-				});
-	}
-
-	private boolean isNonNullEmpty(final MutableCollection<?> coll)
-	{
-		return coll != null && !coll.isEmpty();
+		curPrime
+			.getPrimeBaseData()
+			.addPrimeBases(BaseTypes.NPRIME, lst, npbmd);
 	}
 }

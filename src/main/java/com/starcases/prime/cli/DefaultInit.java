@@ -14,10 +14,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
+import javax.cache.Cache;
 
 import org.eclipse.collections.api.collection.ImmutableCollection;
 import org.eclipse.collections.api.factory.Lists;
@@ -25,15 +26,15 @@ import org.eclipse.collections.api.factory.Maps;
 import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.map.ImmutableMap;
 import org.eclipse.collections.impl.list.mutable.FastList;
-import org.infinispan.Cache;
 import org.jgrapht.event.GraphListener;
 import org.jgrapht.graph.DefaultEdge;
 
 import com.starcases.prime.PTKFactory;
-import com.starcases.prime.PrimeToolKit;
 import com.starcases.prime.base.api.BaseProviderIntfc;
 import com.starcases.prime.base.api.BaseTypes;
-import com.starcases.prime.base.impl.AbstractPrimeBaseGenerator;
+import com.starcases.prime.base.impl.LogBaseGenDecorator;
+import com.starcases.prime.base.impl.LogTimerDecorator;
+import com.starcases.prime.base.api.PrimeBaseGeneratorIntfc;
 import com.starcases.prime.base.impl.PrimeMultiBaseContainer;
 import com.starcases.prime.base.nprime.impl.LogBasesNPrime;
 import com.starcases.prime.base.prefix.impl.LogBasePrefixes;
@@ -46,6 +47,7 @@ import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceFactoryIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
 import com.starcases.prime.core.api.ProgressProviderIntfc;
+import com.starcases.prime.core.impl.PTKLogger;
 import com.starcases.prime.core.impl.PrimeRef;
 import com.starcases.prime.graph.export.api.ExportsProviderIntfc;
 import com.starcases.prime.graph.log.LogGraphStructure;
@@ -53,8 +55,6 @@ import com.starcases.prime.graph.visualize.impl.MetaDataTable;
 import com.starcases.prime.graph.visualize.impl.ViewDefault;
 import com.starcases.prime.log.LogNodeStructure;
 import com.starcases.prime.metrics.api.MetricsProviderIntfc;
-import com.starcases.prime.preload.api.PreloaderIntfc;
-import com.starcases.prime.preload.api.PreloaderProviderIntfc;
 import com.starcases.prime.preload.impl.PrimeSubset;
 import com.starcases.prime.service.SvcLoader;
 import com.starcases.prime.sql.api.SqlProviderIntfc;
@@ -168,11 +168,13 @@ public class DefaultInit implements Runnable
 
 		setFactoryDefaults();
 
-		actionInitDefaultPrimeContent();
+		actionCreatePrimeSrc();
+
+		actionPrepAdditionalBases();
+
+		actionInitPrimeSourceData();
 
 		actionEnableMetrics();
-
-		actionHandleAdditionalBases();
 
 		actionHandleOutputs();
 
@@ -228,9 +230,15 @@ public class DefaultInit implements Runnable
 		{
 			final SvcLoader<ExportsProviderIntfc, Class<ExportsProviderIntfc>> exportProvider = new SvcLoader< >(ExportsProviderIntfc.class);
 			final ImmutableCollection<String> attributes = Lists.immutable.of("GML", "DEFAULT");
-			final var exporter = exportProvider.provider(attributes).create(primeSrc, exportWriter, null);
-			exporter.export();
-			exportWriter.flush();
+			exportProvider
+				.provider(attributes)
+				.map(p -> p.create(primeSrc, exportWriter, null))
+				.ifPresent( p ->
+								{
+									p.export();
+									exportWriter.flush();
+								}
+						);
 		}
 		catch(IOException except)
 		{
@@ -267,13 +275,15 @@ public class DefaultInit implements Runnable
 
 	private void setFactoryDefaults()
 	{
+		LOG.info("CLI - Setting defaults");
 		PTKFactory.setMaxCount(initOpts.getMaxCount());
 		PTKFactory.setConfidenceLevel(initOpts.getConfidenceLevel());
 
 		PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
 
 		PTKFactory.setPrimeBaseCtor(PrimeMultiBaseContainer::new);
-		PTKFactory.setPrimeRefRawCtor( (i, base) -> new PrimeRef(i).init(PTKFactory.getPrimeBaseCtor(), base) );
+
+		PTKFactory.setPrimeRefRawCtor( (i) -> new PrimeRef(i).init(PTKFactory.getPrimeBaseCtor()));
 	}
 
 	private boolean ensureFolderExist(final String folderPath)
@@ -303,7 +313,7 @@ public class DefaultInit implements Runnable
 		if (stdOutPath != null)
 		{
 			// Point standard out to our selected output file.
-			PrimeToolKit.setOutput("stdout", stdOutPath);
+			PTKLogger.setOutput("stdout", stdOutPath);
 		}
 		else
 		{
@@ -316,7 +326,10 @@ public class DefaultInit implements Runnable
 
 	private void actionEnableMetrics()
 	{
-
+		if (LOG.isLoggable(Level.INFO))
+		{
+			LOG.info("CLI - Check metrics enablement.");
+		}
 		if (Arrays.asList((metricOpts != null) ? metricOpts.getMetricType() : NULL_OPTS).contains(MetricOpt.ALL))
 		{
 			final SvcLoader<MetricsProviderIntfc, Class<MetricsProviderIntfc>> registryProviders = new SvcLoader< >(MetricsProviderIntfc.class);
@@ -327,34 +340,49 @@ public class DefaultInit implements Runnable
 
 	private void actionEnableCmdListener()
 	{
+		if (LOG.isLoggable(Level.INFO))
+		{
+			LOG.info("CLI - Check SQL listener enablement.");
+		}
 		if (baseOpts != null && baseOpts.isEnableCmmandListener())
 		{
 			final ImmutableCollection<String> attributes = Lists.immutable.of("SQLPRIME");
 			final SvcLoader<SqlProviderIntfc, Class<SqlProviderIntfc>> sqlCmdProviders = new SvcLoader< >(SqlProviderIntfc.class);
 
 			actions.add(s -> {
-				try
-				{
+
 					if (LOG.isLoggable(Level.INFO))
 					{
-						LOG.info("DefaultInit::actionEnableCmdListener - SQL command listener port:" + baseOpts.getCmdListenerPort());
+						LOG.info("Starting SQL command listener - port:" + baseOpts.getCmdListenerPort());
 					}
-					sqlCmdProviders.provider(attributes).create(primeSrc, baseOpts.getCmdListenerPort()).run();
-				}
-				catch(final InterruptedException e)
-				{
-					throw new RuntimeException(e);
-				}
+
+					sqlCmdProviders
+						.provider(attributes)
+						.map(p -> p.create(primeSrc, baseOpts.getCmdListenerPort()))
+						.ifPresent(p ->
+									{
+										try
+										{
+											p.run();
+										}
+										catch(final InterruptedException e)
+										{
+											throw new RuntimeException(e);
+										}
+									});
 			});
 		}
 	}
 
-	private void actionInitDefaultPrimeContent()
+	private void actionCreatePrimeSrc()
 	{
+		if (LOG.isLoggable(Level.INFO))
+		{
+			LOG.info("CLI - Prep init of default prime content.");
+		}
 		final SvcLoader<CacheProviderIntfc, Class<CacheProviderIntfc>> cacheProvider = new SvcLoader< >(CacheProviderIntfc.class);
 		final ImmutableList<String> cacheAttributes = Lists.immutable.of("CACHE");
 
-		LOG.info("enter actionInitDefaultPrimeContent");
 		actions.add(s -> {
 
 			final FactoryIntfc factory = PTKFactory.getFactory();
@@ -362,146 +390,183 @@ public class DefaultInit implements Runnable
 			@SuppressWarnings({"PMD.LocalVariableNamingConventions"})
 			final String CACHE_NAME = "primes";
 			final String inputFolderPath = initOpts.getInputDataFolder();
-			final Cache<Long,PrimeSubset> cache = cacheProvider.provider(cacheAttributes).create(CACHE_NAME, null);
+			final Cache<Long,PrimeSubset> cache = cacheProvider
+													.provider(cacheAttributes)
+													.map(p -> p.<Long, PrimeSubset>create(CACHE_NAME, null))
+													.orElseThrow();
+
+			PTKFactory.setCache(cache);
 
 			// Use idx 2 which would be prime 3 for determining if cache was loaded / pre-loaded propertly. Since Primes 1 and 2 may be hard coded in
 			// places, it is safer to use the 1st item which is never hardcoded.
 			final var cacheIdx0 = cache.get(0L);
 			final var cacheIdx0idx2 = cacheIdx0 != null ? cacheIdx0.get(2) : -1L;
 			final var alreadyLoaded = cacheIdx0idx2 == 3;
+
 			final var inputFoldExist = ensureFolderExist(inputFolderPath);
 			final var loadRawPrimes = initOpts.isLoadPrimes();
 
-			if (alreadyLoaded || !inputFoldExist || !loadRawPrimes)
+			if (loadRawPrimes && !alreadyLoaded && inputFoldExist)
 			{
 				if (LOG.isLoggable(Level.INFO))
 				{
-					LOG.info(String.format("Cache NOT loading raw primes ; Cache Loaded: [%b], Input folder exists: [%b], load-raw-primes[%b]",  alreadyLoaded, inputFoldExist, loadRawPrimes));
+					LOG.info(String.format("CREATING PrimeSrc : Loading cache from raw files ; Cache already loaded: [%b], Input folder exists: [%b], do-load-raw-primes[%b]",  alreadyLoaded, inputFoldExist, loadRawPrimes));
 				}
-				primeSrc = factory.getPrimeSource();
+
+				PTKFactory.setInputFolderPath(Path.of(replaceTildeHome(inputFolderPath)));
+
+				primeSrc = factory.getPrimeSource(true);
 			}
-			else if (loadRawPrimes)
+			else
 			{
 				if (LOG.isLoggable(Level.INFO))
 				{
-					LOG.info(String.format("Cache primes from raw files ; Cache Loaded: [%b], Input folder exists: [%b], load-raw-primes[%b]",  alreadyLoaded, inputFoldExist, loadRawPrimes));
+					LOG.info(String.format("CREATING PrimeSrc: NOT loading Cache ; Cache already loaded: [%b], Input folder exists: [%b], do-load-raw-primes[%b]",  alreadyLoaded, inputFoldExist, loadRawPrimes));
 				}
-
-				final SvcLoader<PreloaderProviderIntfc, Class<PreloaderProviderIntfc>> preloadProvider = new SvcLoader< >(PreloaderProviderIntfc.class);
-				final ImmutableCollection<String> attributes = Lists.immutable.of("PRELOADER");
-
-				final PreloaderIntfc primePreloader = preloadProvider
-						.provider(attributes)
-						.create(cache, Path.of(replaceTildeHome(inputFolderPath)), null);
-
-				primePreloader.load();
-
-				primeSrc = factory.getPrimeSource(primePreloader);
+				primeSrc = factory.getPrimeSource(false);
 			}
 
 			if (outputOpts.getOutputOpers().contains(OutputOper.PROGRESS))
 			{
 				final SvcLoader<ProgressProviderIntfc, Class<ProgressProviderIntfc>> progressProvider = new SvcLoader< >(ProgressProviderIntfc.class);
 				final ImmutableList<String> attributes = Lists.immutable.of("PROGRESS");
-				primeSrc.setDisplayProgress(progressProvider.provider(attributes).create(null));
+
+				progressProvider
+					.provider(attributes)
+					.map(p -> p.create(null))
+					.ifPresent(p -> primeSrc.setDisplayProgress(p));
 			}
 
-			primeSrc.setDisplayPrimeTreeMetrics(outputOpts.getOutputOpers().contains(OutputOper.PRIMETREE_METRICS));
-
-			if (LOG.isLoggable(Level.FINE))
-			{
-				if (LOG.isLoggable(Level.INFO))
-				{
-					LOG.fine("DefaultInit::actionInitDefaultPrimeContent - primeSource init");
-				}
-			}
-			primeSrc.init();
+			primeSrc.setDisplayDefaultBaseMetrics(outputOpts.getOutputOpers().contains(OutputOper.PRIMETREE_METRICS));
 		});
 	}
 
-	private void actionHandleAdditionalBases()
+	private void actionInitPrimeSourceData()
 	{
+		if (LOG.isLoggable(Level.INFO))
+		{
+			LOG.info("CLI - Prep prime source init.");
+		}
+		actions.add(s -> primeSrc.init());
+	}
+
+	private void actionPrepAdditionalBases()
+	{
+		if (LOG.isLoggable(Level.INFO))
+		{
+			LOG.info("CLI - Check enablement of bases.");
+		}
+
 		if (baseOpts != null && baseOpts.getBases() != null)
 		{
 			final SvcLoader<BaseProviderIntfc, Class<BaseProviderIntfc>> baseProvider = new SvcLoader< >(BaseProviderIntfc.class);
 			baseOpts.getBases().forEach(baseType ->
 			{
-				final var trackGenTime = true;
+				final var trackGenTime = false;
 				final var method = "DefaultInit::actionHandleAdditionalBases - base :" + baseType.name();
-				final Supplier<AbstractPrimeBaseGenerator> baseSupplier;
 				final ImmutableList<String> baseProviderAttributes = Lists.immutable.of(baseType.name(), "DEFAULT");
-
-				switch(baseType)
+				if (LOG.isLoggable(Level.INFO))
 				{
-					case NPRIME:
+					LOG.info("CLI - Prep base: " + baseType.name());
+				}
+
+				switch(baseType.name())
+				{
+					case "THREETRIPLE":
+					case "PREFIX":
+						baseProvider
+							.provider(baseProviderAttributes)
+							.ifPresent
+								(
+									p -> actions.add(s -> primeSrc.addBaseGenerator(addBaseDecorators(p.create(null).assignPrimeSrc(primeSrc), trackGenTime, baseType)))
+								);
+						break;
+
+					case "NPRIME":
 						{	// braces creates a local scope for "settings" variable here and in PRIME_TREE option below.
 							final ImmutableMap<String, Object> settings = Maps.immutable.of("maxReduce", baseOpts.getMaxReduce());
-							baseSupplier = () -> baseProvider.provider(baseProviderAttributes).create(primeSrc, settings);
+							baseProvider
+								.provider(baseProviderAttributes)
+								.ifPresent
+									(
+										p -> actions.add(s -> primeSrc.addBaseGenerator(addBaseDecorators(p.create(settings).assignPrimeSrc(primeSrc), trackGenTime, baseType)))
+									);
 						}
 						break;
 
-					case THREETRIPLE:
-						baseSupplier = () -> baseProvider.provider(baseProviderAttributes).create(primeSrc, null);
-						break;
-
-					case PREFIX:
-						baseSupplier = () -> baseProvider.provider(baseProviderAttributes).create(primeSrc, null);
-						break;
-
-					case PRIME_TREE:
+					case "PRIME_TREE":
 						{ 	// braces creates a local scope for "settings" variable here and in NPRIME option above.
 							final ImmutableMap<String, Object> settings = Maps.immutable.of("collTracker", PTKFactory.getCollTracker());
-							baseSupplier = () -> baseProvider.provider(baseProviderAttributes).create(primeSrc, settings);
+							baseProvider
+							.provider(baseProviderAttributes)
+							.ifPresent
+								(
+									p -> actions.add(s -> primeSrc.addBaseGenerator(addBaseDecorators(p.create(settings).assignPrimeSrc(primeSrc), trackGenTime, baseType)))
+								);
 						}
 						break;
 
 					default:
-						baseSupplier = null;
 						if(LOG.isLoggable(Level.FINE))
 						{
 							LOG.fine(String.format("%s%s",method, baseOpts.getBases()));
 						}
 						break;
 				}
-				addBaseSupplierAction(baseSupplier, trackGenTime, baseType);
 			}
 		);
 		}
 	}
 
-	private void addBaseSupplierAction(final Supplier<AbstractPrimeBaseGenerator> baseSupplier, final boolean trackGenTime, final BaseTypes baseType)
+	private PrimeBaseGeneratorIntfc addBaseDecorators(@NonNull final PrimeBaseGeneratorIntfc base, final boolean trackGenTime, final BaseTypes baseType)
 	{
-		final var method = "DefaultInit::addBaseSupplierAction - base ";
-		if (null != baseSupplier)
+		if (LOG.isLoggable(Level.INFO))
 		{
-			actions.add(s ->
-				{
-					if (LOG.isLoggable(Level.INFO))
-					{
-						LOG.info(method + baseType.name());
-					}
-
-					if (baseOpts.isUseBaseFile())
-					{
-						PrimeToolKit.setOutput(baseType.name(), this.decorateFileName(baseType.name(), "base", "log"));
-					}
-					final var base = baseSupplier.get();
-					base.setTrackTime(trackGenTime);
-					base.doPreferParallel(initOpts.isPreferParallel());
-					base.setBaseGenerationOutput(outputOpts.getOutputOpers().contains(OutputOper.CREATE));
-
-					base.genBases();
-				});
+			LOG.info("DECORATE base supplier - " + baseType.name());
 		}
+
+		var decoratedBase = base;
+
+		if (baseOpts.isUseBaseFile())
+		{
+			PTKLogger.setOutput(baseType.name(), this.decorateFileName(baseType.name(), "base", "log"));
+		}
+
+		if (trackGenTime)
+		{
+			if (LOG.isLoggable(Level.INFO))
+			{
+				LOG.info(String.format("DECORATE base supplier [%s] with Timer", baseType.name()));
+			}
+			decoratedBase = new LogTimerDecorator(decoratedBase);
+		}
+
+		if (outputOpts.getOutputOpers().contains(OutputOper.CREATE))
+		{
+			if (LOG.isLoggable(Level.INFO))
+			{
+				LOG.info(String.format("DECORATE base supplier [%s] with Logger", baseType.name()));
+			}
+			decoratedBase = new LogBaseGenDecorator(decoratedBase);
+		}
+
+		//FIXME Handle prefer parallel ; base.doPreferParallel(initOpts.isPreferParallel());
+
+		return decoratedBase;
 	}
 	private void actionHandleOutputs()
 	{
+		if (LOG.isLoggable(Level.INFO))
+		{
+			LOG.info("CLI - Check base logging enablement.");
+		}
+
 		if (outputOpts != null && outputOpts.getOutputOpers() != null && !outputOpts.getOutputOpers().isEmpty())
 		{
 			if (LOG.isLoggable(Level.INFO))
 			{
-				final var method = "DefaultInit::actionHandleLogging - logOper ";
-				LOG.info(String.format("%s%s", method, outputOpts.getOutputOpers().stream().map(Object::toString).collect(Collectors.joining(","))));
+
+				LOG.info(String.format("%s%s", "CLI - Prep logger outputs: ", outputOpts.getOutputOpers().stream().map(Object::toString).collect(Collectors.joining(","))));
 			}
 			outputOpts.getOutputOpers().forEach(oo ->
 			{
@@ -580,6 +645,11 @@ public class DefaultInit implements Runnable
 
 	private void actionHandleGraphing()
 	{
+		if (LOG.isLoggable(Level.INFO))
+		{
+			LOG.info("CLI - Check Graph enablement.");
+		}
+
 		if (graphOpts != null && graphOpts.getGraphType() != null && graphOpts.getGraphType() == Graph.DEFAULT)
 		{
 			actions.add(s -> graph(primeSrc, BaseTypes.DEFAULT));
@@ -588,6 +658,10 @@ public class DefaultInit implements Runnable
 
 	private void actionHandleExports()
 	{
+		if (LOG.isLoggable(Level.INFO))
+		{
+			LOG.info("CLI - Check exports enablement.");
+		}
 		if (exportOpts != null && exportOpts.getExportType() != null && exportOpts.getExportType() == Export.GML)
 		{
 			actions.add(s -> export(primeSrc));
@@ -596,6 +670,10 @@ public class DefaultInit implements Runnable
 
 	private void executeActions()
 	{
+		if (LOG.isLoggable(Level.INFO))
+		{
+			LOG.info("CLI - Execute configured actions.");
+		}
 		actions.forEach(c -> c.accept("execute action"));
 	}
 }

@@ -137,11 +137,12 @@ public class AllTriples
 
 	 * This is a "mostly brute force" method which is shown by pretty slow performance.
 	 */
-	public void process()
+	public void process(PrimeRefIntfc primeRef)
 	{
 		tripleStream()
 			.filter(partialTriple)
 			.takeWhile(nonNullTriple)
+			.filter(t -> Arrays.stream(t).collect(Collectors.summingLong(p -> p.getPrime()) ) == primeRef.getPrime())
 			.forEach(triple ->
 
 							primeSrc

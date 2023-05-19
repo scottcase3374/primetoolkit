@@ -7,14 +7,12 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.tree.ParseTree;
 
-import com.starcases.prime.antlrimpl.PrimeSqlLexer;
-import com.starcases.prime.antlrimpl.PrimeSqlParser;
 import com.starcases.prime.core.api.OutputableIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
-import com.starcases.prime.metrics.MetricMonitor;
 
-import io.micrometer.core.instrument.LongTaskTimer;
-import io.micrometer.core.instrument.LongTaskTimer.Sample;
+import com.starcases.prime.sql.antlrimpl.PrimeSqlLexer;
+import com.starcases.prime.sql.antlrimpl.PrimeSqlParser;
+
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -26,7 +24,6 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpUtil;
 
 import java.nio.charset.Charset;
-import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.io.StringWriter;
@@ -122,9 +119,11 @@ public class PrimeSQLChannelHandler extends SimpleChannelInboundHandler<Object>
 			final var content = httpContent.content().readCharSequence(httpContent.content().readableBytes(), Charset.defaultCharset());
 			final var res = processRequest(String.valueOf(content));
 			final StringBuilder respBuf = new StringBuilder(
-					res.getError() == null
-						? String.format("{ \"resp\": %s }", res.getResult())
-						: String.format("{ \"resp\": %s, %n\"error\": \"%s\" }",res.getResult(),res.getError()));
+					res == null ? String.format("{ \"resp\": \"\" , %n\"error\": \"no-data\" }")
+
+						: res.getError() == null
+							? String.format("{ \"resp\": %s }", res.getResult())
+							: String.format("{ \"resp\": %s, %n\"error\": \"%s\" }",res.getResult(),res.getError()));
 
 			if (!writeResponse(ctx, httpRequest, respBuf))
 			{
@@ -157,23 +156,15 @@ public class PrimeSQLChannelHandler extends SimpleChannelInboundHandler<Object>
 
 	private PrimeSqlResult processRequest(final String request)
 	{
-		final Optional<LongTaskTimer.Sample> timer = MetricMonitor.longTimer(MetricType.SQLCOMMAND);
+		final PrimeSqlLexer psl = new PrimeSqlLexer(CharStreams.fromString(request));
+		final CommonTokenStream tokenStream = new CommonTokenStream(psl);
 
-		try
-		{
-			final PrimeSqlLexer psl = new PrimeSqlLexer(CharStreams.fromString(request));
-			final CommonTokenStream tokenStream = new CommonTokenStream(psl);
-			final PrimeSqlParser psp = new PrimeSqlParser(tokenStream);
-			final PrimeSqlVisitor visitor = new PrimeSqlVisitor(primeSrc);
-			psp.removeErrorListeners();
-			psp.addErrorListener(new PrimeSQLErrorListener(visitor));
-			final ParseTree parseTree = psp.root();
+		final PrimeSqlParser psp = new PrimeSqlParser(tokenStream);
 
-			return visitor.visit(parseTree);
-		}
-		finally
-		{
-			timer.ifPresent(Sample::stop);
-		}
+		final PrimeSqlVisitor visitor = new PrimeSqlVisitor(primeSrc);
+		psp.removeErrorListeners();
+		psp.addErrorListener(new PrimeSQLErrorListener(visitor));
+		final ParseTree parseTree = psp.stmts();
+		return visitor.visit(parseTree);
 	}
 }
