@@ -9,6 +9,8 @@
 	<groupId>com.starcases.prime</groupId>
 	<artifactId>prime-tool-kit</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
 	<name>PrimeToolKit</name>
 	<description>Prime Tool Kit</description>
 	<properties>
@@ -135,7 +137,8 @@
 	<build>
 
 
-		<plugins>
+ 		<plugins>
+			 <!--
 			<plugin>
 				<groupId>org.antlr</groupId>
 				<artifactId>antlr4-maven-plugin</artifactId>
@@ -152,7 +155,7 @@
 					<listener>false</listener>
 					<visitor>true</visitor>
 				</configuration>
-			</plugin>
+			</plugin>-->
 
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -197,23 +200,23 @@
 					</configuration>
 				</plugin>
 -->
-					<plugin>
-						<groupId>org.antlr</groupId>
-						<artifactId>antlr4-maven-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>antlr</id>
-								<goals>
-									<goal>antlr4</goal>
-								</goals>
-							</execution>
-						</executions>
-						<configuration>
-							<visitor>true</visitor>
-							<listener>true</listener>
-							
-						</configuration>
-					</plugin>
+<!--					<plugin>-->
+<!--						<groupId>org.antlr</groupId>-->
+<!--						<artifactId>antlr4-maven-plugin</artifactId>-->
+<!--						<executions>-->
+<!--							<execution>-->
+<!--								<id>antlr</id>-->
+<!--								<goals>-->
+<!--									<goal>antlr4</goal>-->
+<!--								</goals>-->
+<!--							</execution>-->
+<!--						</executions>-->
+<!--						<configuration>-->
+<!--							<visitor>true</visitor>-->
+<!--							<listener>true</listener>-->
+
+<!--						</configuration>-->
+<!--					</plugin>-->
 			</plugins>
 		</pluginManagement>
 
@@ -236,4 +239,29 @@
 			</build>
 		</profile>
 	</profiles>-->
+	<modules>
+		<module>ptk-service</module>
+		<module>ptk-preload-api</module>
+		<module>ptk-preload-impl</module>
+		<module>ptk-cache-api</module>
+		<module>ptk-cache-impl</module>
+		<module>ptk-sql-api</module>
+		<module>ptk-sql-impl</module>
+		<module>ptk-metrics-api</module>
+		<module>ptk-metrics-impl</module>
+		<module>ptk-core-api</module>
+		<module>ptk-core-impl</module>
+		<module>ptk-graph-export-api</module>
+		<module>ptk-graph-export-impl-gml</module>
+		<module>ptk-base-nprime</module>
+		<module>ptk-base-triples</module>
+		<module>ptk-base-primetree</module>
+		<module>ptk-base-prefix</module>
+		<module>ptk-export-graph-impl</module>
+		<module>ptk-cli</module>
+		<module>ptk-graph-visualize-api</module>
+		<module>ptk-graph-visualize-impl</module>
+		<module>ptk</module>
+		<module>ptk-logging</module>
+	</modules>
 </project>
