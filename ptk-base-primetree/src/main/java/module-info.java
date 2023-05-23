@@ -12,4 +12,5 @@ module com.starcases.prime.base.primetree.impl
 	requires org.eclipse.collections.impl;
 
 	provides com.starcases.prime.base.api.BaseProviderIntfc with com.starcases.prime.base.primetree.impl.PrimeTreeProvider;
+	provides com.starcases.prime.base.api.LogPrimeDataProviderIntfc with com.starcases.prime.base.primetree.impl.LogPrimeTreeDataProvider;
 }

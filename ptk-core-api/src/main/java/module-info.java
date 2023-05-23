@@ -1,4 +1,4 @@
-open module com.starcases.prime.core.api
+module com.starcases.prime.core.api
 {
 	exports com.starcases.prime.common.api;
 	exports com.starcases.prime.base.api;
@@ -11,5 +11,5 @@ open module com.starcases.prime.core.api
 	requires transitive org.eclipse.collections.api;
 	requires org.eclipse.collections.impl;
 
-	//provides com.starcases.prime.base.api.BaseTypesProviderIntfc with com.starcases.prime.base.api.BaseTypesProvider;
+	//provides com.starcases.prime.base.api.BaseTypesProviderIntfc with com.starcases.prime.base.impl.BaseTypesProviderr;
 }

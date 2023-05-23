@@ -11,4 +11,5 @@ module com.starcases.prime.base.prefix.impl
 	requires transitive org.eclipse.collections.api;
 
 	provides com.starcases.prime.base.api.BaseProviderIntfc with com.starcases.prime.base.prefix.impl.PrefixProvider;
+	provides com.starcases.prime.base.api.LogPrimeDataProviderIntfc with com.starcases.prime.base.prefix.impl.LogPrefixDataProvider;
 }

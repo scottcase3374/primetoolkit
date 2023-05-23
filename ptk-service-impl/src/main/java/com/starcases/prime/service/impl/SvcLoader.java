@@ -17,7 +17,9 @@ public class SvcLoader< T extends SvcProviderBaseIntfc, C extends Class<T>>
 
     public SvcLoader(final C classT)
     {
+    	ServiceLoader.
     	this.loader = ServiceLoader.load(classT);
+
     }
 
     /**

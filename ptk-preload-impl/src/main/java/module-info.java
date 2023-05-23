@@ -11,4 +11,6 @@ module com.starcases.prime.preload.impl
 	requires transitive org.eclipse.collections.api;
 	requires protostream;
 	requires protostream.types;
+
+	provides com.starcases.prime.preload.api.PreloaderProviderIntfc with com.starcases.prime.preload.impl.PreloaderProvider;
 }

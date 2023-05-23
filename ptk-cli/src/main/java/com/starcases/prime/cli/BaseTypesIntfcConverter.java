@@ -6,7 +6,7 @@ import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.map.MutableMap;
 
 import com.starcases.prime.base.api.BaseTypesIntfc;
-import com.starcases.prime.base.impl.BaseTypesLookup;
+import com.starcases.prime.base.impl.BaseTypesProviderOther;
 
 import picocli.CommandLine.ITypeConverter;
 
@@ -24,7 +24,8 @@ public class BaseTypesIntfcConverter implements ITypeConverter<BaseTypesIntfc>
 	public BaseTypesIntfc convert(final String value) throws Exception
 	{
 		MutableMap<String, BaseTypesIntfc> baseTypes = Maps.mutable.empty();
-		BaseTypesLookup.get(baseTypes, ATTRIBUTES);
-		return baseTypes.get(value);
+		var x = (new BaseTypesProviderOther()).get(baseTypes, ATTRIBUTES);
+
+		return x.get(value);
 	}
 }

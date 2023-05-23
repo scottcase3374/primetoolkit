@@ -9,4 +9,6 @@ module com.starcases.graph.export.impl.gml {
 	requires java.logging;
 	requires static lombok;
 	requires transitive org.eclipse.collections.api;
+
+	provides com.starcases.prime.graph.export.api.ExportsProviderIntfc with com.starcases.prime.graph.export.impl.gml.ExportGMLProvider;
 }

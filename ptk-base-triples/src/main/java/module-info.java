@@ -13,4 +13,5 @@ module com.starcases.prime.base.triples.impl
 	requires org.eclipse.collections.impl;
 
 	provides com.starcases.prime.base.api.BaseProviderIntfc with com.starcases.prime.base.triples.impl.TripleProvider;
+	provides com.starcases.prime.base.api.LogPrimeDataProviderIntfc with com.starcases.prime.base.triples.impl.LogTriplesDataProvider;
 }

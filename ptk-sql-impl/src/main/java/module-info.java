@@ -18,4 +18,6 @@ module com.starcases.prime.sql.impl
 	requires org.antlr.antlr4.runtime;
 	requires transitive org.eclipse.collections.api;
 	requires org.eclipse.collections.impl;
+
+	provides com.starcases.prime.sql.api.SqlProviderIntfc with com.starcases.prime.sql.impl.SqlCmdSvrProvider;
 }

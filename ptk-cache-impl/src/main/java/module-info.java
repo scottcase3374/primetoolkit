@@ -6,5 +6,5 @@ module com.starcases.prime.cache.impl {
 	requires static lombok;
 	requires transitive org.eclipse.collections.api;
 
-	//provides com.starcases.prime.cache.api.CacheProviderIntfc with com.starcases.prime.cache.impl.CacheProvider;
+	provides com.starcases.prime.cache.api.CacheProviderIntfc with com.starcases.prime.cache.impl.CacheProvider;
 }
