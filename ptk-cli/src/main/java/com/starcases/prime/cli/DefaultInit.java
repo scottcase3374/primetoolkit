@@ -48,7 +48,7 @@ import com.starcases.prime.logging.LogGraphStructure;
 import com.starcases.prime.logging.LogNodeStructure;
 import com.starcases.prime.metrics.api.MetricsProviderIntfc;
 import com.starcases.prime.preload.api.PrimeSubset;
-import com.starcases.prime.service.SvcLoader;
+import com.starcases.prime.service.impl.SvcLoader;
 import com.starcases.prime.sql.api.SqlProviderIntfc;
 
 import lombok.Getter;

@@ -6,7 +6,7 @@ import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.map.MutableMap;
 
 import com.starcases.prime.base.api.BaseTypesIntfc;
-import com.starcases.prime.base.api.BaseTypesLookup;
+import com.starcases.prime.base.impl.BaseTypesLookup;
 
 import picocli.CommandLine.ITypeConverter;
 

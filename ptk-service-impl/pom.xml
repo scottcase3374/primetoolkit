@@ -5,15 +5,9 @@
     <artifactId>prime-tool-kit</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <artifactId>ptk-metrics-api</artifactId>
+  <artifactId>ptk-service-impl</artifactId>
 
   <dependencies>
-	  <dependency>
-		  <groupId>com.starcases.prime</groupId>
-		  <artifactId>ptk-core-api</artifactId>
-		  <version>0.0.1-SNAPSHOT</version>
-	  </dependency>
-
 	  <dependency>
 		  <groupId>com.starcases.prime</groupId>
 		  <artifactId>ptk-service-api</artifactId>

@@ -5,7 +5,7 @@ module com.starcases.prime.base.primetree.impl
 	requires transitive com.starcases.prime.core.api;
 	requires com.starcases.prime.core.impl;
 	requires com.starcases.prime.logging;
-	requires com.starcases.prime.service;
+	requires com.starcases.prime.service.impl;
 	requires java.logging;
 	requires static lombok;
 	requires transitive org.eclipse.collections.api;

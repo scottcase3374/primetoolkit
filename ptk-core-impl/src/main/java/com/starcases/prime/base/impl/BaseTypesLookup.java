@@ -1,9 +1,11 @@
-package com.starcases.prime.base.api;
+package com.starcases.prime.base.impl;
 
 import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.map.MutableMap;
 
-import com.starcases.prime.service.SvcLoader;
+import com.starcases.prime.base.api.BaseTypesIntfc;
+import com.starcases.prime.base.api.BaseTypesProviderIntfc;
+import com.starcases.prime.service.impl.SvcLoader;
 
 import lombok.NonNull;
 

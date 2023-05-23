@@ -7,7 +7,6 @@ import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.map.ImmutableMap;
 
-import com.starcases.prime.metrics.MetricMonitor;
 import com.starcases.prime.metrics.api.MetricIntfc;
 import com.starcases.prime.metrics.api.MetricsProviderIntfc;
 

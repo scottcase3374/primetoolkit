@@ -4,13 +4,13 @@ open module com.starcases.prime.cli
 
 	requires cache.api;
 	requires com.starcases.prime.cache.api;
-	requires com.starcases.prime.core.api;
+	requires transitive com.starcases.prime.core.api;
 	requires com.starcases.prime.core.impl;
 	requires com.starcases.prime.graph.export.api;
 	requires com.starcases.prime.logging;
 	requires com.starcases.prime.metrics.api;
 	requires com.starcases.prime.preload.api;
-	requires com.starcases.prime.service;
+	requires com.starcases.prime.service.impl;
 	requires com.starcases.prime.sql.api;
 	requires info.picocli;
 	requires jakarta.validation;

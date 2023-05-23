@@ -1,4 +1,4 @@
-package com.starcases.prime.service;
+package com.starcases.prime.service.impl;
 
 import java.util.Optional;
 import java.util.ServiceLoader;

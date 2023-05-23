@@ -6,7 +6,7 @@ module com.starcases.prime.graph.visualize.impl
 	requires transitive com.starcases.prime.core.api;
 	requires com.starcases.prime.graph.impl;
 	requires transitive com.starcases.prime.graph.visualize.api;
-	requires com.starcases.prime.service;
+	requires com.starcases.prime.service.impl;
 	requires java.desktop;
 	requires java.logging;
 	requires static lombok;

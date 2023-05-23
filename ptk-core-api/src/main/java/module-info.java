@@ -5,7 +5,7 @@ open module com.starcases.prime.core.api
 	exports com.starcases.prime.core.api;
 	exports com.starcases.prime.datamgmt.api;
 
-	requires com.starcases.prime.service;
+	requires com.starcases.prime.service.api;
 	requires jakarta.validation;
 	requires static lombok;
 	requires transitive org.eclipse.collections.api;

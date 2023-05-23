@@ -1,4 +1,4 @@
-package com.starcases.prime.metrics;
+package com.starcases.prime.metrics.impl;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -10,7 +10,7 @@ import org.eclipse.collections.api.factory.Lists;
 
 import com.starcases.prime.core.api.OutputableIntfc;
 import com.starcases.prime.metrics.api.MetricsProviderIntfc;
-import com.starcases.prime.service.SvcLoader;
+import com.starcases.prime.service.impl.SvcLoader;
 
 import io.micrometer.core.instrument.LongTaskTimer;
 import io.micrometer.core.instrument.MeterRegistry;

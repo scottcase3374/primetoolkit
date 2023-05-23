@@ -24,7 +24,7 @@ import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
 import com.starcases.prime.datamgmt.api.PData;
 import com.starcases.prime.datamgmt.api.PrimeMapEntry;
 import com.starcases.prime.datamgmt.api.PrimeMapIterator;
-import com.starcases.prime.metrics.MetricMonitor;
+import com.starcases.prime.metrics.impl.MetricMonitor;
 import com.starcases.prime.preload.api.PreloaderIntfc;
 
 import io.micrometer.core.instrument.LongTaskTimer;

@@ -263,5 +263,6 @@
 		<module>ptk-graph-visualize-impl</module>
 		<module>ptk</module>
 		<module>ptk-logging</module>
+		<module>ptk-service-impl</module>
 	</modules>
 </project>

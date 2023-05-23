@@ -5,7 +5,7 @@
     <artifactId>prime-tool-kit</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <artifactId>ptk-service</artifactId>
+  <artifactId>ptk-service-api</artifactId>
   <name>ptk-service</name>
 
   <dependencies>

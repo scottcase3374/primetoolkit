@@ -6,6 +6,7 @@ module com.starcases.prime.sql.impl
 
 	requires com.google.gson;
 	requires transitive com.starcases.prime.core.api;
+	requires com.starcases.prime.service.impl;
 	requires transitive com.starcases.prime.sql.api;
 	requires io.netty.buffer;
 	requires io.netty.codec;

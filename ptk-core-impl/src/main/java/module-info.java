@@ -5,9 +5,9 @@ module com.starcases.prime.core.impl
 	exports com.starcases.prime.datamgmt.impl;
 
 	requires transitive com.starcases.prime.core.api;
-	requires com.starcases.prime.metrics.api;
+	requires com.starcases.prime.metrics.impl;
 	requires transitive com.starcases.prime.preload.api;
-	requires com.starcases.prime.service;
+	requires com.starcases.prime.service.impl;
 	requires jakarta.validation;
 	requires java.logging;
 	requires lombok;
