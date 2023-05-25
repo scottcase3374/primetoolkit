@@ -11,7 +11,7 @@ import org.eclipse.collections.api.map.primitive.MutableLongObjectMap;
 import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 import org.eclipse.collections.impl.map.mutable.primitive.MutableLongObjectMapFactoryImpl;
 
-import com.starcases.prime.core.impl.PTKLogger;
+//import com.starcases.prime.core.impl.PTKLogger;
 import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
 import com.starcases.prime.datamgmt.api.CollectionTreeIterator;
 import com.starcases.prime.datamgmt.api.CollectionTreeIteratorIntfc;
@@ -66,13 +66,13 @@ public class CollectionTrackerImpl implements CollectionTrackerIntfc
 	@Override
 	public void log()
 	{
-		PTKLogger.output("%nCollection tracking:%n", "");
-		useCounts.forEach(
-				(l1, l2) ->
-				PTKLogger.output("sum: [%d] occurrences: [%d] prefix: [%s]%n",
-							l1,
-							l2,
-							sourcePrimes.get(l1).toCanonicalCollection().makeString()));
+		//PTKLogger.output("%nCollection tracking:%n", "");
+		//useCounts.forEach(
+			//	(l1, l2) ->
+				//PTKLogger.output("sum: [%d] occurrences: [%d] prefix: [%s]%n",
+			//				l1,
+			//				l2,
+			//				sourcePrimes.get(l1).toCanonicalCollection().makeString()));
 	}
 
 	/**

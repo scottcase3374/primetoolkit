@@ -6,4 +6,5 @@ module com.starcases.prime.service.impl
 
 	requires lombok;
 	requires org.eclipse.collections.api;
+
 }

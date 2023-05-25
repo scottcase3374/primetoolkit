@@ -15,11 +15,47 @@ public class SvcLoader< T extends SvcProviderBaseIntfc, C extends Class<T>>
 {
     private final ServiceLoader<T> loader;
 
-    public SvcLoader(final C classT)
+    public SvcLoader(@NonNull final C classT)
     {
-    	ServiceLoader.
-    	this.loader = ServiceLoader.load(classT);
+    	final Module module = this.getClass().getModule();
+    	module.addReads(classT.getModule());
+    	module.addUses(classT);
 
+    	final Module classTModule = classT.getModule();
+
+    	SvcProviderBaseIntfc.LOG.info(String.format("svc-loader: %n\t can read mod: [%s] [%b] %n\t can use classT: [%s] [%b]",
+    			classTModule.getName(),
+    			module.canRead(classTModule),
+    			classT.getName(),
+    			module.canUse(classT)));
+
+    	this.loader = ServiceLoader.load(classT);
+    }
+
+    public SvcLoader(@NonNull final C classT, final Class<?> [] classesUsed, final Module [] modulesToRead)
+    {
+    	final Module module = this.getClass().getModule();
+    	module.addReads(classT.getModule());
+    	for (Module m : modulesToRead)
+    	{
+    		module.addReads(m);
+    	}
+
+    	module.addUses(classT);
+    	for (Class<?> c : classesUsed)
+    	{
+    		module.addUses(c);
+    	}
+
+    	final Module classTModule = classT.getModule();
+
+    	SvcProviderBaseIntfc.LOG.info(String.format("svc-loader: %n\t can read mod: [%s] [%b] %n\t can use classT: [%s] [%b]",
+    			classTModule.getName(),
+    			module.canRead(classTModule),
+    			classT.getName(),
+    			module.canUse(classT)));
+
+    	this.loader = ServiceLoader.load(classT);
     }
 
     /**
@@ -46,6 +82,7 @@ public class SvcLoader< T extends SvcProviderBaseIntfc, C extends Class<T>>
     	return Lists.immutable.fromStream(
     		loader
 			  .stream()
+			  //.peek(p -> System.out.println("Svcloader - requested attrs: " + attributes.makeString()))
 			  .filter(x -> x.get().countAttributesMatch(attributes) > 0 )
 			  .map(p -> p.get())
 			);

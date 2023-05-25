@@ -372,7 +372,12 @@ public class DefaultInit implements Runnable
 		{
 			LOG.info("CLI - Prep init of default prime content.");
 		}
-		final SvcLoader<CacheProviderIntfc, Class<CacheProviderIntfc>> cacheProvider = new SvcLoader< >(CacheProviderIntfc.class);
+		final SvcLoader<CacheProviderIntfc, Class<CacheProviderIntfc>> cacheProvider =
+				new SvcLoader< >(CacheProviderIntfc.class,
+								new Class[] {}, //{javax.transaction.xa.XAResource.class},
+								new Module[] {} //{ javax.transaction.xa.XAResource.class.getModule()
+												);
+
 		final ImmutableList<String> cacheAttributes = Lists.immutable.of("CACHE");
 
 		actions.add(s -> {
@@ -384,11 +389,12 @@ public class DefaultInit implements Runnable
 			final String inputFolderPath = initOpts.getInputDataFolder();
 			final Cache<Long,PrimeSubset> cache = cacheProvider
 													.provider(cacheAttributes)
-													.map(p -> p.<Long, PrimeSubset>create(CACHE_NAME, null))
+													.map(p -> p.<Long, PrimeSubset>create(Path.of(initOpts.getOutputFolder(), CACHE_NAME), null))
 													.orElseThrow();
 
 			PTKFactory.setCache(cache);
 
+			LOG.info("actionCreatePrimeSrc *** cache:" + PTKFactory.getCache().getName());
 			// Use idx 2 which would be prime 3 for determining if cache was loaded / pre-loaded propertly. Since Primes 1 and 2 may be hard coded in
 			// places, it is safer to use the 1st item which is never hardcoded.
 			final var cacheIdx0 = cache.get(0L);

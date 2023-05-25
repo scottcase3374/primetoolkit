@@ -7,9 +7,9 @@ import com.starcases.prime.base.api.BaseTypes;
 import com.starcases.prime.base.api.BaseTypesIntfc;
 import com.starcases.prime.base.api.BaseTypesProviderIntfc;
 
-public class BaseTypesProvider implements BaseTypesProviderIntfc
+public class BuiltinBaseTypesProvider implements BaseTypesProviderIntfc
 {
-	private static final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("BASE_TYPES");
+	private static final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("BUILTIN_BASE_TYPES");
 
 	@Override
 	public ImmutableList<String> getProviderAttributes()

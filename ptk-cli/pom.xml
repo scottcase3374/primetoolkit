@@ -110,5 +110,15 @@
 		  <artifactId>ptk-sql-api</artifactId>
  		  <version>0.0.1-SNAPSHOT</version>
 	  </dependency>
+
+<!--		<dependency>
+			<groupId>org.infinispan</groupId>
+			<artifactId>infinispan-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.infinispan</groupId>
+			<artifactId>infinispan-commons</artifactId>
+		</dependency>-->
   </dependencies>
 </project>

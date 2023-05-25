@@ -1,7 +1,7 @@
 package com.starcases.prime.preload.api;
 
-import org.infinispan.protostream.annotations.ProtoFactory;
-import org.infinispan.protostream.annotations.ProtoField;
+//import org.infinispan.protostream.annotations.ProtoFactory;
+//import org.infinispan.protostream.annotations.ProtoField;
 
 import lombok.Getter;
 
@@ -17,14 +17,16 @@ public class PrimeSubset
 	 * Array of entries bundled together
 	 */
 	@Getter
-	@ProtoField(number = 1)
+	//@ProtoField(number = 1)
 	protected long [] entries;
+
+	private long maxOffsetAssigned;
 
 	/**
 	 * Constructor for the container used for bundling prime/bases.
 	 * @param entries
 	 */
-	@ProtoFactory
+	//@ProtoFactory
 	public PrimeSubset(final long ... entries)
 	{
 		this.entries = entries.clone();
@@ -54,6 +56,7 @@ public class PrimeSubset
 	public void set(final int offset, final long val)
 	{
 		entries[offset] = val;
+		maxOffsetAssigned = offset;
 	}
 
 	/**
@@ -64,5 +67,10 @@ public class PrimeSubset
 	public long get(final int offset)
 	{
 		return entries[offset];
+	}
+
+	public String toString()
+	{
+		return String.format("entry-storage:[%d] max-offset-assigned[%d]", entries.length, maxOffsetAssigned);
 	}
 }

@@ -15,8 +15,9 @@
 	  </dependency>
 
 		<dependency>
-			<groupId>org.infinispan.protostream</groupId>
-			<artifactId>protostream-processor</artifactId>
+			<groupId>com.google.protobuf</groupId>
+			<artifactId>protobuf-java</artifactId>
+			<version>3.23.0</version>
 		</dependency>
   </dependencies>
 </project>

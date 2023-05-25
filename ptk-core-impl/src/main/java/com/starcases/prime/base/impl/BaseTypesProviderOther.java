@@ -16,8 +16,9 @@ public class BaseTypesProviderOther
 		final SvcLoader<BaseTypesProviderIntfc, Class<BaseTypesProviderIntfc>> baseTypeProviders = new SvcLoader< >(BaseTypesProviderIntfc.class);
 		return baseTypeProviders
 				.providers(attributes)
+				//.tap(p -> System.out.println("BaseTypesProviderOther provider attrs:" + p.getProviderAttributes().makeString()))
 				.flatCollect(BaseTypesProviderIntfc::create)
-				.tap(p -> System.out.println("BaseTypesProviderOther provider:" + p.name()))
+				//.tap(p -> System.out.println("BaseTypesProviderOther provider:" + p.name()))
 				.toMap(BaseTypesIntfc::name, (f) -> f, baseTypesColl);
 	}
 }

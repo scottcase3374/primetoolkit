@@ -539,11 +539,6 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 			return;
 		}
 
-		if (primeLoader != null)
-		{
-			primeLoader.load();
-		}
-
 		addPrimeRef(0L, 1L,(pRef) -> {/* no-op*/},
 
 								MutableListFactoryImpl

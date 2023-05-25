@@ -40,7 +40,7 @@
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr4-runtime</artifactId>
 		</dependency>
-		<dependency>
+<!--		<dependency>
 			<groupId>org.infinispan</groupId>
 			<artifactId>infinispan-core</artifactId>
 		</dependency>
@@ -66,15 +66,15 @@
 			<groupId>org.infinispan.protostream</groupId>
 			<artifactId>protostream</artifactId>
 
-		</dependency>
+		</dependency>-->
 		<dependency>
 			<groupId>javax.cache</groupId>
 			<artifactId>cache-api</artifactId>
 		</dependency>
-		<!--		<dependency>
+				<dependency>
         	<groupId>org.apache.ignite</groupId>
         	<artifactId>ignite-core</artifactId>
-    	</dependency>-->
+    	</dependency>
 		<dependency>
 			<groupId>org.eclipse.collections</groupId>
 			<artifactId>eclipse-collections</artifactId>

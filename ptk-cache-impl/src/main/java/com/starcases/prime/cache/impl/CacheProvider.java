@@ -1,10 +1,8 @@
 package com.starcases.prime.cache.impl;
 
-import java.net.URI;
+import java.nio.file.Path;
 
 import javax.cache.Cache;
-import javax.cache.CacheManager;
-import javax.cache.Caching;
 
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.ImmutableList;
@@ -14,7 +12,6 @@ import com.starcases.prime.cache.api.CacheProviderIntfc;
 
 import lombok.NonNull;
 
-
 /**
  * Provide API for cache handling.
  * @author scott
@@ -23,12 +20,6 @@ import lombok.NonNull;
 public class CacheProvider implements CacheProviderIntfc
 {
 	private static final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("CACHE");
-
-	/**
-	 * manage any/all caching to files
-	 */
-	private static final CacheManager CACHEMGR = Caching.getCachingProvider().getCacheManager(URI.create("infinispan.xml"), Thread.currentThread().getContextClassLoader());
-
 	/**
 	 *
 	 * @param <K>
@@ -38,9 +29,9 @@ public class CacheProvider implements CacheProviderIntfc
 	 * @return
 	 */
 	@Override
-	public <K,V> Cache<K,V> create( @NonNull final String cacheName, final ImmutableMap<String,Object> settings)
+	public <K,V> Cache<K,V> create( @NonNull final Path cache, final ImmutableMap<String,Object> settings)
 	{
-		return CACHEMGR.getCache(cacheName);
+		return new PrimeCache<K,V>(cache.getFileName().toString(), cache.getParent());
 	}
 
 	@Override

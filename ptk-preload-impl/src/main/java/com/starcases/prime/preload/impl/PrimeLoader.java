@@ -8,11 +8,13 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.OptionalLong;
 import java.util.StringTokenizer;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 import java.util.zip.ZipFile;
 
 import javax.cache.Cache;
 
+import com.starcases.prime.core.impl.PTKLogger;
 // FIXME fix module cycle related to PTKLogger / core-impl module
 //import com.starcases.prime.core.impl.PTKLogger;
 import com.starcases.prime.preload.api.PreloaderIntfc;
@@ -29,6 +31,8 @@ import lombok.Setter;
  */
 public final class PrimeLoader implements PreloaderIntfc
 {
+	Logger LOG = Logger.getLogger(PrimeLoader.class.getName());
+
 	/**
 	 * Define the number of bits to batch together to reduce the number of
 	 * idxToPrimeCache accesses.  This is to reduce the space overhead which is
@@ -90,18 +94,34 @@ public final class PrimeLoader implements PreloaderIntfc
 		subsetOfIdxToPrime.alloc(SUBSET_SIZE);
 	}
 
+	private void convertIdxToSubsetAndOffset(final long idx, final long [] retSubset, final int [] retOffset)
+	{
+		final long subsetId = idx / SUBSET_SIZE;
+		final int offset = (int)(idx % SUBSET_SIZE);
+
+		retSubset[0] = subsetId;
+		retOffset[0] = offset;
+	}
+
 	private void assign(final long idx, final long val)
 	{
-		final int offset = (int)(idx % SUBSET_SIZE);
-		final long subsetId = Math.max(idx >> SUBSET_BITS, 0);
-		if (subsetId != subsetIdx)
+		final long [] subset = {0};
+		final int [] offset = {0};
+
+		convertIdxToSubsetAndOffset(idx, subset, offset);
+
+		if (subset[0] != subsetIdx)
 		{
-			idxToPrimeCache.put(subsetIdx,   subsetOfIdxToPrime);
+			//LOG.info(String.format("put before assign: orig-idx[%d] completed-subsetidx[%d] val[%d]", idx, subsetIdx, val));
+			idxToPrimeCache.put(subsetIdx, subsetOfIdxToPrime);
 
 			subsetOfIdxToPrime = new PrimeSubset();
 			subsetOfIdxToPrime.alloc(SUBSET_SIZE);
+
+			subsetIdx = subset[0];
 		}
-		subsetOfIdxToPrime.set(offset, val);
+		//LOG.info(String.format("assign orig-idx[%d] cur-subsetId[%d] offset[%d] val[%d]", idx, subsetId, offset, val));
+		subsetOfIdxToPrime.set(offset[0], val);
 		maxIdx = idx;
 	}
 
@@ -114,10 +134,13 @@ public final class PrimeLoader implements PreloaderIntfc
 	@Override
 	public OptionalLong retrieve(final long idx)
 	{
-		final int offset = (int)(idx % SUBSET_SIZE);
-		final long subsetId = Math.max(idx >> SUBSET_BITS, 0);
-		final var subset = idxToPrimeCache.get(subsetId);
-		return subset != null ? OptionalLong.of(subset.get(offset)) : OptionalLong.empty();
+		final long [] retSubset = {0};
+		final int [] retOffset = {0};
+		convertIdxToSubsetAndOffset(idx, retSubset, retOffset);
+
+		final var subset = idxToPrimeCache.get(retSubset[0]);
+		//LOG.info(String.format("Retrieve idx[%d] subsetId[%d] subset[%s]", idx, retSubset[0], subset.toString()));
+		return subset != null ? OptionalLong.of(subset.get(retOffset[0])) : OptionalLong.empty();
 	}
 
 	/**
@@ -130,6 +153,7 @@ public final class PrimeLoader implements PreloaderIntfc
 	@Override
 	public boolean load()
 	{
+
 		final int [] index = {0};
 
 		// Hard-code 1 into the set of values - it isn't part of the standard dataset (it is not considered prime per modern definitions).
@@ -146,7 +170,7 @@ public final class PrimeLoader implements PreloaderIntfc
 													   Integer.valueOf(b.getFileName().toString().split("(s|\\.)")[1]) ))
 					 				.forEach( fileRef ->
 					 				{
-					 					//PTKLogger.dbgOutput("file: %s", fileRef.toString());
+					 					PTKLogger.dbgOutput("file: %s", fileRef.toString());
 	 									try
 	 									{
 	 										final Path tmpPath = fileRef;
@@ -175,7 +199,7 @@ public final class PrimeLoader implements PreloaderIntfc
 					 											}
 					 											catch(final IOException e2)
 					 											{
-					 												//PTKLogger.output("%s", ZIP_FOLDER_ISSUE_MSG);
+					 												PTKLogger.output("%s", ZIP_FOLDER_ISSUE_MSG);
 					 											}
 															});
 	 											}
@@ -197,13 +221,13 @@ public final class PrimeLoader implements PreloaderIntfc
 	 									}
 	 									catch(IOException e)
 	 									{
-	 										//PTKLogger.output("%s", ZIP_FOLDER_ISSUE_MSG);
+	 										PTKLogger.output("%s", ZIP_FOLDER_ISSUE_MSG);
 	 									}
 					 				});
 							}
 						catch(IOException e1)
 						{
-							//PTKLogger.output("%s", ZIP_FOLDER_ISSUE_MSG);
+							PTKLogger.output("%s", ZIP_FOLDER_ISSUE_MSG);
 						}
 					}
 				);

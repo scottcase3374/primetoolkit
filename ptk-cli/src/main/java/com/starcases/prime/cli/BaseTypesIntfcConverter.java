@@ -16,7 +16,7 @@ import picocli.CommandLine.ITypeConverter;
  */
 public class BaseTypesIntfcConverter implements ITypeConverter<BaseTypesIntfc>
 {
-	private static final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("BASE_TYPES");
+	private static final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("BUILTIN_BASE_TYPES");
 	/**
 	 * Convert from enum string name to a general interface
 	 */

@@ -1,17 +1,30 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>com.starcases.prime</groupId>
-    <artifactId>prime-tool-kit</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-  </parent>
-  <artifactId>ptk-cache-impl</artifactId>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.starcases.prime</groupId>
+		<artifactId>prime-tool-kit</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+	<artifactId>ptk-cache-impl</artifactId>
 
-    <dependencies>
-	  <dependency>
-		  <groupId>com.starcases.prime</groupId>
-		  <artifactId>ptk-cache-api</artifactId>
-		  <version>0.0.1-SNAPSHOT</version>
-	  </dependency>
-  </dependencies>
+	<dependencies>
+		<dependency>
+			<groupId>com.starcases.prime</groupId>
+			<artifactId>ptk-cache-api</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+<!--		<dependency>
+			<groupId>org.glassfish.main.transaction</groupId>
+			<artifactId>javax.transaction</artifactId>
+			<version>3.1.2.2</version>
+		</dependency>-->
+
+<!--		<dependency>
+			<groupId>org.infinispan</groupId>
+			<artifactId>infinispan-core</artifactId>
+		</dependency>-->
+	</dependencies>
 </project>
