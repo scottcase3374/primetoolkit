@@ -22,7 +22,7 @@ import lombok.NonNull;
  * improvement and also as another base representation by itself.
  *
  */
-public class PrimeTree extends PrimeBaseGenerator
+class PrimeTree extends PrimeBaseGenerator
 {
 	/**
 	 * container for tracking the unique set of prefixes/trees
@@ -41,6 +41,9 @@ public class PrimeTree extends PrimeBaseGenerator
 		this.collectionTracker = collectionTracker;
 	}
 
+	/**
+	 * Generate bases for defined base types for the specified prime.
+	 */
 	@Override
 	public void genBasesForPrimeRef(final PrimeRefIntfc curPrime)
 	{

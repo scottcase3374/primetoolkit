@@ -9,7 +9,7 @@ import com.starcases.prime.service.api.SvcProviderBaseIntfc;
  * @author scott
  *
  */
-public interface MetricsProviderIntfc extends SvcProviderBaseIntfc
+public interface MetricsRegistryProviderIntfc extends SvcProviderBaseIntfc
 {
-	MetricIntfc create(final ImmutableMap<String, Object> attributes);
+	MetricsRegistryProviderIntfc create(final ImmutableMap<String, Object> attributes);
 }

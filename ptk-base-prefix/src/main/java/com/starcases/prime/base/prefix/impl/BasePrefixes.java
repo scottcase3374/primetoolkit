@@ -13,7 +13,7 @@ import lombok.NonNull;
  * Produces prefix list for each prime
  *
  */
-public class BasePrefixes extends PrimeBaseGenerator
+class BasePrefixes extends PrimeBaseGenerator
 {
 	/**
 	 * constructor for creation of Base prefixes.

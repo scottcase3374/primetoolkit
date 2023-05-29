@@ -1,6 +1,7 @@
 package com.starcases.prime.cache.impl;
 
 import java.nio.file.Path;
+import java.util.function.BiFunction;
 
 import javax.cache.Cache;
 
@@ -19,8 +20,13 @@ import lombok.NonNull;
  */
 public class CacheProvider implements CacheProviderIntfc
 {
-	private static final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("CACHE");
 	/**
+	 * default provider attributes
+	 */
+	private static final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("CACHE");
+
+	/**
+	 * create target service.
 	 *
 	 * @param <K>
 	 * @param <V>
@@ -29,11 +35,14 @@ public class CacheProvider implements CacheProviderIntfc
 	 * @return
 	 */
 	@Override
-	public <K,V> Cache<K,V> create( @NonNull final Path cache, final ImmutableMap<String,Object> settings)
+	public <K,V> Cache<K,V> create( @NonNull final Path cache, @NonNull final BiFunction<K, Path, V> load, final ImmutableMap<String,Object> settings)
 	{
-		return new PrimeCache<K,V>(cache.getFileName().toString(), cache.getParent());
+		return new PrimeCache<>(cache.getFileName().toString(), cache.getParent(), load);
 	}
 
+	/**
+	 * get provider attributes.
+	 */
 	@Override
 	public ImmutableList<String> getProviderAttributes()
 	{

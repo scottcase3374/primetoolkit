@@ -9,6 +9,9 @@ import lombok.NonNull;
 
 public interface SvcProviderBaseIntfc
 {
+	/**
+	 * Logger for use during service creation - log provider and service request attributes and match-data.
+	 */
 	Logger LOG = Logger.getLogger(SvcProviderBaseIntfc.class.getName());
 
 	default int countAttributesMatch(final ImmutableCollection<String> attributes)
@@ -23,8 +26,19 @@ public interface SvcProviderBaseIntfc
 		return ret;
 	}
 
+	/**
+	 * Get the provider attributes.
+	 *
+	 * @return
+	 */
 	ImmutableCollection<String> getProviderAttributes();
 
+	/**
+	 * Log attribute/match data during provider selection.
+	 *
+	 * @param attributes
+	 * @param matchedItems
+	 */
 	default void logMatchData(@NonNull final ImmutableCollection<String> attributes, final int matchedItems)
 	{
 		if (LOG.isLoggable(Level.FINE))

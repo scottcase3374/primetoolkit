@@ -1,7 +1,8 @@
 package com.starcases.prime.metrics.api;
 
-public interface MetricIntfc
+import lombok.NonNull;
+
+public interface MetricIntfc extends AutoCloseable
 {
-	String getProviderName();
-	void enable(final boolean enabled);
+	void record(@NonNull final Runnable fn);
 }

@@ -43,7 +43,7 @@ import static io.netty.handler.codec.http.HttpResponseStatus.OK;
  * @author scott
  *
  */
-public class PrimeSQLChannelHandler extends SimpleChannelInboundHandler<Object>
+class PrimeSQLChannelHandler extends SimpleChannelInboundHandler<Object>
 {
 	private static final Logger LOG = Logger.getLogger(PrimeSQLChannelHandler.class.getName());
 

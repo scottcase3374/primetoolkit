@@ -8,12 +8,20 @@ import com.starcases.prime.base.api.BaseProviderIntfc;
 import com.starcases.prime.base.api.BaseTypes;
 import com.starcases.prime.base.api.PrimeBaseGeneratorIntfc;
 
+/**
+ *
+ * @author scott
+ *
+ */
 public class TripleProvider implements BaseProviderIntfc
 {
+	/**
+	 * default provider attributes
+	 */
 	private static final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("THREETRIPLE", "DEFAULT");
 
 	/**
-	 *
+	 * create target service instance
 	 */
 	@Override
 	public PrimeBaseGeneratorIntfc create(final ImmutableMap<String,Object> settings)
@@ -21,6 +29,9 @@ public class TripleProvider implements BaseProviderIntfc
 		return new BaseReduceTriple(BaseTypes.THREETRIPLE);
 	}
 
+	/**
+	 * get provider attributes
+	 */
 	@Override
 	public ImmutableList<String> getProviderAttributes()
 	{

@@ -15,9 +15,7 @@
 
 	<name>PrimeToolKit</name>
 	<description>Prime Tool Kit</description>
-	<properties>
-		<antlr4.visitor>true</antlr4.visitor>
-	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -40,41 +38,14 @@
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr4-runtime</artifactId>
 		</dependency>
-<!--		<dependency>
-			<groupId>org.infinispan</groupId>
-			<artifactId>infinispan-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.infinispan.protostream</groupId>
-			<artifactId>protostream-processor</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.infinispan</groupId>
-			<artifactId>infinispan-cdi-embedded</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.infinispan</groupId>
-			<artifactId>infinispan-jcache</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.infinispan</groupId>
-			<artifactId>infinispan-jcache-commons</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.infinispan.protostream</groupId>
-			<artifactId>protostream</artifactId>
-
-		</dependency>-->
 		<dependency>
 			<groupId>javax.cache</groupId>
 			<artifactId>cache-api</artifactId>
 		</dependency>
-				<dependency>
+	<!--			<dependency>
         	<groupId>org.apache.ignite</groupId>
         	<artifactId>ignite-core</artifactId>
-    	</dependency>
+    	</dependency>-->
 		<dependency>
 			<groupId>org.eclipse.collections</groupId>
 			<artifactId>eclipse-collections</artifactId>
@@ -164,28 +135,6 @@
 			</plugin>
 
 		</plugins>
-
-		<pluginManagement>
-			<plugins>
-				<!--<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-compiler-plugin</artifactId>
-
-					<configuration>
-						<annotationProcessorPaths>
-							<path>
-								<groupId>org.projectlombok</groupId>
-								<artifactId>lombok</artifactId>
-								<version>1.18.26</version>
-							</path>
-						</annotationProcessorPaths>
-
-					</configuration>
-				</plugin>
--->
-			</plugins>
-		</pluginManagement>
-
 	</build>
 
 	<modules>

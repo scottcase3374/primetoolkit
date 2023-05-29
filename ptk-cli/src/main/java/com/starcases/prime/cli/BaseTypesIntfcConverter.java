@@ -23,8 +23,8 @@ public class BaseTypesIntfcConverter implements ITypeConverter<BaseTypesIntfc>
 	@Override
 	public BaseTypesIntfc convert(final String value) throws Exception
 	{
-		MutableMap<String, BaseTypesIntfc> baseTypes = Maps.mutable.empty();
-		var x = (new BaseTypesProviderOther()).get(baseTypes, ATTRIBUTES);
+		final MutableMap<String, BaseTypesIntfc> baseTypes = Maps.mutable.empty();
+		final var x = (new BaseTypesProviderOther()).get(baseTypes, ATTRIBUTES);
 
 		return x.get(value);
 	}

@@ -1,7 +1,7 @@
 com.starcases.prime.metrics.impl.GraphiteRegistryProvider
-com.starcases.prime.metrics.impl.JvmGCMetricProvider
-com.starcases.prime.metrics.impl.JvmMemoryMetricProvider
-com.starcases.prime.metrics.impl.JvmThreadMetricProvider
+com.starcases.prime.metrics.impl.JvmGCPredefinedMetricProvidericProvider
+com.starcases.prime.metrics.impl.JvmMemoryPredefinedMetricProvidericProvider
+com.starcases.prime.metrics.impl.JvmThreadPredefinedMetricProvidericProvider
 com.starcases.prime.metrics.impl.LoggingMeterRegistryProvider
-com.starcases.prime.metrics.impl.ProcessorMetricProvider
+com.starcases.prime.metrics.impl.ProcessorPredefinedMetricProvidericProvider
 com.starcases.prime.metrics.impl.SimpleMeterRegistryProvider

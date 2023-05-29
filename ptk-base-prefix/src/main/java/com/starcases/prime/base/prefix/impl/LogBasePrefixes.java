@@ -13,7 +13,7 @@ import lombok.NonNull;
 /**
  * Logs prefix style base information.
  */
-public class LogBasePrefixes extends AbstractPrimeBaseLog
+class LogBasePrefixes extends AbstractPrimeBaseLog
 {
 	/**
 	 * default logger

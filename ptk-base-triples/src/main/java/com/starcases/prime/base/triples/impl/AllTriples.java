@@ -71,6 +71,9 @@ public class AllTriples
 	private final Predicate<PrimeRefIntfc[]> nonNullTriple =
 			prefArray -> Arrays.stream(prefArray).allMatch(Objects::nonNull);
 
+	/**
+	 * sum up the set of 3 primes.
+	 */
 	private final Function<PrimeRefIntfc[], Long> sumTriple =
 			prefArray -> Arrays.stream(prefArray).collect(Collectors.summingLong(p -> p.getPrime()));
 
@@ -137,7 +140,7 @@ public class AllTriples
 
 	 * This is a "mostly brute force" method which is shown by pretty slow performance.
 	 */
-	public void process(PrimeRefIntfc primeRef)
+	public void process(final PrimeRefIntfc primeRef)
 	{
 		tripleStream()
 			.filter(partialTriple)

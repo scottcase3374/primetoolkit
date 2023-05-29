@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -12,6 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,6 +34,8 @@ import com.starcases.prime.base.api.BaseTypesIntfc;
 import com.starcases.prime.base.api.LogPrimeDataProviderIntfc;
 import com.starcases.prime.base.api.PrimeBaseGeneratorIntfc;
 import com.starcases.prime.base.impl.PrimeMultiBaseContainer;
+import com.starcases.prime.base.impl.BaseGenTimerMetricDecorator;
+import com.starcases.prime.base.impl.LogBaseGenDecorator;
 
 import com.starcases.prime.cache.api.CacheProviderIntfc;
 import com.starcases.prime.cli.MetricsOpts.MetricOpt;
@@ -46,7 +50,7 @@ import com.starcases.prime.graph.export.api.ExportsProviderIntfc;
 
 import com.starcases.prime.logging.LogGraphStructure;
 import com.starcases.prime.logging.LogNodeStructure;
-import com.starcases.prime.metrics.api.MetricsProviderIntfc;
+import com.starcases.prime.metrics.api.MetricsRegistryProviderIntfc;
 import com.starcases.prime.preload.api.PrimeSubset;
 import com.starcases.prime.service.impl.SvcLoader;
 import com.starcases.prime.sql.api.SqlProviderIntfc;
@@ -82,6 +86,8 @@ public class DefaultInit implements Runnable
 	 * default logger
 	 */
 	private static final Logger LOG = Logger.getLogger(DefaultInit.class.getName());
+
+	private static final BiFunction<Long, Path, PrimeSubset> loader = (K, P) -> null; //Paths.get(P.toString(), K.toString()).toFile();
 
 	/**
 	 * prime source - for prime/prime ref lookups
@@ -237,6 +243,7 @@ public class DefaultInit implements Runnable
 			if (LOG.isLoggable(Level.SEVERE))
 			{
 				LOG.severe("Exception "+ except);
+				PTKLogger.output("Exception: %s", except.toString());
 			}
 		}
 	}
@@ -318,15 +325,20 @@ public class DefaultInit implements Runnable
 
 	private void actionEnableMetrics()
 	{
+		// TODO allow enablement of individual metrics
+
 		if (LOG.isLoggable(Level.INFO))
 		{
 			LOG.info("CLI - Check metrics enablement.");
 		}
 		if (Arrays.asList((metricOpts != null) ? metricOpts.getMetricType() : NULL_OPTS).contains(MetricOpt.ALL))
 		{
-			final SvcLoader<MetricsProviderIntfc, Class<MetricsProviderIntfc>> registryProviders = new SvcLoader< >(MetricsProviderIntfc.class);
+			final SvcLoader<MetricsRegistryProviderIntfc, Class<MetricsRegistryProviderIntfc>> registryProviders = new SvcLoader< >(MetricsRegistryProviderIntfc.class);
 			final ImmutableCollection<String> attributes = Lists.immutable.of("METRICS");
-			actions.add(s ->  registryProviders.providers(attributes).forEach(p -> p.create(null).enable(true)));
+			actions.add(s ->  registryProviders
+								.providers(attributes)
+								.tap(p -> System.out.println("metric: " + p.toString()))
+								.forEach(p -> p.create(null).create(null)));
 		}
 	}
 
@@ -373,10 +385,7 @@ public class DefaultInit implements Runnable
 			LOG.info("CLI - Prep init of default prime content.");
 		}
 		final SvcLoader<CacheProviderIntfc, Class<CacheProviderIntfc>> cacheProvider =
-				new SvcLoader< >(CacheProviderIntfc.class,
-								new Class[] {}, //{javax.transaction.xa.XAResource.class},
-								new Module[] {} //{ javax.transaction.xa.XAResource.class.getModule()
-												);
+				new SvcLoader< >(CacheProviderIntfc.class);
 
 		final ImmutableList<String> cacheAttributes = Lists.immutable.of("CACHE");
 
@@ -389,12 +398,11 @@ public class DefaultInit implements Runnable
 			final String inputFolderPath = initOpts.getInputDataFolder();
 			final Cache<Long,PrimeSubset> cache = cacheProvider
 													.provider(cacheAttributes)
-													.map(p -> p.<Long, PrimeSubset>create(Path.of(initOpts.getOutputFolder(), CACHE_NAME), null))
+													.map(p -> p.<Long, PrimeSubset>create(Path.of(replaceTildeHome(initOpts.getOutputFolder()), CACHE_NAME), loader, null))
 													.orElseThrow();
 
 			PTKFactory.setCache(cache);
 
-			LOG.info("actionCreatePrimeSrc *** cache:" + PTKFactory.getCache().getName());
 			// Use idx 2 which would be prime 3 for determining if cache was loaded / pre-loaded propertly. Since Primes 1 and 2 may be hard coded in
 			// places, it is safer to use the 1st item which is never hardcoded.
 			final var cacheIdx0 = cache.get(0L);
@@ -460,6 +468,8 @@ public class DefaultInit implements Runnable
 			final SvcLoader<BaseProviderIntfc, Class<BaseProviderIntfc>> baseProvider = new SvcLoader< >(BaseProviderIntfc.class);
 			baseOpts.getBases().forEach(baseType ->
 			{
+				setupBaseLogConfig(baseType);
+
 				final var trackGenTime = false;
 				final var method = "DefaultInit::actionHandleAdditionalBases - base :" + baseType.name();
 				final ImmutableList<String> baseProviderAttributes = Lists.immutable.of(baseType.name(), "DEFAULT");
@@ -516,7 +526,15 @@ public class DefaultInit implements Runnable
 		}
 	}
 
-	private PrimeBaseGeneratorIntfc addBaseDecorators(@NonNull final PrimeBaseGeneratorIntfc base, final boolean trackGenTime, final BaseTypesIntfc baseType)
+	private void setupBaseLogConfig(@NonNull final BaseTypesIntfc baseType)
+	{
+		if (baseOpts.isUseBaseFile())
+		{
+			PTKLogger.setOutput(baseType.name(), this.decorateFileName(baseType.name(), "base", "log"));
+		}
+	}
+
+	private PrimeBaseGeneratorIntfc addBaseDecorators(@NonNull final PrimeBaseGeneratorIntfc base, final boolean trackGenTime, @NonNull final BaseTypesIntfc baseType)
 	{
 		if (LOG.isLoggable(Level.INFO))
 		{
@@ -525,32 +543,23 @@ public class DefaultInit implements Runnable
 
 		var decoratedBase = base;
 
-		if (baseOpts.isUseBaseFile())
-		{
-			PTKLogger.setOutput(baseType.name(), this.decorateFileName(baseType.name(), "base", "log"));
-		}
 
 		if (trackGenTime)
 		{
 			if (LOG.isLoggable(Level.INFO))
 			{
 				LOG.info(String.format("DECORATE base supplier [%s] with Timer", baseType.name()));
+				decoratedBase = new BaseGenTimerMetricDecorator(decoratedBase, PTKFactory.getMetricProvider());
 			}
-			//decoratedBase = new LogTimerDecorator(decoratedBase);
 		}
 
 		if (outputOpts.getOutputOpers().contains(OutputOper.CREATE))
 		{
-			if (LOG.isLoggable(Level.INFO))
-			{
-				LOG.info(String.format("DECORATE base supplier [%s] with Logger", baseType.name()));
-			}
-			// FIXME
-			//decoratedBase = new LogBaseGenDecorator(decoratedBase);
+			LOG.info(String.format("DECORATE base supplier [%s] with Logger", baseType.name()));
+			decoratedBase = new LogBaseGenDecorator(decoratedBase);
 		}
 
-		//FIXME Handle prefer parallel ; base.doPreferParallel(initOpts.isPreferParallel());
-
+		// TODO Handle prefer parallel ; base.doPreferParallel(initOpts.isPreferParallel());
 		return decoratedBase;
 	}
 	private void actionHandleOutputs()
@@ -659,10 +668,6 @@ public class DefaultInit implements Runnable
 					actions.add(s -> new LogNodeStructure(primeSrc).doPreferParallel(initOpts.isPreferParallel()).outputLogs() );
 					break;
 
-				// TODO Some revamp needed - use logger instead of console.
-				case "PROGRESS",
-					 "CREATE",
-					 "PRIMETREE_METRICS":
 				default:
 					break;
 				}

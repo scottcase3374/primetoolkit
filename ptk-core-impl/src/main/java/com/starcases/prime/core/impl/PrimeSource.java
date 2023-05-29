@@ -24,11 +24,10 @@ import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
 import com.starcases.prime.datamgmt.api.PData;
 import com.starcases.prime.datamgmt.api.PrimeMapEntry;
 import com.starcases.prime.datamgmt.api.PrimeMapIterator;
-import com.starcases.prime.metrics.impl.MetricMonitor;
+import com.starcases.prime.metrics.api.MetricIntfc;
+import com.starcases.prime.metrics.api.MetricProviderIntfc;
 import com.starcases.prime.preload.api.PreloaderIntfc;
 
-import io.micrometer.core.instrument.LongTaskTimer;
-import io.micrometer.core.instrument.LongTaskTimer.Sample;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
@@ -93,6 +92,8 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	//
 	// Metrics / health / progress
 	//
+	@Getter
+	private final MetricProviderIntfc metricProvider;
 
 	/**
 	 * dest of output progress tracking
@@ -180,7 +181,8 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 			@Min(1) final int confidenceLevel,
 			@NonNull final Function<Long, PrimeRefFactoryIntfc> primeRefRawCtor,
 			final CollectionTrackerIntfc collTracker,
-			final PreloaderIntfc primeLoader
+			final PreloaderIntfc primeLoader,
+			final MetricProviderIntfc metricProvider
 			)
 	{
 		super();
@@ -206,6 +208,8 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 						);
 
 		this.confidenceLevel = confidenceLevel;
+
+		this.metricProvider = metricProvider;
 	}
 
 	/**
@@ -222,8 +226,6 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	{
 		final PrimeRefFactoryIntfc ret = primeRefRawCtor.apply(nextPrimeIdx);
 
-		checkMismatch("addPrimeRef", nextPrimeIdx, newPrime);
-
 		updateMaps(nextPrimeIdx, newPrime, ret);
 
 		ret.getPrimeBaseData().addPrimeBases(defaultBase);
@@ -235,28 +237,6 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	private long calcSumCeiling(@Min(3) final long primeSum)
 	{
 		return (primeSum << 1) - 1L;
-	}
-
-	/**
-	 * Data quality check; confirm that the identified prime/base is the expected value
-	 * when pre-determined values exists. This only logs a message on the first
-	 * mismatch.
-	 *
-	 * @param src
-	 * @param idx
-	 * @param newPrime
-	 */
-	private void checkMismatch(final String src, @Min(0) final long idx, @Min(1) final long newPrime)
-	{
-		if (primeLoader != null)
-		{
-			final long expectedPrime = this.getPrimeForIdx(newPrime).orElse(-1L);
-
-			if (newPrime != expectedPrime && LOG.isLoggable(Level.SEVERE) && logMismatch.compareAndSet(true, false) )
-			{
-				LOG.severe(String.format("Mismatch: [%s]  idx [%d] newPrime[%d] pre-primed@idx [%d]", src,  idx, newPrime, expectedPrime));
-			}
-		}
 	}
 
 	/**
@@ -274,14 +254,13 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 		long nextPrimeTmpIdx;
 		do
 		{
-			final Optional<LongTaskTimer.Sample> timer = MetricMonitor.longTimer(OutputOper.CREATE);
-			try
+			try(MetricIntfc metric = metricProvider.longTimer(OutputOper.CREATE))
 			{
 				final int nextPrimeIdx = (int) nextIdx.incrementAndGet();
-				final var lastPrimeIdx = nextPrimeIdx -1;
-				final var lastPrime = getPrimeForIdx(lastPrimeIdx);
+				final int lastPrimeIdx = nextPrimeIdx -1;
+				final OptionalLong lastPrime = getPrimeForIdx(lastPrimeIdx);
 
-				final PrimeRefIntfc ret =  genByListPermutation(nextPrimeIdx, lastPrime)
+				genByListPermutation(nextPrimeIdx, lastPrime)
 											.orElse(genByPrimePermutation(nextPrimeIdx, lastPrime)
 											.orElseThrow( () -> new IllegalStateException("No prime found")));
 
@@ -293,9 +272,10 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 
 				nextPrimeTmpIdx = nextPrimeIdx;
 			}
-			finally
+			catch(final Exception e) // due to autoclosable interface.
 			{
-				timer.ifPresent(Sample::stop);
+				// TODO Review/update error handling.
+				throw new RuntimeException(e);
 			}
 		}
 		while (nextPrimeTmpIdx < targetPrimeCount);
@@ -339,8 +319,6 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 							pdata.ifPresent( pd ->
 										{
 											final var nextPrime = curPrime + pd.prime();
-
-											checkMismatch("genByListPermutation", nextPrimeIdx, nextPrime);
 
 											retPrRef[0] = addPrimeRef(nextPrimeIdx,
 																	nextPrime,
@@ -411,7 +389,6 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 		final var sumCeiling = optCurPrime.stream().map(this::calcSumCeiling).reduce(0L, (a,b) -> a+b);
 
 		PrimeRefIntfc foundPrime = null;
-
 		var doLoop = !primeIndexPermutation.equals(primeIndexMaxPermutation);
 		while (doLoop)
 		{
@@ -440,8 +417,6 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 					final var primeTreeColl = prefixTree.toCollection();
 					final var canonicalPrimeColl = collTracker.track(primeTreeColl).toCanonicalCollection();
 
-					checkMismatch("genByPrimePermutation", idx, permutationSum);
-
 					foundPrime = addPrimeRef(idx,
 											permutationSum,
 											getBasesGenerator(),
@@ -467,14 +442,13 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	@Override
 	public OptionalLong getPrimeForIdx(@Min(0) final long primeIdx)
 	{
-		final var optRet = primeLoader == null ? OptionalLong.empty() : primeLoader.retrieve(primeIdx);
-		final var ret = optRet.orElseGet( () ->
-					{
-						final var r = idxToPrimeMap.get(primeIdx);
-						return r != null ? r.getPrime() : -1L; // so -1 indicates that no prime exists for the given index.d
-					}
-				);
-		return ret == -1L ?  OptionalLong.empty() : OptionalLong.of(ret);
+		final var res1 = idxToPrimeMap.get(primeIdx);
+		final var res2 = res1 != null ?
+				OptionalLong.of(res1.getPrime())
+					: (primeLoader != null)
+						? primeLoader.retrieve(primeIdx)
+							:  OptionalLong.empty();
+		return res2;
 	}
 
 	@Override

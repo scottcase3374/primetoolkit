@@ -10,11 +10,21 @@ import com.starcases.prime.base.api.BaseProviderIntfc;
 import com.starcases.prime.base.api.BaseTypes;
 import com.starcases.prime.base.api.PrimeBaseGeneratorIntfc;
 
+/**
+ *
+ * @author scott
+ *
+ */
 public class PrimeTreeProvider implements BaseProviderIntfc
 {
+	/**
+	 * default provider attributes
+	 */
 	private static final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("PRIME_TREE", "DEFAULT");
 
 	/**
+	 * Create target service
+	 *
 	 * collTrack setting is required.
 	 */
 	@Override
@@ -25,6 +35,9 @@ public class PrimeTreeProvider implements BaseProviderIntfc
 		return new PrimeTree(BaseTypes.PRIME_TREE, collTracker);
 	}
 
+	/**
+	 * get provider attributes
+	 */
 	@Override
 	public ImmutableList<String> getProviderAttributes()
 	{

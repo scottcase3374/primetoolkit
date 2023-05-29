@@ -10,16 +10,30 @@ import com.starcases.prime.core.api.PrimeSourceIntfc;
 
 import lombok.NonNull;
 
+/**
+ *
+ * @author scott
+ *
+ */
 public class LogPrimeTreeDataProvider implements LogPrimeDataProviderIntfc
 {
+	/**
+	 * Default provider attributes
+	 */
 	private static final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("PRIME_TREE", "DEFAULT");
 
+	/**
+	 * Get provider attributes
+	 */
 	@Override
 	public ImmutableList<String> getProviderAttributes()
 	{
 		return ATTRIBUTES;
 	}
 
+	/**
+	 * Create target service
+	 */
 	@Override
 	public LogPrimeDataIntfc create(@NonNull final PrimeSourceIntfc primeSrc, final ImmutableMap<String,Object> settings)
 	{

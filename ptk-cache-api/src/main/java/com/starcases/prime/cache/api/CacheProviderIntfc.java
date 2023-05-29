@@ -1,6 +1,7 @@
 package com.starcases.prime.cache.api;
 
 import java.nio.file.Path;
+import java.util.function.BiFunction;
 
 import javax.cache.Cache;
 
@@ -12,5 +13,5 @@ import lombok.NonNull;
 
 public interface CacheProviderIntfc extends SvcProviderBaseIntfc
 {
-	<X,Y> Cache<X,Y> create( @NonNull final Path cache, final ImmutableMap<String,Object> settings);
+	<K,V> Cache<K,V> create( @NonNull final Path cache, @NonNull final BiFunction<K, Path, V> load, final ImmutableMap<String,Object> settings);
 }

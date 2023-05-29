@@ -16,7 +16,7 @@
 
 	  <dependency>
 		  <groupId>com.starcases.prime</groupId>
-		  <artifactId>ptk-metrics-impl</artifactId>
+		  <artifactId>ptk-metrics-api</artifactId>
 		  <version>0.0.1-SNAPSHOT</version>
 	  </dependency>
 

@@ -7,22 +7,15 @@ import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.map.ImmutableMap;
 
-import com.starcases.prime.metrics.api.MetricIntfc;
-import com.starcases.prime.metrics.api.MetricsProviderIntfc;
+import com.starcases.prime.metrics.api.PredefinedMetricsProviderIntfc;
 
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
 
-public class ProcessorMetricProvider implements MetricsProviderIntfc, MetricIntfc
+public class ProcessorPredefinedMetricProvider implements PredefinedMetricsProviderIntfc
 {
-	private static final Logger LOG = Logger.getLogger(ProcessorMetricProvider.class.getName());
+	private static final Logger LOG = Logger.getLogger(ProcessorPredefinedMetricProvider.class.getName());
 
 	private static final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("PROCESSOR", "METRICS");
-
-	@Override
-	public MetricIntfc create(final ImmutableMap<String, Object> attributes)
-	{
-		return this;
-	}
 
 	@Override
 	public String getProviderName()
@@ -31,13 +24,10 @@ public class ProcessorMetricProvider implements MetricsProviderIntfc, MetricIntf
 	}
 
 	@Override
-	public void enable(final boolean enabled)
+	public void create(ImmutableMap<String, Object> attributes)
 	{
-		if (enabled)
-		{
-			LOG.fine("Enabling Processor ");
-			MetricMonitor.bind(r -> new ProcessorMetrics().bindTo(r));
-		}
+		LOG.fine("Enabling Processor ");
+		MetricProvider.bind(r -> new ProcessorMetrics().bindTo(r));
 	}
 
 	@Override

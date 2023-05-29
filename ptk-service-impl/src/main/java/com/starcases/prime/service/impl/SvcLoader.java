@@ -11,10 +11,23 @@ import com.starcases.prime.service.api.SvcProviderBaseIntfc;
 
 import lombok.NonNull;
 
+/**
+ * Wrapper class which provides service loading.
+ *
+ * @author scott
+ *
+ * @param <T>
+ * @param <C>
+ */
 public class SvcLoader< T extends SvcProviderBaseIntfc, C extends Class<T>>
 {
     private final ServiceLoader<T> loader;
 
+    /**
+     * Constructor when no other dependencies are needed for service provider construction.
+     *
+     * @param classT
+     */
     public SvcLoader(@NonNull final C classT)
     {
     	final Module module = this.getClass().getModule();
@@ -32,6 +45,11 @@ public class SvcLoader< T extends SvcProviderBaseIntfc, C extends Class<T>>
     	this.loader = ServiceLoader.load(classT);
     }
 
+    /**
+     * Constructor when more dependencies are required for service provider construction.
+     *
+     * @param classT
+     */
     public SvcLoader(@NonNull final C classT, final Class<?> [] classesUsed, final Module [] modulesToRead)
     {
     	final Module module = this.getClass().getModule();

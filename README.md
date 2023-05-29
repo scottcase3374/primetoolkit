@@ -20,6 +20,8 @@ Primes can have bases generated via different methodologies, etc - such as where
 - Experiment with Eclipse collections
 - Experiment with Java features in versions > Java 11
 - Research properties of prime numbers
+- Experiment with Java Module System
+- Implement a small "language" and interpreter since I enjoy working with Lexical Analysis/Parsing systems.
 - Research data structures for use as primes numbers become very large
 	- Track bases of primes (sums of primes that add to current prime)
 	- Track and use shared lists or other structures of subsets of bases
@@ -33,7 +35,7 @@ Current processing on my i7 with 64Gb RAM reaches about 3-5 million (cmd line ar
 Some of the technology tried/used.
 - Java 18+
 - Picocli - command line handling
-- JBoss Infinispan - caching
+- JBoss Infinispan - caching; Note I had to remove Infinispan since it ended up incompatible with Java modules when embedded.
 - Protobuf - related to caching
 - Gson - PrimeSQL language results output as json
 - Eclipse Collections - alternative for standard java for lower memory usage, etc.
@@ -44,7 +46,7 @@ I created..
 - Jakarta Validation - as replacement for javax validation.
 - JGrapht / JGraphx - some graphing POC
 - JUnit Jupiter - as replacement for JUnit4
-- JBoss Weld - some POC work for dependency injection with plain Java apps.
+- JBoss Weld - some POC work for dependency injection with plain Java apps. Reverted this for now in favor of Java ServiceLoader.
 - Lombok - code generation / simplification
 - Java ServiceLoader support
 - Maven
@@ -73,6 +75,7 @@ Some of the tools used.
 - Streams
 - Use of caching
 - Use of JSON
+- Java module system
 - Use of Eclipse / maven plugins to improve code quality/security and perform tasks
 
 ## Examples of Design Patterns used
@@ -92,7 +95,7 @@ Some of the tools used.
 - Martin Fowler
 	- Identity Map - Fundamentally implemented by PrimeSource using members; primeToIdxMap and
 	idxToPrimeMap
-	-	Separated Interfaces - package *_api vs *_impl
+	-	Separated Interfaces - package api vs impl
 
 ## Misc items
 - Manual check of some libraries against online Veracode vulnerability data.
@@ -354,7 +357,7 @@ Issues
 	- fix / add API documentation as needed after last major refactoring
 	- Improve package organization; DONE
 	- implement service loader; DONE / IMPROVE AS NEEDED
-	- use Java module system
+	- use Java module system; DONE / IMPROVE AS NEEDED
 	- Should not generate default base as part of prime selection/load; construct default base just like other bases.; DONE
 	- Increase test coverage.
 	- Improve metrics handling.

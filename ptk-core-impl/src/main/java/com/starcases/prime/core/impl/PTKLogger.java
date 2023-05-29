@@ -63,7 +63,7 @@ public class PTKLogger
 	 * @throws IOException
 	 */
 	@SuppressWarnings("PMD.SystemPrintln")
-	public static void output(final String baseType, final String format, final Object...params)
+	private static void output(final String baseType, final String format, final Object...params)
 	{
 		final var path = outputs.get(baseType);
 		if (path != null)

@@ -18,12 +18,20 @@ public class CmdChannelInit extends ChannelInitializer<SocketChannel>
 {
 	private final PrimeSourceIntfc primeSrc;
 
+	/**
+	 * Constructor
+	 *
+	 * @param primeSrc
+	 */
 	public CmdChannelInit(final PrimeSourceIntfc primeSrc)
 	{
 		super();
 		this.primeSrc = primeSrc;
 	}
 
+	/**
+	 * Initialize - setup http and prime sql handler
+	 */
 	@Override
     public void initChannel(final SocketChannel channel) throws Exception
 	{

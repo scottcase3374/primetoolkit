@@ -23,6 +23,9 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
  */
 public class CmdServer implements CmdServerIntfc
 {
+	/**
+	 * default logger
+	 */
 	private static final Logger LOG = Logger.getLogger(CmdServer.class.getName());
 
 	private final int port;

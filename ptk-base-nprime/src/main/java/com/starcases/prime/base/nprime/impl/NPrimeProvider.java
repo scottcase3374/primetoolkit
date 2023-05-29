@@ -8,9 +8,23 @@ import com.starcases.prime.base.api.BaseProviderIntfc;
 import com.starcases.prime.base.api.BaseTypes;
 import com.starcases.prime.base.api.PrimeBaseGeneratorIntfc;
 
+/**
+ *
+ * @author scott
+ *
+ */
 public class NPrimeProvider implements BaseProviderIntfc
 {
+	/**
+	 * attributes for default provider.
+	 */
 	private static final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("NPRIME", "DEFAULT");
+
+	/**
+	 * constructor - Nothing to do.
+	 */
+	public NPrimeProvider()
+	{}
 
 	@Override
 	public ImmutableList<String> getProviderAttributes()

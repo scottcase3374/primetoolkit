@@ -19,6 +19,7 @@ import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
 import com.starcases.prime.core.impl.PrimeSource;
 import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
 import com.starcases.prime.datamgmt.api.CollectionTrackerProviderIntfc;
+import com.starcases.prime.metrics.api.MetricProviderIntfc;
 import com.starcases.prime.preload.api.PreloaderIntfc;
 import com.starcases.prime.preload.api.PreloaderProviderIntfc;
 import com.starcases.prime.preload.api.PrimeSubset;
@@ -91,6 +92,10 @@ public final class PTKFactory
 	@Setter
 	private static Cache<Long,PrimeSubset> cache;
 
+	@Getter
+	@Setter
+	private static MetricProviderIntfc metricProvider;
+
 	/**
 	 * track collections of primes representing prefix prime sums - maintain single copy per unique set.
 	 */
@@ -104,6 +109,13 @@ public final class PTKFactory
 		final ImmutableCollection<String> colTreeAttributes = Lists.immutable.of("COLLECTION_TRACKER");
 		collTracker = collTreeProvider
 						.provider(colTreeAttributes)
+						.map(p -> p.create(null))
+						.orElse(null);
+
+		final SvcLoader<MetricProviderIntfc, Class<MetricProviderIntfc>> metricProviderSvc = new SvcLoader< >(MetricProviderIntfc.class);
+		final ImmutableCollection<String> metricProvAttributes = Lists.immutable.of("METRIC_PROVIDER");
+		metricProvider = metricProviderSvc
+						.provider(metricProvAttributes)
 						.map(p -> p.create(null))
 						.orElse(null);
 	}
@@ -154,7 +166,7 @@ public final class PTKFactory
 
 						final PreloaderIntfc primePreloader = preloadProvider
 								.provider(attributes)
-								.map(p -> p.create(cache, inputFolderPath, null))
+								.map(p -> p.create(cache, inputFolderPath, null).orElse(null))
 								.orElse(null);
 
 						return primeSource(	maxCount,
@@ -209,7 +221,8 @@ public final class PTKFactory
 								, confidenceLevel
 								,primeRefRawCtor,
 								collTree,
-								preloader
+								preloader,
+								metricProvider
 								);
 	}
 }

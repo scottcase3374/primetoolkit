@@ -53,7 +53,7 @@ import lombok.NonNull;
 /**
  * Produce "triples" for each prime.
  */
-public class BaseReduceTriple extends PrimeBaseGenerator
+class BaseReduceTriple extends PrimeBaseGenerator
 {
 	/**
 	 * Constructor
@@ -65,6 +65,9 @@ public class BaseReduceTriple extends PrimeBaseGenerator
 		super(baseType);
 	}
 
+	/**
+	 * Generate base for specified prime
+	 */
 	@Override
 	public void genBasesForPrimeRef(final PrimeRefIntfc curPrime)
 	{

@@ -8,12 +8,20 @@ import com.starcases.prime.base.api.BaseProviderIntfc;
 import com.starcases.prime.base.api.BaseTypes;
 import com.starcases.prime.base.api.PrimeBaseGeneratorIntfc;
 
+/**
+ *
+ * @author scott
+ *
+ */
 public class PrefixProvider implements BaseProviderIntfc
 {
+	/**
+	 * Default provider attributes
+	 */
 	private static final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("PREFIX", "DEFAULT");
 
 	/**
-	 *
+	 * create target service
 	 */
 	@Override
 	public PrimeBaseGeneratorIntfc create(final ImmutableMap<String,Object> settings)
@@ -21,6 +29,9 @@ public class PrefixProvider implements BaseProviderIntfc
 		return new BasePrefixes(BaseTypes.PREFIX);
 	}
 
+	/**
+	 * get provider attributes
+	 */
 	@Override
 	public ImmutableList<String> getProviderAttributes()
 	{

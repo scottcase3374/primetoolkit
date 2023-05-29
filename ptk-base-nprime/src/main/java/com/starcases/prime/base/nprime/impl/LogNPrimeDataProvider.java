@@ -10,9 +10,23 @@ import com.starcases.prime.core.api.PrimeSourceIntfc;
 
 import lombok.NonNull;
 
+/**
+ *
+ * @author scott
+ *
+ */
 public class LogNPrimeDataProvider implements LogPrimeDataProviderIntfc
 {
+	/**
+	 * Attributes for default service provider.
+	 */
 	private static final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("NPRIME", "DEFAULT");
+
+	/**
+	 * Constructor - nothing to do
+	 */
+	public LogNPrimeDataProvider()
+	{}
 
 	@Override
 	public ImmutableList<String> getProviderAttributes()

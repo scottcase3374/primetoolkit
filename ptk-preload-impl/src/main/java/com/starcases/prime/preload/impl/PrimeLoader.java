@@ -15,8 +15,6 @@ import java.util.zip.ZipFile;
 import javax.cache.Cache;
 
 import com.starcases.prime.core.impl.PTKLogger;
-// FIXME fix module cycle related to PTKLogger / core-impl module
-//import com.starcases.prime.core.impl.PTKLogger;
 import com.starcases.prime.preload.api.PreloaderIntfc;
 import com.starcases.prime.preload.api.PrimeSubset;
 
@@ -49,6 +47,9 @@ public final class PrimeLoader implements PreloaderIntfc
 	@Getter(AccessLevel.PRIVATE)
 	private static final int SUBSET_SIZE = 1 << SUBSET_BITS;
 
+	/**
+	 * represents max-assigned idx
+	 */
 	@Getter
 	private long maxIdx = -1;
 
@@ -94,6 +95,13 @@ public final class PrimeLoader implements PreloaderIntfc
 		subsetOfIdxToPrime.alloc(SUBSET_SIZE);
 	}
 
+	/**
+	 * Centralized the mapping from requested idx to subset/offset values.
+	 *
+	 * @param idx
+	 * @param retSubset
+	 * @param retOffset
+	 */
 	private void convertIdxToSubsetAndOffset(final long idx, final long [] retSubset, final int [] retOffset)
 	{
 		final long subsetId = idx / SUBSET_SIZE;
@@ -112,7 +120,6 @@ public final class PrimeLoader implements PreloaderIntfc
 
 		if (subset[0] != subsetIdx)
 		{
-			//LOG.info(String.format("put before assign: orig-idx[%d] completed-subsetidx[%d] val[%d]", idx, subsetIdx, val));
 			idxToPrimeCache.put(subsetIdx, subsetOfIdxToPrime);
 
 			subsetOfIdxToPrime = new PrimeSubset();
@@ -120,7 +127,6 @@ public final class PrimeLoader implements PreloaderIntfc
 
 			subsetIdx = subset[0];
 		}
-		//LOG.info(String.format("assign orig-idx[%d] cur-subsetId[%d] offset[%d] val[%d]", idx, subsetId, offset, val));
 		subsetOfIdxToPrime.set(offset[0], val);
 		maxIdx = idx;
 	}
@@ -139,7 +145,6 @@ public final class PrimeLoader implements PreloaderIntfc
 		convertIdxToSubsetAndOffset(idx, retSubset, retOffset);
 
 		final var subset = idxToPrimeCache.get(retSubset[0]);
-		//LOG.info(String.format("Retrieve idx[%d] subsetId[%d] subset[%s]", idx, retSubset[0], subset.toString()));
 		return subset != null ? OptionalLong.of(subset.get(retOffset[0])) : OptionalLong.empty();
 	}
 
@@ -153,10 +158,10 @@ public final class PrimeLoader implements PreloaderIntfc
 	@Override
 	public boolean load()
 	{
-
 		final int [] index = {0};
 
-		// Hard-code 1 into the set of values - it isn't part of the standard dataset (it is not considered prime per modern definitions).
+		// Hard-code 1 into the set of values - it isn't part of the standard dataset
+		// (it is not considered prime per modern definitions).
 		assign(index[0]++, 1L);
 
 		Arrays.stream(sourceFolders).forEach(
@@ -193,7 +198,8 @@ public final class PrimeLoader implements PreloaderIntfc
 																			final StringTokenizer tokenizer = new StringTokenizer(line);
 																			while(tokenizer.hasMoreTokens())
 																			{
-																				assign(index[0]++, Long.parseLong(tokenizer.nextToken()));
+																				final var token = tokenizer.nextToken();
+																				assign(index[0]++, Long.parseLong(token));
 																			}
 							 											});
 					 											}
@@ -203,6 +209,7 @@ public final class PrimeLoader implements PreloaderIntfc
 					 											}
 															});
 	 											}
+	 											return;
 	 										}
 	 										else
 	 										{

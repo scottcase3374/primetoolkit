@@ -7,22 +7,15 @@ import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.map.ImmutableMap;
 
-import com.starcases.prime.metrics.api.MetricIntfc;
-import com.starcases.prime.metrics.api.MetricsProviderIntfc;
+import com.starcases.prime.metrics.api.PredefinedMetricsProviderIntfc;
 
 import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics;
 
-public class JvmGCMetricProvider implements MetricsProviderIntfc, MetricIntfc
+public class JvmGCPredefinedMetricProvider implements PredefinedMetricsProviderIntfc
 {
-	private static final Logger LOG = Logger.getLogger(JvmGCMetricProvider.class.getName());
+	private static final Logger LOG = Logger.getLogger(JvmGCPredefinedMetricProvider.class.getName());
 
 	private static final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("JVMGC", "METRICS");
-
-	@Override
-	public MetricIntfc create(final ImmutableMap<String, Object> attributes)
-	{
-		return this;
-	}
 
 	@Override
 	public String getProviderName()
@@ -31,13 +24,10 @@ public class JvmGCMetricProvider implements MetricsProviderIntfc, MetricIntfc
 	}
 
 	@Override
-	public void enable(final boolean enabled)
+	public void create(ImmutableMap<String, Object> attributes)
 	{
-		if (enabled)
-		{
-			LOG.fine("Enabling JVM GC");
-			MetricMonitor.bind(r -> new JvmGcMetrics().bindTo(r));
-		}
+		LOG.fine("Enabling JVM GC");
+		MetricProvider.bind(r -> new JvmGcMetrics().bindTo(r));
 	}
 
 	@Override

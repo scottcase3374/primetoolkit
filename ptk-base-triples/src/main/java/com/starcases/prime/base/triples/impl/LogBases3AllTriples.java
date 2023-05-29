@@ -19,7 +19,7 @@ import picocli.CommandLine.Command;
  * LogBaseNPrime after a refactor.
  *
  */
-public class LogBases3AllTriples  extends AbstractPrimeBaseLog
+class LogBases3AllTriples  extends AbstractPrimeBaseLog
 {
 	/**
 	 * default logger

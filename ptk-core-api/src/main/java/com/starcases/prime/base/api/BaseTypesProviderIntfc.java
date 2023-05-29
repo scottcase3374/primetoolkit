@@ -13,6 +13,6 @@ import com.starcases.prime.service.api.SvcProviderBaseIntfc;
  */
 public interface BaseTypesProviderIntfc extends SvcProviderBaseIntfc
 {
-	static ImmutableMap<String,Enum> baseTypes = Maps.immutable.empty();
+	ImmutableMap<String,Enum<?>> baseTypes = Maps.immutable.empty();
 	ImmutableList<BaseTypesIntfc> create();
 }

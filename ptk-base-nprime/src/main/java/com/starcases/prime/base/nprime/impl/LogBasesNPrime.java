@@ -17,7 +17,7 @@ import picocli.CommandLine.Command;
 /**
  * Provides logging of NPrime style base information.
  */
-public class LogBasesNPrime extends AbstractPrimeBaseLog
+class LogBasesNPrime extends AbstractPrimeBaseLog
 {
 	/**
 	 * default logger

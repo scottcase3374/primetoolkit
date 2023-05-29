@@ -16,7 +16,7 @@ import lombok.NonNull;
  * internal structures - in this case for the
  * tree/graph style representation.
  */
-public class LogPrimeTree extends AbstractPrimeBaseLog
+class LogPrimeTree extends AbstractPrimeBaseLog
 {
 	/**
 	 * Default logger instance

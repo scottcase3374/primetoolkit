@@ -7,22 +7,15 @@ import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.map.ImmutableMap;
 
-import com.starcases.prime.metrics.api.MetricIntfc;
-import com.starcases.prime.metrics.api.MetricsProviderIntfc;
+import com.starcases.prime.metrics.api.PredefinedMetricsProviderIntfc;
 
 import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
 
-public class JvmMemoryMetricProvider implements MetricsProviderIntfc, MetricIntfc
+public class JvmMemoryPredefinedMetricProvider implements PredefinedMetricsProviderIntfc
 {
-	private static final Logger LOG = Logger.getLogger(JvmMemoryMetricProvider.class.getName());
+	private static final Logger LOG = Logger.getLogger(JvmMemoryPredefinedMetricProvider.class.getName());
 
 	private static final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("JVMMEMORY", "METRICS");
-
-	@Override
-	public MetricIntfc create(final ImmutableMap<String, Object> attributes)
-	{
-		return this;
-	}
 
 	@Override
 	public String getProviderName()
@@ -31,13 +24,10 @@ public class JvmMemoryMetricProvider implements MetricsProviderIntfc, MetricIntf
 	}
 
 	@Override
-	public void enable(final boolean enabled)
+	public void create(ImmutableMap<String, Object> attributes)
 	{
-		if (enabled)
-		{
-			LOG.fine("Enabling JVM Memory");
-			MetricMonitor.bind(r -> new JvmMemoryMetrics().bindTo(r));
-		}
+		LOG.fine("Enabling JVM Memory");
+		MetricProvider.bind(r -> new JvmMemoryMetrics().bindTo(r));
 	}
 
 	@Override

@@ -20,11 +20,10 @@ open module com.starcases.prime.cli
 	requires org.eclipse.collections.impl;
 	requires org.jgrapht.core;
 	requires java.transaction.xa;
-	//requires	infinispan.core;
-	//requires infinispan.commons;
+
 	uses com.starcases.prime.sql.api.SqlProviderIntfc;
 	uses com.starcases.prime.graph.export.api.ExportsProviderIntfc;
 	uses com.starcases.prime.preload.api.PreloaderProviderIntfc;
-	//uses com.starcases.prime.base.api.BaseTypesProviderIntfc;
 	uses com.starcases.prime.base.api.BaseTypesIntfc;
+	uses com.starcases.prime.metrics.api.MetricProviderIntfc;
 }
