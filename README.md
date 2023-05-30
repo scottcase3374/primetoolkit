@@ -361,7 +361,7 @@ Issues
 	- Should not generate default base as part of prime selection/load; construct default base just like other bases.; DONE
 	- Increase test coverage.
 	- Improve metrics handling.
-	- Improved cache support.
+	- Fix / reimplement cache support.
 	- More generic / useful methods for identifying patterns in the bases/data.
 	- More remote command support; ON-GOING
 	- Improved reporting / visualization.

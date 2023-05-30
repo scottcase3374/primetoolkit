@@ -33,9 +33,6 @@ public class SvcLoader< T extends SvcProviderBaseIntfc, C extends Class<T>>
     	final Module module = this.getClass().getModule();
     	module.addReads(classT.getModule());
     	module.addUses(classT);
-
-    	final Module classTModule = classT.getModule();
-
     	this.loader = ServiceLoader.load(classT);
     }
 
