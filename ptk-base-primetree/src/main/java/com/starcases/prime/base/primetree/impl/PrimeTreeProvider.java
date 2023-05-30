@@ -8,7 +8,7 @@ import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
 
 import com.starcases.prime.base.api.BaseProviderIntfc;
 import com.starcases.prime.base.api.BaseTypes;
-import com.starcases.prime.base.api.PrimeBaseGeneratorIntfc;
+import com.starcases.prime.base.api.BaseGenFactoryIntfc;
 
 /**
  *
@@ -28,7 +28,7 @@ public class PrimeTreeProvider implements BaseProviderIntfc
 	 * collTrack setting is required.
 	 */
 	@Override
-	public PrimeBaseGeneratorIntfc create(final ImmutableMap<String,Object> settings)
+	public BaseGenFactoryIntfc create(final ImmutableMap<String,Object> settings)
 	{
 		final CollectionTrackerIntfc collTracker = (CollectionTrackerIntfc)settings.get("collTracker");
 

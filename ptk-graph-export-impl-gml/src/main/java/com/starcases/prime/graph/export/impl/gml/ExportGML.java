@@ -32,7 +32,7 @@ interface ElementIntfc
  * Top-level for GML output, coordinates other class types to
  * generate GML
  */
-public class ExportGML implements ExportIntfc
+class ExportGML implements ExportIntfc
 {
 	/**
 	 * default logging

@@ -22,7 +22,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 
-public class CollectionTrackerImpl implements CollectionTrackerIntfc
+class CollectionTrackerImpl implements CollectionTrackerIntfc
 {
 	/**
 	 * prefix map

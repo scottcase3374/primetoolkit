@@ -5,7 +5,7 @@ import com.starcases.prime.metrics.api.MetricIntfc;
 import io.micrometer.core.instrument.LongTaskTimer;
 import lombok.NonNull;
 
-public class MetricLongTimerWrapper implements MetricIntfc
+class MetricLongTimerWrapper implements MetricIntfc
 {
 	private final LongTaskTimer.Sample longTimerSample;
 

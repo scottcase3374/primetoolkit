@@ -20,7 +20,7 @@ import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.graph.visualize.api.VisualizationProviderIntfc;
 
 import lombok.NonNull;
-public class CircularLayoutPrimesGraph  extends JFrame implements VisualizationProviderIntfc
+class CircularLayoutPrimesGraph  extends JFrame implements VisualizationProviderIntfc
 {
 	private static final long serialVersionUID = 1L;
 

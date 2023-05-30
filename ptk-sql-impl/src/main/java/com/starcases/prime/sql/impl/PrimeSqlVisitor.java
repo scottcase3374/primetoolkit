@@ -51,7 +51,7 @@ import lombok.Setter;
  * @author scott
  *
  */
-public class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
+class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 {
 	private static final Object[] EMPTY_ARRAY = {};
 

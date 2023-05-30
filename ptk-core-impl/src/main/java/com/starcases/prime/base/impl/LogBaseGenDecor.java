@@ -1,18 +1,17 @@
 package com.starcases.prime.base.impl;
 
 import com.starcases.prime.base.api.BaseTypesIntfc;
-import com.starcases.prime.base.api.PrimeBaseGeneratorIntfc;
+import com.starcases.prime.base.api.BaseGenIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
-import com.starcases.prime.core.api.PrimeSourceIntfc;
 import com.starcases.prime.core.impl.PTKLogger;
 
 import lombok.NonNull;
 
-public class LogBaseGenDecorator implements PrimeBaseGeneratorIntfc
+public class LogBaseGenDecor implements BaseGenIntfc
 {
-	private final PrimeBaseGeneratorIntfc generator;
+	private final BaseGenIntfc generator;
 
-	public LogBaseGenDecorator(@NonNull final PrimeBaseGeneratorIntfc baseGenerator)
+	public LogBaseGenDecor(@NonNull final BaseGenIntfc baseGenerator)
 	{
 		this.generator = baseGenerator;
 	}
@@ -33,12 +32,4 @@ public class LogBaseGenDecorator implements PrimeBaseGeneratorIntfc
 	  {
 		  return generator.getBaseType();
 	  }
-
-
-	@Override
-	public PrimeBaseGeneratorIntfc assignPrimeSrc(PrimeSourceIntfc primeSrc)
-	{
-		return null;
-	}
-
 }

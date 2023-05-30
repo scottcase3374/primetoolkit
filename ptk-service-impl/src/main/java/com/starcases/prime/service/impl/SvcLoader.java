@@ -36,11 +36,12 @@ public class SvcLoader< T extends SvcProviderBaseIntfc, C extends Class<T>>
 
     	final Module classTModule = classT.getModule();
 
-    	SvcProviderBaseIntfc.LOG.info(String.format("svc-loader: %n\t can read mod: [%s] [%b] %n\t can use classT: [%s] [%b]",
-    			classTModule.getName(),
-    			module.canRead(classTModule),
-    			classT.getName(),
-    			module.canUse(classT)));
+		/*
+		 * SvcProviderBaseIntfc.LOG.info(String.
+		 * format("svc-loader: %n\t can read mod: [%s] [%b] %n\t can use classT: [%s] [%b]"
+		 * , classTModule.getName(), module.canRead(classTModule), classT.getName(),
+		 * module.canUse(classT)));
+		 */
 
     	this.loader = ServiceLoader.load(classT);
     }

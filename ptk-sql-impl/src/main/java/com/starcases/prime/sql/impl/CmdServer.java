@@ -21,7 +21,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
  * @author scott
  *
  */
-public class CmdServer implements CmdServerIntfc
+class CmdServer implements CmdServerIntfc
 {
 	/**
 	 * default logger

@@ -21,7 +21,7 @@ import javax.swing.JFrame;
  * Not doing much of anything right now with this.
  *
  */
-public class ParallelEdgeLayoutGraph extends JFrame //implements VisualizationProviderIntfc
+class ParallelEdgeLayoutGraph extends JFrame //implements VisualizationProviderIntfc
 {
 	private static final long serialVersionUID = 1L;
 

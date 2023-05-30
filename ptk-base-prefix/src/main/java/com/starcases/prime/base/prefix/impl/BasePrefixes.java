@@ -4,7 +4,7 @@ import org.eclipse.collections.api.factory.Lists;
 
 import com.starcases.prime.base.api.BaseTypes;
 import com.starcases.prime.base.api.BaseTypesIntfc;
-import com.starcases.prime.base.impl.PrimeBaseGenerator;
+import com.starcases.prime.base.impl.AbsPrimeBaseGen;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 
 import lombok.NonNull;
@@ -13,7 +13,7 @@ import lombok.NonNull;
  * Produces prefix list for each prime
  *
  */
-class BasePrefixes extends PrimeBaseGenerator
+class BasePrefixes extends AbsPrimeBaseGen
 {
 	/**
 	 * constructor for creation of Base prefixes.

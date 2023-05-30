@@ -32,10 +32,10 @@ import com.starcases.prime.base.api.BaseProviderIntfc;
 import com.starcases.prime.base.api.BaseTypes;
 import com.starcases.prime.base.api.BaseTypesIntfc;
 import com.starcases.prime.base.api.LogPrimeDataProviderIntfc;
-import com.starcases.prime.base.api.PrimeBaseGeneratorIntfc;
+import com.starcases.prime.base.api.BaseGenDecorProviderIntfc;
+import com.starcases.prime.base.api.BaseGenIntfc;
 import com.starcases.prime.base.impl.PrimeMultiBaseContainer;
-import com.starcases.prime.base.impl.BaseGenTimerMetricDecorator;
-import com.starcases.prime.base.impl.LogBaseGenDecorator;
+import com.starcases.prime.base.impl.LogBaseGenDecor;
 
 import com.starcases.prime.cache.api.CacheProviderIntfc;
 import com.starcases.prime.cli.MetricsOpts.MetricOpt;
@@ -470,7 +470,7 @@ public class DefaultInit implements Runnable
 			{
 				setupBaseLogConfig(baseType);
 
-				final var trackGenTime = false;
+				final var trackGenTime = true;
 				final var method = "DefaultInit::actionHandleAdditionalBases - base :" + baseType.name();
 				final ImmutableList<String> baseProviderAttributes = Lists.immutable.of(baseType.name(), "DEFAULT");
 				if (LOG.isLoggable(Level.INFO))
@@ -534,33 +534,41 @@ public class DefaultInit implements Runnable
 		}
 	}
 
-	private PrimeBaseGeneratorIntfc addBaseDecorators(@NonNull final PrimeBaseGeneratorIntfc base, final boolean trackGenTime, @NonNull final BaseTypesIntfc baseType)
+	private BaseGenIntfc addBaseDecorators(@NonNull final BaseGenIntfc base, final boolean trackGenTime, @NonNull final BaseTypesIntfc baseType)
 	{
 		if (LOG.isLoggable(Level.INFO))
 		{
-			LOG.info("DECORATE base supplier - " + baseType.name());
+			LOG.info(String.format("DECORATE base supplier - base[%s] track-gen-time[%b]", baseType.name(), trackGenTime));
 		}
 
-		var decoratedBase = base;
-
+		final BaseGenIntfc decoratedBase [] = {base};
 
 		if (trackGenTime)
 		{
+			final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("METRIC_PROVIDER", "BASE_GENERATOR", "DECORATOR");
+			final SvcLoader<BaseGenDecorProviderIntfc, Class<BaseGenDecorProviderIntfc>> metricDecorProvider =
+					new SvcLoader< >(BaseGenDecorProviderIntfc.class);
+
 			if (LOG.isLoggable(Level.INFO))
 			{
 				LOG.info(String.format("DECORATE base supplier [%s] with Timer", baseType.name()));
-				decoratedBase = new BaseGenTimerMetricDecorator(decoratedBase, PTKFactory.getMetricProvider());
 			}
+
+			// PTKFactory.getMetricProvider ()
+			metricDecorProvider.provider(ATTRIBUTES).ifPresent(p -> decoratedBase[0] = p.create(base));
 		}
 
 		if (outputOpts.getOutputOpers().contains(OutputOper.CREATE))
 		{
-			LOG.info(String.format("DECORATE base supplier [%s] with Logger", baseType.name()));
-			decoratedBase = new LogBaseGenDecorator(decoratedBase);
+			if (LOG.isLoggable(Level.INFO))
+			{
+				LOG.info(String.format("DECORATE base supplier [%s] with Logger", baseType.name()));
+			}
+			decoratedBase[0] = new LogBaseGenDecor(decoratedBase[0]);
 		}
 
 		// TODO Handle prefer parallel ; base.doPreferParallel(initOpts.isPreferParallel());
-		return decoratedBase;
+		return decoratedBase[0];
 	}
 	private void actionHandleOutputs()
 	{

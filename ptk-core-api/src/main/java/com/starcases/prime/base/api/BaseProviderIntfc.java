@@ -12,5 +12,5 @@ import com.starcases.prime.service.api.SvcProviderBaseIntfc;
  */
 public interface BaseProviderIntfc extends SvcProviderBaseIntfc
 {
-	PrimeBaseGeneratorIntfc create(final ImmutableMap<String,Object> settings);
+	BaseGenFactoryIntfc create(final ImmutableMap<String,Object> settings);
 }

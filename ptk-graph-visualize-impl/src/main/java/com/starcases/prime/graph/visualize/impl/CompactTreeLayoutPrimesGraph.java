@@ -27,7 +27,7 @@ import com.starcases.prime.graph.visualize.api.VisualizationProviderIntfc;
  *
  *
  */
-public class CompactTreeLayoutPrimesGraph extends JFrame implements VisualizationProviderIntfc
+class CompactTreeLayoutPrimesGraph extends JFrame implements VisualizationProviderIntfc
 {
 	private static final long serialVersionUID = 1L;
 

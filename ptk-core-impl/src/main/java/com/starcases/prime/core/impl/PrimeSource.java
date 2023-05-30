@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.starcases.prime.base.api.PrimeBaseGeneratorIntfc;
+import com.starcases.prime.base.api.BaseGenIntfc;
 import com.starcases.prime.common.api.OutputOper;
 import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
@@ -137,7 +137,7 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	// Internal data used/generated during prime/base creation
 	//
 
-	private MutableList<PrimeBaseGeneratorIntfc> baseGenerators = Lists.mutable.empty();
+	private MutableList<BaseGenIntfc> baseGenerators = Lists.mutable.empty();
 
 	/**
 	 * atomic long for next prime index.
@@ -583,7 +583,7 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	}
 
 	@Override
-	public void addBaseGenerator(final PrimeBaseGeneratorIntfc baseGenerator)
+	public void addBaseGenerator(final BaseGenIntfc baseGenerator)
 	{
 		baseGenerators.add(baseGenerator);
 	}

@@ -14,7 +14,7 @@ import io.netty.handler.codec.http.HttpServerExpectContinueHandler;
  * @author scott
  *
  */
-public class CmdChannelInit extends ChannelInitializer<SocketChannel>
+class CmdChannelInit extends ChannelInitializer<SocketChannel>
 {
 	private final PrimeSourceIntfc primeSrc;
 

@@ -5,7 +5,7 @@ import com.starcases.prime.core.api.ProgressIntfc;
 /**
  * Class that manages progress info for user.
  */
-public final class ProgressTracker implements ProgressIntfc
+final class ProgressTracker implements ProgressIntfc
 {
 	/**
 	 * Display/update progress info

@@ -1,7 +1,7 @@
 package com.starcases.prime.base.triples.impl;
 
 import com.starcases.prime.base.api.BaseTypesIntfc;
-import com.starcases.prime.base.impl.PrimeBaseGenerator;
+import com.starcases.prime.base.impl.AbsPrimeBaseGen;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 
 import lombok.NonNull;
@@ -53,7 +53,7 @@ import lombok.NonNull;
 /**
  * Produce "triples" for each prime.
  */
-class BaseReduceTriple extends PrimeBaseGenerator
+class BaseReduceTriple extends AbsPrimeBaseGen
 {
 	/**
 	 * Constructor

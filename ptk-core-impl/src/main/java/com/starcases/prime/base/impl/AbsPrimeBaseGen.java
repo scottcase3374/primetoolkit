@@ -1,7 +1,8 @@
 package com.starcases.prime.base.impl;
 
 import com.starcases.prime.base.api.BaseTypesIntfc;
-import com.starcases.prime.base.api.PrimeBaseGeneratorIntfc;
+import com.starcases.prime.base.api.BaseGenFactoryIntfc;
+import com.starcases.prime.base.api.BaseGenIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
 
 import lombok.AccessLevel;
@@ -13,7 +14,7 @@ import lombok.NonNull;
  * Abstract class for common Prime base functionality.
  *
  */
-public abstract class PrimeBaseGenerator implements PrimeBaseGeneratorIntfc
+public abstract class AbsPrimeBaseGen implements BaseGenFactoryIntfc
 {
 	@Getter
 	private final BaseTypesIntfc baseType;
@@ -39,7 +40,7 @@ public abstract class PrimeBaseGenerator implements PrimeBaseGeneratorIntfc
 	 * Constructor for secondary bases.
 	 * @param primeSrc
 	 */
-	protected PrimeBaseGenerator(@NonNull final BaseTypesIntfc baseType)
+	protected AbsPrimeBaseGen(@NonNull final BaseTypesIntfc baseType)
 	{
 		this.baseType = baseType;
 	}
@@ -49,14 +50,14 @@ public abstract class PrimeBaseGenerator implements PrimeBaseGeneratorIntfc
 	 * @param preferParallel
 	 * @return
 	 */
-	public PrimeBaseGeneratorIntfc doPreferParallel(final boolean preferParallel)
+	public BaseGenIntfc doPreferParallel(final boolean preferParallel)
 	{
 		this.preferParallel = preferParallel;
 		return this;
 	}
 
 	@Override
-	public PrimeBaseGeneratorIntfc assignPrimeSrc(final PrimeSourceIntfc primeSrc)
+	public BaseGenFactoryIntfc assignPrimeSrc(final PrimeSourceIntfc primeSrc)
 	{
 		this.primeSrc = primeSrc;
 		return this;

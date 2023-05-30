@@ -27,7 +27,7 @@ import lombok.Setter;
  * Typically loaded from files sourced from various internet
  * sites.
  */
-public final class PrimeLoader implements PreloaderIntfc
+class PrimeLoader implements PreloaderIntfc
 {
 	Logger LOG = Logger.getLogger(PrimeLoader.class.getName());
 

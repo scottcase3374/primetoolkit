@@ -35,7 +35,7 @@ import lombok.NonNull;
  * @param <K>
  * @param <V>
  */
-public class PrimeCache<K,V> implements Cache<K,V>
+class PrimeCache<K,V> implements Cache<K,V>
 {
 	/**
 	 * default logger

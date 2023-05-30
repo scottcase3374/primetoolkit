@@ -5,7 +5,7 @@ import org.eclipse.collections.impl.list.mutable.MutableListFactoryImpl;
 
 import com.starcases.prime.base.api.BaseTypes;
 import com.starcases.prime.base.api.BaseTypesIntfc;
-import com.starcases.prime.base.impl.PrimeBaseGenerator;
+import com.starcases.prime.base.impl.AbsPrimeBaseGen;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
 
@@ -22,7 +22,7 @@ import lombok.NonNull;
  * improvement and also as another base representation by itself.
  *
  */
-class PrimeTree extends PrimeBaseGenerator
+class PrimeTree extends AbsPrimeBaseGen
 {
 	/**
 	 * container for tracking the unique set of prefixes/trees

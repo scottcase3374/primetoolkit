@@ -1,7 +1,6 @@
 package com.starcases.prime.base.api;
 
 import com.starcases.prime.core.api.PrimeRefIntfc;
-import com.starcases.prime.core.api.PrimeSourceIntfc;
 
 /**
  *
@@ -9,10 +8,8 @@ import com.starcases.prime.core.api.PrimeSourceIntfc;
  * any alternative base types.
  *
  */
-public interface PrimeBaseGeneratorIntfc
+public interface BaseGenIntfc
 {
 	void genBasesForPrimeRef(final PrimeRefIntfc curPrime);
 	BaseTypesIntfc getBaseType();
-
-	PrimeBaseGeneratorIntfc assignPrimeSrc(final PrimeSourceIntfc primeSrc);
 }

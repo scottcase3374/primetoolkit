@@ -13,10 +13,9 @@ import org.eclipse.collections.impl.list.mutable.MutableListFactoryImpl;
 
 import com.starcases.prime.base.api.BaseTypes;
 import com.starcases.prime.base.api.BaseTypesIntfc;
-import com.starcases.prime.base.impl.PrimeBaseGenerator;
+import com.starcases.prime.base.impl.AbsPrimeBaseGen;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -41,12 +40,12 @@ import lombok.Setter;
  * so result would be: 2(x3) 1(x1),  1(x5) 2(x6),      1(x5) 2(x7)
  *          which reduces to:  1(x11), 2(x16)   =>  1x11 + 2x16 = 43
  */
-class BaseReduceNPrime extends PrimeBaseGenerator
+class BaseReduceNPrime extends AbsPrimeBaseGen
 {
 	/**
 	 * Reduce all values greater than maxReduce - track multiples
 	 */
-	@Getter(AccessLevel.PUBLIC)
+	@Getter
 	@Setter
 	@Min(2)
 	@Max(3)

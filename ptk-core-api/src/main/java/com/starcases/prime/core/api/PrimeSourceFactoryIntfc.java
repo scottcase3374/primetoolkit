@@ -1,9 +1,8 @@
 package com.starcases.prime.core.api;
 
-import com.starcases.prime.base.api.PrimeBaseGeneratorIntfc;
+import com.starcases.prime.base.api.BaseGenIntfc;
 
-/**
- * Private interface used by factory. Any prime source implementation
+/** interface used by factory. Any prime source implementation
  * must implement this interface.
  *
  * The result of completing all the factory processing is an
@@ -22,7 +21,7 @@ import com.starcases.prime.base.api.PrimeBaseGeneratorIntfc;
  */
 public interface PrimeSourceFactoryIntfc extends PrimeSourceIntfc
 {
-	void addBaseGenerator(final PrimeBaseGeneratorIntfc baseGenerator);
+	void addBaseGenerator(final BaseGenIntfc baseGenerator);
 
 	/**
 	 * output progress of initial base creation.

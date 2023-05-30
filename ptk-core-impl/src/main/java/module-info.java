@@ -17,6 +17,7 @@ module com.starcases.prime.core.impl
 
 	provides com.starcases.prime.base.api.BaseTypesProviderIntfc with com.starcases.prime.base.impl.BuiltinBaseTypesProvider;
 	provides com.starcases.prime.datamgmt.api.CollectionTrackerProviderIntfc with com.starcases.prime.datamgmt.impl.CollectionTrackerProvider;
+	provides com.starcases.prime.base.api.BaseGenDecorProviderIntfc with com.starcases.prime.base.impl.BaseGenTimerMetricDecorProvider;
 
 	uses com.starcases.prime.metrics.api.MetricProviderIntfc;
 }

@@ -6,7 +6,7 @@ import org.eclipse.collections.api.map.ImmutableMap;
 
 import com.starcases.prime.base.api.BaseProviderIntfc;
 import com.starcases.prime.base.api.BaseTypes;
-import com.starcases.prime.base.api.PrimeBaseGeneratorIntfc;
+import com.starcases.prime.base.api.BaseGenFactoryIntfc;
 
 /**
  *
@@ -24,7 +24,7 @@ public class PrefixProvider implements BaseProviderIntfc
 	 * create target service
 	 */
 	@Override
-	public PrimeBaseGeneratorIntfc create(final ImmutableMap<String,Object> settings)
+	public BaseGenFactoryIntfc create(final ImmutableMap<String,Object> settings)
 	{
 		return new BasePrefixes(BaseTypes.PREFIX);
 	}

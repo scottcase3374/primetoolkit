@@ -5,7 +5,7 @@ import com.starcases.prime.metrics.api.MetricIntfc;
 import io.micrometer.core.instrument.Timer;
 import lombok.NonNull;
 
-public class MetricTimerWrapper implements MetricIntfc
+class MetricTimerWrapper implements MetricIntfc
 {
 	private final Timer timer;
 
