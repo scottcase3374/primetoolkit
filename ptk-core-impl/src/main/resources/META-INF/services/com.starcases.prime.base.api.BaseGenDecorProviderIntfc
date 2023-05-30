@@ -1,1 +1,2 @@
 com.starcases.prime.base.impl.BaseGenTimerMetricDecorProvider
+com.starcases.prime.base.impl.BaseGenLogGenDecorProvider

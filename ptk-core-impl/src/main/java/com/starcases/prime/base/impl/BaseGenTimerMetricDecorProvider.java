@@ -13,7 +13,7 @@ import lombok.NonNull;
 
 public class BaseGenTimerMetricDecorProvider implements BaseGenDecorProviderIntfc
 {
-	private static final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("METRIC_PROVIDER", "BASE_GENERATOR", "DECORATOR");
+	private static final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("METRIC_BASE_GENERATOR_DECORATOR");
 
 	private static final ImmutableList<String> METRIC_ATTRIBUTES = Lists.immutable.of("METRIC_PROVIDER");
 

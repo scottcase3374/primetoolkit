@@ -16,11 +16,9 @@ public interface SvcProviderBaseIntfc
 
 	default int countAttributesMatch(final ImmutableCollection<String> attributes)
 	{
-		int ret = 0;
-		if (attributes.containsAllIterable(getProviderAttributes()))
-		{
-			ret = getProviderAttributes().size();
-		}
+
+		final var pa = getProviderAttributes();
+		final int ret = attributes.count(a -> pa.contains(a));
 
 		logMatchData(attributes, ret);
 		return ret;

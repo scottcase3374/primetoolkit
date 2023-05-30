@@ -36,13 +36,6 @@ public class SvcLoader< T extends SvcProviderBaseIntfc, C extends Class<T>>
 
     	final Module classTModule = classT.getModule();
 
-		/*
-		 * SvcProviderBaseIntfc.LOG.info(String.
-		 * format("svc-loader: %n\t can read mod: [%s] [%b] %n\t can use classT: [%s] [%b]"
-		 * , classTModule.getName(), module.canRead(classTModule), classT.getName(),
-		 * module.canUse(classT)));
-		 */
-
     	this.loader = ServiceLoader.load(classT);
     }
 
@@ -68,11 +61,12 @@ public class SvcLoader< T extends SvcProviderBaseIntfc, C extends Class<T>>
 
     	final Module classTModule = classT.getModule();
 
-    	SvcProviderBaseIntfc.LOG.info(String.format("svc-loader: %n\t can read mod: [%s] [%b] %n\t can use classT: [%s] [%b]",
+    	SvcProviderBaseIntfc.LOG.info(String.format("svc-loader: %n\t can read mod: [%s] [%b] %n\t can use classT: [%s] [%b] %n\tProvider: [%s]",
     			classTModule.getName(),
     			module.canRead(classTModule),
     			classT.getName(),
-    			module.canUse(classT)));
+    			module.canUse(classT),
+    			classT.getName()));
 
     	this.loader = ServiceLoader.load(classT);
     }
@@ -101,8 +95,8 @@ public class SvcLoader< T extends SvcProviderBaseIntfc, C extends Class<T>>
     	return Lists.immutable.fromStream(
     		loader
 			  .stream()
-			  //.peek(p -> System.out.println("Svcloader - requested attrs: " + attributes.makeString()))
-			  .filter(x -> x.get().countAttributesMatch(attributes) > 0 )
+			  .peek(p -> SvcProviderBaseIntfc.LOG.info(String.format("Svcloader - requested attrs: [%s] provider-attributes: [%s] provider: [%s]", attributes.makeString(), p.get().getProviderAttributes().makeString(), p.get().getClass().getName())))
+			  .filter(x -> { var p = x.get(); return p.countAttributesMatch(attributes) >= Math.min(attributes.size(), p.getProviderAttributes().size()); })
 			  .map(p -> p.get())
 			);
     }

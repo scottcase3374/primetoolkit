@@ -20,7 +20,7 @@ public class LogTriplesDataProvider implements LogPrimeDataProviderIntfc
 	/**
 	 * default provider attributes
 	 */
-	private static final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("TRIPLES", "DEFAULT");
+	private static final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("THREETRIPLE", "DEFAULT");
 
 	@Override
 	public ImmutableList<String> getProviderAttributes()
