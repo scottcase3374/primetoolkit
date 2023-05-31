@@ -487,7 +487,13 @@ public class DefaultInit implements Runnable
 							.provider(baseProviderAttributes)
 							.ifPresentOrElse
 								(
-									p -> actions.add(s -> primeSrc.addBaseGenerator(addBaseDecorators(p.create(null).assignPrimeSrc(primeSrc), trackGenTime, baseType)))
+									p -> actions.add(s -> primeSrc
+															.addBaseGenerator(
+																	addBaseDecorators(
+																			p.create(null)
+																			 .assignPrimeSrc(primeSrc)
+																			 .doPreferParallel(initOpts.isPreferParallel())
+																			,trackGenTime, baseType)))
 									, () -> PTKLogger.dbgOutput(baseType, "ERROR: No provider for %s", baseType.toString())
 								);
 						break;
@@ -512,7 +518,12 @@ public class DefaultInit implements Runnable
 							.provider(baseProviderAttributes)
 							.ifPresentOrElse
 								(
-									p -> actions.add(s -> primeSrc.addBaseGenerator(addBaseDecorators(p.create(settings).assignPrimeSrc(primeSrc), trackGenTime, baseType)))
+									p -> actions.add(s -> primeSrc
+																.addBaseGenerator(
+																		addBaseDecorators(
+																				p.create(settings)
+																					.assignPrimeSrc(primeSrc)
+																				, trackGenTime, baseType)))
 									, () -> PTKLogger.dbgOutput(baseType, "ERROR: No provider for %s", baseType.toString())
 								);
 						}
@@ -572,10 +583,8 @@ public class DefaultInit implements Runnable
 			{
 				LOG.info(String.format("DECORATE base supplier [%s] with Logger", baseType.name()));
 			}
-			logDecorProvider.providers(ATTRIBUTES).getFirstOptional().ifPresentOrElse(p -> decoratedBase[0] = p.create(decoratedBase[0]), () -> PTKLogger.dbgOutput(baseType, "ERROR: No Log-decor-provider"));
+			logDecorProvider.provider(ATTRIBUTES).ifPresentOrElse(p -> decoratedBase[0] = p.create(decoratedBase[0]), () -> PTKLogger.dbgOutput(baseType, "ERROR: No Log-decor-provider"));
 		}
-
-		// TODO Handle prefer parallel ; base.doPreferParallel(initOpts.isPreferParallel());
 		return decoratedBase[0];
 	}
 	private void actionHandleOutputs()

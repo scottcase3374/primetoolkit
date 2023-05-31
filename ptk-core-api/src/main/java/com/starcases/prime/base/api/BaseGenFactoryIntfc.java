@@ -11,4 +11,5 @@ import com.starcases.prime.core.api.PrimeSourceIntfc;
 public interface BaseGenFactoryIntfc extends BaseGenIntfc
 {
 	BaseGenFactoryIntfc assignPrimeSrc(final PrimeSourceIntfc primeSrc);
+	BaseGenFactoryIntfc doPreferParallel(final boolean preferParallel);
 }

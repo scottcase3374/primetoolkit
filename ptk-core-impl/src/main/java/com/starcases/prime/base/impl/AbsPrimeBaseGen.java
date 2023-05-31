@@ -50,7 +50,8 @@ public abstract class AbsPrimeBaseGen implements BaseGenFactoryIntfc
 	 * @param preferParallel
 	 * @return
 	 */
-	public BaseGenIntfc doPreferParallel(final boolean preferParallel)
+	@Override
+	public BaseGenFactoryIntfc doPreferParallel(final boolean preferParallel)
 	{
 		this.preferParallel = preferParallel;
 		return this;
