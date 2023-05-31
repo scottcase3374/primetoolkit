@@ -30,9 +30,9 @@ public enum OutputOper implements OutputableIntfc
 	PROGRESS,
 
 	/**
-	 * Lob base creation process
+	 * Log prime creation process
 	 */
-	CREATE,
+	CREATE_PRIMES,
 
 	/**
 	 * Dumps the list of tree prefixes and the number of counts for each.

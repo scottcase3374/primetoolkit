@@ -51,8 +51,8 @@ class LogBases3AllTriples  extends AbstractPrimeBaseLog
 			.getPrimeRefStream(5L, false)
 			.forEach( primeRef ->
 						{
-							final var size = primeRef.getPrimeBaseData().getPrimeBases(BaseTypes.THREETRIPLE).size();
-							PTKLogger.output(BaseTypes.THREETRIPLE,
+							final var size = primeRef.getPrimeBaseData().getPrimeBases(BaseTypes.TRIPLE).size();
+							PTKLogger.output(BaseTypes.TRIPLE,
 												String.format("%nPrime [%d] idx[%d] #-bases[%d]",
 													primeRef.getPrime(),
 													idx[0]++,
@@ -63,7 +63,7 @@ class LogBases3AllTriples  extends AbstractPrimeBaseLog
 								final StringBuilder outputStr = new StringBuilder(150);
 								primeRef
 									.getPrimeBaseData()
-									.getPrimeBases(BaseTypes.THREETRIPLE)
+									.getPrimeBases(BaseTypes.TRIPLE)
 									.forEach( baseColl ->
 												{
 													cnt[0]++;
@@ -75,7 +75,7 @@ class LogBases3AllTriples  extends AbstractPrimeBaseLog
 
 													if (cnt[0] % maxBasesInRow == 0 || cnt[0] >= size)
 													{
-														PTKLogger.output(BaseTypes.THREETRIPLE, "\t%s", outputStr);
+														PTKLogger.output(BaseTypes.TRIPLE, "\t%s", outputStr);
 														outputStr.setLength(0);
 													}
 												}

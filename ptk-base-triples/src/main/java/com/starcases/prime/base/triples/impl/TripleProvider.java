@@ -18,7 +18,7 @@ public class TripleProvider implements BaseProviderIntfc
 	/**
 	 * default provider attributes
 	 */
-	private static final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("THREETRIPLE", "DEFAULT");
+	private static final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("TRIPLE", "DEFAULT");
 
 	/**
 	 * create target service instance
@@ -26,7 +26,7 @@ public class TripleProvider implements BaseProviderIntfc
 	@Override
 	public BaseGenFactoryIntfc create(final ImmutableMap<String,Object> settings)
 	{
-		return new BaseReduceTriple(BaseTypes.THREETRIPLE);
+		return new BaseReduceTriple(BaseTypes.TRIPLE);
 	}
 
 	/**

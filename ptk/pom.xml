@@ -9,6 +9,14 @@
 
   <dependencies>
 
+		<!-- Provided deps -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- runtime deps -->
 	  <dependency>
 		  <groupId>com.starcases.prime</groupId>
 		  <artifactId>ptk-base-nprime-impl</artifactId>
@@ -63,14 +71,10 @@
 		  <version>0.0.1-SNAPSHOT</version>
 	  </dependency>
 
-		<!-- Provided deps -->
 		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<scope>provided</scope>
+			<groupId>info.picocli</groupId>
+			<artifactId>picocli-codegen</artifactId>
 		</dependency>
-
-		<!-- runtime deps -->
 
   </dependencies>
 </project>

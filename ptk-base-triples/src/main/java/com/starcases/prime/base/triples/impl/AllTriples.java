@@ -158,6 +158,6 @@ public class AllTriples
 	private void addPrimeBases(final @NonNull PrimeRefIntfc prime, final @NonNull PrimeRefIntfc [] triple)
 	{
 		final ImmutableLongCollection primeBase = Sets.immutable.of(triple).collectLong(PrimeRefIntfc::getPrime);
-		prime.getPrimeBaseData().addPrimeBases(primeBase, BaseTypes.THREETRIPLE);
+		prime.getPrimeBaseData().addPrimeBases(primeBase, BaseTypes.TRIPLE);
 	}
 }

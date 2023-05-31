@@ -2,6 +2,7 @@ package com.starcases.prime.core.impl;
 
 import java.math.BigInteger;
 import java.util.BitSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicLong;
@@ -44,6 +45,7 @@ import org.eclipse.collections.api.map.primitive.MutableLongObjectMap;
 import org.eclipse.collections.impl.list.mutable.MutableListFactoryImpl;
 import org.eclipse.collections.impl.map.mutable.primitive.LongLongHashMap;
 import org.eclipse.collections.impl.map.mutable.primitive.LongObjectHashMap;
+import org.eclipse.collections.impl.parallel.ParallelIterate;
 import org.eclipse.collections.impl.set.immutable.primitive.ImmutableLongSetFactoryImpl;
 
 /**
@@ -137,7 +139,7 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	// Internal data used/generated during prime/base creation
 	//
 
-	private MutableList<BaseGenIntfc> baseGenerators = Lists.mutable.empty();
+	private List<BaseGenIntfc> baseGenerators = Lists.mutable.empty();
 
 	/**
 	 * atomic long for next prime index.
@@ -254,7 +256,7 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 		long nextPrimeTmpIdx;
 		do
 		{
-			try(MetricIntfc metric = metricProvider.longTimer(OutputOper.CREATE))
+			try(MetricIntfc metric = metricProvider.longTimer(OutputOper.CREATE_PRIMES, "PrimeSource", "genPrimes"))
 			{
 				final int nextPrimeIdx = (int) nextIdx.incrementAndGet();
 				final int lastPrimeIdx = nextPrimeIdx -1;
@@ -283,9 +285,9 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 
 	private Consumer<PrimeRefFactoryIntfc> getBasesGenerator()
 	{
-		return (pRef) -> this
-							.baseGenerators
-							.each(gen ->
+		return (pRef) -> ParallelIterate.forEach(
+							baseGenerators,
+							gen ->
 								{
 									gen.genBasesForPrimeRef(pRef);
 								});

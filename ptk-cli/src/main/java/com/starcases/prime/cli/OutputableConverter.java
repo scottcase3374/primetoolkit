@@ -22,7 +22,7 @@ public class OutputableConverter implements ITypeConverter<OutputableIntfc>
 			{
 				case "PRIME_TREE" -> BaseTypes.PRIME_TREE;
 				case "PREFIX" -> BaseTypes.PREFIX;
-				case "THREETRIPLE" -> BaseTypes.THREETRIPLE;
+				case "TRIPLE" -> BaseTypes.TRIPLE;
 				case "NPRIME" -> BaseTypes.NPRIME;
 				case "DEFAULT" -> BaseTypes.DEFAULT;
 

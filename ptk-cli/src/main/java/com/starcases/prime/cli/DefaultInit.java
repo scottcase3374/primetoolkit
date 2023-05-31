@@ -481,7 +481,7 @@ public class DefaultInit implements Runnable
 
 				switch(baseType.name())
 				{
-					case "THREETRIPLE":
+					case "TRIPLE":
 					case "PREFIX":
 						baseProvider
 							.provider(baseProviderAttributes)
@@ -562,7 +562,7 @@ public class DefaultInit implements Runnable
 			metricDecorProvider.provider(ATTRIBUTES).ifPresentOrElse(p -> decoratedBase[0] = p.create(decoratedBase[0]), () -> PTKLogger.dbgOutput(baseType, "ERROR: No Metric-decor-provider"));
 		}
 
-		if (outputOpts.getOutputOpers().contains(OutputOper.CREATE))
+		if (outputOpts.getOutputOpers().contains(OutputOper.CREATE_PRIMES))
 		{
 			final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("LOG_BASE_GENERATOR_DECORATOR");
 			final SvcLoader<BaseGenDecorProviderIntfc, Class<BaseGenDecorProviderIntfc>> logDecorProvider =
@@ -601,8 +601,8 @@ public class DefaultInit implements Runnable
 
 				switch(oo.toString())
 				{
-				case "THREETRIPLE":
-					if (isBaseSelected(BaseTypes.THREETRIPLE))
+				case "TRIPLE":
+					if (isBaseSelected(BaseTypes.TRIPLE))
 					{
 						actions.add(s ->
 							logBaseDataProvider
@@ -642,9 +642,9 @@ public class DefaultInit implements Runnable
 					break;
 
 				case "BASES":
-					if (isBaseSelected(BaseTypes.THREETRIPLE))
+					if (isBaseSelected(BaseTypes.TRIPLE))
 					{
-						final ImmutableList<String> attributesAll = Lists.immutable.of(BaseTypes.THREETRIPLE.name());
+						final ImmutableList<String> attributesAll = Lists.immutable.of(BaseTypes.TRIPLE.name());
 						actions.add(s ->
 							logBaseDataProvider
 							.provider(attributesAll)
