@@ -9,7 +9,6 @@ import com.starcases.prime.core.impl.PTKLogger;
 import com.starcases.prime.logging.AbstractPrimeBaseLog;
 
 import lombok.NonNull;
-import picocli.CommandLine.Command;
 
 /**
  *
@@ -39,7 +38,6 @@ class LogBases3AllTriples  extends AbstractPrimeBaseLog
 	 * output log info
 	 */
 	@Override
-	@Command
 	public void outputLogs()
 	{
 		if (LOG.isLoggable(Level.INFO))

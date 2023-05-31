@@ -1,4 +1,5 @@
-open module com.starcases.prime.graph.export.api {
+module com.starcases.prime.graph.export.api {
+
 	exports com.starcases.prime.graph.export.api;
 
 	requires transitive com.starcases.prime.core.api;

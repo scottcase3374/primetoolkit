@@ -28,7 +28,7 @@ class BasePrefixes extends AbsPrimeBaseGen
 	 * This is a pretty quick and dirty implementation.  Maybe find some improvements later.
 	 */
 	@Override
-	public void genBasesForPrimeRef(final PrimeRefIntfc curPrime)
+	public void genBasesForPrimeRef(@NonNull final PrimeRefIntfc curPrime)
 	{
 		final var origBases = curPrime.getPrimeBaseData().getPrimeBases().get(0);
 		curPrime.getPrimeBaseData().addPrimeBases(Lists.mutable.of(origBases), BaseTypes.PREFIX);

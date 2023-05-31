@@ -63,5 +63,14 @@
 		  <version>0.0.1-SNAPSHOT</version>
 	  </dependency>
 
+		<!-- Provided deps -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- runtime deps -->
+
   </dependencies>
 </project>

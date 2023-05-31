@@ -3,11 +3,11 @@ module com.starcases.prime.sql.impl
 	exports com.starcases.prime.sql.impl;
 	exports com.starcases.prime.sql.antlrimpl;
 
-
-	requires com.google.gson;
 	requires transitive com.starcases.prime.core.api;
 	requires com.starcases.prime.service.impl;
 	requires transitive com.starcases.prime.sql.api;
+
+	requires com.google.gson;
 	requires io.netty.buffer;
 	requires io.netty.codec;
 	requires io.netty.codec.http;

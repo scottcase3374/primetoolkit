@@ -8,6 +8,15 @@
   <artifactId>ptk-preload-api</artifactId>
 
   <dependencies>
+
+		<!-- Provided deps -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- runtime deps -->
 	  <dependency>
 		  <groupId>com.starcases.prime</groupId>
 		  <artifactId>ptk-service-api</artifactId>
@@ -19,5 +28,16 @@
 			<artifactId>protobuf-java</artifactId>
 			<version>3.23.0</version>
 		</dependency>
+
+		<dependency>
+			<groupId>javax.cache</groupId>
+			<artifactId>cache-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.collections</groupId>
+			<artifactId>eclipse-collections</artifactId>
+		</dependency>
+
   </dependencies>
 </project>

@@ -9,17 +9,19 @@
   <name>ptk-service</name>
 
   <dependencies>
-	  <!--<dependency>
-		  <groupId>com.starcases.prime</groupId>
-		  <artifactId>ptk-core-api</artifactId>
-		  <version>0.0.1-SNAPSHOT</version>
-	  </dependency>
 
-	  <dependency>
-		  <groupId>com.starcases.prime</groupId>
-		  <artifactId>ptk-preload-api</artifactId>
-		  <version>0.0.1-SNAPSHOT</version>
-	  </dependency>-->
+		<!-- Provided deps -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- runtime deps -->
+		<dependency>
+			<groupId>org.eclipse.collections</groupId>
+			<artifactId>eclipse-collections</artifactId>
+		</dependency>
 
   </dependencies>
 </project>

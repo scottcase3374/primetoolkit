@@ -2,7 +2,6 @@ open module com.starcases.prime.cli
 {
 	exports com.starcases.prime.cli;
 
-	requires cache.api;
 	requires com.starcases.prime.cache.api;
 	requires transitive com.starcases.prime.core.api;
 	requires com.starcases.prime.core.impl;
@@ -12,6 +11,8 @@ open module com.starcases.prime.cli
 	requires com.starcases.prime.preload.api;
 	requires com.starcases.prime.service.impl;
 	requires com.starcases.prime.sql.api;
+
+	requires cache.api;
 	requires info.picocli;
 	requires jakarta.validation;
 	requires java.logging;
@@ -19,7 +20,6 @@ open module com.starcases.prime.cli
 	requires transitive org.eclipse.collections.api;
 	requires org.eclipse.collections.impl;
 	requires org.jgrapht.core;
-	requires java.transaction.xa;
 
 	uses com.starcases.prime.sql.api.SqlProviderIntfc;
 	uses com.starcases.prime.graph.export.api.ExportsProviderIntfc;

@@ -12,7 +12,6 @@ import com.starcases.prime.core.impl.PTKLogger;
 import com.starcases.prime.logging.AbstractPrimeBaseLog;
 
 import lombok.NonNull;
-import picocli.CommandLine.Command;
 
 /**
  * Provides logging of NPrime style base information.
@@ -34,7 +33,6 @@ class LogBasesNPrime extends AbstractPrimeBaseLog
 	}
 
 	@Override
-	@Command
 	public void outputLogs()
 	{
 		if (LOG.isLoggable(Level.INFO))
@@ -48,7 +46,7 @@ class LogBasesNPrime extends AbstractPrimeBaseLog
 		prIt.forEachRemaining(this::logData);
 	}
 
-	private void logData(final PrimeRefIntfc primeRef)
+	private void logData(@NonNull final PrimeRefIntfc primeRef)
 	{
 		final var bmd = primeRef.getPrimeBaseData().getBaseMetadata(BaseTypes.NPRIME);
 		if (bmd instanceof NPrimeBaseMetadata nprimemd)

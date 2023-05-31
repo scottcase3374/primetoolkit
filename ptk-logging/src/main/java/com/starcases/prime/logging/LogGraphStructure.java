@@ -10,7 +10,6 @@ import com.starcases.prime.core.impl.PTKLogger;
 import com.starcases.prime.graph.impl.PrimeGrapherBase;
 
 import lombok.NonNull;
-import picocli.CommandLine.Command;
 
 /**
  * Pulls data from the graph structure and logs it. Main
@@ -39,7 +38,6 @@ public class LogGraphStructure extends PrimeGrapherBase implements LogPrimeDataI
 	 * output log info
 	 */
 	@Override
-	@Command
 	public void outputLogs()
 	{
 		LOG.entering("LogGraphStructure", "l()");

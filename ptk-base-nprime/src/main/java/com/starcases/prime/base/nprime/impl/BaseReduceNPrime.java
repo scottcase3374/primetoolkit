@@ -65,7 +65,7 @@ class BaseReduceNPrime extends AbsPrimeBaseGen
 	 * @param maxReduce
 	 * @return
 	 */
-	public BaseReduceNPrime assignMaxReduce(final long maxReduce)
+	public BaseReduceNPrime assignMaxReduce(@Min(2) final long maxReduce)
 	{
 		this.maxReduce = maxReduce;
 		return this;
@@ -118,7 +118,7 @@ class BaseReduceNPrime extends AbsPrimeBaseGen
 	}
 
 	@Override
-	public void genBasesForPrimeRef(final PrimeRefIntfc curPrime)
+	public void genBasesForPrimeRef(@NonNull final PrimeRefIntfc curPrime)
 	{
 		final MutableLongBag retBases = MutableLongBagFactoryImpl.INSTANCE.empty();
 		primeReduction(curPrime, retBases);

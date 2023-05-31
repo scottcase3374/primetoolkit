@@ -9,6 +9,14 @@
 
   <dependencies>
 
+		<!-- Provided deps -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- runtime deps -->
 	  <dependency>
 		  <groupId>com.starcases.prime</groupId>
 		  <artifactId>ptk-base-nprime-impl</artifactId>
@@ -111,14 +119,25 @@
  		  <version>0.0.1-SNAPSHOT</version>
 	  </dependency>
 
-<!--		<dependency>
-			<groupId>org.infinispan</groupId>
-			<artifactId>infinispan-core</artifactId>
+		<dependency>
+			<groupId>info.picocli</groupId>
+			<artifactId>picocli-codegen</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>org.infinispan</groupId>
-			<artifactId>infinispan-commons</artifactId>
-		</dependency>-->
+			<groupId>jakarta.validation</groupId>
+			<artifactId>jakarta.validation-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.cache</groupId>
+			<artifactId>cache-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.collections</groupId>
+			<artifactId>eclipse-collections</artifactId>
+		</dependency>
+
   </dependencies>
 </project>

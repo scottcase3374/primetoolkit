@@ -6,6 +6,7 @@ module com.starcases.prime.metrics.impl
 	requires transitive com.starcases.prime.metrics.api;
 	requires com.starcases.prime.service.api;
 	requires com.starcases.prime.service.impl;
+
 	requires java.logging;
 	requires static lombok;
 	requires transitive micrometer.core;

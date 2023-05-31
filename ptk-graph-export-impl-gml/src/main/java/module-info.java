@@ -5,6 +5,7 @@ module com.starcases.graph.export.impl.gml {
 	requires transitive com.starcases.prime.graph.export.api;
 
 	requires com.starcases.prime.service.impl;
+
 	requires jakarta.validation;
 	requires java.logging;
 	requires static lombok;

@@ -1,4 +1,4 @@
-open module com.starcases.prime.cache.api
+module com.starcases.prime.cache.api
 {
 	exports com.starcases.prime.cache.api;
 

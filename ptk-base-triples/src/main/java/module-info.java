@@ -6,7 +6,7 @@ module com.starcases.prime.base.triples.impl
 	requires com.starcases.prime.core.impl;
 	requires com.starcases.prime.logging;
 	requires com.starcases.prime.service.impl;
-	requires info.picocli;
+
 	requires java.logging;
 	requires static lombok;
 	requires transitive org.eclipse.collections.api;

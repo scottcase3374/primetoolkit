@@ -11,6 +11,19 @@
 
 	<dependencies>
 
+		<!-- Provided deps -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- runtime deps -->
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>com.starcases.prime</groupId>
 			<artifactId>ptk-core-api</artifactId>
@@ -27,6 +40,21 @@
 			<groupId>com.starcases.prime</groupId>
 			<artifactId>ptk-sql-api</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-all</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.antlr</groupId>
+			<artifactId>antlr4</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.antlr</groupId>
+			<artifactId>antlr4-runtime</artifactId>
 		</dependency>
 
 
