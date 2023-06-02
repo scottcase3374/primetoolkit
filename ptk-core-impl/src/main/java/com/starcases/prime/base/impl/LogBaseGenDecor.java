@@ -1,9 +1,9 @@
 package com.starcases.prime.base.impl;
 
 import com.starcases.prime.base.api.BaseTypesIntfc;
+import com.starcases.prime.common.api.PTKLogger;
 import com.starcases.prime.base.api.BaseGenIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
-import com.starcases.prime.core.impl.PTKLogger;
 
 import lombok.NonNull;
 

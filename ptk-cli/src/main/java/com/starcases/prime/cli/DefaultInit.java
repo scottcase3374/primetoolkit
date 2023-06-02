@@ -21,29 +21,33 @@ import java.util.stream.Collectors;
 
 import javax.cache.Cache;
 
+import org.eclipse.collections.api.block.predicate.Predicate2;
 import org.eclipse.collections.api.collection.ImmutableCollection;
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.factory.Maps;
 import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.map.ImmutableMap;
+import org.eclipse.collections.api.multimap.ImmutableMultimap;
 import org.eclipse.collections.impl.list.mutable.FastList;
 
 import com.starcases.prime.base.api.BaseProviderIntfc;
-import com.starcases.prime.base.api.BaseTypes;
 import com.starcases.prime.base.api.BaseTypesIntfc;
+import com.starcases.prime.base.api.BaseTypesProviderIntfc;
 import com.starcases.prime.base.api.LogPrimeDataProviderIntfc;
 import com.starcases.prime.base.api.BaseGenDecorProviderIntfc;
 import com.starcases.prime.base.api.BaseGenIntfc;
+import com.starcases.prime.base.impl.BaseTypes;
 import com.starcases.prime.base.impl.PrimeMultiBaseContainer;
 
 import com.starcases.prime.cache.api.CacheProviderIntfc;
 import com.starcases.prime.cli.MetricsOpts.MetricOpt;
 import com.starcases.prime.common.api.OutputOper;
+import com.starcases.prime.common.api.PTKLogger;
 import com.starcases.prime.core.api.FactoryIntfc;
+import com.starcases.prime.core.api.OutputableIntfc;
 import com.starcases.prime.core.api.PrimeSourceFactoryIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
 import com.starcases.prime.core.api.ProgressProviderIntfc;
-import com.starcases.prime.core.impl.PTKLogger;
 import com.starcases.prime.core.impl.PrimeRef;
 import com.starcases.prime.graph.export.api.ExportsProviderIntfc;
 
@@ -87,6 +91,11 @@ public class DefaultInit implements Runnable
 	private static final Logger LOG = Logger.getLogger(DefaultInit.class.getName());
 
 	private static final BiFunction<Long, Path, PrimeSubset> loader = (K, P) -> null; //Paths.get(P.toString(), K.toString()).toFile();
+
+	/**
+	 * for matching output type names to base-type names
+	 */
+	private static Predicate2<BaseTypesIntfc, String> baseMatchPred = (base, outputType) -> base.name().equals(outputType);
 
 	/**
 	 * prime source - for prime/prime ref lookups
@@ -150,6 +159,11 @@ public class DefaultInit implements Runnable
 	@Getter
 	@NonNull
 	private final List<Consumer<String>> actions = new FastList<>();
+
+
+	final  ImmutableCollection<BaseTypesIntfc> BASE_TYPES =
+			new SvcLoader<BaseTypesProviderIntfc, Class<BaseTypesProviderIntfc>>(BaseTypesProviderIntfc.class)
+				.provider(Lists.immutable.of("GLOBAL_BASE_TYPES")).orElseThrow().create();
 
 	/**
 	 * Pull all the settings together and execute all the desired functionality.
@@ -318,7 +332,7 @@ public class DefaultInit implements Runnable
 		{
 			if (LOG.isLoggable(Level.SEVERE))
 			{
-				LOG.severe("ERROR: could not set standard out to provided destination. " );
+				LOG.severe("ERROR: could not set stdout to provided destination. " );
 			}
 		}
 	}
@@ -441,7 +455,8 @@ public class DefaultInit implements Runnable
 				progressProvider
 					.provider(attributes)
 					.map(p -> p.create(null))
-					.ifPresentOrElse(p -> primeSrc.setDisplayProgress(p), () -> PTKLogger.dbgOutput("ERROR: %s", "No Progress provider"));
+					.ifPresentOrElse(p -> primeSrc.setDisplayProgress(p),
+							() -> PTKLogger.dbgOutput("ERROR: %s", "No Progress provider"));
 			}
 
 			primeSrc.setDisplayDefaultBaseMetrics(outputOpts.getOutputOpers().contains(OutputOper.PRIMETREE_METRICS));
@@ -467,6 +482,7 @@ public class DefaultInit implements Runnable
 		if (baseOpts != null && baseOpts.getBases() != null)
 		{
 			final SvcLoader<BaseProviderIntfc, Class<BaseProviderIntfc>> baseProvider = new SvcLoader< >(BaseProviderIntfc.class);
+
 			baseOpts.getBases().forEach(baseType ->
 			{
 				setupBaseLogConfig(baseType);
@@ -587,6 +603,7 @@ public class DefaultInit implements Runnable
 		}
 		return decoratedBase[0];
 	}
+
 	private void actionHandleOutputs()
 	{
 		if (LOG.isLoggable(Level.INFO))
@@ -599,111 +616,84 @@ public class DefaultInit implements Runnable
 			if (LOG.isLoggable(Level.INFO))
 			{
 
-				LOG.info(String.format("%s%s", "CLI - Prep logger outputs: ", outputOpts.getOutputOpers().stream().map(Object::toString).collect(Collectors.joining(","))));
+				LOG.info(String.format("%s%s", "CLI - Prep logger outputs: ",
+						outputOpts
+							.getOutputOpers()
+							.stream()
+							.map(Object::toString)
+							.collect(Collectors.joining(","))));
 			}
 
 			final SvcLoader<LogPrimeDataProviderIntfc, Class<LogPrimeDataProviderIntfc>> logBaseDataProvider = new SvcLoader< >(LogPrimeDataProviderIntfc.class);
 
-			outputOpts.getOutputOpers().forEach(oo ->
-			{
-				final ImmutableList<String> attributes = Lists.immutable.of(oo.toString(), "DEFAULT");
+			final ImmutableMultimap<Boolean, OutputableIntfc> baseNotBaseColl =
+					outputOpts
+					.getOutputOpers()
+					.groupBy(o -> BASE_TYPES.anySatisfyWith(baseMatchPred, o.toString()));
 
-				switch(oo.toString())
-				{
-				case "TRIPLE":
-					if (isBaseSelected(BaseTypes.TRIPLE))
-					{
-						actions.add(s ->
-							logBaseDataProvider
-							.provider(attributes)
-							.ifPresentOrElse(p -> p.create(primeSrc, null).doPreferParallel(initOpts.isPreferParallel()).outputLogs(), () -> PTKLogger.dbgOutput("ERROR: No TripleLog provider")));
-					}
-					break;
+			baseNotBaseColl.forEachKeyMultiValues((b, oVals) ->
+						{
+							if (b) // meaning individual bases specified
+							{
+								oVals.forEach(o ->
+									{
+										final ImmutableList<String> attributes = Lists.immutable.of(o.toString());
 
-				case "NPRIME":
-					if (isBaseSelected(BaseTypes.NPRIME))
-					{
-						actions.add(s ->
-							logBaseDataProvider
-							.provider(attributes)
-							.ifPresentOrElse(p -> p.create(primeSrc, null).doPreferParallel(initOpts.isPreferParallel()).outputLogs(), () -> PTKLogger.dbgOutput("ERROR: No NPrimeLog provider") ));
-					}
-					break;
+										actions.add(s ->
+										logBaseDataProvider
+										.provider(attributes)
+										.ifPresentOrElse(p ->
+															p.create(primeSrc, null)
+															 .doPreferParallel(initOpts.isPreferParallel())
+															 .outputLogs()
+															,() -> PTKLogger.dbgOutput("ERROR: No %s provider", o.toString())
+														)
+												);
+									});
+							}
+							else // meaning either non-base specified or the value "bases" indicating each active base.
+							{
+								oVals.forEach(o ->
+											{
+												switch(o.toString())
+												{
+												case "BASES":
 
-				case "PREFIX":
-					if (isBaseSelected(BaseTypes.PREFIX))
-					{
-						actions.add(s ->
-							logBaseDataProvider
-							.provider(attributes)
-							.ifPresentOrElse(p -> p.create(primeSrc, null).doPreferParallel(false).outputLogs(), () -> PTKLogger.dbgOutput("ERROR: No PrefixLog provider") ));
-					}
-					break;
+													if (baseOpts != null)
+													{
+														baseOpts.getBases().forEach(base ->
+																{
+																	final ImmutableList<String> attributes = Lists.immutable.of(base.toString());
 
-				case "PRIME_TREE":
-					if (isBaseSelected(BaseTypes.PRIME_TREE))
-					{
-						actions.add(s ->
-							logBaseDataProvider
-							.provider(attributes)
-							.ifPresentOrElse(p -> p.create(primeSrc, null).doPreferParallel(false).outputLogs(), () -> PTKLogger.dbgOutput("ERROR: No PrimeTreeLog provider")));
-					}
-					break;
+																	actions.add(s ->
+																		logBaseDataProvider
+																		.provider(attributes)
+																		.ifPresentOrElse(p ->
+																				p.create(primeSrc, null)
+																				 .doPreferParallel(initOpts.isPreferParallel())
+																				 .outputLogs()
+																			   ,() -> PTKLogger.dbgOutput("ERROR: No TripleLog provider")));
+																 }
+																);
+													}
 
-				case "BASES":
-					if (isBaseSelected(BaseTypes.TRIPLE))
-					{
-						final ImmutableList<String> attributesAll = Lists.immutable.of(BaseTypes.TRIPLE.name());
-						actions.add(s ->
-							logBaseDataProvider
-							.provider(attributesAll)
-							.ifPresentOrElse(p -> p.create(primeSrc, null).doPreferParallel(initOpts.isPreferParallel()).outputLogs(), () -> PTKLogger.dbgOutput("ERROR: No TripleLog provider")));
-					}
-					if (isBaseSelected(BaseTypes.NPRIME))
-					{
-						final ImmutableList<String> attributesAll = Lists.immutable.of(BaseTypes.NPRIME.name());
-						actions.add(s ->
-							logBaseDataProvider
-							.provider(attributesAll)
-							.ifPresentOrElse(p -> p.create(primeSrc, null).doPreferParallel(initOpts.isPreferParallel()).outputLogs(), () -> PTKLogger.dbgOutput("ERROR: No NPrimeLog provider")));
-					}
-					if (isBaseSelected(BaseTypes.PREFIX))
-					{
-						final ImmutableList<String> attributesAll = Lists.immutable.of(BaseTypes.PREFIX.name());
-						actions.add(s ->
-							logBaseDataProvider
-							.provider(attributesAll)
-							.ifPresentOrElse(p -> p.create(primeSrc, null).doPreferParallel(false).outputLogs(), () -> PTKLogger.dbgOutput("ERROR: No PrefixLog provider")));
-					}
-					if (isBaseSelected(BaseTypes.PRIME_TREE))
-					{
-						final ImmutableList<String> attributesAll = Lists.immutable.of(BaseTypes.PRIME_TREE.name());
-						actions.add(s ->
-							logBaseDataProvider
-							.provider(attributesAll)
-							.ifPresentOrElse(p -> p.create(primeSrc, null).doPreferParallel(false).outputLogs(), () -> PTKLogger.dbgOutput("ERROR: No PrimeTreeLog provider")));
-					}
-					break;
+												case "GRAPHSTRUCT":
+													actions.add(s -> new LogGraphStructure(primeSrc, BaseTypes.DEFAULT ).doPreferParallel(initOpts.isPreferParallel()).outputLogs() );
+													break;
 
-				case "GRAPHSTRUCT":
-					actions.add(s -> new LogGraphStructure(primeSrc, BaseTypes.DEFAULT ).doPreferParallel(initOpts.isPreferParallel()).outputLogs() );
-					break;
+												case "NODESTRUCT":
+													actions.add(s -> new LogNodeStructure(primeSrc).doPreferParallel(initOpts.isPreferParallel()).outputLogs() );
+													break;
 
-				case "NODESTRUCT":
-					actions.add(s -> new LogNodeStructure(primeSrc).doPreferParallel(initOpts.isPreferParallel()).outputLogs() );
-					break;
-
-				default:
-					break;
-				}
-			});
+												default:
+													break;
+												}
+											}
+										);
+							}
+					});
+			}
 		}
-	}
-
-	private boolean isBaseSelected(final BaseTypesIntfc baseType)
-	{
-		return baseOpts != null && baseOpts.getBases().contains(baseType);
-	}
 
 	private void actionHandleGraphing()
 	{

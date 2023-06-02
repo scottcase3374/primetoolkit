@@ -3,8 +3,8 @@ package com.starcases.prime.logging;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.starcases.prime.common.api.PTKLogger;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
-import com.starcases.prime.core.impl.PTKLogger;
 
 import lombok.NonNull;
 

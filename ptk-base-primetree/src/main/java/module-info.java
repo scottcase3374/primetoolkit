@@ -12,6 +12,7 @@ module com.starcases.prime.base.primetree.impl
 	requires transitive org.eclipse.collections.api;
 	requires org.eclipse.collections.impl;
 
+	provides com.starcases.prime.base.api.BaseTypesProviderIntfc with com.starcases.prime.base.primetree.impl.PrimeTreeBaseTypeProvider;
 	provides com.starcases.prime.base.api.BaseProviderIntfc with com.starcases.prime.base.primetree.impl.PrimeTreeProvider;
 	provides com.starcases.prime.base.api.LogPrimeDataProviderIntfc with com.starcases.prime.base.primetree.impl.LogPrimeTreeDataProvider;
 }

@@ -1,4 +1,4 @@
-package com.starcases.prime.core.impl;
+package com.starcases.prime.common.api;
 
 import java.io.IOException;
 import java.nio.file.Files;

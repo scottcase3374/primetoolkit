@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.collections.api.block.predicate.primitive.LongPredicate;
+import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.api.collection.MutableCollection;
 import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
@@ -18,18 +19,14 @@ import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.starcases.prime.base.api.BaseTypes;
+import com.starcases.prime.base.api.BaseTypesIntfc;
+import com.starcases.prime.base.api.BaseTypesProviderIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
+import com.starcases.prime.service.impl.SvcLoader;
 import com.starcases.prime.sql.antlrimpl.PrimeSqlBaseVisitor;
 import com.starcases.prime.sql.antlrimpl.PrimeSqlParser;
 import com.starcases.prime.sql.antlrimpl.PrimeSqlParser.ArrayItemContext;
-//import com.starcases.prime.sql.impl.PrimeSqlParser.ArrayItemContext;
-//import com.starcases.prime.sql.impl.PrimeSqlParser.Array_top_clauseContext;
-//import com.starcases.prime.sql.impl.PrimeSqlParser.BaseMatchContext;
-//import com.starcases.prime.sql.impl.PrimeSqlParser.Idx_boundsContext;
-//import com.starcases.prime.sql.impl.PrimeSqlParser.Sel_optsContext;
-//import com.starcases.prime.sql.impl.PrimeSqlParser.SubArrayContext;
 import com.starcases.prime.sql.antlrimpl.PrimeSqlParser.Array_top_clauseContext;
 import com.starcases.prime.sql.antlrimpl.PrimeSqlParser.BaseMatchContext;
 import com.starcases.prime.sql.antlrimpl.PrimeSqlParser.Idx_boundsContext;
@@ -57,6 +54,12 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 
 	@Getter(AccessLevel.PRIVATE)
 	private static final Logger LOG = Logger.getLogger(PrimeSqlVisitor.class.getName());
+
+	private static final ImmutableList<BaseTypesIntfc> BASE_TYPES =
+			new SvcLoader<BaseTypesProviderIntfc, Class<BaseTypesProviderIntfc>>(BaseTypesProviderIntfc.class)
+				.provider( Lists.immutable.of("GLOBAL_BASE_TYPES"))
+				.orElseThrow()
+				.create();
 
 	private final PrimeSourceIntfc primeSrc;
 
@@ -212,7 +215,7 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 									pRef.getPrime(),
 									baseType != null
 										? pRef.getPrimeBaseData()
-											.getPrimeBases(BaseTypes.valueOf(baseType))
+											.getPrimeBases(BASE_TYPES.select(base -> base.name().equals(baseType)).getOnly())
 											.stream()
 											// Filter tuples out of bases for each matched prime which where tuple doesn't meet the match criteria
 											.filter(baseColl ->
@@ -414,7 +417,7 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 		{
 	 		primePredColl.add( Predicates.adapt(
 	 			pRef -> pRef.getPrimeBaseData()
-	 						.getPrimeBases(BaseTypes.valueOf(baseType.toUpperCase(Locale.ENGLISH)))
+	 						.getPrimeBases(BASE_TYPES.select(base -> base.name().equals(baseType.toUpperCase(Locale.ENGLISH))).getOnly())
 	 						.parallelStream()
 	 						.anyMatch(baseColl -> baseColl.containsAny(anyItemsColl)))
 				  );
@@ -426,7 +429,7 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
  		{
  			primePredColl.add( Predicates.adapt(
  					pRef -> pRef.getPrimeBaseData()
- 								.getPrimeBases(BaseTypes.valueOf(baseType.toUpperCase(Locale.ENGLISH)))
+ 								.getPrimeBases(BASE_TYPES.select(base -> base.name().equals(baseType.toUpperCase(Locale.ENGLISH))).getOnly())
  								.parallelStream()
  								.anyMatch(baseColl -> itemGroupColl
  														.stream()

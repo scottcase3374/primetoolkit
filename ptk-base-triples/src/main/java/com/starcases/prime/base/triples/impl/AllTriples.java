@@ -12,7 +12,6 @@ import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
 
 import org.eclipse.collections.impl.factory.Sets;
 
-import com.starcases.prime.base.api.BaseTypes;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
 
@@ -158,6 +157,6 @@ public class AllTriples
 	private void addPrimeBases(final @NonNull PrimeRefIntfc prime, final @NonNull PrimeRefIntfc [] triple)
 	{
 		final ImmutableLongCollection primeBase = Sets.immutable.of(triple).collectLong(PrimeRefIntfc::getPrime);
-		prime.getPrimeBaseData().addPrimeBases(primeBase, BaseTypes.TRIPLE);
+		prime.getPrimeBaseData().addPrimeBases(primeBase, TripleBaseType.TRIPLE);
 	}
 }

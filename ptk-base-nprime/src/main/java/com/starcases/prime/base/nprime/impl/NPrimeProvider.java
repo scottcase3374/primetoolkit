@@ -5,7 +5,6 @@ import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.map.ImmutableMap;
 
 import com.starcases.prime.base.api.BaseProviderIntfc;
-import com.starcases.prime.base.api.BaseTypes;
 import com.starcases.prime.base.api.BaseGenFactoryIntfc;
 
 /**
@@ -40,6 +39,6 @@ public class NPrimeProvider implements BaseProviderIntfc
 	{
 		final Integer maxReduce = (Integer)settings.getOrDefault("maxReduce", 3);
 
-		return new BaseReduceNPrime(BaseTypes.NPRIME).assignMaxReduce(maxReduce);
+		return new BaseReduceNPrime(NPrimeBaseType.NPRIME).assignMaxReduce(maxReduce);
 	}
 }

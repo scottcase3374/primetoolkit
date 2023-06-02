@@ -5,7 +5,7 @@ module com.starcases.prime.core.api
 	exports com.starcases.prime.core.api;
 	exports com.starcases.prime.datamgmt.api;
 
-	requires com.starcases.prime.service.api;
+	requires com.starcases.prime.service.impl;
 
 	requires jakarta.validation;
 	requires static lombok;

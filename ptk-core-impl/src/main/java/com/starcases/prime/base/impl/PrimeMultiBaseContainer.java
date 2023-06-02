@@ -8,7 +8,6 @@ import org.eclipse.collections.impl.list.mutable.MutableListFactoryImpl;
 import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 
 import com.starcases.prime.base.api.BaseMetadataIntfc;
-import com.starcases.prime.base.api.BaseTypes;
 import com.starcases.prime.base.api.BaseTypesIntfc;
 import com.starcases.prime.base.api.PrimeBaseIntfc;
 

@@ -3,7 +3,6 @@ module com.starcases.prime.logging
 	exports com.starcases.prime.logging;
 
 	requires transitive com.starcases.prime.core.api;
-	requires com.starcases.prime.core.impl;
 	requires com.starcases.prime.graph.impl;
 
 	requires java.logging;

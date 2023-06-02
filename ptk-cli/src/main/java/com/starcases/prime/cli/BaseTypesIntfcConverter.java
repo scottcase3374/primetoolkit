@@ -1,12 +1,11 @@
 package com.starcases.prime.cli;
 
 import org.eclipse.collections.api.factory.Lists;
-import org.eclipse.collections.api.factory.Maps;
 import org.eclipse.collections.api.list.ImmutableList;
-import org.eclipse.collections.api.map.MutableMap;
 
 import com.starcases.prime.base.api.BaseTypesIntfc;
-import com.starcases.prime.base.impl.BaseTypesProviderOther;
+import com.starcases.prime.base.api.BaseTypesProviderIntfc;
+import com.starcases.prime.service.impl.SvcLoader;
 
 import picocli.CommandLine.ITypeConverter;
 
@@ -16,16 +15,17 @@ import picocli.CommandLine.ITypeConverter;
  */
 public class BaseTypesIntfcConverter implements ITypeConverter<BaseTypesIntfc>
 {
-	private static final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("BUILTIN_BASE_TYPES");
+	private static final ImmutableList<BaseTypesIntfc> BASE_TYPES =
+			new SvcLoader<BaseTypesProviderIntfc, Class<BaseTypesProviderIntfc>>(BaseTypesProviderIntfc.class)
+				.provider( Lists.immutable.of("GLOBAL_BASE_TYPES"))
+				.orElseThrow()
+				.create();
 	/**
 	 * Convert from enum string name to a general interface
 	 */
 	@Override
-	public BaseTypesIntfc convert(final String value) throws Exception
+	public BaseTypesIntfc convert(final String name) throws Exception
 	{
-		final MutableMap<String, BaseTypesIntfc> baseTypes = Maps.mutable.empty();
-		final var x = (new BaseTypesProviderOther()).get(baseTypes, ATTRIBUTES);
-
-		return x.get(value);
+		return BASE_TYPES.select(base -> base.name().equals(name)).getOnly();
 	}
 }

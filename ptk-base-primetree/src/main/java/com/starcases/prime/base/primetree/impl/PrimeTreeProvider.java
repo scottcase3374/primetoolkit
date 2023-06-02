@@ -7,7 +7,6 @@ import org.eclipse.collections.api.map.ImmutableMap;
 import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
 
 import com.starcases.prime.base.api.BaseProviderIntfc;
-import com.starcases.prime.base.api.BaseTypes;
 import com.starcases.prime.base.api.BaseGenFactoryIntfc;
 
 /**
@@ -32,7 +31,7 @@ public class PrimeTreeProvider implements BaseProviderIntfc
 	{
 		final CollectionTrackerIntfc collTracker = (CollectionTrackerIntfc)settings.get("collTracker");
 
-		return new PrimeTree(BaseTypes.PRIME_TREE, collTracker);
+		return new PrimeTree(PrimeTreeBaseType.PRIME_TREE, collTracker);
 	}
 
 	/**

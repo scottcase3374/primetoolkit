@@ -1,8 +1,15 @@
 package com.starcases.prime.cli;
 
-import com.starcases.prime.base.api.BaseTypes;
+import java.util.Optional;
+
+import org.eclipse.collections.api.factory.Lists;
+import org.eclipse.collections.api.list.ImmutableList;
+
+import com.starcases.prime.base.api.BaseTypesIntfc;
+import com.starcases.prime.base.api.BaseTypesProviderIntfc;
 import com.starcases.prime.common.api.OutputOper;
 import com.starcases.prime.core.api.OutputableIntfc;
+import com.starcases.prime.service.impl.SvcLoader;
 
 import picocli.CommandLine.ITypeConverter;
 
@@ -12,21 +19,18 @@ import picocli.CommandLine.ITypeConverter;
  */
 public class OutputableConverter implements ITypeConverter<OutputableIntfc>
 {
+	private static final ImmutableList<BaseTypesIntfc> BASE_TYPES =
+			new SvcLoader<BaseTypesProviderIntfc, Class<BaseTypesProviderIntfc>>(BaseTypesProviderIntfc.class)
+				.provider( Lists.immutable.of("GLOBAL_BASE_TYPES"))
+				.orElseThrow()
+				.create();
 	/**
 	 * Convert from enum string name to a general interface
 	 */
 	@Override
-	public OutputableIntfc convert(final String value) throws Exception
+	public OutputableIntfc convert(final String name) throws Exception
 	{
-		return	switch(value)
-			{
-				case "PRIME_TREE" -> BaseTypes.PRIME_TREE;
-				case "PREFIX" -> BaseTypes.PREFIX;
-				case "TRIPLE" -> BaseTypes.TRIPLE;
-				case "NPRIME" -> BaseTypes.NPRIME;
-				case "DEFAULT" -> BaseTypes.DEFAULT;
-
-				default -> OutputOper.valueOf(value);
-			};
+		final Optional<OutputableIntfc> baseType =  Optional.<OutputableIntfc>ofNullable(BASE_TYPES.select(base -> base.name().equals(name)).getFirst());
+		return	baseType.orElse(OutputOper.valueOf(name));
 	}
 }

@@ -4,9 +4,9 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.starcases.prime.base.api.BaseTypesIntfc;
+import com.starcases.prime.common.api.PTKLogger;
 import com.starcases.prime.core.api.LogPrimeDataIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
-import com.starcases.prime.core.impl.PTKLogger;
 import com.starcases.prime.graph.impl.PrimeGrapherBase;
 
 import lombok.NonNull;

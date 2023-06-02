@@ -14,7 +14,7 @@ import java.util.zip.ZipFile;
 
 import javax.cache.Cache;
 
-import com.starcases.prime.core.impl.PTKLogger;
+import com.starcases.prime.common.api.PTKLogger;
 import com.starcases.prime.preload.api.PreloaderIntfc;
 import com.starcases.prime.preload.api.PrimeSubset;
 

@@ -5,7 +5,6 @@ import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.map.ImmutableMap;
 
 import com.starcases.prime.base.api.BaseProviderIntfc;
-import com.starcases.prime.base.api.BaseTypes;
 import com.starcases.prime.base.api.BaseGenFactoryIntfc;
 
 /**
@@ -26,7 +25,7 @@ public class TripleProvider implements BaseProviderIntfc
 	@Override
 	public BaseGenFactoryIntfc create(final ImmutableMap<String,Object> settings)
 	{
-		return new BaseReduceTriple(BaseTypes.TRIPLE);
+		return new BaseReduceTriple(TripleBaseType.TRIPLE);
 	}
 
 	/**

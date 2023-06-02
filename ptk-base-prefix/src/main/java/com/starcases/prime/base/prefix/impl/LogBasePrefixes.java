@@ -3,9 +3,8 @@ package com.starcases.prime.base.prefix.impl;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.starcases.prime.base.api.BaseTypes;
+import com.starcases.prime.common.api.PTKLogger;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
-import com.starcases.prime.core.impl.PTKLogger;
 import com.starcases.prime.logging.AbstractPrimeBaseLog;
 
 import lombok.NonNull;
@@ -50,7 +49,7 @@ class LogBasePrefixes extends AbstractPrimeBaseLog
 								{
 									primeRef
 									.getPrimeBaseData()
-									.getPrimeBases(BaseTypes.PREFIX)
+									.getPrimeBases(PrefixBaseType.PREFIX)
 									.forEach(
 											primeBases ->
 											{
@@ -59,7 +58,7 @@ class LogBasePrefixes extends AbstractPrimeBaseLog
 
 												primeBases.appendString(outputStr, "[", ",", "]");
 
-												PTKLogger.output(BaseTypes.PREFIX, "%s%n", outputStr);
+												PTKLogger.output(PrefixBaseType.PREFIX, "%s%n", outputStr);
 												outputStr.setLength(0);
 												itemIdx[0]++;
 											});

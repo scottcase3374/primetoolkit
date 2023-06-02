@@ -21,6 +21,7 @@ open module com.starcases.prime.cli
 	requires org.eclipse.collections.impl;
 	requires org.jgrapht.core;
 
+	uses com.starcases.prime.base.api.BaseTypesProviderIntfc;
 	uses com.starcases.prime.sql.api.SqlProviderIntfc;
 	uses com.starcases.prime.graph.export.api.ExportsProviderIntfc;
 	uses com.starcases.prime.preload.api.PreloaderProviderIntfc;

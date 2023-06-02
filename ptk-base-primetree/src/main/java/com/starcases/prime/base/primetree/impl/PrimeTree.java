@@ -3,7 +3,7 @@ package com.starcases.prime.base.primetree.impl;
 import org.eclipse.collections.api.list.primitive.ImmutableLongList;
 import org.eclipse.collections.impl.list.mutable.MutableListFactoryImpl;
 
-import com.starcases.prime.base.api.BaseTypes;
+import com.starcases.prime.base.api.BaseGenFactoryIntfc;
 import com.starcases.prime.base.api.BaseTypesIntfc;
 import com.starcases.prime.base.impl.AbsPrimeBaseGen;
 import com.starcases.prime.core.api.PrimeRefIntfc;
@@ -57,6 +57,19 @@ class PrimeTree extends AbsPrimeBaseGen
 				curPrefixIt.add(prime);
 			});
 
-		curPrime.getPrimeBaseData().addPrimeBases(MutableListFactoryImpl.INSTANCE.of(curPrefixIt.toCollection()), BaseTypes.PRIME_TREE);
+		curPrime.getPrimeBaseData().addPrimeBases(MutableListFactoryImpl.INSTANCE.of(curPrefixIt.toCollection()), PrimeTreeBaseType.PRIME_TREE);
+	}
+
+	/**
+	 * fluent style method for setting flag for whether base construction can use multiple CPU cores.
+	 * @param preferParallel Ignored for PrimeTree - must always be false
+	 *
+	 * @return
+	 */
+	@Override
+	public BaseGenFactoryIntfc doPreferParallel(final boolean preferParallel)
+	{
+		this.preferParallel = false;
+		return this;
 	}
 }

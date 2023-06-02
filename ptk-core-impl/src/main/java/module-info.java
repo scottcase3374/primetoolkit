@@ -16,7 +16,7 @@ module com.starcases.prime.core.impl
 	requires org.eclipse.collections.api;
 	requires org.eclipse.collections.impl;
 
-	provides com.starcases.prime.base.api.BaseTypesProviderIntfc with com.starcases.prime.base.impl.BuiltinBaseTypesProvider;
+	provides com.starcases.prime.base.api.BaseTypesProviderIntfc with com.starcases.prime.base.impl.BaseTypesGlobalProvider;
 	provides com.starcases.prime.base.api.BaseGenDecorProviderIntfc with com.starcases.prime.base.impl.BaseGenTimerMetricDecorProvider;
 	provides com.starcases.prime.datamgmt.api.CollectionTrackerProviderIntfc with com.starcases.prime.datamgmt.impl.CollectionTrackerProvider;
 

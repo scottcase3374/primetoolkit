@@ -6,6 +6,5 @@ package com.starcases.prime.core.api;
  */
 public interface OutputableIntfc
 {
-	@Override
 	String toString();
 }

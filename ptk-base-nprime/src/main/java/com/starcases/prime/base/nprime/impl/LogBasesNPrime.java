@@ -5,10 +5,9 @@ import java.util.logging.Logger;
 
 import org.eclipse.collections.api.bag.primitive.ImmutableLongBag;
 
-import com.starcases.prime.base.api.BaseTypes;
+import com.starcases.prime.common.api.PTKLogger;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
-import com.starcases.prime.core.impl.PTKLogger;
 import com.starcases.prime.logging.AbstractPrimeBaseLog;
 
 import lombok.NonNull;
@@ -48,14 +47,14 @@ class LogBasesNPrime extends AbstractPrimeBaseLog
 
 	private void logData(@NonNull final PrimeRefIntfc primeRef)
 	{
-		final var bmd = primeRef.getPrimeBaseData().getBaseMetadata(BaseTypes.NPRIME);
+		final var bmd = primeRef.getPrimeBaseData().getBaseMetadata(NPrimeBaseType.NPRIME);
 		if (bmd instanceof NPrimeBaseMetadata nprimemd)
 		{
 			final ImmutableLongBag counts = nprimemd.getCountForBaseIdx();
 			final String itemCountsStr = counts.toStringOfItemToCount();
 
 			// Handle "header" info for the current Prime
-			PTKLogger.output(BaseTypes.NPRIME, "%nPrime [%d] %s%n",
+			PTKLogger.output(NPrimeBaseType.NPRIME, "%nPrime [%d] %s%n",
 												primeRef.getPrime(),
 												itemCountsStr
 												);

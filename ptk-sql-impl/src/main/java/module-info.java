@@ -20,4 +20,6 @@ module com.starcases.prime.sql.impl
 	requires org.eclipse.collections.impl;
 
 	provides com.starcases.prime.sql.api.SqlProviderIntfc with com.starcases.prime.sql.impl.SqlCmdSvrProvider;
+
+	uses com.starcases.prime.base.api.BaseTypesProviderIntfc;
 }

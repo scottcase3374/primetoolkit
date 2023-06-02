@@ -2,7 +2,7 @@ module com.starcases.prime.preload.impl
 {
 	exports com.starcases.prime.preload.impl;
 
-	requires com.starcases.prime.core.impl;
+	requires transitive com.starcases.prime.core.api;
 	requires transitive com.starcases.prime.preload.api;
 	requires transitive com.starcases.prime.service.impl;
 

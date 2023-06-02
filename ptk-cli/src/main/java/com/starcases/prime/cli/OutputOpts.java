@@ -1,7 +1,7 @@
 package com.starcases.prime.cli;
 
-import java.util.Collections;
-import java.util.Set;
+import org.eclipse.collections.api.collection.ImmutableCollection;
+import org.eclipse.collections.api.factory.Sets;
 
 import com.starcases.prime.core.api.OutputableIntfc;
 
@@ -29,9 +29,8 @@ class OutputOpts
 	 * during processing
 	 * @return
 	 */
-	public Set<OutputableIntfc> getOutputOpers()
+	public ImmutableCollection<OutputableIntfc> getOutputOpers()
 	{
-
-		return outputOper == null ? Collections.emptySet() :  Set.of(outputOper);
+		return outputOper == null ? Sets.immutable.empty() :  Sets.immutable.of(outputOper);
 	}
 }
