@@ -44,7 +44,22 @@
 
 		<dependency>
 			<groupId>io.netty</groupId>
-			<artifactId>netty-all</artifactId>
+			<artifactId>netty-common</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-codec-http</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-codec</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-handler</artifactId>
 		</dependency>
 
 		<dependency>
@@ -57,27 +72,174 @@
 			<artifactId>antlr4-runtime</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjweaver</artifactId>
+		</dependency>
 
 	</dependencies>
 
 	<build>
 		<plugins>
+<!--			<plugin>
+				<groupId>org.moditect</groupId>
+				<artifactId>moditect-maven-plugin</artifactId>
+				<version>1.0.0.Final</version>
+				<executions>
+					<execution>
+						<id>generate-module-info</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate-module-info</goal>
+						</goals>
+						<configuration>
+							<modules>
+
+								<module>
+									<artifact>
+										<groupId>com.netflix.spectator</groupId>
+										<artifactId>spectator-api</artifactId>
+										<version>1.3.10</version>
+									</artifact>
+									<moduleInfo>
+										<name>com.netflix.spectator</name>
+										<exports>
+											*;
+										</exports>
+									</moduleInfo>
+								</module>
+
+								<module>
+									<artifact>
+										<groupId>com.netflix.spectator</groupId>
+										<artifactId>spectator-reg-atlas</artifactId>
+										<version>1.3.10</version>
+									</artifact>
+									<moduleInfo>
+										<name>com.netflix.spectator.atlas</name>
+										<exports>
+											*;
+										</exports>
+									</moduleInfo>
+								</module>
+
+								<module>
+									<artifact>
+										<groupId>io.netty</groupId>
+										<artifactId>netty-common</artifactId>
+										<version>4.1.86.Final</version>
+									</artifact>
+
+									<moduleInfo>
+										<name>io.netty.common</name>
+										<exports>
+											*;
+										</exports>
+									</moduleInfo>
+								</module>
+
+								<module>
+									<artifact>
+										<groupId>io.netty</groupId>
+										<artifactId>netty-transport-native-unix-common</artifactId>
+										<version>4.1.86.Final</version>
+									</artifact>
+
+									<moduleInfo>
+										<name>io.netty.common</name>
+										<exports>
+											*;
+										</exports>
+									</moduleInfo>
+								</module>
+
+								<module>
+									<artifact>
+										<groupId>io.netty</groupId>
+										<artifactId>netty-resolver</artifactId>
+										<version>4.1.86.Final</version>
+									</artifact>
+
+									<moduleInfo>
+										<name>io.netty.common</name>
+										<exports>
+											*;
+										</exports>
+									</moduleInfo>
+								</module>
+
+								<module>
+									<artifact>
+										<groupId>com.ibm.icu</groupId>
+										<artifactId>icu4j</artifactId>
+										<version>71.1</version>
+									</artifact>
+
+									<moduleInfo>
+										<name>com.ibm.icu</name>
+										<exports>
+											*;
+										</exports>
+									</moduleInfo>
+								</module>
+
+								<module>
+									<artifact>
+										<groupId>com.beanit</groupId>
+										<artifactId>asn1bean</artifactId>
+										<version>1.13.0</version>
+									</artifact>
+
+									<moduleInfo>
+										<name>com.beanit.asn1bean</name>
+										<exports>
+											*;
+										</exports>
+									</moduleInfo>
+								</module>
+
+								<module>
+									<artifact>
+										<groupId>io.micrometer</groupId>
+										<artifactId>micrometer-core</artifactId>
+										<version>1.9.2</version>
+									</artifact>
+
+									<moduleInfo>
+										<name>micrometer.core</name>
+										<exports>
+											*;
+										</exports>
+									</moduleInfo>
+								</module>
+
+								<module>
+									<artifact>
+										<groupId>org.aspectj</groupId>
+										<artifactId>aspectjweaver</artifactId>
+										<version>1.9.19</version>
+									</artifact>
+
+									<moduleInfo>
+										<name>org.aspectj</name>
+										<exports>
+											*;
+										</exports>
+									</moduleInfo>
+								</module>
+
+							</modules>
+							<jdepsExtraArgs>
+								<arg>- -multi-release</arg>
+								<arg>9</arg>
+							</jdepsExtraArgs>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>-->
 			<plugin>
 				<groupId>org.antlr</groupId>
 				<artifactId>antlr4-maven-plugin</artifactId>
-				<version>${antlr.version}</version>
-				<executions>
-					<execution>
-						<id>antlr</id>
-						<goals>
-							<goal>antlr4</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<listener>false</listener>
-					<visitor>true</visitor>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>

@@ -1,4 +1,4 @@
-open module com.starcases.prime.sql.api
+module com.starcases.prime.sql.api
 {
 	exports com.starcases.prime.sql.api;
 

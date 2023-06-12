@@ -6,12 +6,14 @@
 	<parent>
 		<groupId>com.starcases</groupId>
 		<artifactId>raw-java-base-pom</artifactId>
-		<version>1.0.7.1</version>
+		<version>1.0.7.2</version>
 	</parent>
-	<groupId>com.starcases.prime</groupId>
+	<groupId>
+		com.starcases.prime</groupId>
 	<artifactId>prime-tool-kit</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>pom</packaging>
+	<packaging>
+		pom</packaging>
 
 	<name>PrimeToolKit</name>
 	<description>Prime Tool Kit</description>
@@ -43,23 +45,19 @@
 		<plugins>
 
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
+				<groupId>
+					org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 
 				<configuration>
 					<annotationProcessorPaths>
 						<annotationProcessorPath>
-							<groupId>org.projectlombok</groupId>
+							<groupId>
+								org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
-							<version>1.18.26</version>
+							<version>
+								1.18.26</version>
 						</annotationProcessorPath>
-
-						<annotationProcessorPath>
-							<groupId>org.infinispan.protostream</groupId>
-							<artifactId>protostream-processor</artifactId>
-							<version>4.6.2.Final</version>
-						</annotationProcessorPath>
-
 					</annotationProcessorPaths>
 
 				</configuration>
@@ -93,5 +91,6 @@
 		<module>ptk-service-impl</module>
 		<module>ptk-sql-api</module>
 		<module>ptk-sql-impl</module>
+		<module>ptk-jlink</module>
 	</modules>
 </project>

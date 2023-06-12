@@ -4,7 +4,7 @@ module com.starcases.prime.service.impl
 
 	requires transitive com.starcases.prime.service.api;
 
-	requires lombok;
+	requires static lombok;
 	requires org.eclipse.collections.api;
 
 }

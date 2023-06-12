@@ -1,4 +1,4 @@
-open module com.starcases.prime.graph.visualize.api
+module com.starcases.prime.graph.visualize.api
 {
 	exports com.starcases.prime.graph.visualize.api;
 

@@ -1,4 +1,4 @@
-open module com.starcases.prime.preload.api {
+module com.starcases.prime.preload.api {
 
 	exports com.starcases.prime.preload.api;
 

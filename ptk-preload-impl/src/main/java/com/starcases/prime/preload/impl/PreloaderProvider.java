@@ -38,7 +38,7 @@ public class PreloaderProvider implements PreloaderProviderIntfc
 		if (preloader.load())
 		{
 			ret = Optional.of(preloader);
-		};
+		}
 		return ret;
 	}
 

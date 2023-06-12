@@ -1,4 +1,4 @@
-open module com.starcases.prime.metrics.api
+module com.starcases.prime.metrics.api
 {
 	exports com.starcases.prime.metrics.api;
 

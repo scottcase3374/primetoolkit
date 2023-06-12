@@ -18,9 +18,11 @@ import com.starcases.prime.common.api.PTKLogger;
 import com.starcases.prime.preload.api.PreloaderIntfc;
 import com.starcases.prime.preload.api.PrimeSubset;
 
+
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+
 
 /**
  * manage primes which were pre-determined from another source.
@@ -120,15 +122,21 @@ class PrimeLoader implements PreloaderIntfc
 
 		if (subset[0] != subsetIdx)
 		{
-			idxToPrimeCache.put(subsetIdx, subsetOfIdxToPrime);
-
+			//new Primes()
+			//new PrimeSubsetAsn().setPrimes();
 			subsetOfIdxToPrime = new PrimeSubset();
 			subsetOfIdxToPrime.alloc(SUBSET_SIZE);
 
 			subsetIdx = subset[0];
 		}
+		idxToPrimeCache.put(subsetIdx, subsetOfIdxToPrime);
 		subsetOfIdxToPrime.set(offset[0], val);
 		maxIdx = idx;
+	}
+
+
+	private void done()
+	{
 	}
 
 	/**
@@ -240,6 +248,8 @@ class PrimeLoader implements PreloaderIntfc
 				);
 
 		idxToPrimeCache.put(subsetIdx++, subsetOfIdxToPrime);
+
+		done();
 
 		return true;
 	}

@@ -11,9 +11,9 @@ module com.starcases.prime.core.impl
 
 	requires jakarta.validation;
 	requires java.logging;
-	requires lombok;
+	requires static lombok;
 	requires micrometer.core;
-	requires org.eclipse.collections.api;
+	requires transitive org.eclipse.collections.api;
 	requires org.eclipse.collections.impl;
 
 	provides com.starcases.prime.base.api.BaseTypesProviderIntfc with com.starcases.prime.base.impl.BaseTypesGlobalProvider;

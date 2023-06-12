@@ -1,4 +1,4 @@
-open module com.starcases.prime.cli
+module com.starcases.prime.cli
 {
 	exports com.starcases.prime.cli;
 

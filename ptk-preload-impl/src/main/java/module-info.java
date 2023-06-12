@@ -6,6 +6,7 @@ module com.starcases.prime.preload.impl
 	requires transitive com.starcases.prime.preload.api;
 	requires transitive com.starcases.prime.service.impl;
 
+	requires com.beanit.asn1bean;
 	requires cache.api;
 	requires java.compiler;
 	requires static lombok;
