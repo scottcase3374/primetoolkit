@@ -8,12 +8,6 @@
   <artifactId>ptk-metrics-api</artifactId>
 
   <dependencies>
-		<!-- Provided deps -->
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<scope>provided</scope>
-		</dependency>
 
 		<!-- runtime deps -->
 	  <dependency>

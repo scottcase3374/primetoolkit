@@ -11,13 +11,6 @@
 
 	<dependencies>
 
-		<!-- Provided deps -->
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
 		<!-- runtime deps -->
 		<dependency>
 			<groupId>com.starcases.prime</groupId>

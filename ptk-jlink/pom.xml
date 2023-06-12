@@ -9,7 +9,6 @@
 	</parent>
 	<artifactId>ptk-jlink</artifactId>
 	<packaging>jlink</packaging>
-	<name>ptk-jlink</name>
 
 	<dependencies>
 		<dependency>
