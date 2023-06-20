@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -13,7 +12,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -54,7 +52,7 @@ import com.starcases.prime.graph.export.api.ExportsProviderIntfc;
 import com.starcases.prime.logging.LogGraphStructure;
 import com.starcases.prime.logging.LogNodeStructure;
 import com.starcases.prime.metrics.api.MetricsRegistryProviderIntfc;
-import com.starcases.prime.preload.api.PrimeSubset;
+import com.starcases.prime.preload.api.PrimeSubsetIntfc;
 import com.starcases.prime.service.impl.SvcLoader;
 import com.starcases.prime.sql.api.SqlProviderIntfc;
 
@@ -89,8 +87,6 @@ public class DefaultInit implements Runnable
 	 * default logger
 	 */
 	private static final Logger LOG = Logger.getLogger(DefaultInit.class.getName());
-
-	private static final BiFunction<Long, Path, PrimeSubset> loader = (K, P) -> null; //Paths.get(P.toString(), K.toString()).toFile();
 
 	/**
 	 * for matching output type names to base-type names
@@ -402,7 +398,7 @@ public class DefaultInit implements Runnable
 		final SvcLoader<CacheProviderIntfc, Class<CacheProviderIntfc>> cacheProvider =
 				new SvcLoader< >(CacheProviderIntfc.class);
 
-		final ImmutableList<String> cacheAttributes = Lists.immutable.of("CACHE");
+		final ImmutableList<String> cacheAttributes = Lists.immutable.of("CACHE", "PRIMES");
 
 		actions.add(s -> {
 
@@ -411,10 +407,16 @@ public class DefaultInit implements Runnable
 			@SuppressWarnings({"PMD.LocalVariableNamingConventions"})
 			final String CACHE_NAME = "primes";
 			final String inputFolderPath = initOpts.getInputDataFolder();
-			final Cache<Long,PrimeSubset> cache = cacheProvider
+			final boolean loadRawPrimes = initOpts.isLoadPrimes();
+			final Cache<Long,PrimeSubsetIntfc> cache = cacheProvider
 													.provider(cacheAttributes)
-													.map(p -> p.<Long, PrimeSubset>create(Path.of(replaceTildeHome(initOpts.getOutputFolder()), CACHE_NAME), loader, null))
+													.map(p -> p.<Long, PrimeSubsetIntfc>create(
+																Path.of(replaceTildeHome(initOpts.getOutputFolder()), CACHE_NAME),
+																loadRawPrimes /* clear any existing prime cache first */
+																) )
 													.orElseThrow();
+
+
 
 			PTKFactory.setCache(cache);
 
@@ -425,7 +427,7 @@ public class DefaultInit implements Runnable
 			final var alreadyLoaded = cacheIdx0idx2 == 3;
 
 			final var inputFoldExist = ensureFolderExist(inputFolderPath);
-			final var loadRawPrimes = initOpts.isLoadPrimes();
+
 
 			if (loadRawPrimes && !alreadyLoaded && inputFoldExist)
 			{

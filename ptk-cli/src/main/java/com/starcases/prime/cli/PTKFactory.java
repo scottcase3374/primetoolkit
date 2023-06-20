@@ -22,7 +22,7 @@ import com.starcases.prime.datamgmt.api.CollectionTrackerProviderIntfc;
 import com.starcases.prime.metrics.api.MetricProviderIntfc;
 import com.starcases.prime.preload.api.PreloaderIntfc;
 import com.starcases.prime.preload.api.PreloaderProviderIntfc;
-import com.starcases.prime.preload.api.PrimeSubset;
+import com.starcases.prime.preload.api.PrimeSubsetIntfc;
 import com.starcases.prime.service.impl.SvcLoader;
 
 import org.eclipse.collections.api.collection.ImmutableCollection;
@@ -90,7 +90,7 @@ public final class PTKFactory
 
 	@Getter
 	@Setter
-	private static Cache<Long,PrimeSubset> cache;
+	private static Cache<Long,PrimeSubsetIntfc> cache;
 
 	@Getter
 	@Setter

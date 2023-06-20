@@ -5,6 +5,6 @@ import java.util.OptionalLong;
 public interface PreloaderIntfc
 {
 	 OptionalLong retrieve(final long idx);
-	 long getMaxIdx();
-	 boolean load();
+	 long getMaxOffset();
+	 boolean primeTextloader();
 }

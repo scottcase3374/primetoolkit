@@ -1,17 +1,24 @@
 package com.starcases.prime.cache.impl;
 
+import com.beanit.asn1bean.ber.types.BerInteger;
+import com.starcases.prime.preload.api.PrimeSubsetIntfc;
+
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.DirectoryIteratorException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.FileAttribute;
-import java.nio.file.attribute.PosixFilePermission;
-import java.nio.file.attribute.PosixFilePermissions;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import javax.cache.Cache;
 import javax.cache.CacheManager;
@@ -25,7 +32,6 @@ import javax.cache.processor.EntryProcessorResult;
 import org.eclipse.collections.api.factory.Maps;
 import org.eclipse.collections.api.map.MutableMap;
 
-
 import lombok.NonNull;
 
 /**
@@ -35,21 +41,15 @@ import lombok.NonNull;
  * @param <K>
  * @param <V>
  */
-class PrimeCache<K,V> implements Cache<K,V>
+class PrimeCacheImpl<K,V> implements Cache<K,V>
 {
 	/**
 	 * default logger
 	 */
-	private static final Logger LOG = Logger.getLogger(PrimeCache.class.getName());
-
-	private static final FileAttribute<Set<PosixFilePermission>> fileAttrs = PosixFilePermissions
-			.asFileAttribute(Set.of(new PosixFilePermission []{
-											PosixFilePermission.OWNER_WRITE,
-											PosixFilePermission.OWNER_READ}));
+	private static final Logger LOG = Logger.getLogger(PrimeCacheImpl.class.getName());
 
 	private final Path pathToCacheDir;
 	private final MutableMap<K,V> keysToValue = Maps.mutable.empty();
-	private final BiFunction<K, Path, V> load;
 
 	/**
 	 * constructor
@@ -57,9 +57,8 @@ class PrimeCache<K,V> implements Cache<K,V>
 	 * @param cacheName
 	 * @param pathToCacheDirs
 	 */
-	public PrimeCache(@NonNull final String cacheName, @NonNull final Path pathToCacheDirs, @NonNull final BiFunction<K, Path, V> load)
+	public PrimeCacheImpl(@NonNull final String cacheName, @NonNull final Path pathToCacheDirs, final boolean clearCache)
 	{
-		this.load = load;
 		try
 		{
 			if (LOG.isLoggable(Level.INFO))
@@ -70,6 +69,10 @@ class PrimeCache<K,V> implements Cache<K,V>
 			final Path pathToCache = Path.of(pathToCacheDirs.toString(), cacheName).normalize();
 			pathToCacheDir = Files.createDirectories(pathToCache);
 
+			if (clearCache)
+			{
+				clearCache();
+			}
 		}
 		catch(final IOException e)
 		{
@@ -77,10 +80,63 @@ class PrimeCache<K,V> implements Cache<K,V>
 		}
 	}
 
+	private void clearCache()
+	{
+		try (DirectoryStream<Path> stream = Files.newDirectoryStream(pathToCacheDir, "[0-9]*"))
+		{
+		    for (Path file: stream)
+		    {
+		    	Files.delete(file);
+		    }
+		} catch (IOException | DirectoryIteratorException x)
+		{
+		    System.err.println(x);
+		}
+	}
+
+
+	public void loadCache(@NonNull BiFunction<Long, long[], Integer> loader)
+	{
+		try (Stream<Path> stream = Files
+				.list(pathToCacheDir)
+				.filter(f -> f.getFileName().toString().matches("[0-9]+"))
+				.sorted((x,y) -> Integer.valueOf(x.getFileName().toString()).compareTo(Integer.valueOf(y.getFileName().toString())));)
+		{
+		    stream.forEach(path ->
+		    	{
+				  final var subsetAsn = new PrimeSubsetAsn();
+
+				  try
+				  {
+					  subsetAsn.decode(Files.newInputStream(path), true);
+				  }
+				  catch(final IOException e)
+				  {
+					  throw new RuntimeException(e);
+				  }
+
+
+				  final int count = subsetAsn.getMaxOffsetAssigned().intValue();
+				  final long[] primes = new long[count];
+
+				  for (int i=0; i<count; i++)
+				  {
+					  primes[i] = subsetAsn.getPrimes().getBerInteger().get(i).longValue();
+				  }
+
+				  loader.apply(Long.valueOf(path.getFileName().toString()), primes);
+		    	});
+		}
+		catch (IOException | DirectoryIteratorException x)
+		{
+		    System.err.println(x);
+		}
+	}
+
 	@Override
 	public V get(@NonNull final K key)
 	{
-		return keysToValue.getIfAbsentPut(key, () -> load != null ? load.apply(key, pathToCacheDir) : null);
+		return keysToValue.get(key);
 	}
 
 	@Override
@@ -104,6 +160,39 @@ class PrimeCache<K,V> implements Cache<K,V>
 	public void put(@NonNull final K key, @NonNull final V value)
 	{
 		keysToValue.put(key, value);
+		persist(key, value);
+	}
+
+
+	  private void persist(@NonNull final K keyVal, @NonNull final V subsetVal)
+	  {
+		  if (subsetVal instanceof PrimeSubsetIntfc subset && keyVal instanceof Long key)
+		  {
+			  try
+			  {
+				  final var subsetAsn = new PrimeSubsetAsn();
+				  final int count = (int)subset.getMaxOffsetAssigned();
+				  subsetAsn.setMaxOffsetAssigned(new BerInteger(count));
+
+				  final List<BerInteger> berInts =  new ArrayList<>(count);
+				  for (long i : subset.getEntries())
+				  {
+					  berInts.add(new BerInteger(i));
+				  }
+
+				  final PrimeSubsetAsn.Primes pr = new PrimeSubsetAsn.Primes();
+				  pr.getBerInteger().addAll(berInts);
+				  subsetAsn.setPrimes(pr);
+
+				  OutputStream os = new FileOutputStream(Path.of(pathToCacheDir.toString(), key.toString()).toFile());
+
+				  int res = subsetAsn.encode(os, true);
+				  System.out.println(String.format("encode output res: %d  input-count: %d", res, count));
+			  } catch(IOException e)
+			  {
+				  // TODO Auto-generated catch block e.printStackTrace();
+			  }
+		  }
 	}
 
 	@Override
@@ -222,7 +311,7 @@ class PrimeCache<K,V> implements Cache<K,V>
 	@Override
 	public <T> T unwrap(@NonNull final Class<T> clazz)
 	{
-		return null;
+		return clazz.cast(this);
 	}
 
 	@Override

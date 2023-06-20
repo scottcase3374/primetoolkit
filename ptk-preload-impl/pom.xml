@@ -10,11 +10,6 @@
   <dependencies>
 
 		<!-- runtime deps -->
-		<dependency>
-			<groupId>com.beanit</groupId>
-			<artifactId>asn1bean</artifactId>
-		</dependency>
-
 	  <dependency>
 		  <groupId>com.starcases.prime</groupId>
 		  <artifactId>ptk-core-api</artifactId>

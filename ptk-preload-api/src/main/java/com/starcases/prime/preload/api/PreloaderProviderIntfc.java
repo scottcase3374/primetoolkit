@@ -13,5 +13,5 @@ import lombok.NonNull;
 
 public interface PreloaderProviderIntfc extends SvcProviderBaseIntfc
 {
-	<K,V> Optional<PreloaderIntfc> create(@NonNull final Cache<Long, PrimeSubset> cache, @NonNull final Path path, final ImmutableMap<String,Object> settings);
+	Optional<PreloaderIntfc> create(@NonNull final Cache<Long, PrimeSubsetIntfc> cache, @NonNull final Path path, final ImmutableMap<String,Object> settings);
 }

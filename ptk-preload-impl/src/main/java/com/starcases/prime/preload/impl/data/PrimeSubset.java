@@ -1,4 +1,6 @@
-package com.starcases.prime.preload.api;
+package com.starcases.prime.preload.impl.data;
+
+import com.starcases.prime.preload.api.PrimeSubsetIntfc;
 
 import lombok.Getter;
 
@@ -8,24 +10,32 @@ import lombok.Getter;
  * high at large scale so bundling items reduces the overhead.
  */
 
-public class PrimeSubset
+public class PrimeSubset implements PrimeSubsetIntfc
 {
 	/**
 	 * Array of entries bundled together
 	 */
 	@Getter
-	//@ProtoField(number = 1)
 	protected long [] entries;
 
 
 	@Getter
-	protected long maxOffsetAssigned;
+	protected int maxOffsetAssigned;
 
 	/**
 	 * Constructor for the container used for bundling prime/bases.
 	 * @param entries
 	 */
-	//@ProtoFactory
+	public PrimeSubset(final int count, final long ... entries)
+	{
+		this.maxOffsetAssigned = count;
+		this.entries = entries.clone();
+	}
+
+	/**
+	 * Constructor for the container used for bundling prime/bases.
+	 * @param entries
+	 */
 	public PrimeSubset(final long ... entries)
 	{
 		this.entries = entries.clone();
@@ -41,6 +51,7 @@ public class PrimeSubset
 	 * Method for runtime allocation of the desired container size.
 	 * @param subsetSize
 	 */
+	@Override
 	public void alloc(final int subsetSize)
 	{
 		entries = new long[subsetSize];
@@ -52,6 +63,7 @@ public class PrimeSubset
 	 * @param offset
 	 * @param val
 	 */
+	@Override
 	public void set(final int offset, final long val)
 	{
 		entries[offset] = val;
@@ -63,11 +75,13 @@ public class PrimeSubset
 	 * @param offset
 	 * @return
 	 */
+	@Override
 	public long get(final int offset)
 	{
 		return entries[offset];
 	}
 
+	@Override
 	public String toString()
 	{
 		return String.format("entry-storage:[%d] max-offset-assigned[%d]", entries.length, maxOffsetAssigned);

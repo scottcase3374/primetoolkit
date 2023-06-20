@@ -12,7 +12,9 @@ import org.eclipse.collections.api.map.ImmutableMap;
 
 import com.starcases.prime.preload.api.PreloaderIntfc;
 import com.starcases.prime.preload.api.PreloaderProviderIntfc;
-import com.starcases.prime.preload.api.PrimeSubset;
+import com.starcases.prime.preload.api.PrimeSubsetIntfc;
+
+import lombok.NonNull;
 
 /**
  *
@@ -30,12 +32,12 @@ public class PreloaderProvider implements PreloaderProviderIntfc
 	 * create target service.
 	 */
 	@Override
-	public <K,V> Optional<PreloaderIntfc> create(final Cache<Long, PrimeSubset> cache, final Path path, final ImmutableMap<String,Object> settings)
+	public Optional<PreloaderIntfc> create(@NonNull final Cache<Long, PrimeSubsetIntfc> cache, @NonNull final Path path, final ImmutableMap<String,Object> settings)
 	{
-		final var  preloader = new PrimeLoader(cache, path);
+		final var  preloader = new PrimePreloaderImpl(cache, path);
 
 		Optional<PreloaderIntfc> ret = Optional.empty();
-		if (preloader.load())
+		if (preloader.primeTextloader())
 		{
 			ret = Optional.of(preloader);
 		}

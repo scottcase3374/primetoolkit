@@ -13,8 +13,19 @@
 
 		<!-- runtime deps -->
 		<dependency>
+			<groupId>com.beanit</groupId>
+			<artifactId>asn1bean</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>com.starcases.prime</groupId>
 			<artifactId>ptk-cache-api</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.starcases.prime</groupId>
+			<artifactId>ptk-preload-api</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 
@@ -29,4 +40,51 @@
 		</dependency>
 
 	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>3.1.0</version>
+		        <executions>
+		          <execution>
+					  <id>mkdir-asn1</id>
+					  <phase>initialize</phase>
+		            <goals>
+		              <goal>exec</goal>
+		            </goals>
+		          </execution>
+		        </executions>
+
+				<configuration>
+					<executable>mkdir</executable>
+          			<commandlineArgs>target/generated-sources/asn.1</commandlineArgs>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>3.1.0</version>
+		        <executions>
+		          <execution>
+					  <id>asn1bean</id>
+					  <phase>generate-sources</phase>
+		            <goals>
+		              <goal>exec</goal>
+		            </goals>
+		          </execution>
+		        </executions>
+
+				<configuration>
+					<executable>/home/scott/dev/src/lang/java/asn1bean/bin/asn1bean-compiler</executable>
+					<sourceRoot>${project.basedir}/target/generated-sources/asn.1</sourceRoot>
+          			<commandlineArgs>
+						-f ${project.basedir}/src/main/asn.1/com/starcases/prime/cache/impl/subset.asn1 -o ${project.basedir}/target/generated-sources/asn.1 -p com.starcases.prime.cache
+          			</commandlineArgs>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>

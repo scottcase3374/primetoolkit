@@ -14,13 +14,15 @@ import java.util.zip.ZipFile;
 
 import javax.cache.Cache;
 
+
 import com.starcases.prime.common.api.PTKLogger;
 import com.starcases.prime.preload.api.PreloaderIntfc;
-import com.starcases.prime.preload.api.PrimeSubset;
-
+import com.starcases.prime.preload.api.PrimeSubsetIntfc;
+import com.starcases.prime.preload.impl.data.PrimeSubset;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 
 
@@ -29,9 +31,9 @@ import lombok.Setter;
  * Typically loaded from files sourced from various internet
  * sites.
  */
-class PrimeLoader implements PreloaderIntfc
+class PrimePreloaderImpl implements PreloaderIntfc
 {
-	Logger LOG = Logger.getLogger(PrimeLoader.class.getName());
+	Logger LOG = Logger.getLogger(PrimePreloaderImpl.class.getName());
 
 	/**
 	 * Define the number of bits to batch together to reduce the number of
@@ -50,10 +52,10 @@ class PrimeLoader implements PreloaderIntfc
 	private static final int SUBSET_SIZE = 1 << SUBSET_BITS;
 
 	/**
-	 * represents max-assigned idx
+	 * represents max-assigned offset for a batch (subset).
 	 */
 	@Getter
-	private long maxIdx = -1;
+	private long maxOffset = -1;
 
 	/**
 	 * Paths to source folders containing files of any pre-computed prime/base info.
@@ -74,7 +76,7 @@ class PrimeLoader implements PreloaderIntfc
 	 * 	Map index to prime#.
 	 */
 	@Getter(AccessLevel.PRIVATE)
-	private final Cache<Long,PrimeSubset> idxToPrimeCache;
+	private final Cache<Long,PrimeSubsetIntfc> idxToPrimeCache;
 
 	/**
 	 * Break linear index range into indexed batches of indexed items.
@@ -90,11 +92,17 @@ class PrimeLoader implements PreloaderIntfc
 	 *
 	 * @param sourceFolders
 	 */
-	public PrimeLoader(final Cache<Long, PrimeSubset> idxToPrimeCache, final Path ... sourceFolders)
+	public PrimePreloaderImpl(final Cache<Long, PrimeSubsetIntfc> idxToPrimeCache, final Path ... sourceFolders)
 	{
 		this.idxToPrimeCache = idxToPrimeCache;
 		this.sourceFolders = sourceFolders.clone();
 		subsetOfIdxToPrime.alloc(SUBSET_SIZE);
+
+		/*
+		 * BiFunction<Long, long[], Integer> loadCache = (key, primes) -> {
+		 * idxToPrimeCache.put(key, generateSubset(primes.length, primes)); return 0; };
+		 */
+
 	}
 
 	/**
@@ -104,7 +112,7 @@ class PrimeLoader implements PreloaderIntfc
 	 * @param retSubset
 	 * @param retOffset
 	 */
-	private void convertIdxToSubsetAndOffset(final long idx, final long [] retSubset, final int [] retOffset)
+	private void convertIdxToSubsetAndOffset(final long idx, @NonNull final long [] retSubset, @NonNull final int [] retOffset)
 	{
 		final long subsetId = idx / SUBSET_SIZE;
 		final int offset = (int)(idx % SUBSET_SIZE);
@@ -122,21 +130,15 @@ class PrimeLoader implements PreloaderIntfc
 
 		if (subset[0] != subsetIdx)
 		{
-			//new Primes()
-			//new PrimeSubsetAsn().setPrimes();
+			idxToPrimeCache.put(subsetIdx, subsetOfIdxToPrime);
 			subsetOfIdxToPrime = new PrimeSubset();
 			subsetOfIdxToPrime.alloc(SUBSET_SIZE);
 
 			subsetIdx = subset[0];
 		}
-		idxToPrimeCache.put(subsetIdx, subsetOfIdxToPrime);
+
 		subsetOfIdxToPrime.set(offset[0], val);
-		maxIdx = idx;
-	}
-
-
-	private void done()
-	{
+		maxOffset = offset[0];
 	}
 
 	/**
@@ -152,7 +154,7 @@ class PrimeLoader implements PreloaderIntfc
 		final int [] retOffset = {0};
 		convertIdxToSubsetAndOffset(idx, retSubset, retOffset);
 
-		final var subset = idxToPrimeCache.get(retSubset[0]);
+		final PrimeSubsetIntfc subset = idxToPrimeCache.get(retSubset[0]);
 		return subset != null ? OptionalLong.of(subset.get(retOffset[0])) : OptionalLong.empty();
 	}
 
@@ -164,7 +166,7 @@ class PrimeLoader implements PreloaderIntfc
 	 * @return
 	 */
 	@Override
-	public boolean load()
+	public boolean primeTextloader()
 	{
 		final int [] index = {0};
 
@@ -183,7 +185,7 @@ class PrimeLoader implements PreloaderIntfc
 													   Integer.valueOf(b.getFileName().toString().split("(s|\\.)")[1]) ))
 					 				.forEach( fileRef ->
 					 				{
-					 					PTKLogger.dbgOutput("file: %s", fileRef.toString());
+					 					PTKLogger.dbgOutput("Raw text input file: %s", fileRef.toString());
 	 									try
 	 									{
 	 										final Path tmpPath = fileRef;
@@ -248,8 +250,6 @@ class PrimeLoader implements PreloaderIntfc
 				);
 
 		idxToPrimeCache.put(subsetIdx++, subsetOfIdxToPrime);
-
-		done();
 
 		return true;
 	}

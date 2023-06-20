@@ -27,4 +27,5 @@ module com.starcases.prime.cli
 	uses com.starcases.prime.preload.api.PreloaderProviderIntfc;
 	uses com.starcases.prime.base.api.BaseTypesIntfc;
 	uses com.starcases.prime.metrics.api.MetricProviderIntfc;
+	uses com.starcases.prime.preload.api.PrimeSubsetProviderIntfc;
 }

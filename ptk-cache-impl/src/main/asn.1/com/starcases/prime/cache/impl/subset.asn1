@@ -1,0 +1,11 @@
+Impl DEFINITIONS AUTOMATIC TAGS ::= BEGIN
+
+	--------------------------------------------------------------------
+	-- PrimeSubset
+	--------------------------------------------------------------------
+	PrimeSubsetAsn ::= SEQUENCE
+	{
+	   primes                   SEQUENCE OF INTEGER,
+	   maxOffsetAssigned		INTEGER
+	}
+END

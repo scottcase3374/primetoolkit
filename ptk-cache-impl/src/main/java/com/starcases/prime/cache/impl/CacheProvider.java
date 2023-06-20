@@ -1,16 +1,10 @@
 package com.starcases.prime.cache.impl;
 
 import java.nio.file.Path;
-import java.util.function.BiFunction;
-
 import javax.cache.Cache;
-
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.ImmutableList;
-import org.eclipse.collections.api.map.ImmutableMap;
-
 import com.starcases.prime.cache.api.CacheProviderIntfc;
-
 import lombok.NonNull;
 
 /**
@@ -35,9 +29,9 @@ public class CacheProvider implements CacheProviderIntfc
 	 * @return
 	 */
 	@Override
-	public <K,V> Cache<K,V> create( @NonNull final Path cache, @NonNull final BiFunction<K, Path, V> load, final ImmutableMap<String,Object> settings)
+	public <K,V> Cache<K,V> create( @NonNull final Path cache, final boolean clearCache)
 	{
-		return new PrimeCache<>(cache.getFileName().toString(), cache.getParent(), load);
+		return new PrimeCacheImpl<>(cache.getFileName().toString(), cache.getParent(), clearCache);
 	}
 
 	/**
