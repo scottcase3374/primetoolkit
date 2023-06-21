@@ -38,6 +38,10 @@ import com.starcases.prime.base.impl.BaseTypes;
 import com.starcases.prime.base.impl.PrimeMultiBaseContainer;
 
 import com.starcases.prime.cache.api.CacheProviderIntfc;
+import com.starcases.prime.cache.api.persistload.PersistLoaderProviderIntfc;
+import com.starcases.prime.cache.api.subset.PrimeSubsetIntfc;
+import com.starcases.prime.cache.api.subset.PrimeSubsetProviderIntfc;
+import com.starcases.prime.cache.impl.PrimeCacheImpl;
 import com.starcases.prime.cli.MetricsOpts.MetricOpt;
 import com.starcases.prime.common.api.OutputOper;
 import com.starcases.prime.common.api.PTKLogger;
@@ -52,7 +56,6 @@ import com.starcases.prime.graph.export.api.ExportsProviderIntfc;
 import com.starcases.prime.logging.LogGraphStructure;
 import com.starcases.prime.logging.LogNodeStructure;
 import com.starcases.prime.metrics.api.MetricsRegistryProviderIntfc;
-import com.starcases.prime.preload.api.PrimeSubsetIntfc;
 import com.starcases.prime.service.impl.SvcLoader;
 import com.starcases.prime.sql.api.SqlProviderIntfc;
 
@@ -321,7 +324,7 @@ public class DefaultInit implements Runnable
 		final Path stdOutPath = this.decorateFileName("std", "out", "log");
 		if (stdOutPath != null)
 		{
-			// Point standard out to our selected output file.
+			// Point standard-out to our pre-generated output filename.
 			PTKLogger.setOutput("stdout", stdOutPath);
 		}
 		else
@@ -347,7 +350,7 @@ public class DefaultInit implements Runnable
 			final ImmutableCollection<String> attributes = Lists.immutable.of("METRICS");
 			actions.add(s ->  registryProviders
 								.providers(attributes)
-								.tap(p -> System.out.println("metric: " + p.toString()))
+								.tap(p -> LOG.info("metric: " + p.toString()))
 								.forEach(p -> p.create(null).create(null)));
 		}
 	}
@@ -398,54 +401,57 @@ public class DefaultInit implements Runnable
 		final SvcLoader<CacheProviderIntfc, Class<CacheProviderIntfc>> cacheProvider =
 				new SvcLoader< >(CacheProviderIntfc.class);
 
-		final ImmutableList<String> cacheAttributes = Lists.immutable.of("CACHE", "PRIMES");
-
 		actions.add(s -> {
 
 			final FactoryIntfc factory = PTKFactory.getFactory();
 
+			// Create cache instance and if requested - clear out existing primes [persisted]; no in-memory primes should
+			// exist yet since we haven't loaded the raw primes nor have we tried to load persisted primes.
 			@SuppressWarnings({"PMD.LocalVariableNamingConventions"})
 			final String CACHE_NAME = "primes";
 			final String inputFolderPath = initOpts.getInputDataFolder();
 			final boolean loadRawPrimes = initOpts.isLoadPrimes();
+			final Path CACHE_PATH = Path.of(replaceTildeHome(initOpts.getOutputFolder()), CACHE_NAME);
 			final Cache<Long,PrimeSubsetIntfc> cache = cacheProvider
-													.provider(cacheAttributes)
+													.provider(Lists.immutable.of("CACHE", "PRIMES"))
 													.map(p -> p.<Long, PrimeSubsetIntfc>create(
-																Path.of(replaceTildeHome(initOpts.getOutputFolder()), CACHE_NAME),
+																CACHE_PATH,
 																loadRawPrimes /* clear any existing prime cache first */
 																) )
 													.orElseThrow();
 
-
-
 			PTKFactory.setCache(cache);
-
-			// Use idx 2 which would be prime 3 for determining if cache was loaded / pre-loaded propertly. Since Primes 1 and 2 may be hard coded in
-			// places, it is safer to use the 1st item which is never hardcoded.
-			final var cacheIdx0 = cache.get(0L);
-			final var cacheIdx0idx2 = cacheIdx0 != null ? cacheIdx0.get(2) : -1L;
-			final var alreadyLoaded = cacheIdx0idx2 == 3;
 
 			final var inputFoldExist = ensureFolderExist(inputFolderPath);
 
+			// Setup for persistent data load
+			final PrimeSubsetProviderIntfc subsetProvider = new SvcLoader<PrimeSubsetProviderIntfc, Class<PrimeSubsetProviderIntfc>>(PrimeSubsetProviderIntfc.class)
+					.provider(Lists.immutable.of("PRIMESUBSET")).orElseThrow();
 
-			if (loadRawPrimes && !alreadyLoaded && inputFoldExist)
+			// Load previously persisted primes (primes previously cached - NOT the raw text prime data)
+			new SvcLoader< >(PersistLoaderProviderIntfc.class)
+				.provider(Lists.immutable.of("PERSISTLOADER"))
+				.ifPresent(p -> p.create(cache, CACHE_PATH, subsetProvider, null).process());
+
+			if (loadRawPrimes && (cache.get(0L) == null))
 			{
 				if (LOG.isLoggable(Level.INFO))
 				{
-					LOG.info(String.format("CREATING PrimeSrc : Loading cache from raw files ; Cache already loaded: [%b], Input folder exists: [%b], do-load-raw-primes[%b]",  alreadyLoaded, inputFoldExist, loadRawPrimes));
+					LOG.info(String.format("CREATING PrimeSrc : Loading cache from raw files ; Input folder exists: [%b], do-load-raw-primes[%b]", inputFoldExist, loadRawPrimes));
 				}
 
 				PTKFactory.setInputFolderPath(Path.of(replaceTildeHome(inputFolderPath)));
 
 				primeSrc = factory.getPrimeSource(true);
+				cache.unwrap(PrimeCacheImpl.class).persistAll();
 			}
 			else
 			{
 				if (LOG.isLoggable(Level.INFO))
 				{
-					LOG.info(String.format("CREATING PrimeSrc: NOT loading Cache ; Cache already loaded: [%b], Input folder exists: [%b], do-load-raw-primes[%b]",  alreadyLoaded, inputFoldExist, loadRawPrimes));
+					LOG.info(String.format("CREATING PrimeSrc: NOT loading Cache ; Input folder exists: [%b], do-load-raw-primes[%b]", inputFoldExist, loadRawPrimes));
 				}
+
 				primeSrc = factory.getPrimeSource(false);
 			}
 

@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.starcases.prime.base.api.BaseGenIntfc;
+import com.starcases.prime.cache.api.preload.PreloaderIntfc;
 import com.starcases.prime.common.api.OutputOper;
 import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
@@ -27,7 +28,6 @@ import com.starcases.prime.datamgmt.api.PrimeMapEntry;
 import com.starcases.prime.datamgmt.api.PrimeMapIterator;
 import com.starcases.prime.metrics.api.MetricIntfc;
 import com.starcases.prime.metrics.api.MetricProviderIntfc;
-import com.starcases.prime.preload.api.PreloaderIntfc;
 
 import lombok.AccessLevel;
 import lombok.Getter;

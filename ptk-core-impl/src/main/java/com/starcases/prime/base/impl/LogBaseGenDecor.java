@@ -19,7 +19,6 @@ public class LogBaseGenDecor implements BaseGenIntfc
 	  @Override
 	  public void genBasesForPrimeRef(@NonNull final PrimeRefIntfc curPrime)
 	  {
-		  System.out.println("base gen logger");
 		  PTKLogger.output(generator.getBaseType(), "Base gen: prime [%d] index [%d]%n",
 					  getBaseType().name(),
 					  curPrime.getPrime(),

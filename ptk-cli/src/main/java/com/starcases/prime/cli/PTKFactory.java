@@ -12,6 +12,9 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
 import com.starcases.prime.base.api.PrimeBaseIntfc;
+import com.starcases.prime.cache.api.preload.PreloaderIntfc;
+import com.starcases.prime.cache.api.preload.PreloaderProviderIntfc;
+import com.starcases.prime.cache.api.subset.PrimeSubsetIntfc;
 import com.starcases.prime.core.api.FactoryIntfc;
 import com.starcases.prime.core.api.PrimeSourceFactoryIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
@@ -20,9 +23,6 @@ import com.starcases.prime.core.impl.PrimeSource;
 import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
 import com.starcases.prime.datamgmt.api.CollectionTrackerProviderIntfc;
 import com.starcases.prime.metrics.api.MetricProviderIntfc;
-import com.starcases.prime.preload.api.PreloaderIntfc;
-import com.starcases.prime.preload.api.PreloaderProviderIntfc;
-import com.starcases.prime.preload.api.PrimeSubsetIntfc;
 import com.starcases.prime.service.impl.SvcLoader;
 
 import org.eclipse.collections.api.collection.ImmutableCollection;

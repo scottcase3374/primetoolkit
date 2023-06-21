@@ -21,6 +21,7 @@ Primes can have bases generated via different methodologies, etc - such as where
 - Experiment with Java features in versions > Java 11
 - Research properties of prime numbers
 - Experiment with Java Module System
+- Experiment with ASN.1
 - Implement a small "language" and interpreter since I enjoy working with Lexical Analysis/Parsing systems.
 - Research data structures for use as primes numbers become very large
 	- Track bases of primes (sums of primes that add to current prime)
@@ -36,7 +37,8 @@ Some of the technology tried/used.
 - Java 18+
 - Picocli - command line handling
 - JBoss Infinispan - caching; Note I had to remove Infinispan since it ended up incompatible with Java modules when embedded.
-- Protobuf - related to caching
+- Protobuf - related to caching; removed this when I removed Infinispan caching.
+- ASN.1 - This with plain collections + some file handling created a very "low-feature" replacement of Infinispan and its data persistence to files.
 - Gson - PrimeSQL language results output as json
 - Eclipse Collections - alternative for standard java for lower memory usage, etc.
 - Antlr4 - parsing and processing a very simple "SQL like" language for primes that
@@ -331,7 +333,7 @@ Prime [1583] idx[250]
 which is interpreted as: Prime value 1583 is represented by: 1 x 155 + 2 x 318 + 3 x 264
 
 ## Design
-The current design is extensible (Java ServiceLoader mechanism implemented for the different "bases").
+The current design is extensible. I've implemented the Java Service Loader mechanism for the different "base" types. Also, most "components" are implemented as (Service Loader) services as well.
 
 ## Implementation
 - Command line parsing is handled using the picocli library and the resulting options processed; resulting in
@@ -341,9 +343,6 @@ information and then new base generation, logging and graphing actions are added
 
 ## Limitations / issues
 There are some limitations in with the current design.
-- The cache isn't leveraged very well. It was only used to validate that no gaps in
-primes existed.
-- Running the application implies regenerating all the primes each time.
 - The current data structures are fairly memory efficient but still drastically limit the
 maximum number of primes that can be manipulated. The total number of primes managed
 is related to the amount of system memory on a single computer.
@@ -357,13 +356,15 @@ Issues
 	- fix / add API documentation as needed after last major refactoring
 	- Improve package organization; DONE
 	- implement service loader; DONE / IMPROVE AS NEEDED
-	- use Java module system; DONE / IMPROVE AS NEEDED
+	- Enable more uses for caching; ON-GOING - primes are loaded from text files, persisted as ASN.1 to files and loaded at startup into the "cache" collection.
+	- use Java module system; DONE / IMPROVE AS NEEDED (ensure only compatible libs/frameworks are used)
 	- Should not generate default base as part of prime selection/load; construct default base just like other bases.; DONE
 	- Increase test coverage.
 	- Improve metrics handling.
-	- Fix / reimplement cache support.
+	- Fix / reimplement cache support; DONE (replace Infinispan with simple uses of plain collections and ASN.1 encoded data stored in files)
 	- More generic / useful methods for identifying patterns in the bases/data.
 	- More remote command support; ON-GOING
 	- Improved reporting / visualization.
 	- Break up the monolith and use a more event oriented design. Details TBD.
+	- Provide "SQL/DDL" type support to extend current cached primes / data.
 

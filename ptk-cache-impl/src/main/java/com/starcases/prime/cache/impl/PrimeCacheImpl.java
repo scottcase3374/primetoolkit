@@ -1,10 +1,13 @@
 package com.starcases.prime.cache.impl;
 
+import com.beanit.asn1bean.ber.ReverseByteArrayOutputStream;
 import com.beanit.asn1bean.ber.types.BerInteger;
-import com.starcases.prime.preload.api.PrimeSubsetIntfc;
+import com.starcases.prime.cache.api.subset.PrimeSubsetIntfc;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.DirectoryIteratorException;
 import java.nio.file.DirectoryStream;
@@ -15,10 +18,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 
 import javax.cache.Cache;
 import javax.cache.CacheManager;
@@ -38,10 +39,10 @@ import lombok.NonNull;
  *
  * @author scott
  *
- * @param <K>
- * @param <V>
+ * @param <K> Long
+ * @param <V> PrimeSubsetIntfc
  */
-class PrimeCacheImpl<K,V> implements Cache<K,V>
+public class PrimeCacheImpl<K,V> implements Cache<K,V>
 {
 	/**
 	 * default logger
@@ -94,45 +95,6 @@ class PrimeCacheImpl<K,V> implements Cache<K,V>
 		}
 	}
 
-
-	public void loadCache(@NonNull BiFunction<Long, long[], Integer> loader)
-	{
-		try (Stream<Path> stream = Files
-				.list(pathToCacheDir)
-				.filter(f -> f.getFileName().toString().matches("[0-9]+"))
-				.sorted((x,y) -> Integer.valueOf(x.getFileName().toString()).compareTo(Integer.valueOf(y.getFileName().toString())));)
-		{
-		    stream.forEach(path ->
-		    	{
-				  final var subsetAsn = new PrimeSubsetAsn();
-
-				  try
-				  {
-					  subsetAsn.decode(Files.newInputStream(path), true);
-				  }
-				  catch(final IOException e)
-				  {
-					  throw new RuntimeException(e);
-				  }
-
-
-				  final int count = subsetAsn.getMaxOffsetAssigned().intValue();
-				  final long[] primes = new long[count];
-
-				  for (int i=0; i<count; i++)
-				  {
-					  primes[i] = subsetAsn.getPrimes().getBerInteger().get(i).longValue();
-				  }
-
-				  loader.apply(Long.valueOf(path.getFileName().toString()), primes);
-		    	});
-		}
-		catch (IOException | DirectoryIteratorException x)
-		{
-		    System.err.println(x);
-		}
-	}
-
 	@Override
 	public V get(@NonNull final K key)
 	{
@@ -160,9 +122,13 @@ class PrimeCacheImpl<K,V> implements Cache<K,V>
 	public void put(@NonNull final K key, @NonNull final V value)
 	{
 		keysToValue.put(key, value);
-		persist(key, value);
 	}
 
+	public void persistAll()
+	{
+		LOG.info("Persisting Cached data");
+		keysToValue.forEachKeyValue((k,v) -> persist(k,v));
+	}
 
 	  private void persist(@NonNull final K keyVal, @NonNull final V subsetVal)
 	  {
@@ -172,7 +138,6 @@ class PrimeCacheImpl<K,V> implements Cache<K,V>
 			  {
 				  final var subsetAsn = new PrimeSubsetAsn();
 				  final int count = (int)subset.getMaxOffsetAssigned();
-				  subsetAsn.setMaxOffsetAssigned(new BerInteger(count));
 
 				  final List<BerInteger> berInts =  new ArrayList<>(count);
 				  for (long i : subset.getEntries())
@@ -180,17 +145,24 @@ class PrimeCacheImpl<K,V> implements Cache<K,V>
 					  berInts.add(new BerInteger(i));
 				  }
 
-				  final PrimeSubsetAsn.Primes pr = new PrimeSubsetAsn.Primes();
-				  pr.getBerInteger().addAll(berInts);
-				  subsetAsn.setPrimes(pr);
+				  var pr = subsetAsn.getBerInteger();
+				  pr.addAll(berInts);
 
-				  OutputStream os = new FileOutputStream(Path.of(pathToCacheDir.toString(), key.toString()).toFile());
+				  ReverseByteArrayOutputStream os = new ReverseByteArrayOutputStream(1_000_000, true);
 
 				  int res = subsetAsn.encode(os, true);
-				  System.out.println(String.format("encode output res: %d  input-count: %d", res, count));
+
+				  try (	OutputStream oos = new FileOutputStream(Path.of(pathToCacheDir.toString(), key.toString()).toFile());
+						InputStream is = new ByteArrayInputStream(os.getArray());)
+				  {
+					  is.transferTo(oos);
+				  }
+
+				  LOG.info(String.format("Persist batch: [%s] src-rec-count: [%d]", keyVal, count));
 			  } catch(IOException e)
 			  {
 				  // TODO Auto-generated catch block e.printStackTrace();
+				  LOG.severe("Encoding exception: " + e);
 			  }
 		  }
 	}

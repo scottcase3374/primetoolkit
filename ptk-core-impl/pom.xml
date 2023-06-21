@@ -12,6 +12,12 @@
 		<!-- runtime deps -->
 	  <dependency>
 		  <groupId>com.starcases.prime</groupId>
+		  <artifactId>ptk-cache-api</artifactId>
+		  <version>0.0.1-SNAPSHOT</version>
+	  </dependency>
+
+	  <dependency>
+		  <groupId>com.starcases.prime</groupId>
 		  <artifactId>ptk-core-api</artifactId>
 		  <version>0.0.1-SNAPSHOT</version>
 	  </dependency>
@@ -19,12 +25,6 @@
 	  <dependency>
 		  <groupId>com.starcases.prime</groupId>
 		  <artifactId>ptk-metrics-api</artifactId>
-		  <version>0.0.1-SNAPSHOT</version>
-	  </dependency>
-
-	  <dependency>
-		  <groupId>com.starcases.prime</groupId>
-		  <artifactId>ptk-preload-api</artifactId>
 		  <version>0.0.1-SNAPSHOT</version>
 	  </dependency>
 

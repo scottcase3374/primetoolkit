@@ -2,7 +2,7 @@
 <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
     <booleanAttribute key="org.eclipse.debug.core.ATTR_FORCE_SYSTEM_CONSOLE_ENCODING" value="false"/>
     <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-        <listEntry value="/PrimeToolKit/src/main/java/com/starcases/prime/PrimeToolKit.java"/>
+        <listEntry value="/ptk/src/main/java/com/starcases/prime/PrimeToolKit.java"/>
     </listAttribute>
     <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
         <listEntry value="1"/>
@@ -14,7 +14,7 @@
     <stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="org.eclipse.m2e.launchconfig.classpathProvider"/>
     <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.starcases.prime.PrimeToolKit"/>
     <stringAttribute key="org.eclipse.jdt.launching.MODULE_NAME" value="PrimeToolKit"/>
-    <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="init --max-count=100 --base=PREFIX --output=BASES  --use-base-file --enable-cmd-listener --prefer-parallel=true"/>
+    <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="init --max-count=100 --base=PREFIX --output=BASES  --use-base-file --enable-cmd-listener --prefer-parallel=true --load-primes"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="PrimeToolKit"/>
     <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.m2e.launchconfig.sourcepathProvider"/>
 </launchConfiguration>
