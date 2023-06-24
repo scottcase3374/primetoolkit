@@ -46,48 +46,72 @@
 	</dependencies>
 
 	<build>
-
 		<plugins>
-
-<!--			<plugin>
-				<groupId>
-					org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
+			<plugin>
+				<groupId>io.fabric8</groupId>
+				<artifactId>docker-maven-plugin</artifactId>
+				<version>0.43.0</version>
 
 				<configuration>
-					<annotationProcessorPaths>
-						<annotationProcessorPath>
-							<groupId>
-								org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-							<version>${lombok.version}</version>
-						</annotationProcessorPath>
-					</annotationProcessorPaths>
+					<images>
+						<!-- A single's image configuration -->
+        				<image>
 
+						</image>
+					</images>
 				</configuration>
-			</plugin>-->
 
-      		<plugin>
-            	<groupId>org.springframework.boot</groupId>
-            	<artifactId>spring-boot-maven-plugin</artifactId>
-            	<version>3.1.0</version>
-      <executions>
-        <execution>
-          <goals>
-            <goal>repackage</goal>
-          </goals>
-        </execution>
-      </executions>
-            	<configuration>
-					<mainClass>PrimeToolKit/com.starcases.prime.PrimeToolKit</mainClass>
-                	<executable>true</executable>
+							<!-- Connect start/stop to pre- and
+			       post-integration-test phase, respectively if you want to start
+			       your docker containers during integration tests -->
+				<executions>
+					<execution>
+						<id>start</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<!-- "build" should be used to create the images with the artifact -->
+							<goal>build</goal>
+							<goal>start</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>stop</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>stop</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 
-					<layout>JAR</layout>
 
-            	</configuration>
-        	</plugin>
+			<!--     <plugin>
+        <groupId>com.google.cloud.tools</groupId>
+        <artifactId>jib-maven-plugin</artifactId>
+        <version>3.3.2</version>
+        <configuration>
+			<from>
+    			<image>eclipse-temerin:17.0.7_7-jdk-ubi9-minimal</image>
+			</from>
+          <to>
+            <image>ptk:latest</image>
+          </to>
+			 <container>
+			    <mainClass>com.starcases.prime.PrimeToolKit</mainClass>
+			    <entrypoint>java,-jar,/usr/local/jetty/start.jar</entrypoint>
+			 </container>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>build</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>-->
 
-<!--      <plugin>
+			<!--      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jdeps-plugin</artifactId>
         <version>3.1.2</version>
@@ -117,6 +141,8 @@
 		<module>ptk-cli</module>
 		<module>ptk-core-api</module>
 		<module>ptk-core-impl</module>
+		<module>ptk-error-api</module>
+		<module>ptk-error-impl</module>
 		<module>ptk-export-graph-impl</module>
 		<module>ptk-graph-export-api</module>
 		<module>ptk-graph-export-impl-gml</module>
@@ -129,6 +155,6 @@
 		<module>ptk-service-impl</module>
 		<module>ptk-sql-api</module>
 		<module>ptk-sql-impl</module>
-		<module>ptk-jlink</module>
+
 	</modules>
 </project>

@@ -3,6 +3,9 @@ package com.starcases.prime.cache.impl;
 import com.beanit.asn1bean.ber.ReverseByteArrayOutputStream;
 import com.beanit.asn1bean.ber.types.BerInteger;
 import com.starcases.prime.cache.api.subset.PrimeSubsetIntfc;
+import com.starcases.prime.error.api.PtkErrorHandlerIntfc;
+import com.starcases.prime.error.api.PtkErrorHandlerProviderIntfc;
+import com.starcases.prime.service.impl.SvcLoader;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
@@ -30,6 +33,7 @@ import javax.cache.processor.EntryProcessor;
 import javax.cache.processor.EntryProcessorException;
 import javax.cache.processor.EntryProcessorResult;
 
+import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.factory.Maps;
 import org.eclipse.collections.api.map.MutableMap;
 
@@ -44,6 +48,9 @@ import lombok.NonNull;
  */
 public class PrimeCacheImpl<K,V> implements Cache<K,V>
 {
+	private final  PtkErrorHandlerIntfc errorHandler =
+			new SvcLoader<PtkErrorHandlerProviderIntfc, Class<PtkErrorHandlerProviderIntfc>>(PtkErrorHandlerProviderIntfc.class)
+				.provider(Lists.immutable.of("ERROR_HANDLER")).orElseThrow().create();
 	/**
 	 * default logger
 	 */
@@ -161,8 +168,8 @@ public class PrimeCacheImpl<K,V> implements Cache<K,V>
 				  LOG.info(String.format("Persist batch: [%s] src-rec-count: [%d]", keyVal, count));
 			  } catch(IOException e)
 			  {
-				  // TODO Auto-generated catch block e.printStackTrace();
-				  LOG.severe("Encoding exception: " + e);
+				  // Note that batches are not handled in numerical order when done using parallelism.
+				  errorHandler.handleError(() -> "Problem persisting primes.", Level.SEVERE, e, false , true);
 			  }
 		  }
 	}

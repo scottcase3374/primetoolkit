@@ -3,7 +3,7 @@ module com.starcases.prime.cache.impl {
 	exports com.starcases.prime.cache.impl.persistload;
 	exports com.starcases.prime.cache.impl.preload;
 	exports com.starcases.prime.cache.impl.subset;
-
+	requires com.starcases.prime.error.api;
 	requires transitive com.starcases.prime.cache.api;
 	requires com.starcases.prime.service.impl;
 	requires com.starcases.prime.service.api;

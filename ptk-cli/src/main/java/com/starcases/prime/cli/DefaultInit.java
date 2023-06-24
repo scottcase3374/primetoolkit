@@ -51,6 +51,8 @@ import com.starcases.prime.core.api.PrimeSourceFactoryIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
 import com.starcases.prime.core.api.ProgressProviderIntfc;
 import com.starcases.prime.core.impl.PrimeRef;
+import com.starcases.prime.error.api.PtkErrorHandlerIntfc;
+import com.starcases.prime.error.api.PtkErrorHandlerProviderIntfc;
 import com.starcases.prime.graph.export.api.ExportsProviderIntfc;
 
 import com.starcases.prime.logging.LogGraphStructure;
@@ -160,9 +162,13 @@ public class DefaultInit implements Runnable
 	private final List<Consumer<String>> actions = new FastList<>();
 
 
-	final  ImmutableCollection<BaseTypesIntfc> BASE_TYPES =
+	private final  ImmutableCollection<BaseTypesIntfc> BASE_TYPES =
 			new SvcLoader<BaseTypesProviderIntfc, Class<BaseTypesProviderIntfc>>(BaseTypesProviderIntfc.class)
 				.provider(Lists.immutable.of("GLOBAL_BASE_TYPES")).orElseThrow().create();
+
+	private final  PtkErrorHandlerIntfc errorHandler =
+			new SvcLoader<PtkErrorHandlerProviderIntfc, Class<PtkErrorHandlerProviderIntfc>>(PtkErrorHandlerProviderIntfc.class)
+				.provider(Lists.immutable.of("ERROR_HANDLER")).orElseThrow().create();
 
 	/**
 	 * Pull all the settings together and execute all the desired functionality.
@@ -248,16 +254,17 @@ public class DefaultInit implements Runnable
 									p.export();
 									exportWriter.flush();
 								}
-							, () -> PTKLogger.dbgOutput("ERROR: %s", "No Export GML provider")
+							, () -> errorHandler.handleError(() -> "No Export GML provider", Level.SEVERE, false)
 						);
 		}
-		catch(IOException except)
+		catch(final IOException except)
 		{
-			if (LOG.isLoggable(Level.SEVERE))
-			{
-				LOG.severe("Exception "+ except);
-				PTKLogger.output("Exception: %s", except.toString());
-			}
+			errorHandler.handleError(
+					  () -> "Exception during export"
+					, Level.SEVERE
+					, except,
+					false,
+					true);
 		}
 	}
 
@@ -387,7 +394,7 @@ public class DefaultInit implements Runnable
 											throw new RuntimeException(e);
 										}
 									},
-									() -> PTKLogger.dbgOutput("ERROR: %s" , "No SQLCommand Provider"));
+									() -> errorHandler.handleError(() -> "No SQLCommand Provider", Level.SEVERE, false));
 			});
 		}
 	}
@@ -464,7 +471,7 @@ public class DefaultInit implements Runnable
 					.provider(attributes)
 					.map(p -> p.create(null))
 					.ifPresentOrElse(p -> primeSrc.setDisplayProgress(p),
-							() -> PTKLogger.dbgOutput("ERROR: %s", "No Progress provider"));
+							() -> errorHandler.handleError(() -> "No Progress provider", Level.SEVERE, false));
 			}
 
 			primeSrc.setDisplayDefaultBaseMetrics(outputOpts.getOutputOpers().contains(OutputOper.PRIMETREE_METRICS));
@@ -518,7 +525,7 @@ public class DefaultInit implements Runnable
 																			 .assignPrimeSrc(primeSrc)
 																			 .doPreferParallel(initOpts.isPreferParallel())
 																			,trackGenTime, baseType)))
-									, () -> PTKLogger.dbgOutput(baseType, "ERROR: No provider for %s", baseType.toString())
+									, () -> PTKLogger.errorOutput(baseType, "ERROR: No provider for %s", baseType.toString())
 								);
 						break;
 
@@ -594,7 +601,7 @@ public class DefaultInit implements Runnable
 			}
 
 			// PTKFactory.getMetricProvider ()
-			metricDecorProvider.provider(ATTRIBUTES).ifPresentOrElse(p -> decoratedBase[0] = p.create(decoratedBase[0]), () -> PTKLogger.dbgOutput(baseType, "ERROR: No Metric-decor-provider"));
+			metricDecorProvider.provider(ATTRIBUTES).ifPresentOrElse(p -> decoratedBase[0] = p.create(decoratedBase[0]), () -> PTKLogger.errorOutput(baseType, "ERROR: No Metric-decor-provider"));
 		}
 
 		if (outputOpts.getOutputOpers().contains(OutputOper.CREATE_PRIMES))
@@ -654,7 +661,7 @@ public class DefaultInit implements Runnable
 															p.create(primeSrc, null)
 															 .doPreferParallel(initOpts.isPreferParallel())
 															 .outputLogs()
-															,() -> PTKLogger.dbgOutput("ERROR: No %s provider", o.toString())
+															,() -> PTKLogger.errorOutput("ERROR: No %s provider", o.toString())
 														)
 												);
 									});

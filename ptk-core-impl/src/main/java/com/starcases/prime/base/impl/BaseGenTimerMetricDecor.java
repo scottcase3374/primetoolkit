@@ -1,10 +1,18 @@
 package com.starcases.prime.base.impl;
 
 import com.starcases.prime.base.api.BaseTypesIntfc;
+
+import java.util.logging.Level;
+
+import org.eclipse.collections.api.factory.Lists;
+
 import com.starcases.prime.base.api.BaseGenIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
+import com.starcases.prime.error.api.PtkErrorHandlerIntfc;
+import com.starcases.prime.error.api.PtkErrorHandlerProviderIntfc;
 import com.starcases.prime.metrics.api.MetricIntfc;
 import com.starcases.prime.metrics.api.MetricProviderIntfc;
+import com.starcases.prime.service.impl.SvcLoader;
 
 import lombok.NonNull;
 
@@ -15,6 +23,11 @@ import lombok.NonNull;
  */
 public class BaseGenTimerMetricDecor  implements BaseGenIntfc
 {
+
+	private final  PtkErrorHandlerIntfc errorHandler =
+			new SvcLoader<PtkErrorHandlerProviderIntfc, Class<PtkErrorHandlerProviderIntfc>>(PtkErrorHandlerProviderIntfc.class)
+				.provider(Lists.immutable.of("ERROR_HANDLER")).orElseThrow().create();
+
 	private final BaseGenIntfc generator;
 	private final BaseTypesIntfc base;
 	private final MetricProviderIntfc metricProvider;
@@ -38,8 +51,8 @@ public class BaseGenTimerMetricDecor  implements BaseGenIntfc
 		}
 		catch(final Exception e)
 		{
-			// TODO Review/update error handling.
-			throw new RuntimeException(e);
+			// Rethrows
+			errorHandler.handleError(() -> "Problem generating bases for prime (with metric provider).", Level.SEVERE, e, true, true);
 		}
 	}
 

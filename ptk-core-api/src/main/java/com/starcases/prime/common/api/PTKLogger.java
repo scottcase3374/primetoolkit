@@ -127,4 +127,26 @@ public class PTKLogger
 	{
 		output("DEFAULT",format, params);
 	}
+
+	/**
+	 * method for error out
+	 *
+	 * @param format
+	 * @param params
+	 */
+	public static void errorOutput(final BaseTypesIntfc baseType, final String format, final Object...params)
+	{
+		output(baseType, format, params);
+	}
+
+	/**
+	 * method for error out
+	 *
+	 * @param format
+	 * @param params
+	 */
+	public static void errorOutput(final String format, final Object...params)
+	{
+		output("DEFAULT",format, params);
+	}
 }

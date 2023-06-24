@@ -26,8 +26,11 @@ import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
 import com.starcases.prime.datamgmt.api.PData;
 import com.starcases.prime.datamgmt.api.PrimeMapEntry;
 import com.starcases.prime.datamgmt.api.PrimeMapIterator;
+import com.starcases.prime.error.api.PtkErrorHandlerIntfc;
+import com.starcases.prime.error.api.PtkErrorHandlerProviderIntfc;
 import com.starcases.prime.metrics.api.MetricIntfc;
 import com.starcases.prime.metrics.api.MetricProviderIntfc;
+import com.starcases.prime.service.impl.SvcLoader;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -61,6 +64,9 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 {
 	private static final long serialVersionUID = 1L;
 
+	private final  PtkErrorHandlerIntfc errorHandler =
+			new SvcLoader<PtkErrorHandlerProviderIntfc, Class<PtkErrorHandlerProviderIntfc>>(PtkErrorHandlerProviderIntfc.class)
+				.provider(Lists.immutable.of("ERROR_HANDLER")).orElseThrow().create();
 	/**
 	 * default logger
 	 */
@@ -253,7 +259,7 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	 */
 	protected void genPrimes()
 	{
-		long nextPrimeTmpIdx;
+		long nextPrimeTmpIdx = Long.MAX_VALUE;
 		do
 		{
 			try(MetricIntfc metric = metricProvider.longTimer(OutputOper.CREATE_PRIMES, "PrimeSource", "genPrimes"))
@@ -276,8 +282,8 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 			}
 			catch(final Exception e) // due to autoclosable interface.
 			{
-				// TODO Review/update error handling.
-				throw new RuntimeException(e);
+				// rethrows
+				errorHandler.handleError(() -> "Error handling prime generation.", Level.SEVERE, e, true, true);
 			}
 		}
 		while (nextPrimeTmpIdx < targetPrimeCount);

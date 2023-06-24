@@ -6,6 +6,7 @@ module com.starcases.prime.core.impl
 
 	requires transitive com.starcases.prime.cache.api;
 	requires transitive com.starcases.prime.core.api;
+	requires com.starcases.prime.error.api;
 	requires transitive com.starcases.prime.metrics.api;
 	requires com.starcases.prime.service.impl;
 

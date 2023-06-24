@@ -121,7 +121,7 @@ public class AllTriples
 								{
 									triple[memberIdx.ordinal()] = primeSrc.getPrimeRefForIdx(indices[memberIdx.ordinal()]).orElseThrow();
 								}
-								catch(Exception e)
+								catch(final Exception e)
 								{
 									triple[memberIdx.ordinal()] = null;
 								}

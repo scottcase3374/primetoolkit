@@ -6,6 +6,7 @@ module com.starcases.prime.cli
 	requires com.starcases.prime.cache.impl;
 	requires transitive com.starcases.prime.core.api;
 	requires com.starcases.prime.core.impl;
+	requires com.starcases.prime.error.api;
 	requires com.starcases.prime.graph.export.api;
 	requires com.starcases.prime.logging;
 	requires com.starcases.prime.metrics.api;

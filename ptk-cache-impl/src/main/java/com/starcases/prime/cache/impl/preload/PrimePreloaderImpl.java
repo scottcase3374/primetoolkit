@@ -214,7 +214,7 @@ class PrimePreloaderImpl implements PreloaderIntfc
 					 											}
 					 											catch(final IOException e2)
 					 											{
-					 												PTKLogger.output("%s", ZIP_FOLDER_ISSUE_MSG);
+					 												PTKLogger.errorOutput("%s", ZIP_FOLDER_ISSUE_MSG);
 					 											}
 															});
 	 											}
@@ -237,13 +237,13 @@ class PrimePreloaderImpl implements PreloaderIntfc
 	 									}
 	 									catch(IOException e)
 	 									{
-	 										PTKLogger.output("%s", ZIP_FOLDER_ISSUE_MSG);
+	 										PTKLogger.errorOutput("%s", ZIP_FOLDER_ISSUE_MSG);
 	 									}
 					 				});
 							}
 						catch(IOException e1)
 						{
-							PTKLogger.output("%s", ZIP_FOLDER_ISSUE_MSG);
+							PTKLogger.errorOutput("%s", ZIP_FOLDER_ISSUE_MSG);
 						}
 					}
 				);
