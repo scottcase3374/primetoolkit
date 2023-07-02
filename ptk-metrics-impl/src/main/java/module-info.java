@@ -1,6 +1,6 @@
 module com.starcases.prime.metrics.impl
 {
-	exports com.starcases.prime.metrics.impl;
+	//exports com.starcases.prime.metrics.impl;
 
 	requires transitive com.starcases.prime.core.api;
 	requires transitive com.starcases.prime.metrics.api;

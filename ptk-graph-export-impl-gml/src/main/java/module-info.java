@@ -1,5 +1,6 @@
-module com.starcases.graph.export.impl.gml {
-	exports com.starcases.prime.graph.export.impl.gml;
+module com.starcases.graph.export.impl.gml
+{
+	//exports com.starcases.prime.graph.export.impl.gml;
 
 	requires transitive com.starcases.prime.core.api;
 	requires transitive com.starcases.prime.graph.export.api;

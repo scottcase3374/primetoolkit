@@ -1,7 +1,5 @@
 module com.starcases.prime.base.nprime.impl
 {
-	exports com.starcases.prime.base.nprime.impl;
-
 	requires transitive com.starcases.prime.core.api;
 	requires com.starcases.prime.core.impl;
 	requires com.starcases.prime.logging;

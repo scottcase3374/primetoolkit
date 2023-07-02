@@ -1,6 +1,6 @@
 module com.starcases.prime.graph.visualize.impl
 {
-	exports com.starcases.prime.graph.visualize.impl;
+	//exports com.starcases.prime.graph.visualize.impl;
 
 	requires transitive com.starcases.prime.core.api;
 	requires com.starcases.prime.graph.impl;

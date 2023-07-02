@@ -28,6 +28,7 @@ module com.starcases.prime.cli
 	uses com.starcases.prime.cache.api.persistload.PersistLoaderProviderIntfc;
 	uses com.starcases.prime.cache.api.preload.PreloaderProviderIntfc;
 	uses com.starcases.prime.cache.api.subset.PrimeSubsetProviderIntfc;
+	uses com.starcases.prime.error.api.PtkErrorHandlerIntfc;
 	uses com.starcases.prime.graph.export.api.ExportsProviderIntfc;
 	uses com.starcases.prime.metrics.api.MetricProviderIntfc;
 	uses com.starcases.prime.sql.api.SqlProviderIntfc;

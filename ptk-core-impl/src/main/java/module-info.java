@@ -2,7 +2,6 @@ module com.starcases.prime.core.impl
 {
 	exports com.starcases.prime.base.impl;
 	exports com.starcases.prime.core.impl;
-	exports com.starcases.prime.datamgmt.impl;
 
 	requires transitive com.starcases.prime.cache.api;
 	requires transitive com.starcases.prime.core.api;
@@ -21,5 +20,6 @@ module com.starcases.prime.core.impl
 	provides com.starcases.prime.base.api.BaseGenDecorProviderIntfc with com.starcases.prime.base.impl.BaseGenTimerMetricDecorProvider;
 	provides com.starcases.prime.datamgmt.api.CollectionTrackerProviderIntfc with com.starcases.prime.datamgmt.impl.CollectionTrackerProvider;
 
+	uses com.starcases.prime.error.api.PtkErrorHandlerIntfc;
 	uses com.starcases.prime.metrics.api.MetricProviderIntfc;
 }

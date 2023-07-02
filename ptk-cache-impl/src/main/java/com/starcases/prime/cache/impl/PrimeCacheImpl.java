@@ -157,7 +157,7 @@ public class PrimeCacheImpl<K,V> implements Cache<K,V>
 
 				  ReverseByteArrayOutputStream os = new ReverseByteArrayOutputStream(1_000_000, true);
 
-				  int res = subsetAsn.encode(os, true);
+				  subsetAsn.encode(os, true);
 
 				  try (	OutputStream oos = new FileOutputStream(Path.of(pathToCacheDir.toString(), key.toString()).toFile());
 						InputStream is = new ByteArrayInputStream(os.getArray());)

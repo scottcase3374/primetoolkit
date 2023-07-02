@@ -1,8 +1,5 @@
 module com.starcases.prime.sql.impl
 {
-	exports com.starcases.prime.sql.impl;
-	exports com.starcases.prime.sql.antlrimpl;
-
 	requires transitive com.starcases.prime.core.api;
 	requires com.starcases.prime.error.api;
 	requires com.starcases.prime.service.impl;

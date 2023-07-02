@@ -1,6 +1,6 @@
 module com.starcases.prime.base.primetree.impl
 {
-	exports com.starcases.prime.base.primetree.impl;
+	//exports com.starcases.prime.base.primetree.impl;
 
 	requires transitive com.starcases.prime.core.api;
 	requires com.starcases.prime.core.impl;

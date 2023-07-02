@@ -1,8 +1,10 @@
-module com.starcases.prime.cache.impl {
+module com.starcases.prime.cache.impl
+{
 	exports com.starcases.prime.cache.impl;
-	exports com.starcases.prime.cache.impl.persistload;
-	exports com.starcases.prime.cache.impl.preload;
-	exports com.starcases.prime.cache.impl.subset;
+	//exports com.starcases.prime.cache.impl.persistload;
+	//exports com.starcases.prime.cache.impl.preload;
+	//exports com.starcases.prime.cache.impl.subset;
+
 	requires com.starcases.prime.error.api;
 	requires transitive com.starcases.prime.cache.api;
 	requires com.starcases.prime.service.impl;
@@ -18,5 +20,7 @@ module com.starcases.prime.cache.impl {
 	provides com.starcases.prime.cache.api.persistload.PersistLoaderProviderIntfc with com.starcases.prime.cache.impl.persistload.PersistLoaderProvider;
 	provides com.starcases.prime.cache.api.preload.PreloaderProviderIntfc with com.starcases.prime.cache.impl.preload.PreloaderProvider;
 	provides com.starcases.prime.cache.api.subset.PrimeSubsetProviderIntfc with com.starcases.prime.cache.impl.subset.PrimeSubsetProvider;
+
+	uses com.starcases.prime.error.api.PtkErrorHandlerIntfc;
 }
 

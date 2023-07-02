@@ -34,6 +34,11 @@ public class SvcLoader< T extends SvcProviderBaseIntfc, C extends Class<T>>
     	module.addReads(classT.getModule());
     	module.addUses(classT);
     	this.loader = ServiceLoader.load(classT);
+
+    	if (loader.findFirst().isEmpty())
+    	{
+    		logAccess(classT);
+    	}
     }
 
     /**
@@ -43,6 +48,7 @@ public class SvcLoader< T extends SvcProviderBaseIntfc, C extends Class<T>>
      */
     public SvcLoader(@NonNull final C classT, final Class<?> [] classesUsed, final Module [] modulesToRead)
     {
+    	logAccess(classT);
     	final Module module = this.getClass().getModule();
     	module.addReads(classT.getModule());
     	for (Module m : modulesToRead)
@@ -56,16 +62,28 @@ public class SvcLoader< T extends SvcProviderBaseIntfc, C extends Class<T>>
     		module.addUses(c);
     	}
 
+    	this.loader = ServiceLoader.load(classT);
+
+    	if (loader.findFirst().isEmpty())
+    	{
+    		logAccess(classT);
+    	}
+    }
+
+
+    private void logAccess(@NonNull final C classT)
+    {
+    	final Module module = this.getClass().getModule();
+    	module.addReads(classT.getModule());
+
     	final Module classTModule = classT.getModule();
 
-    	SvcProviderBaseIntfc.LOG.info(String.format("svc-loader: %n\t can read mod: [%s] [%b] %n\t can use classT: [%s] [%b] %n\tProvider: [%s]",
+    	SvcProviderBaseIntfc.LOG.info(String.format("WARNING: svc-loader: %n\t can read mod: [%s] [%b] %n\t can use classT: [%s] [%b] %n\tProvider: [%s]",
     			classTModule.getName(),
     			module.canRead(classTModule),
     			classT.getName(),
     			module.canUse(classT),
     			classT.getName()));
-
-    	this.loader = ServiceLoader.load(classT);
     }
 
     /**
@@ -75,11 +93,11 @@ public class SvcLoader< T extends SvcProviderBaseIntfc, C extends Class<T>>
      */
     public Optional<T> provider(@NonNull final ImmutableCollection<String> attributes)
     {
-	  return
+	  Optional<T> result =
 			 providers(attributes)
 			  .stream()
-			  .max((x,y) -> Integer.compare(x.countAttributesMatch(attributes), y.countAttributesMatch(attributes)) )
-			  ;
+			  .max((x,y) -> Integer.compare(x.countAttributesMatch(attributes), y.countAttributesMatch(attributes)) );
+	  return result;
     }
 
     /**
@@ -89,12 +107,19 @@ public class SvcLoader< T extends SvcProviderBaseIntfc, C extends Class<T>>
      */
     public ImmutableList<T> providers(@NonNull final ImmutableCollection<String> attributes)
     {
-    	return Lists.immutable.fromStream(
+    	ImmutableList<T> result =  Lists.immutable.fromStream(
     		loader
 			  .stream()
 			  .peek(p -> SvcProviderBaseIntfc.LOG.info(String.format("Svcloader - requested attrs: [%s] provider-attributes: [%s] provider: [%s]", attributes.makeString(), p.get().getProviderAttributes().makeString(), p.get().getClass().getName())))
 			  .filter(x -> { var p = x.get(); return p.countAttributesMatch(attributes) >= Math.min(attributes.size(), p.getProviderAttributes().size()); })
 			  .map(p -> p.get())
 			);
+
+    	if (result == null || result.size() == 0)
+    	{
+    		System.out.println("ERROR: SvcLoader providers() - no matches for provided attributes: " + attributes.makeString());
+    	}
+
+    	return result;
     }
 }
