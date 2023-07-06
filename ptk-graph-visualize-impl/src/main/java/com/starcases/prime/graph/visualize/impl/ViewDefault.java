@@ -12,11 +12,10 @@ import java.util.List;
 import org.jgrapht.event.GraphListener;
 import org.jgrapht.graph.DefaultEdge;
 
-import com.starcases.prime.graph.impl.PrimeGrapherBase;
-//import com.starcases.prime.service.impl.SvcLoaderoader;
-import com.starcases.prime.base.api.BaseTypesIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
+import com.starcases.prime.graph.impl.PrimeGrapherBase;
+import com.starcases.prime.kern.api.BaseTypesIntfc;
 
 import lombok.NonNull;
 

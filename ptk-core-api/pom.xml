@@ -12,15 +12,21 @@
 		<!-- runtime deps -->
 	  <dependency>
 		  <groupId>com.starcases.prime</groupId>
-		  <artifactId>ptk-service-api</artifactId>
+		  <artifactId>ptk-kern-api</artifactId>
 		  <version>0.0.1-SNAPSHOT</version>
 	  </dependency>
 
 	  <dependency>
 		  <groupId>com.starcases.prime</groupId>
-		  <artifactId>ptk-service-impl</artifactId>
+		  <artifactId>ptk-service-api</artifactId>
 		  <version>0.0.1-SNAPSHOT</version>
 	  </dependency>
+
+<!--	  <dependency>
+		  <groupId>com.starcases.prime</groupId>
+		  <artifactId>ptk-service-impl</artifactId>
+		  <version>0.0.1-SNAPSHOT</version>
+	  </dependency>-->
 
 		<dependency>
 			<groupId>jakarta.validation</groupId>

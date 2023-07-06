@@ -4,9 +4,9 @@ package com.starcases.prime.graph.impl;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.Graph;
 
-import com.starcases.prime.base.api.BaseTypesIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
+import com.starcases.prime.kern.api.BaseTypesIntfc;
 
 import lombok.AccessLevel;
 import lombok.Getter;

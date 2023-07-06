@@ -4,10 +4,10 @@ import org.eclipse.collections.api.list.primitive.ImmutableLongList;
 import org.eclipse.collections.impl.list.mutable.MutableListFactoryImpl;
 
 import com.starcases.prime.base.api.BaseGenFactoryIntfc;
-import com.starcases.prime.base.api.BaseTypesIntfc;
 import com.starcases.prime.base.impl.AbsPrimeBaseGen;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
+import com.starcases.prime.kern.api.BaseTypesIntfc;
 
 import lombok.AccessLevel;
 import lombok.Getter;

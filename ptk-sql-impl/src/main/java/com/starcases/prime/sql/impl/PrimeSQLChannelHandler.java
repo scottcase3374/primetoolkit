@@ -7,9 +7,8 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.tree.ParseTree;
 
-import com.starcases.prime.core.api.OutputableIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
-
+import com.starcases.prime.kern.api.OutputableIntfc;
 import com.starcases.prime.sql.antlrimpl.PrimeSqlLexer;
 import com.starcases.prime.sql.antlrimpl.PrimeSqlParser;
 

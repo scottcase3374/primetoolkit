@@ -5,6 +5,8 @@ import java.io.Serializable;
 import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
 import org.eclipse.collections.api.list.MutableList;
 
+import com.starcases.prime.kern.api.BaseTypesIntfc;
+
 import lombok.NonNull;
 
 /**

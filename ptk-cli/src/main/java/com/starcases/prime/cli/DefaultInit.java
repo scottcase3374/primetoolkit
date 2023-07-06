@@ -29,7 +29,6 @@ import org.eclipse.collections.api.multimap.ImmutableMultimap;
 import org.eclipse.collections.impl.list.mutable.FastList;
 
 import com.starcases.prime.base.api.BaseProviderIntfc;
-import com.starcases.prime.base.api.BaseTypesIntfc;
 import com.starcases.prime.base.api.BaseTypesProviderIntfc;
 import com.starcases.prime.base.api.LogPrimeDataProviderIntfc;
 import com.starcases.prime.base.api.BaseGenDecorProviderIntfc;
@@ -44,17 +43,16 @@ import com.starcases.prime.cache.api.subset.PrimeSubsetProviderIntfc;
 import com.starcases.prime.cache.impl.PrimeCacheImpl;
 import com.starcases.prime.cli.MetricsOpts.MetricOpt;
 import com.starcases.prime.common.api.OutputOper;
-import com.starcases.prime.common.api.PTKLogger;
 import com.starcases.prime.core.api.FactoryIntfc;
-import com.starcases.prime.core.api.OutputableIntfc;
 import com.starcases.prime.core.api.PrimeSourceFactoryIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
 import com.starcases.prime.core.api.ProgressProviderIntfc;
 import com.starcases.prime.core.impl.PrimeRef;
-import com.starcases.prime.error.api.PtkErrorHandlerIntfc;
-import com.starcases.prime.error.api.PtkErrorHandlerProviderIntfc;
 import com.starcases.prime.graph.export.api.ExportsProviderIntfc;
-
+import com.starcases.prime.kern.api.BaseTypesIntfc;
+import com.starcases.prime.kern.api.OutputableIntfc;
+import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
+import com.starcases.prime.kern.api.StatusHandlerIntfc;
 import com.starcases.prime.logging.LogGraphStructure;
 import com.starcases.prime.logging.LogNodeStructure;
 import com.starcases.prime.metrics.api.MetricsRegistryProviderIntfc;
@@ -166,9 +164,9 @@ public class DefaultInit implements Runnable
 			new SvcLoader<BaseTypesProviderIntfc, Class<BaseTypesProviderIntfc>>(BaseTypesProviderIntfc.class)
 				.provider(Lists.immutable.of("GLOBAL_BASE_TYPES")).orElseThrow().create();
 
-	private final  PtkErrorHandlerIntfc errorHandler =
-			new SvcLoader<PtkErrorHandlerProviderIntfc, Class<PtkErrorHandlerProviderIntfc>>(PtkErrorHandlerProviderIntfc.class)
-				.provider(Lists.immutable.of("ERROR_HANDLER")).orElseThrow().create();
+	private final  StatusHandlerIntfc statusHandler =
+			new SvcLoader<StatusHandlerProviderIntfc, Class<StatusHandlerProviderIntfc>>(StatusHandlerProviderIntfc.class)
+				.provider(Lists.immutable.of("STATUS_HANDLER")).orElseThrow().create();
 
 	/**
 	 * Pull all the settings together and execute all the desired functionality.
@@ -254,12 +252,12 @@ public class DefaultInit implements Runnable
 									p.export();
 									exportWriter.flush();
 								}
-							, () -> errorHandler.handleError(() -> "No Export GML provider", Level.SEVERE, false)
+							, () -> statusHandler.handleError(() -> "No Export GML provider", Level.SEVERE, false)
 						);
 		}
 		catch(final IOException except)
 		{
-			errorHandler.handleError(
+			statusHandler.handleError(
 					  () -> "Exception during export"
 					, Level.SEVERE
 					, except,
@@ -332,7 +330,7 @@ public class DefaultInit implements Runnable
 		if (stdOutPath != null)
 		{
 			// Point standard-out to our pre-generated output filename.
-			PTKLogger.setOutput("stdout", stdOutPath);
+			this.statusHandler.setOutput("stdout", stdOutPath);
 		}
 		else
 		{
@@ -394,7 +392,7 @@ public class DefaultInit implements Runnable
 											throw new RuntimeException(e);
 										}
 									},
-									() -> errorHandler.handleError(() -> "No SQLCommand Provider", Level.SEVERE, false));
+									() -> statusHandler.handleError(() -> "No SQLCommand Provider", Level.SEVERE, false));
 			});
 		}
 	}
@@ -471,7 +469,7 @@ public class DefaultInit implements Runnable
 					.provider(attributes)
 					.map(p -> p.create(null))
 					.ifPresentOrElse(p -> primeSrc.setDisplayProgress(p),
-							() -> errorHandler.handleError(() -> "No Progress provider", Level.SEVERE, false));
+							() -> statusHandler.handleError(() -> "No Progress provider", Level.SEVERE, false));
 			}
 
 			primeSrc.setDisplayDefaultBaseMetrics(outputOpts.getOutputOpers().contains(OutputOper.PRIMETREE_METRICS));
@@ -525,7 +523,7 @@ public class DefaultInit implements Runnable
 																			 .assignPrimeSrc(primeSrc)
 																			 .doPreferParallel(initOpts.isPreferParallel())
 																			,trackGenTime, baseType)))
-									, () -> PTKLogger.errorOutput(baseType, "ERROR: No provider for %s", baseType.toString())
+									, () -> statusHandler.errorOutput(baseType, "ERROR: No provider for %s", baseType.toString())
 								);
 						break;
 
@@ -537,7 +535,7 @@ public class DefaultInit implements Runnable
 								.ifPresentOrElse
 									(
 										p -> actions.add(s -> primeSrc.addBaseGenerator(addBaseDecorators(p.create(settings).assignPrimeSrc(primeSrc), trackGenTime, baseType)))
-										, () -> PTKLogger.dbgOutput(baseType, "ERROR: No provider for %s", baseType.toString())
+										, () -> statusHandler.dbgOutput(baseType, "ERROR: No provider for %s", baseType.toString())
 									);
 						}
 						break;
@@ -555,7 +553,7 @@ public class DefaultInit implements Runnable
 																				p.create(settings)
 																					.assignPrimeSrc(primeSrc)
 																				, trackGenTime, baseType)))
-									, () -> PTKLogger.dbgOutput(baseType, "ERROR: No provider for %s", baseType.toString())
+									, () -> statusHandler.dbgOutput(baseType, "ERROR: No provider for %s", baseType.toString())
 								);
 						}
 						break;
@@ -576,7 +574,7 @@ public class DefaultInit implements Runnable
 	{
 		if (baseOpts.isUseBaseFile())
 		{
-			PTKLogger.setOutput(baseType.name(), this.decorateFileName(baseType.name(), "base", "log"));
+			statusHandler.setOutput(baseType.name(), this.decorateFileName(baseType.name(), "base", "log"));
 		}
 	}
 
@@ -601,7 +599,7 @@ public class DefaultInit implements Runnable
 			}
 
 			// PTKFactory.getMetricProvider ()
-			metricDecorProvider.provider(ATTRIBUTES).ifPresentOrElse(p -> decoratedBase[0] = p.create(decoratedBase[0]), () -> PTKLogger.errorOutput(baseType, "ERROR: No Metric-decor-provider"));
+			metricDecorProvider.provider(ATTRIBUTES).ifPresentOrElse(p -> decoratedBase[0] = p.create(decoratedBase[0]), () -> statusHandler.errorOutput(baseType, "ERROR: No Metric-decor-provider"));
 		}
 
 		if (outputOpts.getOutputOpers().contains(OutputOper.CREATE_PRIMES))
@@ -614,7 +612,7 @@ public class DefaultInit implements Runnable
 			{
 				LOG.info(String.format("DECORATE base supplier [%s] with Logger", baseType.name()));
 			}
-			logDecorProvider.provider(ATTRIBUTES).ifPresentOrElse(p -> decoratedBase[0] = p.create(decoratedBase[0]), () -> PTKLogger.dbgOutput(baseType, "ERROR: No Log-decor-provider"));
+			logDecorProvider.provider(ATTRIBUTES).ifPresentOrElse(p -> decoratedBase[0] = p.create(decoratedBase[0]), () -> statusHandler.dbgOutput(baseType, "ERROR: No Log-decor-provider"));
 		}
 		return decoratedBase[0];
 	}
@@ -661,7 +659,7 @@ public class DefaultInit implements Runnable
 															p.create(primeSrc, null)
 															 .doPreferParallel(initOpts.isPreferParallel())
 															 .outputLogs()
-															,() -> PTKLogger.errorOutput("ERROR: No %s provider", o.toString())
+															,() -> statusHandler.errorOutput("ERROR: No %s provider", o.toString())
 														)
 												);
 									});
@@ -687,7 +685,7 @@ public class DefaultInit implements Runnable
 																				p.create(primeSrc, null)
 																				 .doPreferParallel(initOpts.isPreferParallel())
 																				 .outputLogs()
-																			   ,() -> PTKLogger.dbgOutput("ERROR: No TripleLog provider")));
+																			   ,() -> statusHandler.dbgOutput("ERROR: No TripleLog provider")));
 																 }
 																);
 													}

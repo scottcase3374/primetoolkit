@@ -1,6 +1,6 @@
 package com.starcases.prime.common.api;
 
-import com.starcases.prime.core.api.OutputableIntfc;
+import com.starcases.prime.kern.api.OutputableIntfc;
 
 /**
  *

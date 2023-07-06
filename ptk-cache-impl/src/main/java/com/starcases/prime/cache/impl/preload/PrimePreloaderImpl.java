@@ -14,16 +14,19 @@ import java.util.zip.ZipFile;
 
 import javax.cache.Cache;
 
+import org.eclipse.collections.api.factory.Lists;
+
 import com.starcases.prime.cache.api.preload.PreloaderIntfc;
 import com.starcases.prime.cache.api.subset.PrimeSubsetIntfc;
 import com.starcases.prime.cache.impl.subset.PrimeSubset;
-import com.starcases.prime.common.api.PTKLogger;
+import com.starcases.prime.kern.api.StatusHandlerIntfc;
+import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
+import com.starcases.prime.service.impl.SvcLoader;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
-
+import lombok.AccessLevel;
 
 /**
  * manage primes which were pre-determined from another source.
@@ -34,6 +37,9 @@ class PrimePreloaderImpl implements PreloaderIntfc
 {
 	Logger LOG = Logger.getLogger(PrimePreloaderImpl.class.getName());
 
+	private final  StatusHandlerIntfc statusHandler =
+			new SvcLoader<StatusHandlerProviderIntfc, Class<StatusHandlerProviderIntfc>>(StatusHandlerProviderIntfc.class)
+				.provider(Lists.immutable.of("STATUS_HANDLER")).orElseThrow().create();
 	/**
 	 * Define the number of bits to batch together to reduce the number of
 	 * idxToPrimeCache accesses.  This is to reduce the space overhead which is
@@ -184,7 +190,7 @@ class PrimePreloaderImpl implements PreloaderIntfc
 													   Integer.valueOf(b.getFileName().toString().split("(s|\\.)")[1]) ))
 					 				.forEach( fileRef ->
 					 				{
-					 					PTKLogger.dbgOutput("Raw text input file: %s", fileRef.toString());
+					 					statusHandler.dbgOutput("Raw text input file: %s", fileRef.toString());
 	 									try
 	 									{
 	 										final Path tmpPath = fileRef;
@@ -214,7 +220,7 @@ class PrimePreloaderImpl implements PreloaderIntfc
 					 											}
 					 											catch(final IOException e2)
 					 											{
-					 												PTKLogger.errorOutput("%s", ZIP_FOLDER_ISSUE_MSG);
+					 												statusHandler.errorOutput("%s", ZIP_FOLDER_ISSUE_MSG);
 					 											}
 															});
 	 											}
@@ -237,13 +243,13 @@ class PrimePreloaderImpl implements PreloaderIntfc
 	 									}
 	 									catch(IOException e)
 	 									{
-	 										PTKLogger.errorOutput("%s", ZIP_FOLDER_ISSUE_MSG);
+	 										statusHandler.errorOutput("%s", ZIP_FOLDER_ISSUE_MSG);
 	 									}
 					 				});
 							}
 						catch(IOException e1)
 						{
-							PTKLogger.errorOutput("%s", ZIP_FOLDER_ISSUE_MSG);
+							statusHandler.errorOutput("%s", ZIP_FOLDER_ISSUE_MSG);
 						}
 					}
 				);

@@ -1,8 +1,8 @@
 package com.starcases.prime.base.impl;
 
-import com.starcases.prime.base.api.BaseTypesIntfc;
 import com.starcases.prime.base.api.BaseGenFactoryIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
+import com.starcases.prime.kern.api.BaseTypesIntfc;
 
 import lombok.AccessLevel;
 import lombok.Getter;

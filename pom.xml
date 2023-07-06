@@ -141,13 +141,13 @@
 		<module>ptk-cli</module>
 		<module>ptk-core-api</module>
 		<module>ptk-core-impl</module>
-		<module>ptk-error-api</module>
-		<module>ptk-error-impl</module>
 		<module>ptk-export-graph-impl</module>
 		<module>ptk-graph-export-api</module>
 		<module>ptk-graph-export-impl-gml</module>
 		<module>ptk-graph-visualize-api</module>
 		<module>ptk-graph-visualize-impl</module>
+		<module>ptk-kern-api</module>
+		<module>ptk-kern-impl</module>
 		<module>ptk-logging</module>
 		<module>ptk-metrics-api</module>
 		<module>ptk-metrics-impl</module>
@@ -155,6 +155,7 @@
 		<module>ptk-service-impl</module>
 		<module>ptk-sql-api</module>
 		<module>ptk-sql-impl</module>
+
 
 	</modules>
 </project>

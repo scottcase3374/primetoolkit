@@ -46,7 +46,7 @@ public class SvcLoader< T extends SvcProviderBaseIntfc, C extends Class<T>>
      *
      * @param classT
      */
-    public SvcLoader(@NonNull final C classT, final Class<?> [] classesUsed, final Module [] modulesToRead)
+    public SvcLoader(@NonNull final C classT, @NonNull final Class<?> [] classesUsed, @NonNull final Module [] modulesToRead)
     {
     	logAccess(classT);
     	final Module module = this.getClass().getModule();
@@ -78,7 +78,7 @@ public class SvcLoader< T extends SvcProviderBaseIntfc, C extends Class<T>>
 
     	final Module classTModule = classT.getModule();
 
-    	SvcProviderBaseIntfc.LOG.info(String.format("WARNING: svc-loader: %n\t can read mod: [%s] [%b] %n\t can use classT: [%s] [%b] %n\tProvider: [%s]",
+    	SvcProviderBaseIntfc.LOG.warning(String.format("[NOT FOUND] svc-loader: %n\t can read mod: [%s] [%b] %n\t can use classT: [%s] [%b] %n\tProvider: [%s]",
     			classTModule.getName(),
     			module.canRead(classTModule),
     			classT.getName(),

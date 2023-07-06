@@ -3,9 +3,13 @@ package com.starcases.prime.base.triples.impl;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.starcases.prime.common.api.PTKLogger;
+import org.eclipse.collections.api.factory.Lists;
+
 import com.starcases.prime.core.api.PrimeSourceIntfc;
+import com.starcases.prime.kern.api.StatusHandlerIntfc;
+import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
 import com.starcases.prime.logging.AbstractPrimeBaseLog;
+import com.starcases.prime.service.impl.SvcLoader;
 
 import lombok.NonNull;
 
@@ -24,6 +28,9 @@ class LogBases3AllTriples  extends AbstractPrimeBaseLog
 	 */
 	private static final Logger LOG = Logger.getLogger(LogBases3AllTriples.class.getName());
 
+	private final  StatusHandlerIntfc statusHandler =
+			new SvcLoader<StatusHandlerProviderIntfc, Class<StatusHandlerProviderIntfc>>(StatusHandlerProviderIntfc.class)
+				.provider(Lists.immutable.of("STATUS_HANDLER")).orElseThrow().create();
 	/**
 	 * constructor for logging base 3 triples
 	 * @param primeSrc
@@ -51,7 +58,7 @@ class LogBases3AllTriples  extends AbstractPrimeBaseLog
 			.forEach( primeRef ->
 						{
 							final var size = primeRef.getPrimeBaseData().getPrimeBases(TripleBaseType.TRIPLE).size();
-							PTKLogger.output(TripleBaseType.TRIPLE,
+							statusHandler.output(TripleBaseType.TRIPLE,
 												String.format("%nPrime [%d] idx[%d] #-bases[%d]",
 													primeRef.getPrime(),
 													idx[0]++,
@@ -74,7 +81,7 @@ class LogBases3AllTriples  extends AbstractPrimeBaseLog
 
 													if (cnt[0] % maxBasesInRow == 0 || cnt[0] >= size)
 													{
-														PTKLogger.output(TripleBaseType.TRIPLE, "\t%s", outputStr);
+														statusHandler.output(TripleBaseType.TRIPLE, "\t%s", outputStr);
 														outputStr.setLength(0);
 													}
 												}

@@ -6,16 +6,19 @@ import java.util.function.LongPredicate;
 import java.util.function.Predicate;
 
 import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
+import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.map.ConcurrentMutableMap;
 import org.eclipse.collections.api.map.primitive.MutableLongObjectMap;
 import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 import org.eclipse.collections.impl.map.mutable.primitive.MutableLongObjectMapFactoryImpl;
 
-//import com.starcases.prime.core.impl.PTKLogger;
 import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
 import com.starcases.prime.datamgmt.api.CollectionTreeIterator;
 import com.starcases.prime.datamgmt.api.CollectionTreeIteratorIntfc;
 import com.starcases.prime.datamgmt.api.PData;
+import com.starcases.prime.kern.api.StatusHandlerIntfc;
+import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
+import com.starcases.prime.service.impl.SvcLoader;
 import com.starcases.prime.datamgmt.api.CollectionTreeNode;
 
 import lombok.AccessLevel;
@@ -24,6 +27,9 @@ import lombok.NonNull;
 
 class CollectionTrackerImpl implements CollectionTrackerIntfc
 {
+	private final  StatusHandlerIntfc statusHandler =
+			new SvcLoader<StatusHandlerProviderIntfc, Class<StatusHandlerProviderIntfc>>(StatusHandlerProviderIntfc.class)
+				.provider(Lists.immutable.of("STATUS_HANDLER")).orElseThrow().create();
 	/**
 	 * prefix map
 	 */
@@ -66,10 +72,10 @@ class CollectionTrackerImpl implements CollectionTrackerIntfc
 	@Override
 	public void log()
 	{
-		//PTKLogger.output("%nCollection tracking:%n", "");
+		//statusHandler.output("%nCollection tracking:%n", "");
 		//useCounts.forEach(
 			//	(l1, l2) ->
-				//PTKLogger.output("sum: [%d] occurrences: [%d] prefix: [%s]%n",
+				//statusHandler.output("sum: [%d] occurrences: [%d] prefix: [%s]%n",
 			//				l1,
 			//				l2,
 			//				sourcePrimes.get(l1).toCanonicalCollection().makeString()));

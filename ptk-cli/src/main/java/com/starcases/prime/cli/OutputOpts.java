@@ -3,7 +3,7 @@ package com.starcases.prime.cli;
 import org.eclipse.collections.api.collection.ImmutableCollection;
 import org.eclipse.collections.api.factory.Sets;
 
-import com.starcases.prime.core.api.OutputableIntfc;
+import com.starcases.prime.kern.api.OutputableIntfc;
 
 import lombok.Getter;
 import lombok.Setter;

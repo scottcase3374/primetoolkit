@@ -11,9 +11,9 @@ import org.eclipse.collections.impl.bag.immutable.primitive.ImmutableLongBagFact
 import org.eclipse.collections.impl.bag.mutable.primitive.MutableLongBagFactoryImpl;
 import org.eclipse.collections.impl.list.mutable.MutableListFactoryImpl;
 
-import com.starcases.prime.base.api.BaseTypesIntfc;
 import com.starcases.prime.base.impl.AbsPrimeBaseGen;
 import com.starcases.prime.core.api.PrimeRefIntfc;
+import com.starcases.prime.kern.api.BaseTypesIntfc;
 
 import lombok.Getter;
 import lombok.NonNull;

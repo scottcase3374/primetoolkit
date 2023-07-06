@@ -9,4 +9,5 @@ module com.starcases.prime.logging
 	requires static lombok;
 	requires transitive org.eclipse.collections.api;
 	requires org.jgrapht.core;
+	requires com.starcases.prime.service.impl;
 }

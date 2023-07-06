@@ -20,8 +20,9 @@ Primes can have bases generated via different methodologies, etc - such as where
 - Experiment with Eclipse collections
 - Experiment with Java features in versions > Java 11
 - Research properties of prime numbers
-- Experiment with Java Module System
+- Experiment with Java Module System (JPMS)
 - Experiment with ASN.1
+- Experiment with Custom cache implementations
 - Implement a small "language" and interpreter since I enjoy working with Lexical Analysis/Parsing systems.
 - Research data structures for use as primes numbers become very large
 	- Track bases of primes (sums of primes that add to current prime)
@@ -36,7 +37,6 @@ Current processing on my i7 with 64Gb RAM reaches about 3-5 million (cmd line ar
 Some of the technology tried/used.
 - Java 18+
 - Picocli - command line handling
-- JBoss Infinispan - caching; Note I had to remove Infinispan since it ended up incompatible with Java modules when embedded.
 - Protobuf - related to caching; removed this when I removed Infinispan caching.
 - ASN.1 - This with plain collections + some file handling created a very "low-feature" replacement of Infinispan and its data persistence to files.
 - Gson - PrimeSQL language results output as json
@@ -354,14 +354,9 @@ Issues
 
 ## ToDo
 	- fix / add API documentation as needed after last major refactoring
-	- Improve package organization; DONE
-	- implement service loader; DONE / IMPROVE AS NEEDED
 	- Enable more uses for caching; ON-GOING - primes are loaded from text files, persisted as ASN.1 to files and loaded at startup into the "cache" collection.
-	- use Java module system; DONE / IMPROVE AS NEEDED (ensure only compatible libs/frameworks are used)
-	- Should not generate default base as part of prime selection/load; construct default base just like other bases.; DONE
 	- Increase test coverage.
 	- Improve metrics handling.
-	- Fix / reimplement cache support; DONE (replace Infinispan with simple uses of plain collections and ASN.1 encoded data stored in files)
 	- More generic / useful methods for identifying patterns in the bases/data.
 	- More remote command support; ON-GOING
 	- Improved reporting / visualization.

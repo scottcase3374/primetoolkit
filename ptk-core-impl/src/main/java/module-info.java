@@ -5,7 +5,7 @@ module com.starcases.prime.core.impl
 
 	requires transitive com.starcases.prime.cache.api;
 	requires transitive com.starcases.prime.core.api;
-	requires com.starcases.prime.error.api;
+	requires transitive com.starcases.prime.kern.api;
 	requires transitive com.starcases.prime.metrics.api;
 	requires com.starcases.prime.service.impl;
 
@@ -20,6 +20,6 @@ module com.starcases.prime.core.impl
 	provides com.starcases.prime.base.api.BaseGenDecorProviderIntfc with com.starcases.prime.base.impl.BaseGenTimerMetricDecorProvider;
 	provides com.starcases.prime.datamgmt.api.CollectionTrackerProviderIntfc with com.starcases.prime.datamgmt.impl.CollectionTrackerProvider;
 
-	uses com.starcases.prime.error.api.PtkErrorHandlerIntfc;
+	uses com.starcases.prime.kern.api.StatusHandlerIntfc;
 	uses com.starcases.prime.metrics.api.MetricProviderIntfc;
 }

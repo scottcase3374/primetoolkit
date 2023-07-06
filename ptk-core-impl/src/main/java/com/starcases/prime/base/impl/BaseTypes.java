@@ -1,6 +1,6 @@
 package com.starcases.prime.base.impl;
 
-import com.starcases.prime.base.api.BaseTypesIntfc;
+import com.starcases.prime.kern.api.BaseTypesIntfc;
 
 /**
  *

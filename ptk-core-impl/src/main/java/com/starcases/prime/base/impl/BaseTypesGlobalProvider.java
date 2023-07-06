@@ -4,8 +4,8 @@ import org.eclipse.collections.api.collection.ImmutableCollection;
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.ImmutableList;
 
-import com.starcases.prime.base.api.BaseTypesIntfc;
 import com.starcases.prime.base.api.BaseTypesProviderIntfc;
+import com.starcases.prime.kern.api.BaseTypesIntfc;
 import com.starcases.prime.service.impl.SvcLoader;
 
 public class BaseTypesGlobalProvider implements BaseTypesProviderIntfc

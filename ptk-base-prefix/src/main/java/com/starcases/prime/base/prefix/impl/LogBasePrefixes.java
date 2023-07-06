@@ -3,9 +3,13 @@ package com.starcases.prime.base.prefix.impl;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.starcases.prime.common.api.PTKLogger;
+import org.eclipse.collections.api.factory.Lists;
+
 import com.starcases.prime.core.api.PrimeSourceIntfc;
+import com.starcases.prime.kern.api.StatusHandlerIntfc;
+import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
 import com.starcases.prime.logging.AbstractPrimeBaseLog;
+import com.starcases.prime.service.impl.SvcLoader;
 
 import lombok.NonNull;
 
@@ -19,6 +23,9 @@ class LogBasePrefixes extends AbstractPrimeBaseLog
 	 */
 	private static final Logger LOG = Logger.getLogger(LogBasePrefixes.class.getName());
 
+	private final  StatusHandlerIntfc statusHandler =
+			new SvcLoader<StatusHandlerProviderIntfc, Class<StatusHandlerProviderIntfc>>(StatusHandlerProviderIntfc.class)
+				.provider(Lists.immutable.of("STATUS_HANDLER")).orElseThrow().create();
 	/**
 	 * constructor for logging of base prefixes
 	 * @param primeSrc
@@ -58,7 +65,7 @@ class LogBasePrefixes extends AbstractPrimeBaseLog
 
 												primeBases.appendString(outputStr, "[", ",", "]");
 
-												PTKLogger.output(PrefixBaseType.PREFIX, "%s%n", outputStr);
+												statusHandler.output(PrefixBaseType.PREFIX, "%s%n", outputStr);
 												outputStr.setLength(0);
 												itemIdx[0]++;
 											});

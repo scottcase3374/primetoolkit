@@ -1,7 +1,7 @@
 module com.starcases.prime.sql.impl
 {
 	requires transitive com.starcases.prime.core.api;
-	requires com.starcases.prime.error.api;
+	requires com.starcases.prime.kern.api;
 	requires com.starcases.prime.service.impl;
 	requires transitive com.starcases.prime.sql.api;
 
@@ -20,4 +20,5 @@ module com.starcases.prime.sql.impl
 	provides com.starcases.prime.sql.api.SqlProviderIntfc with com.starcases.prime.sql.impl.SqlCmdSvrProvider;
 
 	uses com.starcases.prime.base.api.BaseTypesProviderIntfc;
+	uses com.starcases.prime.kern.api.StatusHandlerIntfc;
 }

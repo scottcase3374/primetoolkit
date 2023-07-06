@@ -3,9 +3,13 @@ package com.starcases.prime.base.primetree.impl;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.starcases.prime.common.api.PTKLogger;
+import org.eclipse.collections.api.factory.Lists;
+
 import com.starcases.prime.core.api.PrimeSourceIntfc;
+import com.starcases.prime.kern.api.StatusHandlerIntfc;
+import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
 import com.starcases.prime.logging.AbstractPrimeBaseLog;
+import com.starcases.prime.service.impl.SvcLoader;
 
 import lombok.NonNull;
 
@@ -22,6 +26,9 @@ class LogPrimeTree extends AbstractPrimeBaseLog
 	 */
 	private static final Logger LOG = Logger.getLogger(LogPrimeTree.class.getName());
 
+	private final  StatusHandlerIntfc statusHandler =
+			new SvcLoader<StatusHandlerProviderIntfc, Class<StatusHandlerProviderIntfc>>(StatusHandlerProviderIntfc.class)
+				.provider(Lists.immutable.of("STATUS_HANDLER")).orElseThrow().create();
 	/**
 	 * Primary constructor
 	 * @param primeSrc
@@ -50,14 +57,14 @@ class LogPrimeTree extends AbstractPrimeBaseLog
 			.getPrimeRefStream(false)
 			.forEach( primeRef ->
 							{
-								PTKLogger.output(PrimeTreeBaseType.PRIME_TREE, "%s", String.format("Prime [%d] idx[%d] Tree: ", primeRef.getPrime(), itemIdx[0]));
+								statusHandler.output(PrimeTreeBaseType.PRIME_TREE, "%s", String.format("Prime [%d] idx[%d] Tree: ", primeRef.getPrime(), itemIdx[0]));
 
 								primeRef
 									.getPrimeBaseData()
 									.getPrimeBases(PrimeTreeBaseType.PRIME_TREE)
 									.iterator()
 									.forEachRemaining( primeBases -> primeBases.appendString(outputStr, "[", ",", "]"));
-								PTKLogger.output(PrimeTreeBaseType.PRIME_TREE, "\t%s%n", outputStr);
+								statusHandler.output(PrimeTreeBaseType.PRIME_TREE, "\t%s%n", outputStr);
 								outputStr.setLength(0);
 								itemIdx[0]++;
 

@@ -3,8 +3,8 @@ package com.starcases.prime.cache.impl;
 import com.beanit.asn1bean.ber.ReverseByteArrayOutputStream;
 import com.beanit.asn1bean.ber.types.BerInteger;
 import com.starcases.prime.cache.api.subset.PrimeSubsetIntfc;
-import com.starcases.prime.error.api.PtkErrorHandlerIntfc;
-import com.starcases.prime.error.api.PtkErrorHandlerProviderIntfc;
+import com.starcases.prime.kern.api.StatusHandlerIntfc;
+import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
 import com.starcases.prime.service.impl.SvcLoader;
 
 import java.io.ByteArrayInputStream;
@@ -48,9 +48,9 @@ import lombok.NonNull;
  */
 public class PrimeCacheImpl<K,V> implements Cache<K,V>
 {
-	private final  PtkErrorHandlerIntfc errorHandler =
-			new SvcLoader<PtkErrorHandlerProviderIntfc, Class<PtkErrorHandlerProviderIntfc>>(PtkErrorHandlerProviderIntfc.class)
-				.provider(Lists.immutable.of("ERROR_HANDLER")).orElseThrow().create();
+	private final  StatusHandlerIntfc statusHandler =
+			new SvcLoader<StatusHandlerProviderIntfc, Class<StatusHandlerProviderIntfc>>(StatusHandlerProviderIntfc.class)
+				.provider(Lists.immutable.of("STATUS_HANDLER")).orElseThrow().create();
 	/**
 	 * default logger
 	 */
@@ -169,7 +169,7 @@ public class PrimeCacheImpl<K,V> implements Cache<K,V>
 			  } catch(IOException e)
 			  {
 				  // Note that batches are not handled in numerical order when done using parallelism.
-				  errorHandler.handleError(() -> "Problem persisting primes.", Level.SEVERE, e, false , true);
+				  statusHandler.handleError(() -> "Problem persisting primes.", Level.SEVERE, e, false , true);
 			  }
 		  }
 	}

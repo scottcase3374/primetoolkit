@@ -1,6 +1,7 @@
 package com.starcases.prime.base.api;
 
 import com.starcases.prime.core.api.PrimeRefIntfc;
+import com.starcases.prime.kern.api.BaseTypesIntfc;
 
 /**
  *

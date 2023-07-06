@@ -3,8 +3,12 @@ package com.starcases.prime.logging;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.starcases.prime.common.api.PTKLogger;
+import org.eclipse.collections.api.factory.Lists;
+
 import com.starcases.prime.core.api.PrimeSourceIntfc;
+import com.starcases.prime.kern.api.StatusHandlerIntfc;
+import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
+import com.starcases.prime.service.impl.SvcLoader;
 
 import lombok.NonNull;
 
@@ -22,6 +26,9 @@ public class LogNodeStructure extends AbstractPrimeBaseLog
 	 */
 	private static final Logger LOG = Logger.getLogger(LogNodeStructure.class.getName());
 
+	private final  StatusHandlerIntfc statusHandler =
+			new SvcLoader<StatusHandlerProviderIntfc, Class<StatusHandlerProviderIntfc>>(StatusHandlerProviderIntfc.class)
+				.provider(Lists.immutable.of("STATUS_HANDLER")).orElseThrow().create();
 	/**
 	 * Constructor for logging node structures
 	 * @param primeSrc
@@ -55,7 +62,7 @@ public class LogNodeStructure extends AbstractPrimeBaseLog
 						final var outputStr = new StringBuilder("\t");
 
 						final long [] cnt = {0};
-						PTKLogger.output(String.format("%nPrime [%d] idx[%d]",
+						statusHandler.output(String.format("%nPrime [%d] idx[%d]",
 								primeRef.getPrime(),
 								idx[0]++
 								));
@@ -70,7 +77,7 @@ public class LogNodeStructure extends AbstractPrimeBaseLog
 											outputStr.append(s);
 											if (cnt[0] % 5 == 0 || cnt[0] >= primeRef.getPrimeBaseData().getPrimeBases().get(0).size())
 											{
-												PTKLogger.output( "\t%s", outputStr);
+												statusHandler.output( "\t%s", outputStr);
 												outputStr.setLength(0);
 											}
 											else

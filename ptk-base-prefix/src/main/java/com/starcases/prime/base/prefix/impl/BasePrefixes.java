@@ -3,9 +3,9 @@ package com.starcases.prime.base.prefix.impl;
 import org.eclipse.collections.api.factory.Lists;
 
 import com.starcases.prime.base.api.BaseGenFactoryIntfc;
-import com.starcases.prime.base.api.BaseTypesIntfc;
 import com.starcases.prime.base.impl.AbsPrimeBaseGen;
 import com.starcases.prime.core.api.PrimeRefIntfc;
+import com.starcases.prime.kern.api.BaseTypesIntfc;
 
 import lombok.NonNull;
 

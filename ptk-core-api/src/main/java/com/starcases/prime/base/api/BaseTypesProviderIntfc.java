@@ -4,6 +4,7 @@ import org.eclipse.collections.api.factory.Maps;
 import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.map.ImmutableMap;
 
+import com.starcases.prime.kern.api.BaseTypesIntfc;
 import com.starcases.prime.service.api.SvcProviderBaseIntfc;
 
 /**

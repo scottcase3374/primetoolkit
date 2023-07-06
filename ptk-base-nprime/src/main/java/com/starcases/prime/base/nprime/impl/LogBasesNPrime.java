@@ -4,11 +4,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.collections.api.bag.primitive.ImmutableLongBag;
+import org.eclipse.collections.api.factory.Lists;
 
-import com.starcases.prime.common.api.PTKLogger;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
+import com.starcases.prime.kern.api.StatusHandlerIntfc;
+import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
 import com.starcases.prime.logging.AbstractPrimeBaseLog;
+import com.starcases.prime.service.impl.SvcLoader;
 
 import lombok.NonNull;
 
@@ -22,6 +25,9 @@ class LogBasesNPrime extends AbstractPrimeBaseLog
 	 */
 	private static final Logger LOG = Logger.getLogger(LogBasesNPrime.class.getName());
 
+	private final  StatusHandlerIntfc statusHandler =
+			new SvcLoader<StatusHandlerProviderIntfc, Class<StatusHandlerProviderIntfc>>(StatusHandlerProviderIntfc.class)
+				.provider(Lists.immutable.of("STATUS_HANDLER")).orElseThrow().create();
 	/**
 	 * Constructor for logging of NPrime base
 	 * @param primeSrc
@@ -54,7 +60,7 @@ class LogBasesNPrime extends AbstractPrimeBaseLog
 			final String itemCountsStr = counts.toStringOfItemToCount();
 
 			// Handle "header" info for the current Prime
-			PTKLogger.output(NPrimeBaseType.NPRIME, "%nPrime [%d] %s%n",
+			statusHandler.output(NPrimeBaseType.NPRIME, "%nPrime [%d] %s%n",
 												primeRef.getPrime(),
 												itemCountsStr
 												);

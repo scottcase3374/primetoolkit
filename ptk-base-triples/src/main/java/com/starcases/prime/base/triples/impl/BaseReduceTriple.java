@@ -1,8 +1,8 @@
 package com.starcases.prime.base.triples.impl;
 
-import com.starcases.prime.base.api.BaseTypesIntfc;
 import com.starcases.prime.base.impl.AbsPrimeBaseGen;
 import com.starcases.prime.core.api.PrimeRefIntfc;
+import com.starcases.prime.kern.api.BaseTypesIntfc;
 
 import lombok.NonNull;
 

@@ -2,7 +2,7 @@ package com.starcases.prime.metrics.api;
 
 import org.eclipse.collections.api.map.ImmutableMap;
 
-import com.starcases.prime.core.api.OutputableIntfc;
+import com.starcases.prime.kern.api.OutputableIntfc;
 import com.starcases.prime.service.api.SvcProviderBaseIntfc;
 
 import lombok.NonNull;

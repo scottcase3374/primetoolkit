@@ -31,7 +31,7 @@
 
 		<dependency>
 			<groupId>com.starcases.prime</groupId>
-			<artifactId>ptk-error-api</artifactId>
+			<artifactId>ptk-kern-api</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 

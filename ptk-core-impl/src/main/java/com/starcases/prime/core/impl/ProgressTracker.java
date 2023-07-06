@@ -1,13 +1,20 @@
 package com.starcases.prime.core.impl;
 
-import com.starcases.prime.common.api.PTKLogger;
+import org.eclipse.collections.api.factory.Lists;
+
 import com.starcases.prime.core.api.ProgressIntfc;
+import com.starcases.prime.kern.api.StatusHandlerIntfc;
+import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
+import com.starcases.prime.service.impl.SvcLoader;
 
 /**
  * Class that manages progress info for user.
  */
 final class ProgressTracker implements ProgressIntfc
 {
+	private final  StatusHandlerIntfc statusHandler =
+			new SvcLoader<StatusHandlerProviderIntfc, Class<StatusHandlerProviderIntfc>>(StatusHandlerProviderIntfc.class)
+				.provider(Lists.immutable.of("STATUS_HANDLER")).orElseThrow().create();
 	/**
 	 * Display/update progress info
 	 *
@@ -29,7 +36,7 @@ final class ProgressTracker implements ProgressIntfc
 		final var num = (int)(primesProcessed / mask[unitIdx]);
 		if (unitIdx != units.length-1 || num <= 2)
 		{
-			PTKLogger.output(String.format(units[unitIdx], num));
+			statusHandler.output(String.format(units[unitIdx], num));
 		}
 	}
 }
