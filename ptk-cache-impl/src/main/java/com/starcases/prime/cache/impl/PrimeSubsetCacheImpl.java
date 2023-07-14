@@ -2,7 +2,9 @@ package com.starcases.prime.cache.impl;
 
 import com.beanit.asn1bean.ber.ReverseByteArrayOutputStream;
 import com.beanit.asn1bean.ber.types.BerInteger;
+import com.starcases.prime.cache.api.PrimeSubsetCacheIntfc;
 import com.starcases.prime.cache.api.subset.PrimeSubsetIntfc;
+import com.starcases.prime.cache.impl.subset.PrimeSubset;
 import com.starcases.prime.kern.api.StatusHandlerIntfc;
 import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
 import com.starcases.prime.service.impl.SvcLoader;
@@ -24,7 +26,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.cache.Cache;
 import javax.cache.CacheManager;
 import javax.cache.configuration.CacheEntryListenerConfiguration;
 import javax.cache.configuration.Configuration;
@@ -46,7 +47,7 @@ import lombok.NonNull;
  * @param <K> Long
  * @param <V> PrimeSubsetIntfc
  */
-public class PrimeCacheImpl<K,V> implements Cache<K,V>
+public class PrimeSubsetCacheImpl<K> implements PrimeSubsetCacheIntfc<K>
 {
 	private final  StatusHandlerIntfc statusHandler =
 			new SvcLoader<StatusHandlerProviderIntfc, Class<StatusHandlerProviderIntfc>>(StatusHandlerProviderIntfc.class)
@@ -54,10 +55,13 @@ public class PrimeCacheImpl<K,V> implements Cache<K,V>
 	/**
 	 * default logger
 	 */
-	private static final Logger LOG = Logger.getLogger(PrimeCacheImpl.class.getName());
+	private static final Logger LOG = Logger.getLogger(PrimeSubsetCacheImpl.class.getName());
 
 	private final Path pathToCacheDir;
-	private final MutableMap<K,V> keysToValue = Maps.mutable.empty();
+
+	private final MutableMap<K,PrimeSubsetIntfc> keysToValue = Maps.mutable.empty();
+
+	private boolean closed = false;
 
 	/**
 	 * constructor
@@ -65,7 +69,7 @@ public class PrimeCacheImpl<K,V> implements Cache<K,V>
 	 * @param cacheName
 	 * @param pathToCacheDirs
 	 */
-	public PrimeCacheImpl(@NonNull final String cacheName, @NonNull final Path pathToCacheDirs, final boolean clearCache)
+	public PrimeSubsetCacheImpl(@NonNull final String cacheName, @NonNull final Path pathToCacheDirs, final boolean clearCache)
 	{
 		try
 		{
@@ -103,13 +107,13 @@ public class PrimeCacheImpl<K,V> implements Cache<K,V>
 	}
 
 	@Override
-	public V get(@NonNull final K key)
+	public PrimeSubsetIntfc get(@NonNull final K key)
 	{
 		return keysToValue.get(key);
 	}
 
 	@Override
-	public Map<K, V> getAll(@NonNull final Set<? extends K> keys)
+	public Map<K, PrimeSubsetIntfc> getAll(@NonNull final Set<? extends K> keys)
 	{
 		return null;
 	}
@@ -126,36 +130,38 @@ public class PrimeCacheImpl<K,V> implements Cache<K,V>
 	}
 
 	@Override
-	public void put(@NonNull final K key, @NonNull final V value)
+	public void put(@NonNull final K key, @NonNull final PrimeSubsetIntfc value)
 	{
 		keysToValue.put(key, value);
 	}
 
+	@Override
 	public void persistAll()
 	{
 		LOG.info("Persisting Cached data");
 		keysToValue.forEachKeyValue((k,v) -> persist(k,v));
 	}
 
-	  private void persist(@NonNull final K keyVal, @NonNull final V subsetVal)
+	@Override
+	public void persist(@NonNull final K keyVal, @NonNull final PrimeSubsetIntfc subset)
 	  {
-		  if (subsetVal instanceof PrimeSubsetIntfc subset && keyVal instanceof Long key)
+		  if (subset instanceof PrimeSubset subsetVal && keyVal instanceof Long key)
 		  {
 			  try
 			  {
 				  final var subsetAsn = new PrimeSubsetAsn();
-				  final int count = (int)subset.getMaxOffsetAssigned();
+				  final int count = (int)subsetVal.getMaxOffsetAssigned();
 
 				  final List<BerInteger> berInts =  new ArrayList<>(count);
-				  for (long i : subset.getEntries())
+				  for (long i : subsetVal.getEntries())
 				  {
 					  berInts.add(new BerInteger(i));
 				  }
 
-				  var pr = subsetAsn.getBerInteger();
+				  final var pr = subsetAsn.getBerInteger();
 				  pr.addAll(berInts);
 
-				  ReverseByteArrayOutputStream os = new ReverseByteArrayOutputStream(1_000_000, true);
+				  final ReverseByteArrayOutputStream os = new ReverseByteArrayOutputStream(1_000_000, true);
 
 				  subsetAsn.encode(os, true);
 
@@ -175,20 +181,20 @@ public class PrimeCacheImpl<K,V> implements Cache<K,V>
 	}
 
 	@Override
-	public V getAndPut(@NonNull final K key, @NonNull final V value)
+	public PrimeSubsetIntfc getAndPut(@NonNull final K key, @NonNull final PrimeSubsetIntfc value)
 	{
 		return null;
 	}
 
 	@Override
-	public void putAll(@NonNull final Map<? extends K, ? extends V> map)
+	public void putAll(@NonNull final Map<? extends K, ? extends PrimeSubsetIntfc> map)
 	{
 	}
 
 	@Override
-	public boolean putIfAbsent(@NonNull final K key, @NonNull final V value)
+	public boolean putIfAbsent(@NonNull final K key, @NonNull final PrimeSubsetIntfc value)
 	{
-		return false;
+		return keysToValue.putIfAbsent(key, value) != null;
 	}
 
 	@Override
@@ -198,38 +204,43 @@ public class PrimeCacheImpl<K,V> implements Cache<K,V>
 	}
 
 	@Override
-	public boolean remove(@NonNull final K key, @NonNull final V oldValue)
+	public boolean remove(@NonNull final K key, @NonNull final PrimeSubsetIntfc oldValue)
 	{
 		return keysToValue.remove(key, oldValue);
 	}
 
 	@Override
-	public V getAndRemove(@NonNull final K key)
+	public PrimeSubsetIntfc getAndRemove(@NonNull final K key)
 	{
+		// no-op
 		return null;
 	}
 
 	@Override
-	public boolean replace(@NonNull final K key, @NonNull final V oldValue, @NonNull final V newValue)
+	public boolean replace(@NonNull final K key, @NonNull final PrimeSubsetIntfc oldValue, @NonNull final PrimeSubsetIntfc newValue)
 	{
+		// no-op
 		return false;
 	}
 
 	@Override
-	public boolean replace(@NonNull final K key, @NonNull final V value)
+	public boolean replace(@NonNull final K key, @NonNull final PrimeSubsetIntfc value)
 	{
+		// no-op
 		return false;
 	}
 
 	@Override
-	public V getAndReplace(@NonNull final K key, @NonNull final V value)
+	public PrimeSubsetIntfc getAndReplace(@NonNull final K key, @NonNull final PrimeSubsetIntfc value)
 	{
+		// no-op
 		return null;
 	}
 
 	@Override
 	public void removeAll(@NonNull final Set<? extends K> keys)
 	{
+		// no-op
 	}
 
 	@Override
@@ -245,20 +256,20 @@ public class PrimeCacheImpl<K,V> implements Cache<K,V>
 	}
 
 	@Override
-	public <C extends Configuration<K, V>> C getConfiguration(@NonNull final Class<C> clazz)
+	public <C extends Configuration<K, PrimeSubsetIntfc>> C getConfiguration(@NonNull final Class<C> clazz)
 	{
 		return null;
 	}
 
 	@Override
-	public <T> T invoke(@NonNull final K key, @NonNull final EntryProcessor<K, V, T> entryProcessor, @NonNull final Object... arguments)
+	public <T> T invoke(@NonNull final K key, @NonNull final EntryProcessor<K, PrimeSubsetIntfc, T> entryProcessor, @NonNull final Object... arguments)
 			throws EntryProcessorException
 	{
 		return null;
 	}
 
 	@Override
-	public <T> Map<K, EntryProcessorResult<T>> invokeAll(@NonNull final Set<? extends K> keys, @NonNull final EntryProcessor<K, V, T> entryProcessor,
+	public <T> Map<K, EntryProcessorResult<T>> invokeAll(@NonNull final Set<? extends K> keys, @NonNull final EntryProcessor<K, PrimeSubsetIntfc, T> entryProcessor,
 			@NonNull final Object... arguments)
 	{
 		return null;
@@ -279,12 +290,13 @@ public class PrimeCacheImpl<K,V> implements Cache<K,V>
 	@Override
 	public void close()
 	{
+		closed = true;
 	}
 
 	@Override
 	public boolean isClosed()
 	{
-		return false;
+		return closed;
 	}
 
 	@Override
@@ -294,18 +306,57 @@ public class PrimeCacheImpl<K,V> implements Cache<K,V>
 	}
 
 	@Override
-	public void registerCacheEntryListener(@NonNull final CacheEntryListenerConfiguration<K, V> cacheEntryListenerConfiguration)
+	public void registerCacheEntryListener(@NonNull final CacheEntryListenerConfiguration<K, PrimeSubsetIntfc> cacheEntryListenerConfiguration)
 	{
 	}
 
 	@Override
-	public void deregisterCacheEntryListener(@NonNull final CacheEntryListenerConfiguration<K, V> cacheEntryListenerConfiguration)
+	public void deregisterCacheEntryListener(@NonNull final CacheEntryListenerConfiguration<K, PrimeSubsetIntfc> cacheEntryListenerConfiguration)
 	{
 	}
 
 	@Override
-	public Iterator<Entry<K, V>> iterator()
+	public Iterator<Entry<K, PrimeSubsetIntfc>> iterator()
 	{
+		// no-op
 		return null;
 	}
+
+	/*
+	 * @Override public long getIfAbsent(long idx, long def) {
+	 *
+	 * return def; }
+	 *
+	 * @Override public long reduceIfEmpty(@NonNull LongLongToLongFunction fn, long
+	 * primeDefault) { // TODO Auto-generated method stub return 0; }
+	 *
+	 * @Override public long reduceIfEmpty(@NonNull LongLongToLongFunction fn) { //
+	 * TODO Auto-generated method stub return keysToValue.reduceIfEmpty(fn); }
+	 *
+	 * @Override public MutableLongLongMap select(@NonNull LongLongPredicate
+	 * keyValPred) {
+	 *
+	 * // TODO Auto-generated method stub return null; }
+	 *
+	 *
+	 * @Override public <R> R select(@NonNull LongPredicate pred, @NonNull R target)
+	 * { // TODO Auto-generated method stub return null; }
+	 *
+	 * @Override public RichIterable<RichIterable<PrimeSubsetIntfc>> chunk(int size)
+	 * { // TODO Auto-generated method stub return null; }
+	 *
+	 * @Override public <R> MutableBag<R> collectIf( Predicate<? super
+	 * com.starcases.prime.cache.api.subset.PrimeSubsetIntfc> predicate, Function<?
+	 * super com.starcases.prime.cache.api.subset.PrimeSubsetIntfc, ? extends R>
+	 * function) { // TODO Auto-generated method stub return null; }
+	 *
+	 * @Override public MutableLongBag collectLong( LongFunction<? super
+	 * com.starcases.prime.cache.api.subset.PrimeSubsetIntfc> longFunction) { //
+	 * TODO Auto-generated method stub return null; }
+	 *
+	 * @Override public MapIterable<K, PrimeSubsetIntfc> ifPresentApply(K key,
+	 * Function<? super com.starcases.prime.cache.api.subset.PrimeSubsetIntfc, ?
+	 * extends Object> function) { // TODO Auto-generated method stub return null; }
+	 */
+
 }

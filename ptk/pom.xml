@@ -63,10 +63,30 @@
 		  <version>0.0.1-SNAPSHOT</version>
 	  </dependency>
 
+	  <dependency> <!-- Include explicitly -->
+		  <groupId>com.starcases.prime</groupId>
+		  <artifactId>ptk-metrics-impl</artifactId>
+		  <version>0.0.1-SNAPSHOT</version>
+	  </dependency>
+
+	  <dependency> <!-- Include explicitly -->
+		  <groupId>com.starcases.prime</groupId>
+		  <artifactId>ptk-sql-impl</artifactId>
+		  <version>0.0.1-SNAPSHOT</version>
+	  </dependency>
+
 		<dependency>
 			<groupId>info.picocli</groupId>
 			<artifactId>picocli-codegen</artifactId>
 		</dependency>
 
   </dependencies>
+
+  	<build>
+		  <plugins>
+			  <plugin>
+					  <artifactId>maven-dependency-plugin</artifactId>
+			  </plugin>
+		  </plugins>
+	  </build>
 </project>

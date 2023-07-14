@@ -1,10 +1,11 @@
 package com.starcases.prime.cache.impl;
 
 import java.nio.file.Path;
-import javax.cache.Cache;
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.ImmutableList;
 import com.starcases.prime.cache.api.CacheProviderIntfc;
+import com.starcases.prime.cache.api.PrimeSubsetCacheIntfc;
+
 import lombok.NonNull;
 
 /**
@@ -29,9 +30,9 @@ public class CacheProvider implements CacheProviderIntfc
 	 * @return
 	 */
 	@Override
-	public <K,V> Cache<K,V> create( @NonNull final Path cache, final boolean clearCache)
+	public <K> PrimeSubsetCacheIntfc<K> create( @NonNull final Path cache, final boolean clearCache)
 	{
-		return new PrimeCacheImpl<>(cache.getFileName().toString(), cache.getParent(), clearCache);
+		return new PrimeSubsetCacheImpl<>(cache.getFileName().toString(), cache.getParent(), clearCache);
 	}
 
 	/**

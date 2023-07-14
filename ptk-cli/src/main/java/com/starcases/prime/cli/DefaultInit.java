@@ -13,11 +13,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
-import javax.cache.Cache;
 
 import org.eclipse.collections.api.block.predicate.Predicate2;
 import org.eclipse.collections.api.collection.ImmutableCollection;
@@ -37,17 +36,22 @@ import com.starcases.prime.base.impl.BaseTypes;
 import com.starcases.prime.base.impl.PrimeMultiBaseContainer;
 
 import com.starcases.prime.cache.api.CacheProviderIntfc;
+import com.starcases.prime.cache.api.PrimeSubsetCacheIntfc;
 import com.starcases.prime.cache.api.persistload.PersistLoaderProviderIntfc;
-import com.starcases.prime.cache.api.subset.PrimeSubsetIntfc;
+import com.starcases.prime.cache.api.preload.PrimeFileLoaderProviderIntfc;
+import com.starcases.prime.cache.api.preload.PrimeFileloaderIntfc;
 import com.starcases.prime.cache.api.subset.PrimeSubsetProviderIntfc;
-import com.starcases.prime.cache.impl.PrimeCacheImpl;
+import com.starcases.prime.cache.impl.PrimeSubsetCacheImpl;
 import com.starcases.prime.cli.MetricsOpts.MetricOpt;
 import com.starcases.prime.common.api.OutputOper;
-import com.starcases.prime.core.api.FactoryIntfc;
+import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
 import com.starcases.prime.core.api.PrimeSourceFactoryIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
 import com.starcases.prime.core.api.ProgressProviderIntfc;
 import com.starcases.prime.core.impl.PrimeRef;
+import com.starcases.prime.core.impl.PrimeSource;
+import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
+import com.starcases.prime.datamgmt.api.CollectionTrackerProviderIntfc;
 import com.starcases.prime.graph.export.api.ExportsProviderIntfc;
 import com.starcases.prime.kern.api.BaseTypesIntfc;
 import com.starcases.prime.kern.api.OutputableIntfc;
@@ -55,6 +59,7 @@ import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
 import com.starcases.prime.kern.api.StatusHandlerIntfc;
 import com.starcases.prime.logging.LogGraphStructure;
 import com.starcases.prime.logging.LogNodeStructure;
+import com.starcases.prime.metrics.api.MetricProviderIntfc;
 import com.starcases.prime.metrics.api.MetricsRegistryProviderIntfc;
 import com.starcases.prime.service.impl.SvcLoader;
 import com.starcases.prime.sql.api.SqlProviderIntfc;
@@ -167,6 +172,18 @@ public class DefaultInit implements Runnable
 	private final  StatusHandlerIntfc statusHandler =
 			new SvcLoader<StatusHandlerProviderIntfc, Class<StatusHandlerProviderIntfc>>(StatusHandlerProviderIntfc.class)
 				.provider(Lists.immutable.of("STATUS_HANDLER")).orElseThrow().create();
+
+	private static final SvcLoader<CollectionTrackerProviderIntfc, Class<CollectionTrackerProviderIntfc>> collTreeProvider = new SvcLoader< >(CollectionTrackerProviderIntfc.class);
+	private static final CollectionTrackerIntfc collTracker = collTreeProvider
+					.provider(Lists.immutable.of("COLLECTION_TRACKER"))
+					.map(p -> p.create(null))
+					.orElse(null);
+
+	private static final SvcLoader<MetricProviderIntfc, Class<MetricProviderIntfc>> metricProviderSvc = new SvcLoader< >(MetricProviderIntfc.class);
+	private static final MetricProviderIntfc metricProvider = metricProviderSvc
+					.provider(Lists.immutable.of("METRIC_PROVIDER"))
+					.map(p -> p.create(null))
+					.orElse(null);
 
 	/**
 	 * Pull all the settings together and execute all the desired functionality.
@@ -293,14 +310,6 @@ public class DefaultInit implements Runnable
 	private void setFactoryDefaults()
 	{
 		LOG.info("CLI - Setting defaults");
-		PTKFactory.setMaxCount(initOpts.getMaxCount());
-		PTKFactory.setConfidenceLevel(initOpts.getConfidenceLevel());
-
-		PTKFactory.setPrimeRefSetPrimeSource(PrimeRef::setPrimeSource);
-
-		PTKFactory.setPrimeBaseCtor(PrimeMultiBaseContainer::new);
-
-		PTKFactory.setPrimeRefRawCtor( (i) -> new PrimeRef(i).init(PTKFactory.getPrimeBaseCtor()));
 	}
 
 	private boolean ensureFolderExist(final String folderPath)
@@ -408,8 +417,6 @@ public class DefaultInit implements Runnable
 
 		actions.add(s -> {
 
-			final FactoryIntfc factory = PTKFactory.getFactory();
-
 			// Create cache instance and if requested - clear out existing primes [persisted]; no in-memory primes should
 			// exist yet since we haven't loaded the raw primes nor have we tried to load persisted primes.
 			@SuppressWarnings({"PMD.LocalVariableNamingConventions"})
@@ -417,15 +424,13 @@ public class DefaultInit implements Runnable
 			final String inputFolderPath = initOpts.getInputDataFolder();
 			final boolean loadRawPrimes = initOpts.isLoadPrimes();
 			final Path CACHE_PATH = Path.of(replaceTildeHome(initOpts.getOutputFolder()), CACHE_NAME);
-			final Cache<Long,PrimeSubsetIntfc> cache = cacheProvider
+			final PrimeSubsetCacheIntfc<Long> cache = cacheProvider
 													.provider(Lists.immutable.of("CACHE", "PRIMES"))
-													.map(p -> p.<Long, PrimeSubsetIntfc>create(
+													.map(p -> p.<Long>create(
 																CACHE_PATH,
 																loadRawPrimes /* clear any existing prime cache first */
 																) )
 													.orElseThrow();
-
-			PTKFactory.setCache(cache);
 
 			final var inputFoldExist = ensureFolderExist(inputFolderPath);
 
@@ -445,10 +450,16 @@ public class DefaultInit implements Runnable
 					LOG.info(String.format("CREATING PrimeSrc : Loading cache from raw files ; Input folder exists: [%b], do-load-raw-primes[%b]", inputFoldExist, loadRawPrimes));
 				}
 
-				PTKFactory.setInputFolderPath(Path.of(replaceTildeHome(inputFolderPath)));
+				final SvcLoader<PrimeFileLoaderProviderIntfc, Class<PrimeFileLoaderProviderIntfc>> preloadProvider =
+						new SvcLoader< >(PrimeFileLoaderProviderIntfc.class);
 
-				primeSrc = factory.getPrimeSource(true);
-				cache.unwrap(PrimeCacheImpl.class).persistAll();
+				final PrimeFileloaderIntfc primePreloader = preloadProvider
+						.provider(Lists.immutable.of("PRELOADER"))
+						.map(p -> p.create(cache, Path.of(replaceTildeHome(inputFolderPath)), null).orElse(null))
+						.orElse(null);
+
+				primeSrc = getPrimeSource(cache);
+				cache.unwrap(PrimeSubsetCacheImpl.class).persistAll();
 			}
 			else
 			{
@@ -457,7 +468,7 @@ public class DefaultInit implements Runnable
 					LOG.info(String.format("CREATING PrimeSrc: NOT loading Cache ; Input folder exists: [%b], do-load-raw-primes[%b]", inputFoldExist, loadRawPrimes));
 				}
 
-				primeSrc = factory.getPrimeSource(false);
+				primeSrc = getPrimeSource(cache);
 			}
 
 			if (outputOpts.getOutputOpers().contains(OutputOper.PROGRESS))
@@ -474,6 +485,21 @@ public class DefaultInit implements Runnable
 
 			primeSrc.setDisplayDefaultBaseMetrics(outputOpts.getOutputOpers().contains(OutputOper.PRIMETREE_METRICS));
 		});
+	}
+
+	private PrimeSourceFactoryIntfc getPrimeSource(@NonNull PrimeSubsetCacheIntfc<Long> cache)
+	{
+		final Consumer<PrimeSourceIntfc> c = PrimeRef::setPrimeSource;
+		final ImmutableList<Consumer<PrimeSourceIntfc>> consumers = Lists.immutable.of(c);
+		final Function<Long, PrimeRefFactoryIntfc>  f = i -> new PrimeRef(i).init(PrimeMultiBaseContainer::new);
+
+		return new PrimeSource(2000
+				, consumers
+				, f
+				,collTracker
+				,cache
+				,metricProvider
+				);
 	}
 
 	private void actionInitPrimeSourceData()
@@ -542,7 +568,7 @@ public class DefaultInit implements Runnable
 
 					case "PRIME_TREE":
 						{ 	// braces creates a local scope for "settings" variable here and in NPRIME option above.
-							final ImmutableMap<String, Object> settings = Maps.immutable.of("collTracker", PTKFactory.getCollTracker());
+							final ImmutableMap<String, Object> settings = Maps.immutable.of("collTracker", collTracker);
 							baseProvider
 							.provider(baseProviderAttributes)
 							.ifPresentOrElse
@@ -598,7 +624,6 @@ public class DefaultInit implements Runnable
 				LOG.info(String.format("DECORATE base supplier [%s] with Timer", baseType.name()));
 			}
 
-			// PTKFactory.getMetricProvider ()
 			metricDecorProvider.provider(ATTRIBUTES).ifPresentOrElse(p -> decoratedBase[0] = p.create(decoratedBase[0]), () -> statusHandler.errorOutput(baseType, "ERROR: No Metric-decor-provider"));
 		}
 

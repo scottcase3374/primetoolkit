@@ -1,4 +1,5 @@
-module com.starcases.prime.sql.impl
+// uses open due to gson
+open module com.starcases.prime.sql.impl
 {
 	requires transitive com.starcases.prime.core.api;
 	requires com.starcases.prime.kern.api;

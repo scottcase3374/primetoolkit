@@ -1,4 +1,4 @@
-module com.starcases.prime.cli
+open module com.starcases.prime.cli
 {
 	exports com.starcases.prime.cli;
 
@@ -25,7 +25,7 @@ module com.starcases.prime.cli
 	uses com.starcases.prime.base.api.BaseTypesProviderIntfc;
 	uses com.starcases.prime.cache.api.CacheProviderIntfc;
 	uses com.starcases.prime.cache.api.persistload.PersistLoaderProviderIntfc;
-	uses com.starcases.prime.cache.api.preload.PreloaderProviderIntfc;
+	uses com.starcases.prime.cache.api.preload.PrimeFileLoaderProviderIntfc;
 	uses com.starcases.prime.cache.api.subset.PrimeSubsetProviderIntfc;
 	uses com.starcases.prime.graph.export.api.ExportsProviderIntfc;
 	uses com.starcases.prime.kern.api.BaseTypesIntfc;

@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.starcases.prime.base.api.BaseGenIntfc;
-import com.starcases.prime.cache.api.preload.PreloaderIntfc;
+import com.starcases.prime.cache.api.PrimeSubsetCacheIntfc;
 import com.starcases.prime.common.api.OutputOper;
 import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
@@ -24,8 +24,6 @@ import com.starcases.prime.core.api.PrimeSourceIntfc;
 import com.starcases.prime.core.api.ProgressIntfc;
 import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
 import com.starcases.prime.datamgmt.api.PData;
-import com.starcases.prime.datamgmt.api.PrimeMapEntry;
-import com.starcases.prime.datamgmt.api.PrimeMapIterator;
 import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
 import com.starcases.prime.kern.api.StatusHandlerIntfc;
 import com.starcases.prime.metrics.api.MetricIntfc;
@@ -117,12 +115,6 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	//
 
 	/**
-	 * confidence level for check of prime
-	 */
-	@Getter(AccessLevel.PRIVATE)
-	private final int confidenceLevel;
-
-	/**
 	 * number of base primes to generate
 	 */
 	@Getter(AccessLevel.PRIVATE)
@@ -134,12 +126,6 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	*/
 	@Getter(AccessLevel.PRIVATE)
 	private final Function<Long, PrimeRefFactoryIntfc> primeRefRawCtor;
-
-	/**
-	 * Container of pre-generated prime/base data.
-	 */
-	@Getter(AccessLevel.PRIVATE)
-	private PreloaderIntfc primeLoader;
 
 	//
 	// Internal data used/generated during prime/base creation
@@ -159,17 +145,35 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	@Getter(AccessLevel.PRIVATE)
 	private final MutableLongLongMap primeToIdxMap;
 
-	/** map long idx to PrimeMapEntry,  PrimeMapEntry is primeRef and BigInt
-	* long idx provides order to primerefs and therefore indirectly to the primes
+	/** map long idx to primeRef
+	* long idx provides order to primerefs
 	*/
 	@Getter(AccessLevel.PRIVATE)
-	private final MutableLongObjectMap<PrimeMapEntry> idxToPrimeMap;
+	private final MutableLongObjectMap<PrimeRefIntfc> idxToPrimeRef;
+
+	private final PrimeSubsetCacheIntfc<Long> primeCache;
 
 	/**
 	 * Multi-level container for the tree of primes.
 	 */
 	@Getter(AccessLevel.PRIVATE)
 	private CollectionTrackerIntfc collTracker;
+
+	/**
+	 * Define the number of bits to batch together to reduce the number of
+	 * idxToPrimeCache accesses.  This is to reduce the space overhead which is
+	 * significant at large scale and to a lesser extent reduce time
+	 * spent in idxToPrimeCache activities.
+	 */
+	@Getter(AccessLevel.PRIVATE)
+	private static final  int SUBSET_BITS = 17;
+
+	/**
+	 * Convert the number of bits into the size of an array for the
+	 * caching.
+	 */
+	@Getter(AccessLevel.PRIVATE)
+	private static final int SUBSET_SIZE = 1 << SUBSET_BITS;
 
 	//
 	// initialization
@@ -186,20 +190,18 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	public PrimeSource(
 			@Min(1) final long maxCount,
 			@NonNull final ImmutableList<Consumer<PrimeSourceIntfc>> consumersSetPrimeSrc,
-			@Min(1) final int confidenceLevel,
 			@NonNull final Function<Long, PrimeRefFactoryIntfc> primeRefRawCtor,
 			final CollectionTrackerIntfc collTracker,
-			final PreloaderIntfc primeLoader,
+			final PrimeSubsetCacheIntfc<Long> primeCache,
 			final MetricProviderIntfc metricProvider
 			)
 	{
 		super();
 
 		this.collTracker = collTracker;
-		this.primeLoader = primeLoader;
-
-		final int capacity = (int)(maxCount*1.25);
-		idxToPrimeMap = new LongObjectHashMap<>(capacity);
+		this.primeCache = primeCache;
+		final int capacity = 50_500_000;
+		idxToPrimeRef = new LongObjectHashMap<>(capacity);
 		primeToIdxMap = new LongLongHashMap(capacity);
 
 		targetPrimeCount = maxCount;
@@ -214,8 +216,6 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 						}
 					}
 						);
-
-		this.confidenceLevel = confidenceLevel;
 
 		this.metricProvider = metricProvider;
 	}
@@ -450,25 +450,33 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	@Override
 	public OptionalLong getPrimeForIdx(@Min(0) final long primeIdx)
 	{
-		final var res1 = idxToPrimeMap.get(primeIdx);
-		final var res2 = res1 != null ?
-				OptionalLong.of(res1.getPrime())
-					: (primeLoader != null)
-						? primeLoader.retrieve(primeIdx)
-							:  OptionalLong.empty();
-		return res2;
+		final long [] retSubset = {-1};
+		final int [] retOffset = {-1};
+		convertIdxToSubsetAndOffset(primeIdx, retSubset, retOffset);
+
+		return OptionalLong.of(this.primeCache.get(retSubset[0]).get(retOffset[0]));
+	}
+
+	private void convertIdxToSubsetAndOffset(final long idx, @NonNull final long [] retSubset, @NonNull final int [] retOffset)
+	{
+		final long subsetId = idx / SUBSET_SIZE;
+		final int offset = (int)(idx % SUBSET_SIZE);
+
+		retSubset[0] = subsetId;
+		retOffset[0] = offset;
 	}
 
 	@Override
 	public Optional<PrimeRefIntfc> getPrimeRefForIdx(@Min(0) final long primeIdx)
 	{
-		final var primeRef = idxToPrimeMap.get(primeIdx).getPrimeRef();
+		final var primeRef = idxToPrimeRef.get(primeIdx);
 		return Optional.of(primeRef);
 	}
 
 	@Override
 	public Optional<PrimeRefIntfc> getPrimeRefForPrime(@Min(0) final long prime)
 	{
+
 		return this.getPrimeRefForIdx(primeToIdxMap.get(prime));
 	}
 
@@ -481,19 +489,19 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	@Override
 	public java.util.Iterator<PrimeRefIntfc> getPrimeRefIter()
 	{
-		return new PrimeMapIterator(idxToPrimeMap.iterator());
+		return idxToPrimeRef.iterator();
 	}
 
 	@Override
 	public Stream<PrimeRefIntfc> getPrimeRefStream(final boolean preferParallel)
-	{
-		return (preferParallel ? idxToPrimeMap.values().parallelStream() : idxToPrimeMap.values().stream()).map(PrimeMapEntry::getPrimeRef);
+	{ //MutableLongObjectMap<PrimeRefIntfc> idxToPrimeRef;
+		return (preferParallel ? idxToPrimeRef.values().parallelStream() : idxToPrimeRef.values().stream());
 	}
 
 	@Override
 	public Stream<PrimeRefIntfc> getPrimeRefStream(@Min(1) final long skipCount, final boolean preferParallel)
 	{
-		return (preferParallel ? idxToPrimeMap.values().stream().skip(skipCount).parallel() : idxToPrimeMap.values().stream().skip(skipCount)).map(PrimeMapEntry::getPrimeRef);
+		return (preferParallel ? idxToPrimeRef.values().stream().skip(skipCount).parallel() : idxToPrimeRef.values().stream().skip(skipCount));
 	}
 
 	private void incrementPermutation(@NonNull final BitSet primePermutation)
@@ -561,7 +569,7 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 
 	private void updateMaps(@Min(0) final long idx, @Min(1) final long newPrime, @NonNull final PrimeRefIntfc ref)
 	{
-		this.idxToPrimeMap.put(idx, new PrimeMapEntry(newPrime, ref));
+		this.idxToPrimeRef.put(idx,ref);
 		this.primeToIdxMap.put(newPrime, idx);
 	}
 
@@ -583,11 +591,7 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 			// Part of "non-cheating" Prime checks.
 			// Not a Prime if is even.
 				(primeSum & 1) == 1
-			&&
-				// This is bootstrap logic.
-				// If possible, this block should be removed and allow the
-				// remaining blocks to determine next Prime.
-				BigInteger.valueOf(primeSum).isProbablePrime(confidenceLevel);
+			;
 	}
 
 	@Override

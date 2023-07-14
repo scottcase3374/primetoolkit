@@ -1,4 +1,4 @@
-module PrimeToolKit
+open module PrimeToolKit
 {
 	exports com.starcases.prime;
 

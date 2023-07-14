@@ -85,6 +85,7 @@
 			</plugin>
 
 
+
 			<!--     <plugin>
         <groupId>com.google.cloud.tools</groupId>
         <artifactId>jib-maven-plugin</artifactId>
@@ -127,7 +128,28 @@
           ...
         </configuration>
       </plugin>-->
+
 		</plugins>
+		<pluginManagement>
+			<plugins>
+
+					<plugin>
+					    <artifactId>maven-dependency-plugin</artifactId>
+					    <executions>
+					        <execution>
+					            <phase>prepare-package</phase>
+					            <goals>
+					                <goal>copy-dependencies</goal>
+					            </goals>
+					            <configuration>
+					                <outputDirectory>${project.build.directory}/../../lib</outputDirectory>
+					            </configuration>
+					        </execution>
+					    </executions>
+					</plugin>
+
+			</plugins>
+		</pluginManagement>
 	</build>
 
 	<modules>
@@ -155,7 +177,6 @@
 		<module>ptk-service-impl</module>
 		<module>ptk-sql-api</module>
 		<module>ptk-sql-impl</module>
-
-
 	</modules>
+
 </project>

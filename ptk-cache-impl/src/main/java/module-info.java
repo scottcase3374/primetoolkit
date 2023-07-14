@@ -15,7 +15,7 @@ module com.starcases.prime.cache.impl
 
 	provides com.starcases.prime.cache.api.CacheProviderIntfc with com.starcases.prime.cache.impl.CacheProvider;
 	provides com.starcases.prime.cache.api.persistload.PersistLoaderProviderIntfc with com.starcases.prime.cache.impl.persistload.PersistLoaderProvider;
-	provides com.starcases.prime.cache.api.preload.PreloaderProviderIntfc with com.starcases.prime.cache.impl.preload.PreloaderProvider;
+	provides com.starcases.prime.cache.api.preload.PrimeFileLoaderProviderIntfc with com.starcases.prime.cache.impl.loader.PrimeFileLoaderProvider;
 	provides com.starcases.prime.cache.api.subset.PrimeSubsetProviderIntfc with com.starcases.prime.cache.impl.subset.PrimeSubsetProvider;
 
 	uses com.starcases.prime.kern.api.StatusHandlerIntfc;

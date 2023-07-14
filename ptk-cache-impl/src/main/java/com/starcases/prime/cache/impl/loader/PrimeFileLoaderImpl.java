@@ -1,4 +1,4 @@
-package com.starcases.prime.cache.impl.preload;
+package com.starcases.prime.cache.impl.loader;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,7 +16,7 @@ import javax.cache.Cache;
 
 import org.eclipse.collections.api.factory.Lists;
 
-import com.starcases.prime.cache.api.preload.PreloaderIntfc;
+import com.starcases.prime.cache.api.preload.PrimeFileloaderIntfc;
 import com.starcases.prime.cache.api.subset.PrimeSubsetIntfc;
 import com.starcases.prime.cache.impl.subset.PrimeSubset;
 import com.starcases.prime.kern.api.StatusHandlerIntfc;
@@ -33,9 +33,9 @@ import lombok.AccessLevel;
  * Typically loaded from files sourced from various internet
  * sites.
  */
-class PrimePreloaderImpl implements PreloaderIntfc
+class PrimeFileLoaderImpl implements PrimeFileloaderIntfc
 {
-	Logger LOG = Logger.getLogger(PrimePreloaderImpl.class.getName());
+	Logger LOG = Logger.getLogger(PrimeFileLoaderImpl.class.getName());
 
 	private final  StatusHandlerIntfc statusHandler =
 			new SvcLoader<StatusHandlerProviderIntfc, Class<StatusHandlerProviderIntfc>>(StatusHandlerProviderIntfc.class)
@@ -97,17 +97,11 @@ class PrimePreloaderImpl implements PreloaderIntfc
 	 *
 	 * @param sourceFolders
 	 */
-	public PrimePreloaderImpl(final Cache<Long, PrimeSubsetIntfc> idxToPrimeCache, final Path ... sourceFolders)
+	public PrimeFileLoaderImpl(final Cache<Long, PrimeSubsetIntfc> idxToPrimeCache, final Path ... sourceFolders)
 	{
 		this.idxToPrimeCache = idxToPrimeCache;
 		this.sourceFolders = sourceFolders.clone();
 		subsetOfIdxToPrime.alloc(SUBSET_SIZE);
-
-		/*
-		 * BiFunction<Long, long[], Integer> loadCache = (key, primes) -> {
-		 * idxToPrimeCache.put(key, generateSubset(primes.length, primes)); return 0; };
-		 */
-
 	}
 
 	/**

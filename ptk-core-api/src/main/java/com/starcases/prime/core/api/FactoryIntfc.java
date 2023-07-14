@@ -21,7 +21,7 @@ public interface FactoryIntfc
 	 * provide prime/primeref lookups
 	 * @return
 	 */
-	PrimeSourceFactoryIntfc getPrimeSource(final boolean preload);
+	PrimeSourceFactoryIntfc getPrimeSource();
 
 	/**
 	 * Get a supplier of the base constructor.
