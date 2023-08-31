@@ -4,7 +4,7 @@ import org.eclipse.collections.api.collection.ImmutableCollection;
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.ImmutableList;
 
-import com.starcases.prime.cache.api.subset.PrimeSubsetIntfc;
+import com.starcases.prime.cache.api.subset.SubsetIntfc;
 import com.starcases.prime.cache.api.subset.PrimeSubsetProviderIntfc;
 
 import lombok.NonNull;
@@ -25,9 +25,14 @@ public class PrimeSubsetProvider implements PrimeSubsetProviderIntfc
 	 * create target service.
 	 */
 	@Override
-	public PrimeSubsetIntfc create(@NonNull Integer count, @NonNull long[] primes)
+	public SubsetIntfc<Long> create(@NonNull long[] primes)
 	{
-		return new PrimeSubset(count, primes);
+		final Long [] wrapper = new Long[primes.length];
+		for (int i=0; i < primes.length; i++)
+		{
+			wrapper[i] = primes[i];
+		}
+		return new Subset<Long>(Long.class, wrapper);
 	}
 
 	/**

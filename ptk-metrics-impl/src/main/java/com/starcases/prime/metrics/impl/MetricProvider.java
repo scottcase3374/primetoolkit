@@ -1,5 +1,6 @@
 package com.starcases.prime.metrics.impl;
 
+import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -100,7 +101,7 @@ public final class MetricProvider implements MetricProviderIntfc
 	public MetricIntfc  longTimer(@NonNull final OutputableIntfc outputable, @NonNull final String...tags)
 	{
 
-		return new MetricLongTimerWrapper(LongTaskTimer.builder(outputable.toString()).register(METRICS_REGISTRY).start());
+		return new MetricLongTimerWrapper(LongTaskTimer.builder(String.format("%s [%s]", outputable, Arrays.toString(tags))).register(METRICS_REGISTRY).start());
 	}
 
 	@Override

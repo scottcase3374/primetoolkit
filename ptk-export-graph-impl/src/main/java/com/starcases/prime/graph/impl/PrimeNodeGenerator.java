@@ -104,13 +104,21 @@ public class PrimeNodeGenerator
 	 */
 	public boolean nextEvents()
 	{
-		primeSrc.getPrimeRefForIdx(level).ifPresent(pRef ->
-			{
-				primeRef = pRef;
-				addNodeRawBase();
-			});
-
-		return true;
+		final boolean more[] = { false };
+		try
+		{
+			primeSrc.getPrimeRefForIdx(level).ifPresent(pRef ->
+				{
+					primeRef = pRef;
+					addNodeRawBase();
+					more[0] = true;
+				});
+		}
+		catch(final NullPointerException e)
+		{
+			more[0] = false;
+		}
+		return more[0];
 	}
 
 	/**
@@ -120,13 +128,15 @@ public class PrimeNodeGenerator
 	protected void addNodeRawBase()
 	{
 		// Link from Prime node to Prime bases (i.e. unique set of smaller primes that sums to this Prime).
-		primeRef.getPrimeBaseData().getPrimeBases(baseType)
-							.get(0)
-							.forEach(
-									base -> {
-											addVertext(primeRef);
-											addBaseEdge(base, primeRef);
-										});
+		primeRef
+			.getPrimeBaseData()
+			.getPrimeBases(baseType)
+			 .get(0)
+			.forEach(
+					base -> {
+							addVertex(primeRef);
+							addBaseEdge(base, primeRef);
+						});
 		level++;
 	}
 
@@ -134,7 +144,7 @@ public class PrimeNodeGenerator
 	 * Add new vertex for prime/ref
 	 * @param primeRef
 	 */
-	protected void addVertext(final PrimeRefIntfc primeRef)
+	protected void addVertex(final PrimeRefIntfc primeRef)
 	{
 		graph.addVertex(primeRef);
 	}

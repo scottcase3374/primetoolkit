@@ -1,6 +1,7 @@
 // uses open due to gson
 open module com.starcases.prime.sql.impl
 {
+	requires com.starcases.prime.cache.api;
 	requires transitive com.starcases.prime.core.api;
 	requires com.starcases.prime.kern.api;
 	requires com.starcases.prime.service.impl;
@@ -17,6 +18,7 @@ open module com.starcases.prime.sql.impl
 	requires org.antlr.antlr4.runtime;
 	requires transitive org.eclipse.collections.api;
 	requires org.eclipse.collections.impl;
+	requires com.opencsv;
 
 	provides com.starcases.prime.sql.api.SqlProviderIntfc with com.starcases.prime.sql.impl.SqlCmdSvrProvider;
 

@@ -19,6 +19,9 @@ import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.opencsv.bean.StatefulBeanToCsvBuilder;
+import com.opencsv.exceptions.CsvDataTypeMismatchException;
+import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import com.starcases.prime.base.api.BaseTypesProviderIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
@@ -30,11 +33,13 @@ import com.starcases.prime.sql.antlrimpl.PrimeSqlParser.ArrayItemContext;
 import com.starcases.prime.sql.antlrimpl.PrimeSqlParser.Array_top_clauseContext;
 import com.starcases.prime.sql.antlrimpl.PrimeSqlParser.BaseMatchContext;
 import com.starcases.prime.sql.antlrimpl.PrimeSqlParser.Idx_boundsContext;
+import com.starcases.prime.sql.antlrimpl.PrimeSqlParser.InsertContext;
 import com.starcases.prime.sql.antlrimpl.PrimeSqlParser.Sel_optsContext;
 import com.starcases.prime.sql.antlrimpl.PrimeSqlParser.SubArrayContext;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 
 /**
@@ -93,16 +98,19 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 
 	private String baseType;
 
+	private String contentType;
+
 	/**
 	 * Constructor for the visitor type; the PrimeSourceIntfc provides access to the
 	 * set of primes needed to perform search/filter/etc operations.
 	 *
 	 * @param primeSrc
 	 */
-	public PrimeSqlVisitor(final PrimeSourceIntfc primeSrc)
+	public PrimeSqlVisitor(@NonNull final PrimeSourceIntfc primeSrc, @NonNull final String contentType)
 	{
 		super();
 		this.primeSrc = primeSrc;
+		this.contentType = contentType;
 	}
 
 	/**
@@ -147,7 +155,7 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 	 * @author scott
 	 *
 	 */
-	private class RetData
+	private class JsonData
 	{
 		@Setter
 		@Getter
@@ -161,7 +169,7 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 		@Getter
 		private Object[] base;
 
-		public RetData(final long index, final long prime, final Object[] bases)
+		public JsonData(final long index, final long prime, final Object[] bases)
 		{
 			this.index = index;
 			this.prime = prime;
@@ -169,10 +177,6 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 		}
 	}
 
-	/**
-	 * This method overrides the default and applies filters for the prime set based
-	 * upon the parsed data.
-	 */
 	@Override
 	public PrimeSqlResult visitRoot(final PrimeSqlParser.RootContext ctx)
 	{
@@ -204,13 +208,46 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 			// This is the "manual" way of converting to json. Some custom serialization
 			// support would be better (i.e. less garbage collection needed for temp
 			// arrays).
-			result.setResult(
-					gson.toJson(
+			switch(contentType)
+			{
+					case "application/json":
+						result.setResult(
+							gson.toJson(
+								primeSrc
+								.getPrimeRefStream(this.selUseParallel)
+								// Filter out primes based on index/prime/base-related-info
+								.filter(pRef -> primePredColl.stream().allMatch(primeFilt -> primeFilt.accept(pRef)))
+								.<JsonData>map(pRef -> new JsonData(
+										pRef.getPrimeRefIdx(),
+										pRef.getPrime(),
+										baseType != null
+											? pRef.getPrimeBaseData()
+												.getPrimeBases(BASE_TYPES.select(base -> base.name().equals(baseType)).getOnly())
+												.stream()
+												// Filter tuples out of bases for each matched prime which where tuple doesn't meet the match criteria
+												.filter(baseColl ->
+															   primeBaseItemPredColl.stream().anyMatch(baseItemFilt -> baseColl.anySatisfy(baseItemFilt))
+															|| primeBaseTuplePredColl.stream().anyMatch(tupleFilt -> tupleFilt.accept(baseColl))
+														)
+												.map(lc -> lc.toArray())
+												.toArray()
+											: EMPTY_ARRAY))
+								.toArray()));
+
+					break;
+
+				case "text/csv":
+					final var sWriter = new StringWriter();
+					final var beanToCSV = new StatefulBeanToCsvBuilder<CSVData>(sWriter)
+						.withQuotechar('\'')
+						.build();
+
+					beanToCSV.write(
 							primeSrc
-							.getPrimeRefStream(this.selUseParallel)
+								.getPrimeRefStream(this.selUseParallel)
 							// Filter out primes based on index/prime/base-related-info
 							.filter(pRef -> primePredColl.stream().allMatch(primeFilt -> primeFilt.accept(pRef)))
-							.map(pRef -> new RetData(
+							.<CSVData>map(pRef -> new CSVData(
 									pRef.getPrimeRefIdx(),
 									pRef.getPrime(),
 									baseType != null
@@ -225,9 +262,16 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 											.map(lc -> lc.toArray())
 											.toArray()
 										: EMPTY_ARRAY))
-					.toArray()));
+							);
+
+
+						result.setResult(sWriter.toString());
+					break;
+
+				default:
+			}
 		}
-		catch (IllegalArgumentException | SecurityException e)
+		catch (IllegalArgumentException | SecurityException | CsvDataTypeMismatchException | CsvRequiredFieldEmptyException e)
 		{
 			final StringWriter strWriter = new StringWriter();
 			final PrintWriter prtWriter = new PrintWriter(strWriter);
@@ -454,6 +498,33 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
  									.anyMatch(pred ->  baseItem.containsAll(pred))));
  		}
 
+		return result;
+	}
+
+	//FIXME IS THIS THE BROKEN CODE RELATED TO SUBSET OFFSET BEING EXCEEDED?
+	@Override
+	public PrimeSqlResult visitInsert(InsertContext ctx)
+	{
+//		final long numCacheEntry = cache.getNumCacheEntries();
+//		SubsetIntfc<Long> subset = cache.get(numCacheEntry-1);
+//
+//		boolean persist = false;
+//
+//		if (subset.getMaxOffsetAssigned() >= subset.getMaxOffset()-1)
+//		{
+//			final PrimeSubsetProviderIntfc subsetProvider = new SvcLoader<PrimeSubsetProviderIntfc, Class<PrimeSubsetProviderIntfc>>(PrimeSubsetProviderIntfc.class)
+//					.provider(Lists.immutable.of("PRIMESUBSET")).orElseThrow();
+//
+//			subset = subsetProvider.create((int)numCacheEntry, new long[subset.getMaxOffset()]);
+//			persist = true;
+//		}
+//
+//		subset.set(subset.getMaxOffsetAssigned() % subset.getMaxOffset(), Long.valueOf(ctx.val.getText()));
+//
+//		if (persist)
+//		{
+//			cache.persist(numCacheEntry, subset);
+//		}
 		return result;
 	}
 }

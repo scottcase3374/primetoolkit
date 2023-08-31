@@ -4,7 +4,8 @@ import java.nio.file.Path;
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.ImmutableList;
 import com.starcases.prime.cache.api.CacheProviderIntfc;
-import com.starcases.prime.cache.api.PrimeSubsetCacheIntfc;
+import com.starcases.prime.cache.api.PersistedCacheIntfc;
+import com.starcases.prime.cache.impl.prime.PrimeSubsetCacheImpl;
 
 import lombok.NonNull;
 
@@ -13,7 +14,7 @@ import lombok.NonNull;
  * @author scott
  *
  */
-public class CacheProvider implements CacheProviderIntfc
+public class CacheProvider implements CacheProviderIntfc<Long>
 {
 	/**
 	 * default provider attributes
@@ -30,9 +31,9 @@ public class CacheProvider implements CacheProviderIntfc
 	 * @return
 	 */
 	@Override
-	public <K> PrimeSubsetCacheIntfc<K> create( @NonNull final Path cache, final boolean clearCache)
+	public PersistedCacheIntfc<Long> create( @NonNull final Path cache, final boolean clearCache)
 	{
-		return new PrimeSubsetCacheImpl<>(cache.getFileName().toString(), cache.getParent(), clearCache);
+		return new PrimeSubsetCacheImpl(cache.getFileName().toString(), cache.getParent(), clearCache);
 	}
 
 	/**

@@ -59,7 +59,25 @@
 
 	  <dependency>
 		  <groupId>com.starcases.prime</groupId>
+		  <artifactId>ptk-kern-api</artifactId>
+		  <version>0.0.1-SNAPSHOT</version>
+	  </dependency>
+
+	  <dependency>
+		  <groupId>com.starcases.prime</groupId>
 		  <artifactId>ptk-kern-impl</artifactId>
+		  <version>0.0.1-SNAPSHOT</version>
+	  </dependency>
+
+	  <dependency> <!-- Include explicitly -->
+		  <groupId>com.starcases.prime</groupId>
+		  <artifactId>ptk-logging</artifactId>
+		  <version>0.0.1-SNAPSHOT</version>
+	  </dependency>
+
+	  <dependency> <!-- Include explicitly -->
+		  <groupId>com.starcases.prime</groupId>
+		  <artifactId>ptk-metrics-api</artifactId>
 		  <version>0.0.1-SNAPSHOT</version>
 	  </dependency>
 

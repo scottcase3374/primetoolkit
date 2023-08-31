@@ -72,13 +72,13 @@ class CollectionTrackerImpl implements CollectionTrackerIntfc
 	@Override
 	public void log()
 	{
-		//statusHandler.output("%nCollection tracking:%n", "");
-		//useCounts.forEach(
-			//	(l1, l2) ->
-				//statusHandler.output("sum: [%d] occurrences: [%d] prefix: [%s]%n",
-			//				l1,
-			//				l2,
-			//				sourcePrimes.get(l1).toCanonicalCollection().makeString()));
+		statusHandler.output("%nCollection tracking:%n", "");
+		useCounts.forEach(
+				(l1, l2) ->
+				statusHandler.output("sum: [%d] occurrences: [%d] prefix: [%s]%n",
+							l1,
+							l2,
+							sourcePrimes.get(l1).toCanonicalCollection().makeString()));
 	}
 
 	/**

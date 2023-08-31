@@ -8,6 +8,7 @@ import java.util.function.LongSupplier;
 import java.util.stream.Stream;
 
 import jakarta.validation.constraints.Min;
+import lombok.NonNull;
 
 /**
  *
@@ -76,7 +77,7 @@ public interface PrimeSourceIntfc extends Serializable
 	 * @param longSupplier
 	 * @return
 	 */
-	Optional<PrimeRefIntfc> getPrimeRefForPrime(final LongSupplier longSupplier);
+	Optional<PrimeRefIntfc> getPrimeRefForPrime(@NonNull final LongSupplier longSupplier);
 
 	/**
 	 * Get the big integer [prime] from the prime ref associated with
@@ -86,4 +87,16 @@ public interface PrimeSourceIntfc extends Serializable
 	 * @return
 	 */
 	OptionalLong getPrimeForIdx(@Min(0) long primeIdx);
+
+	/**
+	 *
+	 * @param nextPrimeIdx
+	 * @param newPrime
+	 * @param defaultBase
+	 * @return
+	 */
+	PrimeRefFactoryIntfc addPrimeRef(
+			@Min(0) final long nextPrimeIdx,
+			@Min(1) final long newPrime
+			);
 }

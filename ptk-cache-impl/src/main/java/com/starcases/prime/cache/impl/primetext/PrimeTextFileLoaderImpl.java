@@ -1,4 +1,4 @@
-package com.starcases.prime.cache.impl.loader;
+package com.starcases.prime.cache.impl.primetext;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,11 +16,13 @@ import javax.cache.Cache;
 
 import org.eclipse.collections.api.factory.Lists;
 
-import com.starcases.prime.cache.api.preload.PrimeFileloaderIntfc;
-import com.starcases.prime.cache.api.subset.PrimeSubsetIntfc;
-import com.starcases.prime.cache.impl.subset.PrimeSubset;
+import com.starcases.prime.cache.api.primetext.PrimeTextFileloaderIntfc;
+import com.starcases.prime.cache.api.subset.SubsetIntfc;
+import com.starcases.prime.cache.impl.subset.Subset;
+import com.starcases.prime.kern.api.IdxToSubsetMapperIntfc;
 import com.starcases.prime.kern.api.StatusHandlerIntfc;
 import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
+import com.starcases.prime.kern.impl.IdxToSubsetMapperImpl;
 import com.starcases.prime.service.impl.SvcLoader;
 
 import lombok.Getter;
@@ -33,28 +35,14 @@ import lombok.AccessLevel;
  * Typically loaded from files sourced from various internet
  * sites.
  */
-class PrimeFileLoaderImpl implements PrimeFileloaderIntfc
+class PrimeTextFileLoaderImpl implements PrimeTextFileloaderIntfc
 {
-	Logger LOG = Logger.getLogger(PrimeFileLoaderImpl.class.getName());
+	Logger LOG = Logger.getLogger(PrimeTextFileLoaderImpl.class.getName());
 
 	private final  StatusHandlerIntfc statusHandler =
 			new SvcLoader<StatusHandlerProviderIntfc, Class<StatusHandlerProviderIntfc>>(StatusHandlerProviderIntfc.class)
 				.provider(Lists.immutable.of("STATUS_HANDLER")).orElseThrow().create();
-	/**
-	 * Define the number of bits to batch together to reduce the number of
-	 * idxToPrimeCache accesses.  This is to reduce the space overhead which is
-	 * significant at large scale and to a lesser extent reduce time
-	 * spent in idxToPrimeCache activities.
-	 */
-	@Getter(AccessLevel.PRIVATE)
-	private static final  int SUBSET_BITS = 17;
 
-	/**
-	 * Convert the number of bits into the size of an array for the
-	 * caching.
-	 */
-	@Getter(AccessLevel.PRIVATE)
-	private static final int SUBSET_SIZE = 1 << SUBSET_BITS;
 
 	/**
 	 * represents max-assigned offset for a batch (subset).
@@ -74,14 +62,14 @@ class PrimeFileLoaderImpl implements PrimeFileloaderIntfc
 	 */
 	@Getter
 	@Setter
-	private PrimeSubset subsetOfIdxToPrime = new PrimeSubset();
+	private Subset<Long> subsetOfIdxToPrime;
 
 	/**
 	 * Cache object - both in-memory and persisted data
 	 * 	Map index to prime#.
 	 */
 	@Getter(AccessLevel.PRIVATE)
-	private final Cache<Long,PrimeSubsetIntfc> idxToPrimeCache;
+	private final Cache<Long,SubsetIntfc<Long>> idxToPrimeCache;
 
 	/**
 	 * Break linear index range into indexed batches of indexed items.
@@ -92,32 +80,18 @@ class PrimeFileLoaderImpl implements PrimeFileloaderIntfc
 
 	private static final String ZIP_FOLDER_ISSUE_MSG = "Problem with input zip-file or folder";
 
+	private static final IdxToSubsetMapperIntfc idxMap = new IdxToSubsetMapperImpl();
+
 	/**
 	 * Constructor for class responsible for loading pre-generated prime/base info.
 	 *
 	 * @param sourceFolders
 	 */
-	public PrimeFileLoaderImpl(final Cache<Long, PrimeSubsetIntfc> idxToPrimeCache, final Path ... sourceFolders)
+	public PrimeTextFileLoaderImpl(@NonNull final Cache<Long, SubsetIntfc<Long>> idxToPrimeCache, final Path ... sourceFolders)
 	{
 		this.idxToPrimeCache = idxToPrimeCache;
-		this.sourceFolders = sourceFolders.clone();
-		subsetOfIdxToPrime.alloc(SUBSET_SIZE);
-	}
-
-	/**
-	 * Centralized the mapping from requested idx to subset/offset values.
-	 *
-	 * @param idx
-	 * @param retSubset
-	 * @param retOffset
-	 */
-	private void convertIdxToSubsetAndOffset(final long idx, @NonNull final long [] retSubset, @NonNull final int [] retOffset)
-	{
-		final long subsetId = idx / SUBSET_SIZE;
-		final int offset = (int)(idx % SUBSET_SIZE);
-
-		retSubset[0] = subsetId;
-		retOffset[0] = offset;
+		this.sourceFolders = sourceFolders;
+		subsetOfIdxToPrime = new Subset<Long>(Long.class, IdxToSubsetMapperIntfc.SUBSET_SIZE);
 	}
 
 	private void assign(final long idx, final long val)
@@ -125,14 +99,13 @@ class PrimeFileLoaderImpl implements PrimeFileloaderIntfc
 		final long [] subset = {0};
 		final int [] offset = {0};
 
-		convertIdxToSubsetAndOffset(idx, subset, offset);
+		idxMap.convertIdxToSubsetAndOffset(idx, subset, offset);
 
 		if (subset[0] != subsetIdx)
 		{
 			idxToPrimeCache.put(subsetIdx, subsetOfIdxToPrime);
-			subsetOfIdxToPrime = new PrimeSubset();
-			subsetOfIdxToPrime.alloc(SUBSET_SIZE);
 
+			subsetOfIdxToPrime = new Subset<Long>(Long.class, IdxToSubsetMapperIntfc.SUBSET_SIZE);
 			subsetIdx = subset[0];
 		}
 
@@ -151,9 +124,9 @@ class PrimeFileLoaderImpl implements PrimeFileloaderIntfc
 	{
 		final long [] retSubset = {0};
 		final int [] retOffset = {0};
-		convertIdxToSubsetAndOffset(idx, retSubset, retOffset);
+		idxMap.convertIdxToSubsetAndOffset(idx, retSubset, retOffset);
 
-		final PrimeSubsetIntfc subset = idxToPrimeCache.get(retSubset[0]);
+		final SubsetIntfc<Long> subset = idxToPrimeCache.get(retSubset[0]);
 		return subset != null ? OptionalLong.of(subset.get(retOffset[0])) : OptionalLong.empty();
 	}
 
@@ -167,6 +140,11 @@ class PrimeFileLoaderImpl implements PrimeFileloaderIntfc
 	@Override
 	public boolean primeTextloader()
 	{
+		if (null == sourceFolders)
+		{
+			return false;
+		}
+
 		final int [] index = {0};
 
 		// Hard-code 1 into the set of values - it isn't part of the standard dataset

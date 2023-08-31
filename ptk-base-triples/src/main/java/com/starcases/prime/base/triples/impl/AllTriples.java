@@ -117,22 +117,13 @@ public class AllTriples
 					Arrays.stream(TripleMember.values())
 					.forEach( memberIdx ->
 							{
-								try
-								{
-									triple[memberIdx.ordinal()] = primeSrc.getPrimeRefForIdx(indices[memberIdx.ordinal()]).orElseThrow();
-								}
-								catch(final Exception e)
-								{
-									triple[memberIdx.ordinal()] = null;
-								}
+								triple[memberIdx.ordinal()] = primeSrc.getPrimeRefForIdx(indices[memberIdx.ordinal()]).orElse(null);
 							}
 						);
 					return triple;
 				}
 			);
 	}
-
-
 
 	/**
 	 * Main entry point to this processing - produce all viable triples and add each to the corresponding prime base.

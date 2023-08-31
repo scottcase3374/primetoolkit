@@ -135,13 +135,15 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	@Override
 	public Optional<PrimeRefIntfc> getNextPrimeRef()
 	{
-		return primeSrc.getPrimeRefForIdx(primeIdx +1);
+		final var ret = primeSrc.getPrimeRefForIdx(primeIdx +1);
+		return ret;
 	}
 
 	@Override
 	public Optional<PrimeRefIntfc> getPrevPrimeRef()
 	{
-		return primeIdx == 0 ? Optional.empty() : primeSrc.getPrimeRefForIdx(primeIdx -1);
+		return primeIdx <= 0 ? Optional.empty() : primeSrc.getPrimeRefForIdx(primeIdx -1);
+		//return primeSrc.getPrimeRefForIdx(primeIdx -1);
 	}
 
 	@Override

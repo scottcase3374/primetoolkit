@@ -6,5 +6,5 @@ import lombok.NonNull;
 
 public interface PrimeSubsetProviderIntfc extends SvcProviderBaseIntfc
 {
-	PrimeSubsetIntfc create(@NonNull Integer count, @NonNull long[] primes);
+	SubsetIntfc<Long> create(@NonNull long[] primes);
 }

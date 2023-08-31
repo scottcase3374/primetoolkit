@@ -1,8 +1,8 @@
-package com.starcases.prime.cache.api.preload;
+package com.starcases.prime.cache.api.primetext;
 
 import java.util.OptionalLong;
 
-public interface PrimeFileloaderIntfc
+public interface PrimeTextFileloaderIntfc
 {
 	 OptionalLong retrieve(final long idx);
 	 long getMaxOffset();

@@ -1,11 +1,13 @@
 package com.starcases.prime.cache.api.subset;
 
-public interface PrimeSubsetIntfc
+public interface SubsetIntfc<K>
 {
 
-	long[] getEntries();
+	K[] getEntries();
 
 	int getMaxOffsetAssigned();
+
+	int getMaxOffset();
 
 	/**
 	 * Method for runtime allocation of the desired container size.
@@ -19,14 +21,14 @@ public interface PrimeSubsetIntfc
 	 * @param offset
 	 * @param val
 	 */
-	void set(final int offset, final long val);
+	void set(final int offset, final K val);
 
 	/**
 	 * retrieve prime/base from container
 	 * @param offset
 	 * @return
 	 */
-	long get(final int offset);
+	K get(final int offset);
 
 	String toString();
 }

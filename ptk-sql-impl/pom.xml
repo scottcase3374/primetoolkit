@@ -9,12 +9,27 @@
 	</parent>
 	<artifactId>ptk-sql-impl</artifactId>
 
+	<properties>
+		<opencsv.version>5.8</opencsv.version>
+	</properties>
+
 	<dependencies>
+		<dependency>
+			<groupId>com.opencsv</groupId>
+    		<artifactId>opencsv</artifactId>
+    		<version>${opencsv.version}</version>
+		</dependency>
 
 		<!-- runtime deps -->
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.starcases.prime</groupId>
+			<artifactId>ptk-cache-api</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>

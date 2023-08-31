@@ -81,7 +81,7 @@ public class PrimeGrapherBase
 	 */
 	protected PrimeGrapherBase(@NonNull final PrimeSourceIntfc primeSrc, @NonNull final BaseTypesIntfc baseType, @NonNull final List<GraphListener<PrimeRefIntfc, DefaultEdge>> graphs)
 	{
-		LOG.fine("PrimeGrapherBase()");
+		LOG.info("PrimeGrapherBase() - basetype: " + baseType.name());
 		this.primeSrc = primeSrc;
 		this.baseType = baseType;
 

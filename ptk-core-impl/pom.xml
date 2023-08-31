@@ -60,6 +60,11 @@
 			<groupId>org.eclipse.collections</groupId>
 			<artifactId>eclipse-collections</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.starcases.prime</groupId>
+			<artifactId>ptk-kern-impl</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
   </dependencies>
 
   	<build>

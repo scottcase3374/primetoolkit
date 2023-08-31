@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -26,6 +27,8 @@ import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.map.ImmutableMap;
 import org.eclipse.collections.api.multimap.ImmutableMultimap;
 import org.eclipse.collections.impl.list.mutable.FastList;
+import org.jgrapht.event.GraphListener;
+import org.jgrapht.graph.DefaultEdge;
 
 import com.starcases.prime.base.api.BaseProviderIntfc;
 import com.starcases.prime.base.api.BaseTypesProviderIntfc;
@@ -36,15 +39,16 @@ import com.starcases.prime.base.impl.BaseTypes;
 import com.starcases.prime.base.impl.PrimeMultiBaseContainer;
 
 import com.starcases.prime.cache.api.CacheProviderIntfc;
-import com.starcases.prime.cache.api.PrimeSubsetCacheIntfc;
+import com.starcases.prime.cache.api.PersistedCacheIntfc;
 import com.starcases.prime.cache.api.persistload.PersistLoaderProviderIntfc;
-import com.starcases.prime.cache.api.preload.PrimeFileLoaderProviderIntfc;
-import com.starcases.prime.cache.api.preload.PrimeFileloaderIntfc;
+import com.starcases.prime.cache.api.primetext.PrimeTextFileLoaderProviderIntfc;
+import com.starcases.prime.cache.api.primetext.PrimeTextFileloaderIntfc;
 import com.starcases.prime.cache.api.subset.PrimeSubsetProviderIntfc;
-import com.starcases.prime.cache.impl.PrimeSubsetCacheImpl;
+import com.starcases.prime.cache.impl.prime.PrimeSubsetCacheImpl;
 import com.starcases.prime.cli.MetricsOpts.MetricOpt;
 import com.starcases.prime.common.api.OutputOper;
 import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
+import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceFactoryIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
 import com.starcases.prime.core.api.ProgressProviderIntfc;
@@ -53,6 +57,7 @@ import com.starcases.prime.core.impl.PrimeSource;
 import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
 import com.starcases.prime.datamgmt.api.CollectionTrackerProviderIntfc;
 import com.starcases.prime.graph.export.api.ExportsProviderIntfc;
+import com.starcases.prime.graph.visualize.impl.ViewDefault;
 import com.starcases.prime.kern.api.BaseTypesIntfc;
 import com.starcases.prime.kern.api.OutputableIntfc;
 import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
@@ -226,23 +231,35 @@ public class DefaultInit implements Runnable
 	 */
 	private void graph(final PrimeSourceIntfc primeSrc, final BaseTypesIntfc baseType)
 	{
-//		try
-//		{
-//			final var metaDataView = new MetaDataTable();
-//			final var viewList = new ArrayList<GraphListener<PrimeRefIntfc, DefaultEdge>>();
-//			viewList.add(metaDataView);
-//			metaDataView.setSize(400, 320);
-//			metaDataView.setVisible(true);
-//			final var viewDefault = new ViewDefault(primeSrc,  baseType, viewList);
-//			viewDefault.viewDefault();
-//		}
-//		catch(IOException except)
-//		{
-//			if (LOG.isLoggable(Level.SEVERE))
-//			{
-//				LOG.severe("IOExcetion: " + except.toString());
-//			}
-//		}
+		try
+		{
+//			final SvcLoader<VisualizationProviderIntfc, Class<VisualizationProviderIntfc>> visualizationProvider = new SvcLoader< >(VisualizationProviderIntfc.class);
+//
+//			final MutableList<VisualizationProviderIntfc> list = visualizationProvider
+//				.providers(Lists.immutable.of("VISUALIZATION"))
+//				.collectIf(f -> f.countAttributesMatch( Lists.immutable.of("CIRCULAR_LAYOUT", "COMPACT_TREE_LAYOUT", "METADATA_TABLE")) > 0, p -> p)
+//				.toList()
+//				;
+
+			final var viewList = new ArrayList<GraphListener<PrimeRefIntfc, DefaultEdge>>();
+//			list.flatCollect(p -> p.create(null, null)).forEach( i ->
+//					{
+//						i.setSize(400, 320);
+//						i.setVisible(true);
+//						viewList.add(i);
+//					}
+//					);
+
+			final var viewDefault = new ViewDefault(primeSrc,  baseType, viewList);
+			viewDefault.viewDefault();
+		}
+		catch(IOException except)
+		{
+			if (LOG.isLoggable(Level.SEVERE))
+			{
+				LOG.severe("IOExcetion: " + except.toString());
+			}
+		}
 	}
 
 	/**
@@ -412,8 +429,6 @@ public class DefaultInit implements Runnable
 		{
 			LOG.info("CLI - Prep init of default prime content.");
 		}
-		final SvcLoader<CacheProviderIntfc, Class<CacheProviderIntfc>> cacheProvider =
-				new SvcLoader< >(CacheProviderIntfc.class);
 
 		actions.add(s -> {
 
@@ -424,9 +439,9 @@ public class DefaultInit implements Runnable
 			final String inputFolderPath = initOpts.getInputDataFolder();
 			final boolean loadRawPrimes = initOpts.isLoadPrimes();
 			final Path CACHE_PATH = Path.of(replaceTildeHome(initOpts.getOutputFolder()), CACHE_NAME);
-			final PrimeSubsetCacheIntfc<Long> cache = cacheProvider
+			final PersistedCacheIntfc<Long> cache = new SvcLoader< >(CacheProviderIntfc.class)
 													.provider(Lists.immutable.of("CACHE", "PRIMES"))
-													.map(p -> p.<Long>create(
+													.map(p -> p.create(
 																CACHE_PATH,
 																loadRawPrimes /* clear any existing prime cache first */
 																) )
@@ -440,8 +455,12 @@ public class DefaultInit implements Runnable
 
 			// Load previously persisted primes (primes previously cached - NOT the raw text prime data)
 			new SvcLoader< >(PersistLoaderProviderIntfc.class)
-				.provider(Lists.immutable.of("PERSISTLOADER"))
+				.provider(Lists.immutable.of("PERSISTLOADER", "PRIMES"))
 				.ifPresent(p -> p.create(cache, CACHE_PATH, subsetProvider, null).process());
+
+//			new SvcLoader< >(PersistLoaderProviderIntfc.class)
+//				.provider(Lists.immutable.of("PERSISTLOADER", "BASES"))
+//				.ifPresent(p -> p.create(cache, CACHE_PATH, subsetProvider, null).process());
 
 			if (loadRawPrimes && (cache.get(0L) == null))
 			{
@@ -450,10 +469,11 @@ public class DefaultInit implements Runnable
 					LOG.info(String.format("CREATING PrimeSrc : Loading cache from raw files ; Input folder exists: [%b], do-load-raw-primes[%b]", inputFoldExist, loadRawPrimes));
 				}
 
-				final SvcLoader<PrimeFileLoaderProviderIntfc, Class<PrimeFileLoaderProviderIntfc>> preloadProvider =
-						new SvcLoader< >(PrimeFileLoaderProviderIntfc.class);
+				final SvcLoader<PrimeTextFileLoaderProviderIntfc, Class<PrimeTextFileLoaderProviderIntfc>> preloadProvider =
+						new SvcLoader< >(PrimeTextFileLoaderProviderIntfc.class);
 
-				final PrimeFileloaderIntfc primePreloader = preloadProvider
+				// Constructor calls required methods to load data.
+				final PrimeTextFileloaderIntfc primePreloader = preloadProvider
 						.provider(Lists.immutable.of("PRELOADER"))
 						.map(p -> p.create(cache, Path.of(replaceTildeHome(inputFolderPath)), null).orElse(null))
 						.orElse(null);
@@ -487,13 +507,13 @@ public class DefaultInit implements Runnable
 		});
 	}
 
-	private PrimeSourceFactoryIntfc getPrimeSource(@NonNull PrimeSubsetCacheIntfc<Long> cache)
+	private PrimeSourceFactoryIntfc getPrimeSource(@NonNull PersistedCacheIntfc<Long> cache)
 	{
 		final Consumer<PrimeSourceIntfc> c = PrimeRef::setPrimeSource;
 		final ImmutableList<Consumer<PrimeSourceIntfc>> consumers = Lists.immutable.of(c);
 		final Function<Long, PrimeRefFactoryIntfc>  f = i -> new PrimeRef(i).init(PrimeMultiBaseContainer::new);
 
-		return new PrimeSource(2000
+		return new PrimeSource(initOpts.getMaxCount()
 				, consumers
 				, f
 				,collTracker
@@ -504,20 +524,13 @@ public class DefaultInit implements Runnable
 
 	private void actionInitPrimeSourceData()
 	{
-		if (LOG.isLoggable(Level.INFO))
-		{
-			LOG.info("CLI - Prep prime source init.");
-		}
+
 		actions.add(s -> primeSrc.init());
 	}
 
 	private void actionPrepAdditionalBases()
 	{
-		if (LOG.isLoggable(Level.INFO))
-		{
-			LOG.info("CLI - Check enablement of bases.");
-		}
-
+		statusHandler.dbgOutput("%s", "CLI - Check enablement of bases.");
 		if (baseOpts != null && baseOpts.getBases() != null)
 		{
 			final SvcLoader<BaseProviderIntfc, Class<BaseProviderIntfc>> baseProvider = new SvcLoader< >(BaseProviderIntfc.class);
@@ -529,11 +542,8 @@ public class DefaultInit implements Runnable
 				final var trackGenTime = true;
 				final var method = "DefaultInit::actionHandleAdditionalBases - base :" + baseType.name();
 				final ImmutableList<String> baseProviderAttributes = Lists.immutable.of(baseType.name(), "DEFAULT");
-				if (LOG.isLoggable(Level.INFO))
-				{
-					LOG.info("CLI - Prep base: " + baseType.name());
-				}
 
+				statusHandler.dbgOutput("CLI - Prep base: %s", baseType.name());
 				switch(baseType.name())
 				{
 					case "TRIPLE":
@@ -740,9 +750,10 @@ public class DefaultInit implements Runnable
 			LOG.info("CLI - Check Graph enablement.");
 		}
 
-		if (graphOpts != null && graphOpts.getGraphType() != null && graphOpts.getGraphType() == Graph.DEFAULT)
+		if (graphOpts != null && graphOpts.getGraphType() != null && graphOpts.getGraphType() != null)
 		{
-			actions.add(s -> graph(primeSrc, BaseTypes.DEFAULT));
+			System.out.println("**** Graphing enabled");
+			actions.add(s -> graph(primeSrc, BASE_TYPES.select(p -> p.name().equals(graphOpts.getGraphType().name())).getOnly() ) );
 		}
 	}
 

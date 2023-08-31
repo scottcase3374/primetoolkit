@@ -21,7 +21,7 @@ import lombok.NonNull;
  * Not doing much of anything right now..
  *
  */
-class CompactTreeLayoutBaseMetaDataGraph extends JFrame implements VisualizationProviderIntfc
+public class CompactTreeLayoutBaseMetaDataGraph extends JFrame implements VisualizationProviderIntfc
 {
 	private static final long serialVersionUID = 1L;
 

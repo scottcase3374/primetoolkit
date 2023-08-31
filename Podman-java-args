@@ -1,0 +1,50 @@
+-Dcom.level=info 
+-Dfile.encoding=UTF-8 
+-XX:+ShowCodeDetailsInExceptionMessages 
+--add-reads com.starcases.prime.service.impl=ALL-UNNAMED 
+--add-reads com.starcases.prime.logging=ALL-UNNAMED 
+--add-reads PrimeToolKit=ALL-UNNAMED 
+--add-reads com.starcases.prime.base.nprime.impl=ALL-UNNAMED 
+--add-reads com.starcases.prime.base.prefix.impl=ALL-UNNAMED 
+--add-reads com.starcases.prime.base.primetree.impl=ALL-UNNAMED 
+--add-reads com.starcases.prime.base.triples.impl=ALL-UNNAMED 
+--add-reads com.starcases.prime.cache.api=ALL-UNNAMED 
+--add-reads com.starcases.prime.cache.impl=ALL-UNNAMED 
+--add-reads com.starcases.prime.cli=ALL-UNNAMED 
+--add-reads com.starcases.prime.core.api=ALL-UNNAMED 
+--add-reads com.starcases.prime.core.impl=ALL-UNNAMED 
+--add-reads com.starcases.prime.graph.export.api=ALL-UNNAMED 
+--add-reads com.starcases.graph.export.impl.gml=ALL-UNNAMED 
+--add-reads com.starcases.prime.graph.impl=ALL-UNNAMED 
+--add-reads com.starcases.prime.graph.visualize.api=ALL-UNNAMED 
+--add-reads com.starcases.prime.graph.visualize.impl=ALL-UNNAMED 
+--add-reads com.starcases.prime.metrics.api=ALL-UNNAMED 
+--add-reads com.starcases.prime.metrics.impl=ALL-UNNAMED 
+--add-reads com.starcases.prime.sql.api=ALL-UNNAMED 
+--add-reads com.starcases.prime.sql.impl=ALL-UNNAMED 
+--add-reads com.starcases.prime.service.api=ALL-UNNAMED 
+--add-reads com.starcases.prime.service.impl=ALL-UNNAMED 
+--add-reads com.starcases.prime.logging=ALL-UNNAMED 
+--add-reads PrimeToolKit=ALL-UNNAMED 
+--add-reads com.starcases.prime.base.nprime.impl=ALL-UNNAMED 
+--add-reads com.starcases.prime.base.prefix.impl=ALL-UNNAMED 
+--add-reads com.starcases.prime.base.primetree.impl=ALL-UNNAMED 
+--add-reads com.starcases.prime.base.triples.impl=ALL-UNNAMED 
+--add-reads com.starcases.prime.cache.api=ALL-UNNAMED 
+--add-reads com.starcases.prime.cache.impl=ALL-UNNAMED 
+--add-reads com.starcases.prime.cli=ALL-UNNAMED 
+--add-reads com.starcases.prime.core.api=ALL-UNNAMED 
+--add-reads com.starcases.prime.core.impl=ALL-UNNAMED 
+--add-reads com.starcases.prime.graph.export.api=ALL-UNNAMED 
+--add-reads com.starcases.graph.export.impl.gml=ALL-UNNAMED 
+--add-reads com.starcases.prime.graph.impl=ALL-UNNAMED 
+--add-reads com.starcases.prime.graph.visualize.api=ALL-UNNAMED 
+--add-reads com.starcases.prime.graph.visualize.impl=ALL-UNNAMED 
+--add-reads com.starcases.prime.metrics.api=ALL-UNNAMED 
+--add-reads com.starcases.prime.metrics.impl=ALL-UNNAMED 
+--add-reads com.starcases.prime.sql.api=ALL-UNNAMED 
+--add-reads com.starcases.prime.sql.impl=ALL-UNNAMED 
+--add-reads com.starcases.prime.service.api=ALL-UNNAMED 
+--module-path ./ 
+--module PrimeToolKit/com.starcases.prime.PrimeToolKit  
+

@@ -4,8 +4,29 @@ Impl DEFINITIONS AUTOMATIC TAGS ::= BEGIN
 	-- PrimeSubset
 	--------------------------------------------------------------------
 	PrimeSubsetAsn ::= SEQUENCE OF INTEGER
---	{
---	   maxOffsetAssigned		INTEGER,
---	   primes                   SEQUENCE
---	}
+
+	--------------------------------------------------------------------
+	-- Collection of Integer for bases
+	--------------------------------------------------------------------
+	CollPrimeAsn ::= SEQUENCE OF INTEGER
+
+	--------------------------------------------------------------------
+	-- Prefixes
+	--------------------------------------------------------------------
+	PrefixAsn ::= SEQUENCE OF CollPrimeAsn
+
+	--------------------------------------------------------------------
+	-- Collection of base
+	--------------------------------------------------------------------
+	CollBaseAsn ::= SEQUENCE OF CollPrimeAsn
+
+	--------------------------------------------------------------------
+	-- Base Plain
+	--------------------------------------------------------------------
+	BasesAsn ::= SEQUENCE
+	{
+	   baseName					IA5STRING,
+	   startIndex				INTEGER,
+	   primes                   SEQUENCE OF CollBaseAsn
+	}
 END

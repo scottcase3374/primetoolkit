@@ -49,6 +49,7 @@ class PrimeSQLChannelHandler extends SimpleChannelInboundHandler<Object>
 	private final PrimeSourceIntfc primeSrc;
 
 	private HttpRequest httpRequest;
+	private String contentType;
 
 	private enum MetricType implements OutputableIntfc
 	{
@@ -112,19 +113,14 @@ class PrimeSQLChannelHandler extends SimpleChannelInboundHandler<Object>
 		if (msg instanceof HttpRequest httpReq)
 		{
 			this.httpRequest = httpReq;
+			contentType = httpReq.headers().get("Content-Type");
 		}
 		if (msg instanceof HttpContent httpContent)
 		{
 			final var content = httpContent.content().readCharSequence(httpContent.content().readableBytes(), Charset.defaultCharset());
-			final var res = processRequest(String.valueOf(content));
-			final StringBuilder respBuf = new StringBuilder(
-					res == null ? String.format("{ \"resp\": \"\" , %n\"error\": \"no-data\" }")
+			final var res = processRequest(String.valueOf(content), contentType);
 
-						: res.getError() == null
-							? String.format("{ \"resp\": %s }", res.getResult())
-							: String.format("{ \"resp\": %s, %n\"error\": \"%s\" }",res.getResult(),res.getError()));
-
-			if (!writeResponse(ctx, httpRequest, respBuf))
+			if (!writeResponse(ctx, httpRequest, res.getResult()))
 			{
 				ctx.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
 			}
@@ -153,17 +149,35 @@ class PrimeSQLChannelHandler extends SimpleChannelInboundHandler<Object>
 		return keepAlive;
 	}
 
-	private PrimeSqlResult processRequest(final String request)
+	private PrimeSqlResult processRequest(final String request, final String contentType)
 	{
 		final PrimeSqlLexer psl = new PrimeSqlLexer(CharStreams.fromString(request));
 		final CommonTokenStream tokenStream = new CommonTokenStream(psl);
 
 		final PrimeSqlParser psp = new PrimeSqlParser(tokenStream);
 
-		final PrimeSqlVisitor visitor = new PrimeSqlVisitor(primeSrc);
+		final PrimeSqlVisitor visitor = new PrimeSqlVisitor(primeSrc, contentType);
 		psp.removeErrorListeners();
 		psp.addErrorListener(new PrimeSQLErrorListener(visitor));
 		final ParseTree parseTree = psp.stmts();
-		return visitor.visit(parseTree);
+		var res = visitor.visit(parseTree);
+
+		switch(contentType)
+		{
+			case "application/json":
+				new StringBuilder(
+						res == null ? String.format("{ \"resp\": \"\" , %n\"error\": \"no-data\" }")
+								: res.getError() == null
+								? String.format("{ \"resp\": %s }", res.getResult())
+										: String.format("{ \"resp\": %s, %n\"error\": \"%s\" }",res.getResult(),res.getError())).toString();
+				break;
+
+			case "text/csv":
+				break;
+
+		};
+
+
+		return res;
 	}
 }
