@@ -1,0 +1,7 @@
+containers: {
+ web: {
+	image: localhost/ptk:latest
+	ports: publish: "8690/http"
+}
+}
+
