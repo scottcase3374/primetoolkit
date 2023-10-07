@@ -100,6 +100,8 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 
 	private String contentType;
 
+
+	private long greaterThanAttr = -1;
 	/**
 	 * Constructor for the visitor type; the PrimeSourceIntfc provides access to the
 	 * set of primes needed to perform search/filter/etc operations.
@@ -214,7 +216,7 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 						result.setResult(
 							gson.toJson(
 								primeSrc
-								.getPrimeRefStream(this.selUseParallel)
+								.getPrimeRefStream(greaterThanAttr, this.selUseParallel)
 								// Filter out primes based on index/prime/base-related-info
 								.filter(pRef -> primePredColl.stream().allMatch(primeFilt -> primeFilt.accept(pRef)))
 								.<JsonData>map(pRef -> new JsonData(
@@ -244,7 +246,7 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 
 					beanToCSV.write(
 							primeSrc
-								.getPrimeRefStream(this.selUseParallel)
+								.getPrimeRefStream(greaterThanAttr, this.selUseParallel)
 							// Filter out primes based on index/prime/base-related-info
 							.filter(pRef -> primePredColl.stream().allMatch(primeFilt -> primeFilt.accept(pRef)))
 							.<CSVData>map(pRef -> new CSVData(
@@ -355,10 +357,12 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 			{
 				case PrimeSqlParser.GT:
 					pred = Predicates.attributeGreaterThan(PrimeRefIntfc::getPrimeRefIdx, great);
+					greaterThanAttr = great;
 					break;
 
 				case PrimeSqlParser.GT_EQUAL:
 					pred = Predicates.attributeGreaterThanOrEqualTo(PrimeRefIntfc::getPrimeRefIdx, great);
+					greaterThanAttr = great;
 					break;
 
 				default:

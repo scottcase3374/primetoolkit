@@ -34,6 +34,13 @@ public interface PrimeSourceIntfc extends Serializable
 	Iterator<PrimeRefIntfc> getPrimeRefIter();
 
 	/**
+	 * Iterator to PrimeRefIntfc instances.
+	 *
+	 * @return
+	 */
+	Iterator<PrimeRefIntfc> getPrimeRefIter(long startIdx);
+
+	/**
 	 * Get a stream of prime refs and indicate whether parallel stream ops
 	 * are allowed.
 	 *

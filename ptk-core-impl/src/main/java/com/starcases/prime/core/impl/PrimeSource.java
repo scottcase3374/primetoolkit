@@ -270,6 +270,13 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	}
 
 	@Override
+	public Iterator<PrimeRefIntfc> getPrimeRefIter(long idx)
+	{
+		var ret = new PrimeRefIterator(new PrimeRef(idx));
+		return ret;
+	}
+
+	@Override
 	public Stream<PrimeRefIntfc> getPrimeRefStream(final boolean preferParallel)
 	{
 		return getPrimeRefStream(0, preferParallel);
@@ -278,7 +285,7 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	@Override
 	public Stream<PrimeRefIntfc> getPrimeRefStream(@Min(1) final long skipCount, final boolean preferParallel)
 	{
-		final Iterator<PrimeRefIntfc> iter = getPrimeRefIter();
+		final Iterator<PrimeRefIntfc> iter = getPrimeRefIter(skipCount -1);
 		final Supplier<PrimeRefIntfc> supplier = () -> { var it = iter; return it.hasNext() ? ((Iterator<PrimeRefIntfc>)it).next() : null; };
 		return Stream.generate(supplier).takeWhile( p -> Objects.nonNull(p)).skip(skipCount);
 	}

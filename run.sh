@@ -50,11 +50,8 @@ java \
 --add-reads com.starcases.prime.service.api=ALL-UNNAMED \
 --module-path ./lib:./ptk/target/ptk-0.0.1-SNAPSHOT.jar  \
 --module PrimeToolKit/com.starcases.prime.PrimeToolKit  \
-init help\
+init  \
 --max-count=2500 \
---base=PRIME_TREE \
 --base=PREFIX \
---output=BASES \
---use-base-file \
 --prefer-parallel=true \
 --enable-cmd-listener
