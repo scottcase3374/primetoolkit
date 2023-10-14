@@ -1,6 +1,7 @@
 package com.starcases.prime.core.impl;
 
-import java.util.Objects;
+import java.util.Arrays;
+
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.Consumer;
@@ -11,10 +12,9 @@ import com.starcases.prime.base.api.PrimeBaseIntfc;
 import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
+import com.starcases.prime.kern.impl.IdxToSubsetMapperImpl;
 
-import lombok.Getter;
 import lombok.NonNull;
-import lombok.Setter;
 
 /**
  * Default Prime representation.
@@ -39,13 +39,9 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	@NonNull
 	private static PrimeSourceIntfc primeSrc;
 
-	/**
-	 *  Index for this instance of a Prime.
-	 *  index to bitsets or collections for this val
-	 */
-	@Setter
-	@Getter
-	public long primeIdx;
+	private final static IdxToSubsetMapperImpl idxToSubsetMapper = new IdxToSubsetMapperImpl();
+	private long subset[] = {-1};
+	private int offset[] = {-1};
 
 	/**
 	 * Base data
@@ -60,7 +56,13 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	 */
 	public PrimeRef(final long primeIdx)
 	{
-		this.primeIdx = primeIdx;
+		idxToSubsetMapper.convertIdxToSubsetAndOffset(primeIdx, subset, offset);
+	}
+
+	public PrimeRef(final long subset, final int offset)
+	{
+		this.subset[0] = subset;
+		this.offset[0] = offset;
 	}
 
 	/**
@@ -107,56 +109,49 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 		primeSrc = primeSrcIntfc;
 	}
 
-	@SuppressWarnings("PMD.ConfusingTernary")
-	@Override
-	public boolean equals(final Object obj)
-	{
-		boolean ret;
-		if (this == obj)
-		{
-			ret = true;
-		}
-		else if (obj == null)
-		{
-			ret = false;
-		}
-		else if (getClass() != obj.getClass())
-		{
-			ret = false;
-		}
-		else
-		{
-			final PrimeRef other = (PrimeRef) obj;
-			ret = primeIdx == other.primeIdx;
-		}
-		return ret;
-	}
-
 	@Override
 	public Optional<PrimeRefIntfc> getNextPrimeRef()
 	{
-		final var ret = primeSrc.getPrimeRefForIdx(primeIdx +1);
+		if (offset[0]+1 < IdxToSubsetMapperImpl.SUBSET_SIZE)
+		{
+			offset[0]++;
+		}
+		else
+		{
+			subset[0]++;
+			offset[0] = 0;
+		}
+
+		final var ret = primeSrc.getPrimeRefForIdx(subset[0], offset[0]);
 		return ret;
 	}
 
 	@Override
 	public Optional<PrimeRefIntfc> getPrevPrimeRef()
 	{
-		return primeIdx <= 0 ? Optional.empty() : primeSrc.getPrimeRefForIdx(primeIdx -1);
-		//return primeSrc.getPrimeRefForIdx(primeIdx -1);
+		if (offset[0]-1 < 0)
+		{
+			subset[0]--;
+			offset[0] = IdxToSubsetMapperImpl.SUBSET_SIZE-1;
+		}
+		else
+		{
+			offset[0]--;
+		}
+		return subset[0] < 0 ? Optional.empty() : primeSrc.getPrimeRefForIdx(subset[0], offset[0]);
 	}
 
 	@Override
 	public long getPrime()
 	{
-		return primeSrc.getPrimeForIdx(primeIdx)
+		return primeSrc.getPrimeForIdx(subset[0], offset[0])
 				.orElseThrow();
 	}
 
 	@Override
 	public long getPrimeRefIdx()
 	{
-		return this.primeIdx;
+		return  subset[0] * IdxToSubsetMapperImpl.SUBSET_SIZE + offset[0];
 	}
 
 	/**
@@ -186,15 +181,35 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	}
 
 	@Override
-	public int hashCode()
-	{
-		return Objects.hash(primeIdx);
-	}
-
-	@Override
 	public String toString()
 	{
 		return Long.toString(this.getPrime());
 	}
 
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(offset);
+		result = prime * result + Arrays.hashCode(subset);
+		return result;
+	}
+
+	@SuppressWarnings("PMD.ConfusingTernary")
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		PrimeRef other = (PrimeRef) obj;
+		return Arrays.equals(offset, other.offset) && Arrays.equals(subset, other.subset);
+	}
 }

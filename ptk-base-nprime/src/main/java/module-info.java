@@ -4,7 +4,7 @@ module com.starcases.prime.base.nprime.impl
 	requires com.starcases.prime.core.impl;
 	requires transitive com.starcases.prime.kern.api;
 	requires com.starcases.prime.logging;
-	requires com.starcases.prime.service.api;
+	requires transitive com.starcases.prime.service.api;
 	requires com.starcases.prime.service.impl;
 
 	requires jakarta.validation;

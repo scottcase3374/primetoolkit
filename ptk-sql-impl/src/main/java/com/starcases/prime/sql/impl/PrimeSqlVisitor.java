@@ -6,22 +6,18 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.collections.impl.block.factory.Predicates;
+import org.eclipse.collections.api.block.predicate.Predicate;
 import org.eclipse.collections.api.block.predicate.primitive.LongPredicate;
 import org.eclipse.collections.api.list.ImmutableList;
-import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.api.collection.MutableCollection;
 import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
-import org.eclipse.collections.impl.block.factory.Predicates;
 import org.eclipse.collections.impl.factory.Lists;
 import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
 
 import com.google.gson.ExclusionStrategy;
-import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.opencsv.bean.StatefulBeanToCsvBuilder;
-import com.opencsv.exceptions.CsvDataTypeMismatchException;
-import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import com.starcases.prime.base.api.BaseTypesProviderIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
@@ -36,11 +32,11 @@ import com.starcases.prime.sql.antlrimpl.PrimeSqlParser.Idx_boundsContext;
 import com.starcases.prime.sql.antlrimpl.PrimeSqlParser.InsertContext;
 import com.starcases.prime.sql.antlrimpl.PrimeSqlParser.Sel_optsContext;
 import com.starcases.prime.sql.antlrimpl.PrimeSqlParser.SubArrayContext;
+import com.starcases.prime.sql.api.OutputProviderIntfc;
 
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Setter;
 
 /**
  * Visit the parse tree nodes, gather values needed for the query and add/apply
@@ -55,8 +51,6 @@ import lombok.Setter;
  */
 class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 {
-	private static final Object[] EMPTY_ARRAY = {};
-
 	@Getter(AccessLevel.PRIVATE)
 	private static final Logger LOG = Logger.getLogger(PrimeSqlVisitor.class.getName());
 
@@ -115,39 +109,6 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 		this.contentType = contentType;
 	}
 
-	/**
-	 * Class which enables excluding specific field names from json output.
-	 */
-	private static class ExclFieldNameStrategy implements ExclusionStrategy
-	{
-		@Getter
-		private final MutableList<String> fieldNames = Lists.mutable.empty();
-
-		/**
-		 * Constructors for the field name exclusion class.
-		 *
-		 * @param fieldName
-		 */
-		public ExclFieldNameStrategy()
-		{}
-
-		public void addExcludedField(final String fieldName)
-		{
-			this.fieldNames.add(fieldName);
-		}
-
-		@Override
-		public boolean shouldSkipClass(final Class<?> clazz)
-		{
-			return false;
-		}
-
-		@Override
-		public boolean shouldSkipField(final FieldAttributes f)
-		{
-			return fieldNames.stream().anyMatch(fn -> f.getName().equals(fn));
-		}
-	}
 
 	/**
 	 * Class defining possible data values to return to caller of the SQL-like
@@ -157,27 +118,7 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 	 * @author scott
 	 *
 	 */
-	private class JsonData
-	{
-		@Setter
-		@Getter
-		private long index;
 
-		@Setter
-		@Getter
-		private long prime;
-
-		@Setter
-		@Getter
-		private Object[] base;
-
-		public JsonData(final long index, final long prime, final Object[] bases)
-		{
-			this.index = index;
-			this.prime = prime;
-			this.base = bases;
-		}
-	}
 
 	@Override
 	public PrimeSqlResult visitRoot(final PrimeSqlParser.RootContext ctx)
@@ -204,77 +145,25 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 	public PrimeSqlResult visitSelect(final PrimeSqlParser.SelectContext ctx)
 	{
 		visitChildren(ctx);
-		final Gson gson = new GsonBuilder().setExclusionStrategies(fieldExclusionStrategy).serializeNulls().create();
+		 Predicate<? super PrimeRefIntfc> idxFilter =
+				 pRef -> primePredColl.stream().allMatch(primeFilt -> primeFilt.accept(pRef));
+
+		Predicate<? super ImmutableLongCollection> baseFilter =
+				 baseColl ->
+					   primeBaseItemPredColl.stream().anyMatch(baseItemFilt ->
+					   		   baseColl.anySatisfy(baseItemFilt))
+							|| primeBaseTuplePredColl.stream().anyMatch(tupleFilt -> tupleFilt.accept(baseColl));
 		try
 		{
-			// This is the "manual" way of converting to json. Some custom serialization
-			// support would be better (i.e. less garbage collection needed for temp
-			// arrays).
-			switch(contentType)
-			{
-					case "application/json":
-						result.setResult(
-							gson.toJson(
-								primeSrc
-								.getPrimeRefStream(greaterThanAttr, this.selUseParallel)
-								// Filter out primes based on index/prime/base-related-info
-								.filter(pRef -> primePredColl.stream().allMatch(primeFilt -> primeFilt.accept(pRef)))
-								.<JsonData>map(pRef -> new JsonData(
-										pRef.getPrimeRefIdx(),
-										pRef.getPrime(),
-										baseType != null
-											? pRef.getPrimeBaseData()
-												.getPrimeBases(BASE_TYPES.select(base -> base.name().equals(baseType)).getOnly())
-												.stream()
-												// Filter tuples out of bases for each matched prime which where tuple doesn't meet the match criteria
-												.filter(baseColl ->
-															   primeBaseItemPredColl.stream().anyMatch(baseItemFilt -> baseColl.anySatisfy(baseItemFilt))
-															|| primeBaseTuplePredColl.stream().anyMatch(tupleFilt -> tupleFilt.accept(baseColl))
-														)
-												.map(lc -> lc.toArray())
-												.toArray()
-											: EMPTY_ARRAY))
-								.toArray()));
-
-					break;
-
-				case "text/csv":
-					final var sWriter = new StringWriter();
-					final var beanToCSV = new StatefulBeanToCsvBuilder<CSVData>(sWriter)
-						.withQuotechar('\'')
-						.build();
-
-					beanToCSV.write(
-							primeSrc
-								.getPrimeRefStream(greaterThanAttr, this.selUseParallel)
-							// Filter out primes based on index/prime/base-related-info
-							.filter(pRef -> primePredColl.stream().allMatch(primeFilt -> primeFilt.accept(pRef)))
-							.<CSVData>map(pRef -> new CSVData(
-									pRef.getPrimeRefIdx(),
-									pRef.getPrime(),
-									baseType != null
-										? pRef.getPrimeBaseData()
-											.getPrimeBases(BASE_TYPES.select(base -> base.name().equals(baseType)).getOnly())
-											.stream()
-											// Filter tuples out of bases for each matched prime which where tuple doesn't meet the match criteria
-											.filter(baseColl ->
-														   primeBaseItemPredColl.stream().anyMatch(baseItemFilt -> baseColl.anySatisfy(baseItemFilt))
-														|| primeBaseTuplePredColl.stream().anyMatch(tupleFilt -> tupleFilt.accept(baseColl))
-													)
-											.map(lc -> lc.toArray())
-											.toArray()
-										: EMPTY_ARRAY))
-							);
-
-
-						result.setResult(sWriter.toString());
-					break;
-
-				default:
-			}
+			new SvcLoader<OutputProviderIntfc, Class<OutputProviderIntfc>>(OutputProviderIntfc.class)
+				.provider( Lists.immutable.of(contentType))
+				.orElseThrow()
+				.create(primeSrc, result)
+				.output(baseType, greaterThanAttr, selUseParallel, idxFilter, baseFilter);
 		}
-		catch (IllegalArgumentException | SecurityException | CsvDataTypeMismatchException | CsvRequiredFieldEmptyException e)
+		catch (final Exception e)
 		{
+			final Gson gson = new GsonBuilder().setExclusionStrategies(fieldExclusionStrategy).serializeNulls().create();
 			final StringWriter strWriter = new StringWriter();
 			final PrintWriter prtWriter = new PrintWriter(strWriter);
 			e.printStackTrace(prtWriter);

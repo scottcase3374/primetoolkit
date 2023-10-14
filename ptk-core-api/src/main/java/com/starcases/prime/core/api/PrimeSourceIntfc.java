@@ -39,6 +39,7 @@ public interface PrimeSourceIntfc extends Serializable
 	 * @return
 	 */
 	Iterator<PrimeRefIntfc> getPrimeRefIter(long startIdx);
+	Iterator<PrimeRefIntfc> getPrimeRefIter(@Min(0) final long subset, @Min(0) final int offset);
 
 	/**
 	 * Get a stream of prime refs and indicate whether parallel stream ops
@@ -67,6 +68,7 @@ public interface PrimeSourceIntfc extends Serializable
 	 * @return
 	 */
 	Optional<PrimeRefIntfc> getPrimeRefForIdx(@Min(0) long primeIdx);
+	Optional<PrimeRefIntfc> getPrimeRefForIdx(@Min(0) final long primeSubset, @Min(0) final int primeOffset);
 
 	/**
 	 * Get prime ref associated with the specified long
@@ -94,6 +96,7 @@ public interface PrimeSourceIntfc extends Serializable
 	 * @return
 	 */
 	OptionalLong getPrimeForIdx(@Min(0) long primeIdx);
+	OptionalLong getPrimeForIdx(@Min(0) final long primeSubset, @Min(0) final int primeOffset);
 
 	/**
 	 *
@@ -104,6 +107,12 @@ public interface PrimeSourceIntfc extends Serializable
 	 */
 	PrimeRefFactoryIntfc addPrimeRef(
 			@Min(0) final long nextPrimeIdx,
+			@Min(1) final long newPrime
+			);
+
+	PrimeRefFactoryIntfc addPrimeRef(
+			@Min(0) final long primeSubset,
+			@Min(0) final int primeOffset,
 			@Min(1) final long newPrime
 			);
 }

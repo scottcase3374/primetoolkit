@@ -91,6 +91,10 @@
 			<artifactId>aspectjweaver</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.eclipse.collections</groupId>
+			<artifactId>eclipse-collections</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

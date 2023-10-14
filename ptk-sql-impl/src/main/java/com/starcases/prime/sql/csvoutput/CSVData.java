@@ -1,4 +1,4 @@
-package com.starcases.prime.sql.impl;
+package com.starcases.prime.sql.csvoutput;
 
 import com.opencsv.bean.CsvBindByName;
 

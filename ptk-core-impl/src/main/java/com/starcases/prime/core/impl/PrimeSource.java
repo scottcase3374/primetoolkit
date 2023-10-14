@@ -130,7 +130,9 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	 *  map prime to long index
 	 */
 	@Getter(AccessLevel.PRIVATE)
-	private final MutableLongLongMap primeToIdxMap;
+	//private final MutableLongLongMap primeToIdxMap;
+	private final MutableLongLongMap primeToSubsetMap;
+	private final MutableLongLongMap primeToOffsetMap;
 
 	private final PersistedCacheIntfc<Long> primeCache;
 
@@ -169,7 +171,9 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 		this.collTracker = collTracker;
 		this.primeCache = primeCache;
 		final int capacity = 50_500_000;
-		primeToIdxMap = new LongLongHashMap(capacity);
+		//primeToIdxMap = new LongLongHashMap(capacity);
+		primeToSubsetMap = new LongLongHashMap(capacity);
+		primeToOffsetMap = new LongLongHashMap(capacity);
 
 		targetPrimeCount = maxCount;
 
@@ -198,14 +202,28 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 			@Min(1) final long newPrime
 			)
 	{
-		final PrimeRefFactoryIntfc ret = primeRefRawCtor.apply(nextPrimeIdx);
+		final long subset[] = {-1};
+		final int offset[] = {-1};
 
-		updateMaps(nextPrimeIdx, newPrime, ret);
+		this.idxMap.convertIdxToSubsetAndOffset(nextPrimeIdx, subset, offset);
+		return addPrimeRef(subset[0], offset[0], newPrime);
+	}
+
+	@Override
+	public PrimeRefFactoryIntfc addPrimeRef(
+			@Min(0) final long primeSubset,
+			@Min(0) final int primeOffset,
+			@Min(1) final long newPrime
+			)
+	{
+		final long primeIdx = primeSubset * idxMap.SUBSET_SIZE + primeOffset;
+		final PrimeRefFactoryIntfc ret = primeRefRawCtor.apply(primeIdx);
+
+		updateMaps(primeSubset, primeOffset, newPrime, ret);
 		ret.generateBases(getBasesGenerator());
 
 		return ret;
 	}
-
 
 	private Consumer<PrimeRefFactoryIntfc> getBasesGenerator()
 	{
@@ -224,8 +242,14 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 		final int [] retOffset = {-1};
 		idxMap.convertIdxToSubsetAndOffset(primeIdx, retSubset, retOffset);
 
-		final var val = this.primeCache.get(retSubset[0]);
-		final var prime = val.get(retOffset[0]);
+		return getPrimeForIdx(retSubset[0], retOffset[0]);
+	}
+
+	@Override
+	public OptionalLong getPrimeForIdx(@Min(0) final long primeSubset, @Min(0) final int primeOffset)
+	{
+		final var val = this.primeCache.get(primeSubset);
+		final var prime = val.get(primeOffset);
 		return val == null ? OptionalLong.empty() : OptionalLong.of(prime);
 	}
 
@@ -236,16 +260,22 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 		final int [] retOffset = {-1};
 		idxMap.convertIdxToSubsetAndOffset(primeIdx, retSubset, retOffset);
 
-		final var val = this.primeCache.get(retSubset[0]);
+		return getPrimeRefForIdx(retSubset[0], retOffset[0]);
+	}
+
+	@Override
+	public Optional<PrimeRefIntfc> getPrimeRefForIdx(@Min(0) final long primeSubset, @Min(0) final int primeOffset)
+	{
+		final var val = this.primeCache.get(primeSubset);
 		Optional<PrimeRefIntfc> ret = Optional.empty();
-		if (retSubset[0] <= val.getMaxOffsetAssigned())
+		if (primeSubset <= val.getMaxOffsetAssigned())
 		{
-			final var prime = val.get(retOffset[0]);
-			ret = val == null ? Optional.empty() : prime == null ? Optional.empty() : Optional.of(new PrimeRef(primeIdx));
+			final var prime = val.get(primeOffset);
+			ret = val == null ? Optional.empty() : prime == null ? Optional.empty() : Optional.of(new PrimeRef(primeSubset, primeOffset));
 		}
 		else
 		{
-			System.out.println(String.format("primeIdx overflow: prime-idx %d subset %d offset %d maxassigned-idx %d",  primeIdx, retSubset[0], retOffset[0], val.getMaxOffsetAssigned()));
+			System.out.println(String.format("primeIdx overflow: subset %d offset %d maxassigned-idx %d", primeSubset, primeOffset, val.getMaxOffsetAssigned()));
 		}
 		return ret;
 	}
@@ -253,26 +283,34 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	@Override
 	public Optional<PrimeRefIntfc> getPrimeRefForPrime(@Min(0) final long prime)
 	{
-		return this.getPrimeRefForIdx(primeToIdxMap.get(prime));
+		return this.getPrimeRefForIdx(primeToSubsetMap.get(prime), (int)primeToOffsetMap.get(prime));
 	}
 
 	@Override
 	public Optional<PrimeRefIntfc> getPrimeRefForPrime(@NonNull final LongSupplier longSupplier)
 	{
-		return this.getPrimeRefForIdx(primeToIdxMap.get(longSupplier.getAsLong()));
+		final long prime = longSupplier.getAsLong();
+		return this.getPrimeRefForIdx(primeToSubsetMap.get(prime), (int)primeToOffsetMap.get(prime));
 	}
 
 	@Override
 	public Iterator<PrimeRefIntfc> getPrimeRefIter()
 	{
-		var ret = new PrimeRefIterator(new PrimeRef(-1));
+		var ret = new PrimeRefIterator(new PrimeRef(0,0));
 		return ret;
 	}
 
 	@Override
-	public Iterator<PrimeRefIntfc> getPrimeRefIter(long idx)
+	public Iterator<PrimeRefIntfc> getPrimeRefIter(final long idx)
 	{
 		var ret = new PrimeRefIterator(new PrimeRef(idx));
+		return ret;
+	}
+
+	@Override
+	public Iterator<PrimeRefIntfc> getPrimeRefIter(@Min(0) final long subset, @Min(0) final int offset)
+	{
+		var ret = new PrimeRefIterator(new PrimeRef(subset, offset));
 		return ret;
 	}
 
@@ -321,9 +359,10 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 		this.progress = progress;
 	}
 
-	private void updateMaps(@Min(0) final long idx, @Min(1) final long newPrime, @NonNull final PrimeRefIntfc ref)
+	private void updateMaps(@Min(0) final long subset, @Min(0) final long offset, @Min(1) final long newPrime, @NonNull final PrimeRefIntfc ref)
 	{
-		this.primeToIdxMap.put(newPrime, idx);
+		primeToSubsetMap.put(newPrime, subset);
+		primeToOffsetMap.put(newPrime, offset);
 	}
 
 	@Override
