@@ -93,6 +93,17 @@
 		  <version>0.0.1-SNAPSHOT</version>
 	  </dependency>
 
+	  <dependency> <!-- Include explicitly -->
+		  <groupId>com.starcases.prime</groupId>
+		  <artifactId>ptk-sqlcsvout-impl</artifactId>
+		  <version>0.0.1-SNAPSHOT</version>
+	  </dependency>
+
+	  <dependency> <!-- Include explicitly -->
+		  <groupId>com.starcases.prime</groupId>
+		  <artifactId>ptk-sqljsonout-impl</artifactId>
+		  <version>0.0.1-SNAPSHOT</version>
+	  </dependency>
 		<dependency>
 			<groupId>info.picocli</groupId>
 			<artifactId>picocli-codegen</artifactId>

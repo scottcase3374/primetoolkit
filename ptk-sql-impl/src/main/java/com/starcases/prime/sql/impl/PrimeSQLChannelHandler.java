@@ -165,11 +165,7 @@ class PrimeSQLChannelHandler extends SimpleChannelInboundHandler<Object>
 		switch(contentType)
 		{
 			case "application/json":
-				new StringBuilder(
-						res == null ? String.format("{ \"resp\": \"\" , %n\"error\": \"no-data\" }")
-								: res.getError() == null
-								? String.format("{ \"resp\": %s }", res.getResult())
-										: String.format("{ \"resp\": %s, %n\"error\": \"%s\" }",res.getResult(),res.getError())).toString();
+
 				break;
 
 			case "text/csv":

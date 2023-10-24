@@ -1,13 +1,14 @@
-package com.starcases.prime.sql.csvoutput;
+package com.starcases.prime.sql.csvoutput.impl;
 
 import java.io.StringWriter;
 import java.util.function.Predicate;
 
 import org.eclipse.collections.api.list.ImmutableList;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
 import org.eclipse.collections.impl.factory.Lists;
 
-import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.starcases.prime.base.api.BaseTypesProviderIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
@@ -15,6 +16,8 @@ import com.starcases.prime.kern.api.BaseTypesIntfc;
 import com.starcases.prime.service.impl.SvcLoader;
 import com.starcases.prime.sql.api.OutputServiceIntfc;
 import com.starcases.prime.sql.api.PrimeSqlResultIntfc;
+
+import lombok.NonNull;
 
 public class CSVOutputSvcImpl implements OutputServiceIntfc
 {
@@ -42,42 +45,47 @@ public class CSVOutputSvcImpl implements OutputServiceIntfc
 	@Override
 	public void output(	final String baseType,
 						final long startIdx,
+						final long maxIndexes,
 						final boolean useParallel,
-						final Predicate<? super PrimeRefIntfc> idxFilter,
-						final Predicate<? super ImmutableLongCollection> baseFilter
+						@NonNull final Predicate<? super PrimeRefIntfc> idxFilter,
+						@NonNull final Predicate<? super ImmutableLongCollection> baseFilter,
+						Object nothing
 						)
 	{
-		try
+		final var sWriter = new StringWriter();
+		try(CSVPrinter printer = new CSVPrinter(sWriter, CSVFormat.DEFAULT))
 		{
-			final var sWriter = new StringWriter();
-			final var beanToCSV = new StatefulBeanToCsvBuilder<CSVData>(sWriter)
-				.withQuotechar('\'')
-				.build();
-
-			beanToCSV.write(
-					primeSrc
-						.getPrimeRefStream(startIdx, useParallel)
-					// Filter out primes based on index/prime/base-related-info
-					.filter(idxFilter)
-					.<CSVData>map(pRef -> new CSVData(
-							pRef.getPrimeRefIdx(),
-							pRef.getPrime(),
-							baseType != null
-								? pRef.getPrimeBaseData()
-									.getPrimeBases(BASE_TYPES.select(base -> base.name().equals(baseType)).getOnly())
-									.stream()
-									// Filter tuples out of bases for each matched prime which where tuple doesn't meet the match criteria
-									.filter(baseFilter)
-									.map(lc -> lc.toArray())
-									.toArray()
-								: EMPTY_ARRAY))
-					);
+				  primeSrc
+				  	.getPrimeRefStream(startIdx, useParallel)
+				  	.limit(maxIndexes)
+				  	// Filter out primes based on index/prime/base-related-info
+				  	//.filter(idxFilter)
+				  	.<CSVData>map(pRef -> new CSVData( pRef.getPrimeRefIdx(), pRef.getPrime(),
+				  			baseType != null ?
+				  					pRef.getPrimeBaseData()
+				  					.getPrimeBases(BASE_TYPES.select(base -> base.name().equals(baseType)).getOnly())
+				  					.stream()
+				  					// Filter tuples out of bases for each matched prime which where tuple doesn't meet the match criteria
+				  					.filter(baseFilter)
+				  					.map(lc -> lc.toArray())
+				  					.toArray()
+				  				: EMPTY_ARRAY))
+				  				.forEach(p -> {
+				  							try
+				  							{
+				  								printer.printRecord(p.index);
+				  								printer.printRecord(p.prime);
+				  							}
+				  							catch(final Exception e)
+				  							{}
+				  						  });
 
 				result.setResult(sWriter.toString());
 		}
 		catch(final Exception e)
 		{
-
+				result.setResult(e.toString());
+				result.setError(e.toString());
 		}
 	}
 }

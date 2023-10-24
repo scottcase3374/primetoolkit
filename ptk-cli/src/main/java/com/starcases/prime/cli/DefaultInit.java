@@ -42,7 +42,6 @@ import com.starcases.prime.cache.api.CacheProviderIntfc;
 import com.starcases.prime.cache.api.PersistedCacheIntfc;
 import com.starcases.prime.cache.api.persistload.PersistLoaderProviderIntfc;
 import com.starcases.prime.cache.api.primetext.PrimeTextFileLoaderProviderIntfc;
-import com.starcases.prime.cache.api.primetext.PrimeTextFileloaderIntfc;
 import com.starcases.prime.cache.api.subset.PrimeSubsetProviderIntfc;
 import com.starcases.prime.cache.impl.prime.PrimeSubsetCacheImpl;
 import com.starcases.prime.cli.MetricsOpts.MetricOpt;
@@ -473,7 +472,7 @@ public class DefaultInit implements Runnable
 						new SvcLoader< >(PrimeTextFileLoaderProviderIntfc.class);
 
 				// Constructor calls required methods to load data.
-				final PrimeTextFileloaderIntfc primePreloader = preloadProvider
+				preloadProvider
 						.provider(Lists.immutable.of("PRELOADER"))
 						.map(p -> p.create(cache, Path.of(replaceTildeHome(inputFolderPath)), null).orElse(null))
 						.orElse(null);

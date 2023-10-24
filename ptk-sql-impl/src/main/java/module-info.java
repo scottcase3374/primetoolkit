@@ -17,14 +17,11 @@ open module com.starcases.prime.sql.impl
 	requires static lombok;
 	requires org.antlr.antlr4.runtime;
 	requires transitive org.eclipse.collections.api;
-	//requires org.eclipse.collections.impl;
-	requires com.opencsv;
+	requires org.apache.commons.csv;
 
 	provides com.starcases.prime.sql.api.SqlProviderIntfc with com.starcases.prime.sql.impl.SqlCmdSvrProvider;
-	provides com.starcases.prime.sql.api.OutputServiceIntfc with com.starcases.prime.sql.jsonoutput.JSONOutputServiceImpl;
-	//provides com.starcases.prime.sql.impl.OutputServiceIntfc with com.starcases.prime.sql.csvoutput.CSVOutputSvcImpl;
 
 	uses com.starcases.prime.base.api.BaseTypesProviderIntfc;
 	uses com.starcases.prime.kern.api.StatusHandlerIntfc;
-	//uses com.starcases.prime.sql.impl.OutputServiceIntfc;
+	uses com.starcases.prime.sql.api.OutputProviderIntfc;
 }

@@ -15,13 +15,13 @@ public class PrimeRefIterator implements PrimeRefIteratorIntfc
 	@Override
 	public boolean hasNext()
 	{
-		return primeRef.getNextPrimeRef().isPresent();
+		return primeRef.hasNext();
 	}
 
 	@Override
 	public PrimeRefIntfc next()
 	{
-		final var ret = primeRef.getNextPrimeRef().orElseThrow();
+		final var ret = primeRef.getNextPrimeRef().orElse(null);
 		primeRef = ret;
 		return ret;
 	}
@@ -29,7 +29,7 @@ public class PrimeRefIterator implements PrimeRefIteratorIntfc
 	@Override
 	public boolean hasPrevious()
 	{
-		return primeRef.getPrevPrimeRef().isPresent();
+		return primeRef.hasPrev();
 	}
 
 	@Override

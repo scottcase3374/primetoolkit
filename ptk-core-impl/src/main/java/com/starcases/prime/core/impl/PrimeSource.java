@@ -205,7 +205,7 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 		final long subset[] = {-1};
 		final int offset[] = {-1};
 
-		this.idxMap.convertIdxToSubsetAndOffset(nextPrimeIdx, subset, offset);
+		PrimeSource.idxMap.convertIdxToSubsetAndOffset(nextPrimeIdx, subset, offset);
 		return addPrimeRef(subset[0], offset[0], newPrime);
 	}
 
@@ -216,7 +216,7 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 			@Min(1) final long newPrime
 			)
 	{
-		final long primeIdx = primeSubset * idxMap.SUBSET_SIZE + primeOffset;
+		final long primeIdx = primeSubset * IdxToSubsetMapperIntfc.SUBSET_SIZE + primeOffset;
 		final PrimeRefFactoryIntfc ret = primeRefRawCtor.apply(primeIdx);
 
 		updateMaps(primeSubset, primeOffset, newPrime, ret);

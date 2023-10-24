@@ -1,4 +1,4 @@
-package com.starcases.prime.sql.csvoutput;
+package com.starcases.prime.sql.csvoutput.impl;
 
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.ImmutableList;
@@ -10,7 +10,7 @@ import com.starcases.prime.sql.api.PrimeSqlResultIntfc;
 
 public class CSVOutputProvider implements OutputProviderIntfc
 {
-	private static final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("text/csv");
+	private static final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("text/csv".toUpperCase());
 
 	@Override
 	public ImmutableList<String> getProviderAttributes()

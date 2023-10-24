@@ -47,11 +47,18 @@ java \
 --add-reads com.starcases.prime.metrics.impl=ALL-UNNAMED \
 --add-reads com.starcases.prime.sql.api=ALL-UNNAMED \
 --add-reads com.starcases.prime.sql.impl=ALL-UNNAMED \
+--add-reads com.starcases.prime.sql.csvoutput.impl=ALL-UNNAMED \
+--add-reads com.starcases.prime.sql.jsonoutput.impl=ALL-UNNAMED \
 --add-reads com.starcases.prime.service.api=ALL-UNNAMED \
 --module-path ./lib:./ptk/target/ptk-0.0.1-SNAPSHOT.jar  \
 --module PrimeToolKit/com.starcases.prime.PrimeToolKit  \
-init  \
+init \
 --max-count=2500 \
 --base=PREFIX \
 --prefer-parallel=true \
 --enable-cmd-listener
+
+#--add-modules java.sql
+#--base=PRIME_TREE \
+#--output=BASES \
+#--use-base-file \

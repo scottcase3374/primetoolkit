@@ -2,9 +2,6 @@ package com.starcases.prime.sql.impl;
 
 import com.starcases.prime.sql.api.PrimeSqlResultIntfc;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.ToString;
 
 @ToString
@@ -27,14 +24,14 @@ public class PrimeSqlResult implements PrimeSqlResultIntfc
 	}
 
 	@Override
-	public String getResult() {
-		// TODO Auto-generated method stub
-		return null;
+	public CharSequence getResult()
+	{
+		return result;
 	}
 
 	@Override
-	public String getError() {
-		// TODO Auto-generated method stub
-		return null;
+	public CharSequence getError()
+	{
+		return error;
 	}
 }

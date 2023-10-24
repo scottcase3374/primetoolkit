@@ -1,4 +1,4 @@
-package com.starcases.prime.sql.jsonoutput;
+package com.starcases.prime.sql.jsonoutput.impl;
 
 import lombok.Getter;
 import lombok.Setter;

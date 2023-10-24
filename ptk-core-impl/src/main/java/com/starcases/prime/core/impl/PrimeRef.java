@@ -142,6 +142,42 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	}
 
 	@Override
+	public boolean hasNext()
+	{
+		var offset_local = offset[0];
+		var subset_local = subset[0];
+		if (offset_local+1 < IdxToSubsetMapperImpl.SUBSET_SIZE)
+		{
+			offset_local++;
+		}
+		else
+		{
+			subset_local++;
+			offset_local = 0;
+		}
+
+		return primeSrc.getPrimeRefForIdx(subset_local, offset_local).isPresent();
+	}
+
+	@Override
+	public boolean hasPrev()
+	{
+		var offset_local = offset[0];
+		var subset_local = subset[0];
+
+		if (offset_local -1 < 0)
+		{
+			subset_local--;
+			offset_local = IdxToSubsetMapperImpl.SUBSET_SIZE-1;
+		}
+		else
+		{
+			offset_local--;
+		}
+		return subset_local < 0 ? false : primeSrc.getPrimeRefForIdx(subset_local, offset_local).isPresent();
+	}
+
+	@Override
 	public long getPrime()
 	{
 		return primeSrc.getPrimeForIdx(subset[0], offset[0])

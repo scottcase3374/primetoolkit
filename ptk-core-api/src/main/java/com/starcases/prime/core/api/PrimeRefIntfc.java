@@ -70,4 +70,7 @@ public interface PrimeRefIntfc extends Serializable
 	 * overall list of primes.
 	 */
 	long getPrimeRefIdx();
+
+	boolean hasNext();
+	boolean hasPrev();
 }

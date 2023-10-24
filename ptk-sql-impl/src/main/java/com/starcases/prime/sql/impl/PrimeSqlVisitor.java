@@ -60,6 +60,8 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 				.orElseThrow()
 				.create();
 
+	private final String contentType;
+
 	private final PrimeSourceIntfc primeSrc;
 
 	@Getter
@@ -92,10 +94,9 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 
 	private String baseType;
 
-	private String contentType;
-
-
 	private long greaterThanAttr = -1;
+	private long maxIndexCount = 0;
+
 	/**
 	 * Constructor for the visitor type; the PrimeSourceIntfc provides access to the
 	 * set of primes needed to perform search/filter/etc operations.
@@ -145,21 +146,20 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 	public PrimeSqlResult visitSelect(final PrimeSqlParser.SelectContext ctx)
 	{
 		visitChildren(ctx);
-		 Predicate<? super PrimeRefIntfc> idxFilter =
+		final Predicate<? super PrimeRefIntfc> idxFilter =
 				 pRef -> primePredColl.stream().allMatch(primeFilt -> primeFilt.accept(pRef));
 
-		Predicate<? super ImmutableLongCollection> baseFilter =
+		final Predicate<? super ImmutableLongCollection> baseFilter =
 				 baseColl ->
-					   primeBaseItemPredColl.stream().anyMatch(baseItemFilt ->
-					   		   baseColl.anySatisfy(baseItemFilt))
-							|| primeBaseTuplePredColl.stream().anyMatch(tupleFilt -> tupleFilt.accept(baseColl));
+					   primeBaseItemPredColl.stream().anyMatch(baseItemFilt -> baseColl.anySatisfy(baseItemFilt))
+					|| primeBaseTuplePredColl.stream().anyMatch(tupleFilt -> tupleFilt.accept(baseColl));
 		try
 		{
-			new SvcLoader<OutputProviderIntfc, Class<OutputProviderIntfc>>(OutputProviderIntfc.class)
-				.provider( Lists.immutable.of(contentType))
-				.orElseThrow()
-				.create(primeSrc, result)
-				.output(baseType, greaterThanAttr, selUseParallel, idxFilter, baseFilter);
+			 new SvcLoader<OutputProviderIntfc, Class<OutputProviderIntfc>>(OutputProviderIntfc.class)
+			 	.provider( Lists.immutable.of(contentType.toUpperCase()))
+			 	.orElseThrow()
+			 	.create(primeSrc, result)
+			 	.output(baseType, greaterThanAttr, this.maxIndexCount, selUseParallel, idxFilter, baseFilter, fieldExclusionStrategy);
 		}
 		catch (final Exception e)
 		{
@@ -242,16 +242,15 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 		if (ctx.opG != null)
 		{
 			final long great = Long.parseLong(ctx.gval.getText());
+			greaterThanAttr = great;
 			switch(ctx.opG.getType())
 			{
 				case PrimeSqlParser.GT:
 					pred = Predicates.attributeGreaterThan(PrimeRefIntfc::getPrimeRefIdx, great);
-					greaterThanAttr = great;
 					break;
 
 				case PrimeSqlParser.GT_EQUAL:
 					pred = Predicates.attributeGreaterThanOrEqualTo(PrimeRefIntfc::getPrimeRefIdx, great);
-					greaterThanAttr = great;
 					break;
 
 				default:
@@ -262,6 +261,8 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 		if (ctx.opL != null)
 		{
 			final long less = Long.parseLong(ctx.lval.getText());
+			this.maxIndexCount = Math.max(0, less - greaterThanAttr);
+
 			final Predicates<PrimeRefIntfc> pred2;
 			switch(ctx.opL.getType())
 			{

@@ -1,4 +1,4 @@
-package com.starcases.prime.sql.jsonoutput;
+package com.starcases.prime.sql.jsonoutput.impl;
 
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.ImmutableList;
@@ -10,7 +10,7 @@ import com.starcases.prime.sql.api.PrimeSqlResultIntfc;
 
 public class JSONOutputProvider implements OutputProviderIntfc
 {
-	private static final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("application/json");
+	private static final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("application/json".toUpperCase());
 
 	@Override
 	public ImmutableList<String> getProviderAttributes()
@@ -21,6 +21,6 @@ public class JSONOutputProvider implements OutputProviderIntfc
 	@Override
 	public OutputServiceIntfc create(final PrimeSourceIntfc primeSrc, final PrimeSqlResultIntfc result)
 	{
-		return new JSONOutputServiceImpl().init(primeSrc, result);
+		return new JSONOutputSvcImpl().init(primeSrc, result);
 	}
 }

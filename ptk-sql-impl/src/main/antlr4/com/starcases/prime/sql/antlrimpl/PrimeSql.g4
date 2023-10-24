@@ -82,9 +82,9 @@ sel_opts :
 //   ALL means return ALL tuples where any of the tuples matched (if multiple exist)
 //   MATCHED means only return the matched tuples (if multiple exist)
 select_field :
-		sel=SPLAT 	all_or_matched? (idx_sel=NO INDEX)? (WITH BASE ID)?
+		sel=SPLAT 	all_or_matched? (idx_sel=NO INDEX)? (WITH BASE base=ID)?
 	|	sel=PRIMES 	all_or_matched? (WITH idx_sel=INDEX)?
-	|	sel=BASES 	all_or_matched? (WITH idx_sel=INDEX)? (WITH BASE ID)?
+	|	sel=BASES 	all_or_matched? (WITH idx_sel=INDEX)? (WITH BASE base=ID)?
 	;
 
 all_or_matched :
