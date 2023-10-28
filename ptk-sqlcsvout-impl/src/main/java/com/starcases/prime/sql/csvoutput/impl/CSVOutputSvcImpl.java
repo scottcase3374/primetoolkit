@@ -58,8 +58,6 @@ public class CSVOutputSvcImpl implements OutputServiceIntfc
 				  primeSrc
 				  	.getPrimeRefStream(startIdx, useParallel)
 				  	.limit(maxIndexes)
-				  	// Filter out primes based on index/prime/base-related-info
-				  	//.filter(idxFilter)
 				  	.<CSVData>map(pRef -> new CSVData( pRef.getPrimeRefIdx(), pRef.getPrime(),
 				  			baseType != null ?
 				  					pRef.getPrimeBaseData()

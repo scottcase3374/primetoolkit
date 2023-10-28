@@ -61,8 +61,6 @@ public class JSONOutputSvcImpl implements OutputServiceIntfc
 						primeSrc
 						.getPrimeRefStream(startIdx, useParallel)
 						.limit(maxIndexes)
-						// Filter out primes based on index/prime/base-related-info
-						//.filter(idxFilter)
 						.<JsonData>map(pRef -> new JsonData(
 								pRef.getPrimeRefIdx(),
 								pRef.getPrime(),
