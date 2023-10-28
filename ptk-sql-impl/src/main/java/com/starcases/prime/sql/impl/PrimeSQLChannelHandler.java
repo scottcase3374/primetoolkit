@@ -161,19 +161,6 @@ class PrimeSQLChannelHandler extends SimpleChannelInboundHandler<Object>
 		psp.addErrorListener(new PrimeSQLErrorListener(visitor));
 		final ParseTree parseTree = psp.stmts();
 		var res = visitor.visit(parseTree);
-
-		switch(contentType)
-		{
-			case "application/json":
-
-				break;
-
-			case "text/csv":
-				break;
-
-		};
-
-
 		return res;
 	}
 }
