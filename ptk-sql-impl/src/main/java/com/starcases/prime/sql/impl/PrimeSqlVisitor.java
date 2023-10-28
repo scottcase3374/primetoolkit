@@ -154,7 +154,7 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 					   primeBaseItemPredColl.stream().anyMatch(baseItemFilt -> baseColl.anySatisfy(baseItemFilt))
 					|| primeBaseTuplePredColl.stream().anyMatch(tupleFilt -> tupleFilt.accept(baseColl));
 		try
-		{
+		{	System.out.println("**** greaterThanAttr: " + greaterThanAttr);
 			 new SvcLoader<OutputProviderIntfc, Class<OutputProviderIntfc>>(OutputProviderIntfc.class)
 			 	.provider( Lists.immutable.of(contentType.toUpperCase()))
 			 	.orElseThrow()

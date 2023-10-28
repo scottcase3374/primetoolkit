@@ -323,9 +323,9 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	@Override
 	public Stream<PrimeRefIntfc> getPrimeRefStream(@Min(1) final long skipCount, final boolean preferParallel)
 	{
-		final Iterator<PrimeRefIntfc> iter = getPrimeRefIter(skipCount -1);
+		final Iterator<PrimeRefIntfc> iter = getPrimeRefIter(skipCount-1);
 		final Supplier<PrimeRefIntfc> supplier = () -> { var it = iter; return it.hasNext() ? ((Iterator<PrimeRefIntfc>)it).next() : null; };
-		return Stream.generate(supplier).takeWhile( p -> Objects.nonNull(p)).skip(skipCount);
+		return Stream.generate(supplier).takeWhile( p -> Objects.nonNull(p));
 	}
 
 	@Override
