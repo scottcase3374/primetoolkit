@@ -23,4 +23,32 @@ public class IdxToSubsetMapperImpl implements IdxToSubsetMapperIntfc
 		retSubset[0] = subsetId;
 		retOffset[0] = offset;
 	}
+
+	@Override
+	public void increment( @NonNull final long [] retSubset, @NonNull final int [] retOffset)
+	{
+		if (retOffset[0] +1 < IdxToSubsetMapperImpl.SUBSET_SIZE)
+		{
+			retOffset[0]++;
+		}
+		else
+		{
+			retSubset[0]++;
+			retOffset[0] = 0;
+		}
+	}
+
+	@Override
+	public void decrement( @NonNull final long [] retSubset, @NonNull final int [] retOffset)
+	{
+		if (retOffset[0] -1 < 0)
+		{
+			retSubset[0]--;
+			retOffset[0] = IdxToSubsetMapperImpl.SUBSET_SIZE-1;
+		}
+		else
+		{
+			retOffset[0]--;
+		}
+	}
 }

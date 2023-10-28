@@ -29,4 +29,7 @@ public interface IdxToSubsetMapperIntfc
 	 * @param retOffset
 	 */
 	void convertIdxToSubsetAndOffset(final long idx, @NonNull final long [] retSubset, @NonNull final int [] retOffset);
+
+	void increment( @NonNull final long [] retSubset, @NonNull final int [] retOffset);
+	void decrement( @NonNull final long [] retSubset, @NonNull final int [] retOffset);
 }

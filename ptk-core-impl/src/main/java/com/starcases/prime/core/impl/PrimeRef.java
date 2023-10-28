@@ -54,11 +54,11 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	 */
 	public PrimeRef(final long primeIdx)
 	{
-		long subset_local[] = {-1 };
-		int offset_local[] = {-1};
+		final long [] subset_local = { -1 };
+		final int [] offset_local = { -1 };
 		idxToSubsetMapper.convertIdxToSubsetAndOffset(primeIdx, subset_local, offset_local);
-		this.subset = subset_local[0];
-		this.offset = offset_local[0];
+		subset = subset_local[0];
+		offset = offset_local[0];
 	}
 
 	public PrimeRef(final long subset, final int offset)
@@ -114,74 +114,41 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	@Override
 	public Optional<PrimeRefIntfc> getNextPrimeRef()
 	{
-		var offset_local = offset;
-		var subset_local = subset;
-		if (offset_local+1 < IdxToSubsetMapperImpl.SUBSET_SIZE)
-		{
-			offset_local++;
-		}
-		else
-		{
-			subset_local++;
-			offset_local = 0;
-		}
-
-		final var ret = primeSrc.getPrimeRefForIdx(subset_local, offset_local);
+		final int offset_local[] = {offset};
+		final long subset_local[] = {subset};
+		idxToSubsetMapper.increment(subset_local, offset_local);
+		final var ret = primeSrc.getPrimeRefForIdx(subset_local[0], offset_local[0]);
 		return ret;
 	}
 
 	@Override
 	public Optional<PrimeRefIntfc> getPrevPrimeRef()
 	{
-		var offset_local = offset;
-		var subset_local = subset;
+		final int[] offset_local = {offset};
+		final long [] subset_local = {subset};
 
-		if (offset_local -1 < 0)
-		{
-			subset_local--;
-			offset_local = IdxToSubsetMapperImpl.SUBSET_SIZE-1;
-		}
-		else
-		{
-			offset_local--;
-		}
-		return subset < 0 ? Optional.empty() : primeSrc.getPrimeRefForIdx(subset_local, offset_local);
+		idxToSubsetMapper.decrement(subset_local, offset_local);
+		return subset < 0 ? Optional.empty() : primeSrc.getPrimeRefForIdx(subset_local[0], offset_local[0]);
 	}
 
 	@Override
 	public boolean hasNext()
 	{
-		var offset_local = offset;
-		var subset_local = subset;
-		if (offset_local+1 < IdxToSubsetMapperImpl.SUBSET_SIZE)
-		{
-			offset_local++;
-		}
-		else
-		{
-			subset_local++;
-			offset_local = 0;
-		}
+		final int[] offset_local = {offset};
+		final long [] subset_local = {subset};
 
-		return primeSrc.getPrimeRefForIdx(subset_local, offset_local).isPresent();
+		idxToSubsetMapper.increment(subset_local, offset_local);
+		return primeSrc.getPrimeRefForIdx(subset_local[0], offset_local[0]).isPresent();
 	}
 
 	@Override
 	public boolean hasPrev()
 	{
-		var offset_local = offset;
-		var subset_local = subset;
+		final int[] offset_local = {offset};
+		final long [] subset_local = {subset};
 
-		if (offset_local -1 < 0)
-		{
-			subset_local--;
-			offset_local = IdxToSubsetMapperImpl.SUBSET_SIZE-1;
-		}
-		else
-		{
-			offset_local--;
-		}
-		return subset_local < 0 ? false : primeSrc.getPrimeRefForIdx(subset_local, offset_local).isPresent();
+		idxToSubsetMapper.decrement(subset_local, offset_local);
+		return subset_local[0] < 0 ? false : primeSrc.getPrimeRefForIdx(subset_local[0], offset_local[0]).isPresent();
 	}
 
 	@Override
@@ -206,19 +173,11 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	@Override
 	public OptionalLong getDistToNextPrime()
 	{
-		var offset_local = offset;
-		var subset_local = subset;
-		if (offset_local+1 < IdxToSubsetMapperImpl.SUBSET_SIZE)
-		{
-			offset_local++;
-		}
-		else
-		{
-			subset_local++;
-			offset_local = 0;
-		}
+		final int[] offset_local = {offset};
+		final long [] subset_local = {subset};
 
-		final var result = primeSrc.getPrimeRefForIdx(subset_local, offset_local);
+		idxToSubsetMapper.increment(subset_local, offset_local);
+		final var result = primeSrc.getPrimeRefForIdx(subset_local[0], offset_local[0]);
 
 		return  result.isPresent() ? OptionalLong.of(result.get().getPrime() - getPrime()) : OptionalLong.empty();
 	}
@@ -232,19 +191,12 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	@Override
 	public OptionalLong getDistToPrevPrime()
 	{
-		var offset_local = offset;
-		var subset_local = subset;
+		final int[] offset_local = {offset};
+		final long [] subset_local = {subset};
 
-		if (offset_local -1 < 0)
-		{
-			subset_local--;
-			offset_local = IdxToSubsetMapperImpl.SUBSET_SIZE-1;
-		}
-		else
-		{
-			offset_local--;
-		}
-		final var result =  primeSrc.getPrimeRefForIdx(subset_local, offset_local);
+		idxToSubsetMapper.decrement(subset_local, offset_local);
+		final var result =  primeSrc.getPrimeRefForIdx(subset_local[0], offset_local[0]);
+
 		return result.isPresent() ? OptionalLong.of(result.get().getPrime() - getPrime()) : OptionalLong.empty();
 	}
 
