@@ -10,12 +10,12 @@ import org.eclipse.collections.impl.block.factory.Predicates;
 import org.eclipse.collections.api.block.predicate.Predicate;
 import org.eclipse.collections.api.block.predicate.primitive.LongPredicate;
 import org.eclipse.collections.api.list.ImmutableList;
+import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.api.collection.MutableCollection;
 import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
 import org.eclipse.collections.impl.factory.Lists;
 import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
 
-import com.google.gson.ExclusionStrategy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.starcases.prime.base.api.BaseTypesProviderIntfc;
@@ -88,7 +88,7 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 	private static final String FIELD_SPLAT = "*";
 	private static final String FIELD_EXCLUDE_NONE = FIELD_SPLAT;
 
-	private ExclusionStrategy fieldExclusionStrategy;
+	private ImmutableList<String> fieldExclusionFields;
 
 	private boolean selUseParallel;
 
@@ -142,6 +142,13 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 		return result;
 	}
 
+//	@Override
+//	public PrimeSqlResult visitShowPlugins(final PrimeSqlParser.Show_pluginsContext ctx)
+//	{
+//		visitChildren(ctx);
+//		return result;
+//	}
+
 	@Override
 	public PrimeSqlResult visitSelect(final PrimeSqlParser.SelectContext ctx)
 	{
@@ -159,11 +166,11 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 			 	.provider( Lists.immutable.of(contentType.toUpperCase()))
 			 	.orElseThrow()
 			 	.create(primeSrc, result)
-			 	.output(baseType, greaterThanAttr, this.maxIndexCount, selUseParallel, idxFilter, baseFilter, fieldExclusionStrategy);
+			 	.output(baseType, greaterThanAttr, this.maxIndexCount, selUseParallel, idxFilter, baseFilter, fieldExclusionFields);
 		}
 		catch (final Exception e)
 		{
-			final Gson gson = new GsonBuilder().setExclusionStrategies(fieldExclusionStrategy).serializeNulls().create();
+			final Gson gson = new GsonBuilder().serializeNulls().create();
 			final StringWriter strWriter = new StringWriter();
 			final PrintWriter prtWriter = new PrintWriter(strWriter);
 			e.printStackTrace(prtWriter);
@@ -183,23 +190,23 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 	public PrimeSqlResult visitSelect_field(final PrimeSqlParser.Select_fieldContext ctx)
 	{
 		visitChildren(ctx);
-		final ExclFieldNameStrategy excludes = new ExclFieldNameStrategy();
+		final MutableList<String> excludes = Lists.mutable.empty();
 
 		switch (ctx.sel.getType())
 		{
 			case PrimeSqlParser.PRIMES:
-				excludes.addExcludedField(FIELD_BASE);
+				excludes.add(FIELD_BASE);
 				if (ctx.idx_sel == null || ctx.idx_sel.getType() != PrimeSqlParser.INDEX)
 				{
-					excludes.addExcludedField(FIELD_INDEX);
+					excludes.add(FIELD_INDEX);
 				}
 				break;
 
 			case PrimeSqlParser.BASES:
-				excludes.addExcludedField(FIELD_PRIME);
+				excludes.add(FIELD_PRIME);
 				if (ctx.idx_sel == null || ctx.idx_sel.getType() != PrimeSqlParser.INDEX)
 				{
-					excludes.addExcludedField(FIELD_INDEX);
+					excludes.add(FIELD_INDEX);
 				}
 				break;
 
@@ -207,16 +214,16 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 			default:
 				if (ctx.idx_sel != null && ctx.idx_sel.getType() == PrimeSqlParser.NO)
 				{
-					excludes.addExcludedField(FIELD_INDEX);
+					excludes.add(FIELD_INDEX);
 				}
 				else
 				{
-					excludes.addExcludedField(FIELD_EXCLUDE_NONE);
+					excludes.add(FIELD_EXCLUDE_NONE);
 				}
 				break;
 		}
 
-		fieldExclusionStrategy = excludes;
+		fieldExclusionFields = excludes.toImmutable();
 		return result;
 	}
 

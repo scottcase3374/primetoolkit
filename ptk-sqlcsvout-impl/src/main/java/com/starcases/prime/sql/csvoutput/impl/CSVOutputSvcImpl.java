@@ -2,6 +2,7 @@ package com.starcases.prime.sql.csvoutput.impl;
 
 import java.io.StringWriter;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import org.eclipse.collections.api.list.ImmutableList;
 import org.apache.commons.csv.CSVFormat;
@@ -21,6 +22,10 @@ import lombok.NonNull;
 
 public class CSVOutputSvcImpl implements OutputServiceIntfc
 {
+	private static final String FIELD_INDEX = "index";
+	private static final String FIELD_PRIME = "prime";
+	private static final String FIELD_BASE = "base";
+
 	private static final Object[] EMPTY_ARRAY = {};
 	private static final ImmutableList<BaseTypesIntfc> BASE_TYPES =
 			new SvcLoader<BaseTypesProviderIntfc, Class<BaseTypesProviderIntfc>>(BaseTypesProviderIntfc.class)
@@ -49,12 +54,29 @@ public class CSVOutputSvcImpl implements OutputServiceIntfc
 						final boolean useParallel,
 						@NonNull final Predicate<? super PrimeRefIntfc> idxFilter,
 						@NonNull final Predicate<? super ImmutableLongCollection> baseFilter,
-						Object nothing
+						final ImmutableList<String> excludeFields
 						)
 	{
 		final var sWriter = new StringWriter();
 		try(CSVPrinter printer = new CSVPrinter(sWriter, CSVFormat.DEFAULT))
 		{
+			final Stream.Builder<String> strHrdBuilder = Stream.builder();
+			if (!excludeFields.contains(FIELD_INDEX))
+			{
+				strHrdBuilder.add(FIELD_INDEX);
+			}
+
+			if (!excludeFields.contains(FIELD_PRIME))
+			{
+				strHrdBuilder.add(FIELD_PRIME);
+			}
+
+			if (!excludeFields.contains(FIELD_BASE))
+			{
+
+			}
+			printer.printRecord(strHrdBuilder.build());
+
 				  primeSrc
 				  	.getPrimeRefStream(startIdx, useParallel)
 				  	.limit(maxIndexes)
@@ -71,8 +93,24 @@ public class CSVOutputSvcImpl implements OutputServiceIntfc
 				  				.forEach(p -> {
 				  							try
 				  							{
-				  								printer.printRecord(p.index);
-				  								printer.printRecord(p.prime);
+				  								final Stream.Builder<Object> streamBuilder = Stream.builder();
+
+				  								if (!excludeFields.contains(FIELD_INDEX))
+				  								{
+				  									streamBuilder.add(p.index);
+				  								}
+
+				  								if (!excludeFields.contains(FIELD_PRIME))
+				  								{
+				  									streamBuilder.add(p.prime);
+				  								}
+
+				  								if (!excludeFields.contains(FIELD_BASE))
+				  								{
+
+				  								}
+
+				  								printer.printRecord(streamBuilder.build());
 				  							}
 				  							catch(final Exception e)
 				  							{}

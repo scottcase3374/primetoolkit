@@ -3,6 +3,7 @@ package com.starcases.prime.sql.api;
 import java.util.function.Predicate;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
+import org.eclipse.collections.api.list.ImmutableList;
 
 public interface OutputServiceIntfc
 {
@@ -13,6 +14,6 @@ public interface OutputServiceIntfc
 			,final boolean useParallel
 			,final Predicate<? super PrimeRefIntfc> idxFilter
 			,final Predicate<? super ImmutableLongCollection> baseFilter
-			,final Object extra
+			,final ImmutableList<String> excludeFields
 			);
 }

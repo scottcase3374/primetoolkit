@@ -8,7 +8,6 @@ import org.eclipse.collections.impl.factory.Lists;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.ExclusionStrategy;
 import com.starcases.prime.base.api.BaseTypesProviderIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
@@ -49,13 +48,15 @@ public class JSONOutputSvcImpl implements OutputServiceIntfc
 			,final boolean useParallel
 			,@NonNull final Predicate<? super PrimeRefIntfc> idxFilter
 			,@NonNull final Predicate<? super ImmutableLongCollection> baseFilter
-			,@NonNull final Object excludeStrategyFilter
+			,@NonNull final ImmutableList<String> excludeFields
 			)
 	{
 		try
 		{
-			final ExclusionStrategy excludeStrategy = (ExclusionStrategy)excludeStrategyFilter;
-			final Gson gson = new GsonBuilder().setExclusionStrategies(excludeStrategy).serializeNulls().create();
+			final ExclFieldNameStrategy excludes = new ExclFieldNameStrategy();
+			excludeFields.forEach(fld -> excludes.addExcludedField(fld));
+
+			final Gson gson = new GsonBuilder().setExclusionStrategies(excludes).serializeNulls().create();
 			result.setResult(
 					gson.toJson(
 						primeSrc

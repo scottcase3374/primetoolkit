@@ -1,4 +1,4 @@
-package com.starcases.prime.sql.impl;
+package com.starcases.prime.sql.jsonoutput.impl;
 
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.impl.factory.Lists;

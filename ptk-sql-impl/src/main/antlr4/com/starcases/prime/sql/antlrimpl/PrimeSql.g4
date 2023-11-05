@@ -42,8 +42,10 @@ MAX			: [mM][aA][xX];
 NO			: [nN][oO];
 ONLY		: [oO][nN][lL][yY];
 PARALLEL	: [pP][aA][rR][aA][lL][lL][eE][lL];
+PLUGINS		: [pP][lL][uU][gG][iI][nN][sS];
 PRIMES		: [pP][rR][iI][mM][eE][sS];
 SELECT 		: [sS][eE][lL][eE][cC][tT];
+SHOW		: [sS][hH][oO][wW];
 USING		: [uU][sS][iI][nN][gG];
 WHERE		: [wW][hH][eE][rR][eE];
 WITH		: [wW][iI][tT][hH];
@@ -63,6 +65,11 @@ stmts :
 stmt :
 		select
 	|	insert
+	| 	show_plugins
+	;
+
+show_plugins :
+		SHOW PLUGINS
 	;
 
 insert :
