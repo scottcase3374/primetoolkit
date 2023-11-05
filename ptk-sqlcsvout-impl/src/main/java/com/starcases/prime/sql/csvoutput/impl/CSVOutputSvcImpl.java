@@ -73,7 +73,7 @@ public class CSVOutputSvcImpl implements OutputServiceIntfc
 
 			if (!excludeFields.contains(FIELD_BASE))
 			{
-
+				strHrdBuilder.add(FIELD_BASE);
 			}
 			printer.printRecord(strHrdBuilder.build());
 
@@ -107,7 +107,7 @@ public class CSVOutputSvcImpl implements OutputServiceIntfc
 
 				  								if (!excludeFields.contains(FIELD_BASE))
 				  								{
-
+				  									streamBuilder.add(null);
 				  								}
 
 				  								printer.printRecord(streamBuilder.build());
