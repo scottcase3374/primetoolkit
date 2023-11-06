@@ -142,12 +142,12 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 		return result;
 	}
 
-//	@Override
-//	public PrimeSqlResult visitShowPlugins(final PrimeSqlParser.Show_pluginsContext ctx)
-//	{
-//		visitChildren(ctx);
-//		return result;
-//	}
+	@Override
+	public PrimeSqlResult visitShow_plugins(final PrimeSqlParser.Show_pluginsContext ctx)
+	{
+		visitChildren(ctx);
+		return result;
+	}
 
 	@Override
 	public PrimeSqlResult visitSelect(final PrimeSqlParser.SelectContext ctx)
