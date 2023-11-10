@@ -38,6 +38,7 @@ public class CSVOutputSvcImpl implements OutputServiceIntfc
 
 	public CSVOutputSvcImpl()
 	{
+		/* nothing to do */
 	}
 
 	public OutputServiceIntfc init(final PrimeSourceIntfc primeSrc, final PrimeSqlResultIntfc result)

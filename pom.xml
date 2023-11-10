@@ -52,22 +52,6 @@
 
 	<build>
 		<plugins>
-			<!--      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jdeps-plugin</artifactId>
-        <version>3.1.2</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>jdkinternals</goal>  verify main classes
-              <goal>test-jdkinternals</goal>  verify test classes
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          ...
-        </configuration>
-      </plugin> -->
 
 		</plugins>
 		<pluginManagement>
@@ -141,9 +125,7 @@
 							</images>
 						</configuration>
 
-						<!-- Connect start/stop to pre- and
-			       post-integration-test phase, respectively if you want to start
-			       your docker containers during integration tests -->
+
 						<executions>
 							<execution>
 								<id>start</id>

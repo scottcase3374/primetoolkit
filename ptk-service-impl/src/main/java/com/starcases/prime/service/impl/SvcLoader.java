@@ -93,11 +93,10 @@ public class SvcLoader< T extends SvcProviderBaseIntfc, C extends Class<T>>
      */
     public Optional<T> provider(@NonNull final ImmutableCollection<String> attributes)
     {
-	  Optional<T> result =
+	  return
 			 providers(attributes)
 			  .stream()
 			  .max((x,y) -> Integer.compare(x.countAttributesMatch(attributes), y.countAttributesMatch(attributes)) );
-	  return result;
     }
 
     /**

@@ -27,6 +27,7 @@ LPAREN		: '('		;
 RPAREN		: ')'		;
 
 
+ALGORITHM	: [aA][lL][gG][oO][rR][iI][tT][hH][mM];
 ALL			: [aA][lL][lL];
 ANY			: [aA][nN][yY];
 AS			: [aA][sS];
@@ -44,6 +45,7 @@ ONLY		: [oO][nN][lL][yY];
 PARALLEL	: [pP][aA][rR][aA][lL][lL][eE][lL];
 PLUGINS		: [pP][lL][uU][gG][iI][nN][sS];
 PRIMES		: [pP][rR][iI][mM][eE][sS];
+RUN			: [rR][uU][nN];
 SELECT 		: [sS][eE][lL][eE][cC][tT];
 SHOW		: [sS][hH][oO][wW];
 USING		: [uU][sS][iI][nN][gG];
@@ -66,10 +68,15 @@ stmt :
 		select
 	|	insert
 	| 	show_plugins
+	|	run_algorithm
 	;
 
 show_plugins :
 		SHOW PLUGINS
+	;
+
+run_algorithm :
+		RUN ALGORITHM ID
 	;
 
 insert :

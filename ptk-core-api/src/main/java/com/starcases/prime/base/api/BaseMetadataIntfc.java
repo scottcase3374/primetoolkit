@@ -1,7 +1,5 @@
 package com.starcases.prime.base.api;
 
-import java.io.Serializable;
-
 /**
  * Not used everywhere but this should be used to
  * associate other data with Prime bases where/when
@@ -9,7 +7,7 @@ import java.io.Serializable;
  *
  *
  */
-public interface BaseMetadataIntfc extends Serializable
+public interface BaseMetadataIntfc
 {
 
 }

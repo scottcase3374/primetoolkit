@@ -18,7 +18,7 @@ public interface SvcProviderBaseIntfc
 	{
 
 		final var pa = getProviderAttributes();
-		final int ret = attributes.count(a -> pa.contains(a));
+		final int ret = attributes.count(pa::contains);
 
 		logMatchData(attributes, ret);
 		return ret;

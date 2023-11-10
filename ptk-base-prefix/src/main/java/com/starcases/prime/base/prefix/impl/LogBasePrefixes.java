@@ -53,7 +53,6 @@ class LogBasePrefixes extends AbstractPrimeBaseLog
 		primeSrc
 			.getPrimeRefStream(false)
 			.forEach( primeRef ->
-								{
 									primeRef
 									.getPrimeBaseData()
 									.getPrimeBases(PrefixBaseType.PREFIX)
@@ -68,8 +67,7 @@ class LogBasePrefixes extends AbstractPrimeBaseLog
 												statusHandler.output(PrefixBaseType.PREFIX, "%s%n", outputStr);
 												outputStr.setLength(0);
 												itemIdx[0]++;
-											});
-								}
+											})
 					);
 	}
 }

@@ -22,7 +22,7 @@ public class ExclFieldNameStrategy implements ExclusionStrategy
 	 * @param fieldName
 	 */
 	public ExclFieldNameStrategy()
-	{}
+	{ /* nothing to do */ }
 
 	public void addExcludedField(final String fieldName)
 	{

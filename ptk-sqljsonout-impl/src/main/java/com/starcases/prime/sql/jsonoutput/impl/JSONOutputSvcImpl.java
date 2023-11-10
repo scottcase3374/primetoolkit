@@ -31,7 +31,7 @@ public class JSONOutputSvcImpl implements OutputServiceIntfc
 	private PrimeSqlResultIntfc result;
 
 	public JSONOutputSvcImpl()
-	{}
+	{ /* nothing to do */ }
 
 	public OutputServiceIntfc init(@NonNull final PrimeSourceIntfc primeSrc, @NonNull final PrimeSqlResultIntfc result)
 	{
@@ -54,7 +54,7 @@ public class JSONOutputSvcImpl implements OutputServiceIntfc
 		try
 		{
 			final ExclFieldNameStrategy excludes = new ExclFieldNameStrategy();
-			excludeFields.forEach(fld -> excludes.addExcludedField(fld));
+			excludeFields.forEach(excludes::addExcludedField);
 
 			final Gson gson = new GsonBuilder().setExclusionStrategies(excludes).serializeNulls().create();
 			result.setResult(

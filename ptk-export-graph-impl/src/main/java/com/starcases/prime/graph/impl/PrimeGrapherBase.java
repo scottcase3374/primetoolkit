@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.jgrapht.Graph;
@@ -81,7 +82,10 @@ public class PrimeGrapherBase
 	 */
 	protected PrimeGrapherBase(@NonNull final PrimeSourceIntfc primeSrc, @NonNull final BaseTypesIntfc baseType, @NonNull final List<GraphListener<PrimeRefIntfc, DefaultEdge>> graphs)
 	{
-		LOG.info("PrimeGrapherBase() - basetype: " + baseType.name());
+		if (LOG.isLoggable(Level.INFO))
+		{
+			LOG.info("PrimeGrapherBase() - basetype: " + baseType.name());
+		}
 		this.primeSrc = primeSrc;
 		this.baseType = baseType;
 

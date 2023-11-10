@@ -43,15 +43,13 @@ public class PrimeRefIterator implements PrimeRefIteratorIntfc
 	@Override
 	public int nextIndex()
 	{
-		final var ret = (int)primeRef.getNextPrimeRef().orElseThrow().getPrimeRefIdx();
-		return ret;
+		return (int)primeRef.getNextPrimeRef().orElseThrow().getPrimeRefIdx();
 	}
 
 	@Override
 	public int previousIndex()
 	{
-		final var ret = (int)primeRef.getPrevPrimeRef().orElseThrow().getPrimeRefIdx();
-		return ret;
+		return (int)primeRef.getPrevPrimeRef().orElseThrow().getPrimeRefIdx();
 	}
 
 	@Override

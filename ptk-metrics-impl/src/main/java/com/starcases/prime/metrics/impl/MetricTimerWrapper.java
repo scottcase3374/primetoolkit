@@ -14,7 +14,7 @@ class MetricTimerWrapper implements MetricIntfc
 		this.timer = timer;
 	}
 
-	public void record(@NonNull final Runnable fn)
+	public void recordInfo(@NonNull final Runnable fn)
 	{
 		fn.run();
 	}

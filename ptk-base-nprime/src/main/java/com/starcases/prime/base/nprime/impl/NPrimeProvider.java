@@ -23,7 +23,7 @@ public class NPrimeProvider implements BaseProviderIntfc
 	 * constructor - Nothing to do.
 	 */
 	public NPrimeProvider()
-	{}
+	{ /* Nothing to do  */ }
 
 	@Override
 	public ImmutableList<String> getProviderAttributes()

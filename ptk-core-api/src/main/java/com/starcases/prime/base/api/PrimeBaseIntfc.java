@@ -1,7 +1,5 @@
 package com.starcases.prime.base.api;
 
-import java.io.Serializable;
-
 import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
 import org.eclipse.collections.api.list.MutableList;
 
@@ -28,7 +26,7 @@ import lombok.NonNull;
  *
  *
  */
-public interface PrimeBaseIntfc extends Serializable
+public interface PrimeBaseIntfc
 {
 	/**
 	 * Add Sets of primes (longs) and a base metadata container to the specified base.

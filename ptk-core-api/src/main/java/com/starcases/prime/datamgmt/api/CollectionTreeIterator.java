@@ -32,12 +32,6 @@ public class CollectionTreeIterator implements CollectionTreeIteratorIntfc
 	private final CollectionTrackerIntfc collTracker;
 
 	/**
-	 * container to track unique instances of the unique prefix/collTree info
-	 */
-	//@Getter(AccessLevel.PRIVATE)
-	//private final CollectionTrackerIntfc collTrack;
-
-	/**
 	 * Ref to next collTree node map
 	 */
 	@Getter(AccessLevel.PRIVATE)

@@ -104,7 +104,7 @@ public class PrimeNodeGenerator
 	 */
 	public boolean nextEvents()
 	{
-		final boolean more[] = { false };
+		final boolean [] more = { false };
 		try
 		{
 			primeSrc.getPrimeRefForIdx(level).ifPresent(pRef ->

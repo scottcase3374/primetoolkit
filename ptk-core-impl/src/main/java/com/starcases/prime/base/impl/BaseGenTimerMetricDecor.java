@@ -46,7 +46,7 @@ public class BaseGenTimerMetricDecor  implements BaseGenIntfc
 	{
 		try (MetricIntfc metric = metricProvider.timer(base, "BASES_GEN", base.toString()))
 		{
-			metric.record(() -> generator.genBasesForPrimeRef(curPrime));
+			metric.recordInfo(() -> generator.genBasesForPrimeRef(curPrime));
 		}
 		catch(final Exception e)
 		{

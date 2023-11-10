@@ -103,7 +103,6 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 	 * UI element for metrics
 	 */
 	@Getter(AccessLevel.PRIVATE)
-	@NonNull
 	private  JTable table;
 
 	/**

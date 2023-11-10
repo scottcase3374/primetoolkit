@@ -126,11 +126,6 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 
 	private List<BaseGenIntfc> baseGenerators = Lists.mutable.empty();
 
-	/**
-	 *  map prime to long index
-	 */
-	@Getter(AccessLevel.PRIVATE)
-	//private final MutableLongLongMap primeToIdxMap;
 	private final MutableLongLongMap primeToSubsetMap;
 	private final MutableLongLongMap primeToOffsetMap;
 
@@ -171,7 +166,6 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 		this.collTracker = collTracker;
 		this.primeCache = primeCache;
 		final int capacity = 50_500_000;
-		//primeToIdxMap = new LongLongHashMap(capacity);
 		primeToSubsetMap = new LongLongHashMap(capacity);
 		primeToOffsetMap = new LongLongHashMap(capacity);
 
@@ -202,8 +196,8 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 			@Min(1) final long newPrime
 			)
 	{
-		final long subset[] = {-1};
-		final int offset[] = {-1};
+		final long [] subset = {-1};
+		final int [] offset = {-1};
 
 		PrimeSource.idxMap.convertIdxToSubsetAndOffset(nextPrimeIdx, subset, offset);
 		return addPrimeRef(subset[0], offset[0], newPrime);
@@ -219,7 +213,7 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 		final long primeIdx = primeSubset * IdxToSubsetMapperIntfc.SUBSET_SIZE + primeOffset;
 		final PrimeRefFactoryIntfc ret = primeRefRawCtor.apply(primeIdx);
 
-		updateMaps(primeSubset, primeOffset, newPrime, ret);
+		updateMaps(primeSubset, primeOffset, newPrime);
 		ret.generateBases(getBasesGenerator());
 
 		return ret;
@@ -227,12 +221,9 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 
 	private Consumer<PrimeRefFactoryIntfc> getBasesGenerator()
 	{
-		return (pRef) -> ParallelIterate.forEach(
+		return pRef -> ParallelIterate.forEach(
 							baseGenerators,
-							gen ->
-								{
-									gen.genBasesForPrimeRef(pRef);
-								});
+							gen -> gen.genBasesForPrimeRef(pRef) );
 	}
 
 	@Override
@@ -250,7 +241,7 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	{
 		final var val = this.primeCache.get(primeSubset);
 		final var prime = val.get(primeOffset);
-		return val == null ? OptionalLong.empty() : OptionalLong.of(prime);
+		return OptionalLong.of(prime);
 	}
 
 	@Override
@@ -271,11 +262,11 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 		if (primeSubset <= val.getMaxOffsetAssigned())
 		{
 			final var prime = val.get(primeOffset);
-			ret = val == null ? Optional.empty() : prime == null ? Optional.empty() : Optional.of(new PrimeRef(primeSubset, primeOffset));
+			ret = prime == null ? Optional.empty() : Optional.of(new PrimeRef(primeSubset, primeOffset));
 		}
 		else
 		{
-			System.out.println(String.format("primeIdx overflow: subset %d offset %d maxassigned-idx %d", primeSubset, primeOffset, val.getMaxOffsetAssigned()));
+			statusHandler.output("primeIdx overflow: subset %d offset %d maxassigned-idx %d", primeSubset, primeOffset, val.getMaxOffsetAssigned());
 		}
 		return ret;
 	}
@@ -296,22 +287,19 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	@Override
 	public Iterator<PrimeRefIntfc> getPrimeRefIter()
 	{
-		var ret = new PrimeRefIterator(new PrimeRef(0,0));
-		return ret;
+		return new PrimeRefIterator(new PrimeRef(0,0));
 	}
 
 	@Override
 	public Iterator<PrimeRefIntfc> getPrimeRefIter(final long idx)
 	{
-		var ret = new PrimeRefIterator(new PrimeRef(idx));
-		return ret;
+		return new PrimeRefIterator(new PrimeRef(idx));
 	}
 
 	@Override
 	public Iterator<PrimeRefIntfc> getPrimeRefIter(@Min(0) final long subset, @Min(0) final int offset)
 	{
-		var ret = new PrimeRefIterator(new PrimeRef(subset, offset));
-		return ret;
+		return new PrimeRefIterator(new PrimeRef(subset, offset));
 	}
 
 	@Override
@@ -324,8 +312,8 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	public Stream<PrimeRefIntfc> getPrimeRefStream(@Min(1) final long skipCount, final boolean preferParallel)
 	{
 		final Iterator<PrimeRefIntfc> iter = getPrimeRefIter(skipCount-1);
-		final Supplier<PrimeRefIntfc> supplier = () -> { var it = iter; return it.hasNext() ? ((Iterator<PrimeRefIntfc>)it).next() : null; };
-		return Stream.generate(supplier).takeWhile( p -> Objects.nonNull(p));
+		final Supplier<PrimeRefIntfc> supplier = () -> { var it = iter; return it.hasNext() ? it.next() : null; };
+		return Stream.generate(supplier).takeWhile( Objects::nonNull);
 	}
 
 	@Override
@@ -359,7 +347,7 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 		this.progress = progress;
 	}
 
-	private void updateMaps(@Min(0) final long subset, @Min(0) final long offset, @Min(1) final long newPrime, @NonNull final PrimeRefIntfc ref)
+	private void updateMaps(@Min(0) final long subset, @Min(0) final long offset, @Min(1) final long newPrime)
 	{
 		primeToSubsetMap.put(newPrime, subset);
 		primeToOffsetMap.put(newPrime, offset);

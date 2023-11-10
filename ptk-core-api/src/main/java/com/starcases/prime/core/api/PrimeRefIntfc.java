@@ -1,6 +1,5 @@
 package com.starcases.prime.core.api;
 
-import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -21,7 +20,7 @@ import com.starcases.prime.base.api.PrimeBaseIntfc;
  *   be managed by each class implementing this PrimeRefIntfc interface.
  *
  */
-public interface PrimeRefIntfc extends Serializable
+public interface PrimeRefIntfc
 {
 	/**
 	 * Prime ref compatator

@@ -1,5 +1,7 @@
 package com.starcases.prime.cache.impl.subset;
 
+import java.util.Arrays;
+
 import org.eclipse.collections.api.collection.ImmutableCollection;
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.ImmutableList;
@@ -32,7 +34,8 @@ public class PrimeSubsetProvider implements PrimeSubsetProviderIntfc
 		{
 			wrapper[i] = primes[i];
 		}
-		return new Subset<Long>(Long.class, wrapper);
+
+		return new Subset<>(Long.class, wrapper);
 	}
 
 	/**

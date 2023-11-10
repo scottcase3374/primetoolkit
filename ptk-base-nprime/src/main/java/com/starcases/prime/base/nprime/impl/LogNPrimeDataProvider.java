@@ -26,7 +26,7 @@ public class LogNPrimeDataProvider implements LogPrimeDataProviderIntfc
 	 * Constructor - nothing to do
 	 */
 	public LogNPrimeDataProvider()
-	{}
+	{ /* Nothing to do */ }
 
 	@Override
 	public ImmutableList<String> getProviderAttributes()

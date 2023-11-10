@@ -21,7 +21,7 @@ class MetricLongTimerWrapper implements MetricIntfc
 	}
 
 	@Override
-	public void record(@NonNull Runnable fn)
+	public void recordInfo(@NonNull Runnable fn)
 	{
 		fn.run();
 	}

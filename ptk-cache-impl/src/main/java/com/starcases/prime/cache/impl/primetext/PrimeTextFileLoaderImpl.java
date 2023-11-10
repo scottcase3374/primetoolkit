@@ -91,7 +91,7 @@ class PrimeTextFileLoaderImpl implements PrimeTextFileloaderIntfc
 	{
 		this.idxToPrimeCache = idxToPrimeCache;
 		this.sourceFolders = sourceFolders;
-		subsetOfIdxToPrime = new Subset<Long>(Long.class, IdxToSubsetMapperIntfc.SUBSET_SIZE);
+		subsetOfIdxToPrime = new Subset<>(Long.class, IdxToSubsetMapperIntfc.SUBSET_SIZE);
 	}
 
 	private void assign(final long idx, final long val)
@@ -105,7 +105,7 @@ class PrimeTextFileLoaderImpl implements PrimeTextFileloaderIntfc
 		{
 			idxToPrimeCache.put(subsetIdx, subsetOfIdxToPrime);
 
-			subsetOfIdxToPrime = new Subset<Long>(Long.class, IdxToSubsetMapperIntfc.SUBSET_SIZE);
+			subsetOfIdxToPrime = new Subset<>(Long.class, IdxToSubsetMapperIntfc.SUBSET_SIZE);
 			subsetIdx = subset[0];
 		}
 

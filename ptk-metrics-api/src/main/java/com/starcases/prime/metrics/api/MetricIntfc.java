@@ -4,5 +4,5 @@ import lombok.NonNull;
 
 public interface MetricIntfc extends AutoCloseable
 {
-	void record(@NonNull final Runnable fn);
+	void recordInfo(@NonNull final Runnable fn);
 }

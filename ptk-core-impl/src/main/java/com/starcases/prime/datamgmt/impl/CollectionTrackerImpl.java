@@ -54,7 +54,9 @@ class CollectionTrackerImpl implements CollectionTrackerIntfc
 	 * @param collectionTracker
 	 */
 	public CollectionTrackerImpl()
-	{}
+	{
+		// Nothing to do
+	}
 
 	/**
 	 * get iterator to the tree info

@@ -115,11 +115,7 @@ public class AllTriples
 				{
 					incrementIndices(indices);
 					Arrays.stream(TripleMember.values())
-					.forEach( memberIdx ->
-							{
-								triple[memberIdx.ordinal()] = primeSrc.getPrimeRefForIdx(indices[memberIdx.ordinal()]).orElse(null);
-							}
-						);
+					.forEach( memberIdx -> triple[memberIdx.ordinal()] = primeSrc.getPrimeRefForIdx(indices[memberIdx.ordinal()]).orElse(null));
 					return triple;
 				}
 			);

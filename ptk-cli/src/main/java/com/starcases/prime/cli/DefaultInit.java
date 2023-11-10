@@ -545,8 +545,7 @@ public class DefaultInit implements Runnable
 				statusHandler.dbgOutput("CLI - Prep base: %s", baseType.name());
 				switch(baseType.name())
 				{
-					case "TRIPLE":
-					case "PREFIX":
+					case "PREFIX", "TRIPLE":
 						baseProvider
 							.provider(baseProviderAttributes)
 							.ifPresentOrElse
@@ -620,7 +619,7 @@ public class DefaultInit implements Runnable
 			LOG.info(String.format("DECORATE base supplier - base[%s] track-gen-time[%b]", baseType.name(), trackGenTime));
 		}
 
-		final BaseGenIntfc decoratedBase [] = {base};
+		final BaseGenIntfc [] decoratedBase = {base};
 
 		if (trackGenTime)
 		{
@@ -723,6 +722,7 @@ public class DefaultInit implements Runnable
 																 }
 																);
 													}
+													break;
 
 												case "GRAPHSTRUCT":
 													actions.add(s -> new LogGraphStructure(primeSrc, BaseTypes.DEFAULT ).doPreferParallel(initOpts.isPreferParallel()).outputLogs() );

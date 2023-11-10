@@ -1,6 +1,5 @@
 package com.starcases.prime.core.api;
 
-import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -22,7 +21,7 @@ import lombok.NonNull;
  * and data for navigating amongst the primes.
  *
  */
-public interface PrimeSourceIntfc extends Serializable
+public interface PrimeSourceIntfc //extends Serializable
 {
 
 

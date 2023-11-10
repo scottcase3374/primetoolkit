@@ -158,7 +158,7 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 
 		final Predicate<? super ImmutableLongCollection> baseFilter =
 				 baseColl ->
-					   primeBaseItemPredColl.stream().anyMatch(baseItemFilt -> baseColl.anySatisfy(baseItemFilt))
+					   primeBaseItemPredColl.stream().anyMatch(baseColl::anySatisfy)
 					|| primeBaseTuplePredColl.stream().anyMatch(tupleFilt -> tupleFilt.accept(baseColl));
 		try
 		{
@@ -378,7 +378,7 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
  								.parallelStream()
  								.anyMatch(baseColl -> itemGroupColl
  														.stream()
- 														.anyMatch(coll -> baseColl.containsAll(coll))))
+ 														.anyMatch(baseColl::containsAll)))
  						);
  		}
 
@@ -396,13 +396,13 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
  			primeBaseTuplePredColl.add( Predicates.adapt(
  					baseItem ->   itemGroupColl
  									.stream()
- 									.anyMatch(pred ->  baseItem.containsAll(pred))));
+ 									.anyMatch(baseItem::containsAll)));
  		}
 
 		return result;
 	}
 
-	//FIXME IS THIS THE BROKEN CODE RELATED TO SUBSET OFFSET BEING EXCEEDED?
+
 	@Override
 	public PrimeSqlResult visitInsert(InsertContext ctx)
 	{

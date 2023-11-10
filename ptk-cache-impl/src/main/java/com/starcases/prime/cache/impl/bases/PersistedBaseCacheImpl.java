@@ -123,7 +123,7 @@ public class PersistedBaseCacheImpl implements PersistedCacheIntfc<Long[][]>
 	@Override
 	public Map<Long, SubsetIntfc<Long[][]>> getAll(@NonNull final Set<? extends Long> keys)
 	{
-		return null;
+		return Maps.mutable.empty();
 	}
 
 	@Override
@@ -135,6 +135,7 @@ public class PersistedBaseCacheImpl implements PersistedCacheIntfc<Long[][]>
 	@Override
 	public void loadAll(@NonNull final Set<? extends Long> keys, boolean replaceExistingValues, @NonNull final CompletionListener completionListener)
 	{
+		/* ignored */
 	}
 
 	@Override
@@ -148,7 +149,7 @@ public class PersistedBaseCacheImpl implements PersistedCacheIntfc<Long[][]>
 	public void persistAll()
 	{
 		LOG.info("Persisting Cached data");
-		keysToValue.forEachKeyValue((k,v) -> persist(k,v));
+		keysToValue.forEachKeyValue(this::persist);
 	}
 
 	@Override
@@ -190,7 +191,10 @@ public class PersistedBaseCacheImpl implements PersistedCacheIntfc<Long[][]>
 				  is.transferTo(oos);
 			  }
 
-			  LOG.info(String.format("Persist batch: [%s] src-rec-count: [%d]", keyVal, primes.length));
+			  if (LOG.isLoggable(Level.INFO))
+			  {
+				  LOG.info(String.format("Persist batch: [%s] src-rec-count: [%d]", keyVal, primes.length));
+			  }
 		  } catch(IOException e)
 		  {
 			  // Note that batches are not handled in numerical order when done using parallelism.
@@ -207,6 +211,7 @@ public class PersistedBaseCacheImpl implements PersistedCacheIntfc<Long[][]>
 	@Override
 	public void putAll(@NonNull final Map<? extends Long, ? extends SubsetIntfc<Long[][]>> map)
 	{
+		/* ignored */
 	}
 
 	@Override
@@ -290,7 +295,7 @@ public class PersistedBaseCacheImpl implements PersistedCacheIntfc<Long[][]>
 	public <T> Map<Long, EntryProcessorResult<T>> invokeAll(@NonNull final Set<? extends Long> keys, @NonNull final EntryProcessor<Long, SubsetIntfc<Long[][]>, T> entryProcessor,
 			@NonNull final Object... arguments)
 	{
-		return null;
+		return Maps.mutable.empty();
 	}
 
 	@Override
@@ -326,11 +331,13 @@ public class PersistedBaseCacheImpl implements PersistedCacheIntfc<Long[][]>
 	@Override
 	public void registerCacheEntryListener(@NonNull final CacheEntryListenerConfiguration<Long, SubsetIntfc<Long[][]>> cacheEntryListenerConfiguration)
 	{
+		/* ignored */
 	}
 
 	@Override
 	public void deregisterCacheEntryListener(@NonNull final CacheEntryListenerConfiguration<Long, SubsetIntfc<Long[][]>> cacheEntryListenerConfiguration)
 	{
+		/* ignored */
 	}
 
 	@Override

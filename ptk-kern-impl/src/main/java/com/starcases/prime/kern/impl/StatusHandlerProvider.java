@@ -11,7 +11,7 @@ public class StatusHandlerProvider implements StatusHandlerProviderIntfc
 	private static final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("STATUS_HANDLER");
 
 	public StatusHandlerProvider()
-	{}
+	{ /* nothing to do */ }
 
 	@Override
 	public ImmutableList<String> getProviderAttributes()
