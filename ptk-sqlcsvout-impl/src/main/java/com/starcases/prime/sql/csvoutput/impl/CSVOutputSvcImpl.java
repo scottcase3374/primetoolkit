@@ -14,9 +14,10 @@ import com.starcases.prime.base.api.BaseTypesProviderIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
 import com.starcases.prime.kern.api.BaseTypesIntfc;
+import com.starcases.prime.kern.api.PtkException;
 import com.starcases.prime.service.impl.SvcLoader;
 import com.starcases.prime.sql.api.OutputServiceIntfc;
-import com.starcases.prime.sql.api.PrimeSqlResultIntfc;
+import com.starcases.prime.sql.api.PrimeResultIntfc;
 
 import lombok.NonNull;
 
@@ -34,14 +35,14 @@ public class CSVOutputSvcImpl implements OutputServiceIntfc
 				.create();
 
 	private PrimeSourceIntfc primeSrc;
-	private PrimeSqlResultIntfc result;
+	private PrimeResultIntfc result;
 
 	public CSVOutputSvcImpl()
 	{
 		/* nothing to do */
 	}
 
-	public OutputServiceIntfc init(final PrimeSourceIntfc primeSrc, final PrimeSqlResultIntfc result)
+	public OutputServiceIntfc init(final PrimeSourceIntfc primeSrc, final PrimeResultIntfc result)
 	{
 		this.primeSrc = primeSrc;
 		this.result = result;
@@ -114,7 +115,9 @@ public class CSVOutputSvcImpl implements OutputServiceIntfc
 				  								printer.printRecord(streamBuilder.build());
 				  							}
 				  							catch(final Exception e)
-				  							{}
+				  							{
+				  								throw new PtkException(e);
+				  							}
 				  						  });
 
 				result.setResult(sWriter.toString());

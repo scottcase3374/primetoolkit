@@ -71,6 +71,6 @@ class BaseReduceTriple extends AbsPrimeBaseGen
 	@Override
 	public void genBasesForPrimeRef(final PrimeRefIntfc curPrime)
 	{
-		new AllTriples(primeSrc, this.preferParallel).process(curPrime);
+		new AllTriples(primeSrc).process(curPrime);
 	}
 }

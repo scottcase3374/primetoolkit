@@ -12,6 +12,7 @@ import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 
 import com.starcases.prime.kern.api.BaseTypesIntfc;
+import com.starcases.prime.kern.api.PtkException;
 import com.starcases.prime.kern.api.StatusHandlerIntfc;
 
 import lombok.NonNull;
@@ -173,7 +174,7 @@ public class StatusHandlerImpl implements StatusHandlerIntfc
 			}
 			else
 			{
-				throw new RuntimeException(exception);
+				throw new PtkException(exception);
 			}
 		}
 		return this;

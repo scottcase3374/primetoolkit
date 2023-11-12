@@ -5,5 +5,5 @@ import com.starcases.prime.service.api.SvcProviderBaseIntfc;
 
 public interface OutputProviderIntfc extends SvcProviderBaseIntfc
 {
-	OutputServiceIntfc create(final PrimeSourceIntfc primeSrc, final PrimeSqlResultIntfc result);
+	OutputServiceIntfc create(final PrimeSourceIntfc primeSrc, final PrimeResultIntfc result);
 }

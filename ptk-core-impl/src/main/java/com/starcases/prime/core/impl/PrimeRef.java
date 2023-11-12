@@ -27,11 +27,6 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	private static final Logger LOG = Logger.getLogger(PrimeRef.class.getName());
 
 	/**
-	 *
-	 */
-	private static final long serialVersionUID = 1L;
-
-	/**
 	 * Access lookup for prime/primeRefs
 	 */
 	@NonNull
@@ -92,11 +87,6 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	@Override
 	public PrimeBaseIntfc getPrimeBaseData()
 	{
-		if (primeBaseData == null)
-		{
-			LOG.info("Prime base data is null :  returning null from getPrimeBaseData()");
-		}
-
 		return primeBaseData;
 	}
 

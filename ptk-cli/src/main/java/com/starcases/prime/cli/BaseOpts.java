@@ -21,7 +21,7 @@ class BaseOpts
 	 * Base info selected - picocli
 	 */
 	@Setter
-	@Option(names = {"-b", "--base"}, arity = "0..*", description = "Valid vals: ${COMPLETION-CANDIDATES}", converter = BaseTypesIntfcConverter.class)
+	@Option(names = {"-b", "--base"}, arity = "0..*", description = "Valid vals: PREFIX,NPRIME,TRIPLE,PRIME_TREE", converter = BaseTypesIntfcConverter.class)
 	private BaseTypesIntfc[] bases;
 
 	/**
@@ -56,8 +56,6 @@ class BaseOpts
 	@Setter
 	@Option(names = {"--cmd-listener-port"}, description = "Port for the command (SQL) listener", defaultValue = "8690", required = false )
 	private int cmdListenerPort;
-
-
 
 	/**
 	 * Get bases to process

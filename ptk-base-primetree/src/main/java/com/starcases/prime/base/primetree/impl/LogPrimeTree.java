@@ -1,5 +1,6 @@
 package com.starcases.prime.base.primetree.impl;
 
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -59,11 +60,12 @@ class LogPrimeTree extends AbstractPrimeBaseLog
 							{
 								statusHandler.output(PrimeTreeBaseType.PRIME_TREE, "%s", String.format("Prime [%d] idx[%d] Tree: ", primeRef.getPrime(), itemIdx[0]));
 
-								primeRef
-									.getPrimeBaseData()
-									.getPrimeBases(PrimeTreeBaseType.PRIME_TREE)
-									.iterator()
-									.forEachRemaining( primeBases -> primeBases.appendString(outputStr, "[", ",", "]"));
+								Optional.ofNullable(primeRef.getPrimeBaseData())
+									.ifPresent( bd ->
+										bd.getPrimeBases(PrimeTreeBaseType.PRIME_TREE)
+										.iterator()
+										.forEachRemaining( primeBases -> primeBases.appendString(outputStr, "[", ",", "]")));
+
 								statusHandler.output(PrimeTreeBaseType.PRIME_TREE, "\t%s%n", outputStr);
 								outputStr.setLength(0);
 								itemIdx[0]++;

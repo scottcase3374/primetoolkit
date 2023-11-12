@@ -110,7 +110,7 @@ public class PersistedBaseCacheImpl implements PersistedCacheIntfc<Long[][]>
 		    }
 		} catch (IOException | DirectoryIteratorException x)
 		{
-		    System.err.println(x);
+			LOG.severe(x.toString());
 		}
 	}
 

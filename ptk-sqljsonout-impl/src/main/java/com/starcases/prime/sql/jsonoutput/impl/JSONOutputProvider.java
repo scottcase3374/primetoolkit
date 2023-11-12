@@ -6,7 +6,7 @@ import org.eclipse.collections.api.list.ImmutableList;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
 import com.starcases.prime.sql.api.OutputProviderIntfc;
 import com.starcases.prime.sql.api.OutputServiceIntfc;
-import com.starcases.prime.sql.api.PrimeSqlResultIntfc;
+import com.starcases.prime.sql.api.PrimeResultIntfc;
 
 public class JSONOutputProvider implements OutputProviderIntfc
 {
@@ -19,7 +19,7 @@ public class JSONOutputProvider implements OutputProviderIntfc
 	}
 
 	@Override
-	public OutputServiceIntfc create(final PrimeSourceIntfc primeSrc, final PrimeSqlResultIntfc result)
+	public OutputServiceIntfc create(final PrimeSourceIntfc primeSrc, final PrimeResultIntfc result)
 	{
 		return new JSONOutputSvcImpl().init(primeSrc, result);
 	}

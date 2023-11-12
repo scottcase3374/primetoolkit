@@ -59,6 +59,7 @@ import com.starcases.prime.graph.export.api.ExportsProviderIntfc;
 import com.starcases.prime.graph.visualize.impl.ViewDefault;
 import com.starcases.prime.kern.api.BaseTypesIntfc;
 import com.starcases.prime.kern.api.OutputableIntfc;
+import com.starcases.prime.kern.api.PtkException;
 import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
 import com.starcases.prime.kern.api.StatusHandlerIntfc;
 import com.starcases.prime.logging.LogGraphStructure;
@@ -414,7 +415,7 @@ public class DefaultInit implements Runnable
 										}
 										catch(final InterruptedException e)
 										{
-											throw new RuntimeException(e);
+											throw new PtkException(e);
 										}
 									},
 									() -> statusHandler.handleError(() -> "No SQLCommand Provider", Level.SEVERE, false));
@@ -749,7 +750,7 @@ public class DefaultInit implements Runnable
 			LOG.info("CLI - Check Graph enablement.");
 		}
 
-		if (graphOpts != null && graphOpts.getGraphType() != null && graphOpts.getGraphType() != null)
+		if (graphOpts != null && graphOpts.getGraphType() != null)
 		{
 			System.out.println("**** Graphing enabled");
 			actions.add(s -> graph(primeSrc, BASE_TYPES.select(p -> p.name().equals(graphOpts.getGraphType().name())).getOnly() ) );

@@ -20,6 +20,7 @@ import com.starcases.prime.cache.impl.BasesAsn;
 import com.starcases.prime.cache.impl.BasesAsn.Primes;
 import com.starcases.prime.cache.impl.CollBaseAsn;
 import com.starcases.prime.cache.impl.CollPrimeAsn;
+import com.starcases.prime.kern.api.PtkException;
 
 import lombok.NonNull;
 
@@ -102,13 +103,13 @@ public class PersistedBaseLoaderImpl implements PersistLoaderIntfc
 				  }
 				  catch(final IOException e)
 				  {
-					  throw new RuntimeException(e);
+					  throw new PtkException(e);
 				  }
 		    	});
 		}
 		catch (IOException | DirectoryIteratorException x)
 		{
-		    System.err.println(x);
+		    LOG.severe(x.toString());
 		    ok = false;
 		}
 

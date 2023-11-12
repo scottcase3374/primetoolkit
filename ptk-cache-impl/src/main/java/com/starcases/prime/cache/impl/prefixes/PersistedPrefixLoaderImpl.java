@@ -20,6 +20,7 @@ import com.starcases.prime.cache.api.subset.PrefixSubsetProviderIntfc;
 import com.starcases.prime.cache.api.subset.SubsetIntfc;
 import com.starcases.prime.cache.impl.CollPrimeAsn;
 import com.starcases.prime.cache.impl.PrefixAsn;
+import com.starcases.prime.kern.api.PtkException;
 
 import lombok.NonNull;
 
@@ -95,13 +96,13 @@ class PersistedPrefixLoaderImpl implements PersistLoaderIntfc
 				  }
 				  catch(final IOException e)
 				  {
-					  throw new RuntimeException(e);
+					  throw new PtkException(e);
 				  }
 		    	});
 		}
 		catch (IOException | DirectoryIteratorException x)
 		{
-		    System.err.println(x);
+		    LOG.severe(x.toString());
 		    ok = false;
 		}
 

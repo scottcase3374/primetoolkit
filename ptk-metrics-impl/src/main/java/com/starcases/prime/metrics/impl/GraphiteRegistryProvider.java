@@ -16,12 +16,12 @@ public class GraphiteRegistryProvider implements MetricsRegistryProviderIntfc
 {
 	private static final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("GRAPHITE", "METRICS");
 
-	private GraphiteConfig graphiteConfig;
+
 
 	@Override
 	public MetricsRegistryProviderIntfc create(final ImmutableMap<String, Object> attributes)
 	{
-		graphiteConfig = new GraphiteConfig()
+		final GraphiteConfig graphiteConfig = new GraphiteConfig()
 		{
 		    @Override
 		    public String host()

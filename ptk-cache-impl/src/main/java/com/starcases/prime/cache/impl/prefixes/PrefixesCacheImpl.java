@@ -6,6 +6,7 @@ import com.starcases.prime.cache.api.PersistedCacheIntfc;
 import com.starcases.prime.cache.api.subset.SubsetIntfc;
 import com.starcases.prime.cache.impl.CollPrimeAsn;
 import com.starcases.prime.cache.impl.PrefixAsn;
+import com.starcases.prime.kern.api.PtkException;
 import com.starcases.prime.kern.api.StatusHandlerIntfc;
 import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
 import com.starcases.prime.service.impl.SvcLoader;
@@ -94,7 +95,7 @@ public class PrefixesCacheImpl implements PersistedCacheIntfc<Long[]>
 		}
 		catch(final IOException e)
 		{
-			throw new RuntimeException("can't create cache directory");
+			throw new PtkException("can't create cache directory");
 		}
 	}
 
@@ -108,7 +109,7 @@ public class PrefixesCacheImpl implements PersistedCacheIntfc<Long[]>
 		    }
 		} catch (IOException | DirectoryIteratorException x)
 		{
-		    System.err.println(x);
+		    LOG.severe(x.toString());
 		}
 	}
 

@@ -23,11 +23,6 @@ import lombok.Setter;
 public class PrimeMultiBaseContainer implements PrimeBaseIntfc
 {
 	/**
-	 *
-	 */
-	private static final long serialVersionUID = 1L;
-
-	/**
 	 * Represents sets of base primes that sum to this Prime. (index to primes)
 	 *
 	 */

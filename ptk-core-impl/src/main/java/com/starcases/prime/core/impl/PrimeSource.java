@@ -53,8 +53,6 @@ import org.eclipse.collections.impl.parallel.ParallelIterate;
 @SuppressWarnings({ "PMD.AvoidDuplicateLiterals"})
 public class PrimeSource implements PrimeSourceFactoryIntfc
 {
-	private static final long serialVersionUID = 1L;
-
 	private final  StatusHandlerIntfc statusHandler =
 			new SvcLoader<StatusHandlerProviderIntfc, Class<StatusHandlerProviderIntfc>>(StatusHandlerProviderIntfc.class)
 				.provider(Lists.immutable.of("STATUS_HANDLER")).orElseThrow().create();
@@ -257,18 +255,22 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	@Override
 	public Optional<PrimeRefIntfc> getPrimeRefForIdx(@Min(0) final long primeSubset, @Min(0) final int primeOffset)
 	{
-		final var val = this.primeCache.get(primeSubset);
-		Optional<PrimeRefIntfc> ret = Optional.empty();
-		if (primeSubset <= val.getMaxOffsetAssigned())
-		{
-			final var prime = val.get(primeOffset);
-			ret = prime == null ? Optional.empty() : Optional.of(new PrimeRef(primeSubset, primeOffset));
-		}
-		else
-		{
-			statusHandler.output("primeIdx overflow: subset %d offset %d maxassigned-idx %d", primeSubset, primeOffset, val.getMaxOffsetAssigned());
-		}
-		return ret;
+		final Optional [] ret = { Optional.empty() };
+
+		final var valOpt = Optional.ofNullable(this.primeCache.get(primeSubset));
+		valOpt.ifPresent( val ->
+				{
+					if (primeSubset <= val.getMaxOffsetAssigned())
+					{
+						final var prime = val.get(primeOffset);
+						ret[0] = prime == null ? Optional.empty() : Optional.of(new PrimeRef(primeSubset, primeOffset));
+					}
+					else
+					{
+						statusHandler.output("primeIdx overflow: subset %d offset %d maxassigned-idx %d", primeSubset, primeOffset, val.getMaxOffsetAssigned());
+				}});
+
+		return ret[0];
 	}
 
 	@Override

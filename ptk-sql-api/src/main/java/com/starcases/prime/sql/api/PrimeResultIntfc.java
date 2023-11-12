@@ -1,6 +1,6 @@
 package com.starcases.prime.sql.api;
 
-public interface PrimeSqlResultIntfc
+public interface PrimeResultIntfc
 {
 	void setResult(final CharSequence result);
 	CharSequence getResult();

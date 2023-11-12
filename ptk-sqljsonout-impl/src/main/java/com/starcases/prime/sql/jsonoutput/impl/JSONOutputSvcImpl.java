@@ -14,7 +14,7 @@ import com.starcases.prime.core.api.PrimeSourceIntfc;
 import com.starcases.prime.kern.api.BaseTypesIntfc;
 import com.starcases.prime.service.impl.SvcLoader;
 import com.starcases.prime.sql.api.OutputServiceIntfc;
-import com.starcases.prime.sql.api.PrimeSqlResultIntfc;
+import com.starcases.prime.sql.api.PrimeResultIntfc;
 
 import lombok.NonNull;
 
@@ -28,12 +28,12 @@ public class JSONOutputSvcImpl implements OutputServiceIntfc
 				.create();
 
 	private PrimeSourceIntfc primeSrc;
-	private PrimeSqlResultIntfc result;
+	private PrimeResultIntfc result;
 
 	public JSONOutputSvcImpl()
 	{ /* nothing to do */ }
 
-	public OutputServiceIntfc init(@NonNull final PrimeSourceIntfc primeSrc, @NonNull final PrimeSqlResultIntfc result)
+	public OutputServiceIntfc init(@NonNull final PrimeSourceIntfc primeSrc, @NonNull final PrimeResultIntfc result)
 	{
 		this.primeSrc = primeSrc;
 		this.result = result;

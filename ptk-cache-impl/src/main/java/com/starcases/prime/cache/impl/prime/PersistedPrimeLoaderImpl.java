@@ -16,6 +16,7 @@ import com.starcases.prime.cache.api.persistload.PersistLoaderIntfc;
 import com.starcases.prime.cache.api.subset.SubsetIntfc;
 import com.starcases.prime.cache.api.subset.PrimeSubsetProviderIntfc;
 import com.starcases.prime.cache.impl.PrimeSubsetAsn;
+import com.starcases.prime.kern.api.PtkException;
 
 import lombok.NonNull;
 
@@ -82,13 +83,13 @@ public class PersistedPrimeLoaderImpl implements PersistLoaderIntfc
 				  }
 				  catch(final IOException e)
 				  {
-					  throw new RuntimeException(e);
+					  throw new PtkException(e);
 				  }
 		    	});
 		}
 		catch (IOException | DirectoryIteratorException x)
 		{
-		    System.err.println(x);
+		    LOG.severe(x.toString());
 		    ok = false;
 		}
 

@@ -81,7 +81,7 @@ public class AllTriples
 	 * @param primeSrc
 	 * @param targetPrime
 	 */
-	public AllTriples(@NonNull final PrimeSourceIntfc primeSrc, final boolean preferParallel)
+	public AllTriples(@NonNull final PrimeSourceIntfc primeSrc)
 	{
 		this.primeSrc = primeSrc;
 	}

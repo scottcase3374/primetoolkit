@@ -1,11 +1,11 @@
 package com.starcases.prime.sql.impl;
 
-import com.starcases.prime.sql.api.PrimeSqlResultIntfc;
+import com.starcases.prime.sql.api.PrimeResultIntfc;
 
 import lombok.ToString;
 
 @ToString
-public class PrimeSqlResult implements PrimeSqlResultIntfc
+public class PrimeSqlResult implements PrimeResultIntfc
 {
 	private CharSequence result = "<empty>";
 

@@ -1,5 +1,6 @@
 package com.starcases.prime.base.nprime.impl;
 
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -53,24 +54,29 @@ class LogBasesNPrime extends AbstractPrimeBaseLog
 
 	private void logData(@NonNull final PrimeRefIntfc primeRef)
 	{
-		final var bmd = primeRef.getPrimeBaseData().getBaseMetadata(NPrimeBaseType.NPRIME);
-		if (bmd instanceof NPrimeBaseMetadata nprimemd)
+		final var bdOpt = Optional.ofNullable(primeRef.getPrimeBaseData());
+		bdOpt.ifPresent(bd ->
 		{
-			final ImmutableLongBag counts = nprimemd.getCountForBaseIdx();
-			final String itemCountsStr = counts.toStringOfItemToCount();
+			final var bmdOpt = bd.getBaseMetadata(NPrimeBaseType.NPRIME);
 
-			// Handle "header" info for the current Prime
-			statusHandler.output(NPrimeBaseType.NPRIME, "%nPrime [%d] %s%n",
-												primeRef.getPrime(),
-												itemCountsStr
-												);
-		}
-		else
-		{
-			if (LOG.isLoggable(Level.SEVERE))
+			if (bmdOpt != null && bmdOpt instanceof NPrimeBaseMetadata nprimemd)
 			{
-				LOG.severe(String.format("Can't show bases for Prime [%d] index[%d] : invalid NPrimeBaseMetadata", primeRef.getPrime(), primeRef.getPrimeRefIdx()));
+				final ImmutableLongBag counts = nprimemd.getCountForBaseIdx();
+				final String itemCountsStr = counts.toStringOfItemToCount();
+
+				// Handle "header" info for the current Prime
+				statusHandler.output(NPrimeBaseType.NPRIME, "%nPrime [%d] %s%n",
+													primeRef.getPrime(),
+													itemCountsStr
+													);
 			}
-		}
+			else
+			{
+				if (LOG.isLoggable(Level.SEVERE))
+				{
+					LOG.severe(String.format("Can't show bases for Prime [%d] index[%d] : invalid NPrimeBaseMetadata", primeRef.getPrime(), primeRef.getPrimeRefIdx()));
+				}
+			}
+		});
 	}
 }

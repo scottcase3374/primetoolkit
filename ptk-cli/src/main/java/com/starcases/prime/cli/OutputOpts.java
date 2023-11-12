@@ -21,7 +21,7 @@ class OutputOpts
 	 */
 	@Setter
 	@Getter
-	@Option(names = {"--output","-o"}, arity = "0..*", description = "Valid vals: ${COMPLETION-CANDIDATES}", converter = OutputableConverter.class)
+	@Option(names = {"--output","-o"}, arity = "0..*", description = "Valid vals: PREFIX,TRIPLE,NPRIME,PRIME_TREE", converter = OutputableConverter.class)
 	private OutputableIntfc [] outputOper;
 
 	/**

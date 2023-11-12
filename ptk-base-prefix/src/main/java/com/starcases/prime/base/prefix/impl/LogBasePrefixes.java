@@ -1,5 +1,6 @@
 package com.starcases.prime.base.prefix.impl;
 
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -53,22 +54,21 @@ class LogBasePrefixes extends AbstractPrimeBaseLog
 		primeSrc
 			.getPrimeRefStream(false)
 			.forEach( primeRef ->
-									primeRef
-									.getPrimeBaseData()
-									.getPrimeBases(PrefixBaseType.PREFIX)
-									.forEach(
-											primeBases ->
-											{
+									Optional.ofNullable(  primeRef.getPrimeBaseData())
+										.ifPresent(bd ->
+											Optional.ofNullable(bd.getPrimeBases(PrefixBaseType.PREFIX))
+											.ifPresent(bd1 ->
+													bd1.forEach(
+															primeBases ->
+															{
+																outputStr.append(String.format("Prime [%d] Prefix: \t", primeRef.getPrime()));
 
-												outputStr.append(String.format("Prime [%d] Prefix: \t", primeRef.getPrime()));
+																primeBases.appendString(outputStr, "[", ",", "]");
 
-												primeBases.appendString(outputStr, "[", ",", "]");
-
-												statusHandler.output(PrefixBaseType.PREFIX, "%s%n", outputStr);
-												outputStr.setLength(0);
-												itemIdx[0]++;
-											})
-					);
+																statusHandler.output(PrefixBaseType.PREFIX, "%s%n", outputStr);
+																outputStr.setLength(0);
+																itemIdx[0]++;
+															}))));
 	}
 }
 

@@ -24,14 +24,6 @@ class InitOpts
 	private int maxCount;
 
 	/**
-	 * Confidence level for the "cheating" prime determination check
-	 */
-	@Getter
-	@Setter
-	@Option(names = {"--confidence-level"}, description = "Drives confidence level of primality check.", defaultValue = "100", required = false)
-	private int confidenceLevel;
-
-	/**
 	 * Log level
 	 */
 	@Getter
