@@ -59,7 +59,7 @@ public class PersistedPrimeLoaderImpl implements PersistLoaderIntfc
 		try (Stream<Path> stream = Files
 				.list(pathToCacheDir)
 				.parallel()
-				.filter(f -> f.getFileName().toString().matches("\\d"))
+				.filter(f -> f.getFileName().toString().matches("\\d+"))
 				)
 		{
 		    stream.forEach(path ->
