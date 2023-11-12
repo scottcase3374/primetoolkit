@@ -107,7 +107,7 @@ public class AllTriples
 
 	private Stream<PrimeRefIntfc[]> tripleStream()
 	{
-		final long [] indices = {0,1,2};
+		final long [] indices = {TripleMember.BOT.ordinal(), TripleMember.MID.ordinal(), TripleMember.TOP.ordinal()};
 		final PrimeRefIntfc [] triple = {null, null, null};
 
 		return Stream.generate(
@@ -130,7 +130,7 @@ public class AllTriples
 	{
 		tripleStream()
 			.filter(partialTriple)
-			.takeWhile(nonNullTriple)
+			.takeWhile(nonNullTriple).peek(pt -> System.out.println("peek - triple " + Arrays.toString(pt)))
 			.filter(t -> Arrays.stream(t).collect(Collectors.summingLong(p -> p.getPrime()) ) == primeRef.getPrime())
 			.forEach(triple ->
 
