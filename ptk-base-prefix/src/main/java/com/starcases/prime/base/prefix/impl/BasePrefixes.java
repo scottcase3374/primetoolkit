@@ -4,6 +4,7 @@ import org.eclipse.collections.api.factory.Lists;
 
 import com.starcases.prime.base.api.BaseGenFactoryIntfc;
 import com.starcases.prime.base.impl.AbsPrimeBaseGen;
+import com.starcases.prime.cache.api.PersistedPrefixCacheIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.kern.api.BaseTypesIntfc;
 
@@ -19,19 +20,19 @@ class BasePrefixes extends AbsPrimeBaseGen
 	 * constructor for creation of Base prefixes.
 	 * @param primeSrc
 	 */
-	public BasePrefixes(@NonNull final BaseTypesIntfc baseType)
+	public BasePrefixes(@NonNull final BaseTypesIntfc baseType, PersistedPrefixCacheIntfc cache)
 	{
-		super(baseType);
+		super(baseType, cache);
 	}
 
 	/**
-	 * This is a pretty quick and dirty implementation.  Maybe find some improvements later.
+	 * Generate the base info for the curPrime.
 	 */
 	@Override
 	public void genBasesForPrimeRef(@NonNull final PrimeRefIntfc curPrime)
 	{
-		final var origBases = curPrime.getPrimeBaseData().getPrimeBases().get(0);
-		curPrime.getPrimeBaseData().addPrimeBases(Lists.mutable.of(origBases), PrefixBaseType.PREFIX);
+		final var origBases = findPrefixesLowFirst(curPrime);
+		curPrime.getPrimeBaseData().addPrimeBases(curPrime.getPrimeRefIdx(), Lists.mutable.of(origBases), PrefixBaseType.PREFIX);
 	}
 
 	/**

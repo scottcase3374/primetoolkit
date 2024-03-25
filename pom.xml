@@ -22,6 +22,24 @@
 	</properties>
 
 	<dependencies>
+		<dependency>
+		    <groupId>org.mapdb</groupId>
+		    <artifactId>mapdb</artifactId>
+		    <version>3.0.10</version>
+		    <exclusions>
+		    	<exclusion>
+		    		<groupId>org.eclipse.collections</groupId>
+		    		<artifactId>eclipse-collections-api</artifactId>
+		    	</exclusion>
+		    	<exclusion>
+		    		<groupId>org.eclipse.collections</groupId>
+		    		<artifactId>
+		    			eclipse-collections-forkjoin
+		    		</artifactId>
+		    	</exclusion>
+		    </exclusions>
+		</dependency>
+
 		<!-- Provided deps -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -82,6 +100,7 @@
 		<module>ptk-base-nprime</module>
 		<module>ptk-base-prefix</module>
 		<module>ptk-base-primetree</module>
+		<module>ptk-base-tripleng</module>
 		<module>ptk-base-triples</module>
 		<module>ptk-cache-api</module>
 		<module>ptk-cache-impl</module>
@@ -104,6 +123,7 @@
 		<module>ptk-sql-impl</module>
 		<module>ptk-sqlcsvout-impl</module>
 		<module>ptk-sqljsonout-impl</module>
+		<module>ptk-algo-gen-prime-1</module>
 	</modules>
 
 	<profiles>

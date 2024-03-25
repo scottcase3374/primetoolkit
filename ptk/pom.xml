@@ -11,6 +11,12 @@
 		<!-- runtime deps -->
 	  <dependency>
 		  <groupId>com.starcases.prime</groupId>
+		  <artifactId>ptk-algo-gen-prime-1</artifactId>
+		  <version>0.0.1-SNAPSHOT</version>
+	  </dependency>
+
+	  <dependency>
+		  <groupId>com.starcases.prime</groupId>
 		  <artifactId>ptk-base-nprime-impl</artifactId>
 		  <version>0.0.1-SNAPSHOT</version>
 	  </dependency>
@@ -24,6 +30,12 @@
 	  <dependency>
 		  <groupId>com.starcases.prime</groupId>
 		  <artifactId>ptk-base-primetree-impl</artifactId>
+		  <version>0.0.1-SNAPSHOT</version>
+	  </dependency>
+
+	  <dependency>
+		  <groupId>com.starcases.prime</groupId>
+		  <artifactId>ptk-base-tripleng-impl</artifactId>
 		  <version>0.0.1-SNAPSHOT</version>
 	  </dependency>
 

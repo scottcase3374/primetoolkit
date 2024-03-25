@@ -10,7 +10,6 @@ open module com.starcases.prime.cli
 	requires com.starcases.prime.graph.visualize.impl;
 	requires transitive com.starcases.prime.kern.api;
 	requires com.starcases.prime.logging;
-	requires com.starcases.prime.metrics.api;
 	requires com.starcases.prime.service.impl;
 	requires com.starcases.prime.sql.api;
 
@@ -23,15 +22,15 @@ open module com.starcases.prime.cli
 	requires org.eclipse.collections.impl;
 	requires org.jgrapht.core;
 
-
+	uses com.starcases.prime.cache.api.CachePrefixProviderIntfc;
 	uses com.starcases.prime.base.api.BaseTypesProviderIntfc;
-	uses com.starcases.prime.cache.api.CacheProviderIntfc;
 	uses com.starcases.prime.cache.api.persistload.PersistLoaderProviderIntfc;
 	uses com.starcases.prime.cache.api.primetext.PrimeTextFileLoaderProviderIntfc;
+	uses com.starcases.prime.cache.api.subset.PrefixSubsetProviderIntfc;
 	uses com.starcases.prime.cache.api.subset.PrimeSubsetProviderIntfc;
 	uses com.starcases.prime.graph.export.api.ExportsProviderIntfc;
 	uses com.starcases.prime.kern.api.BaseTypesIntfc;
 	uses com.starcases.prime.kern.api.StatusHandlerIntfc;
-	uses com.starcases.prime.metrics.api.MetricProviderIntfc;
 	uses com.starcases.prime.sql.api.SqlProviderIntfc;
+	uses javax.cache.CacheManager;
 }

@@ -1,4 +1,4 @@
-package com.starcases.prime.core.impl;
+package com.starcases.prime.algorithm.gen1.impl;
 
 import java.math.BigInteger;
 import java.util.BitSet;
@@ -18,6 +18,7 @@ import com.starcases.prime.core.api.PrimeSourceIntfc;
 import com.starcases.prime.core.api.ProgressIntfc;
 import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
 import com.starcases.prime.datamgmt.api.PData;
+import com.starcases.prime.kern.api.Permutation;
 import com.starcases.prime.kern.api.StatusHandlerIntfc;
 import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
 import com.starcases.prime.metrics.api.MetricIntfc;
@@ -167,39 +168,6 @@ public class PrimeGenImpl implements PrimeGenIntfc
 	}
 
 	/**
-	 * This is
-	 * fundamentally calculating log-base-2 (+1) for the value. Slightly
-	 * different implementations can have different performance
-	 * impacts. This can be called a very large number of times
-	 * in total so ability to tune it may be useful.
-	 *
-	 * @param value
-	 * @return
-	 */
-	public int getBitsRequired(@Min(0) final long value)
-	{
-		final long [] masks = { 0xFFL, 0xFF00L, 0xFF000000L,  0xFF00000000000000L };
-		final int [] bitStart = {7, 15, 31, 63};
-		final int [] bitEnd = {0, 8, 16, 32};
-		int ret = 1;
-		for (int idx = masks.length-1; idx >= 0 ; idx--)
-		{
-			if ((value & masks[idx]) > 0)
-			{
-				for(int bit = bitStart[idx] ; bit > bitEnd[idx]; bit--)
-				{
-					if ( (value & (1<<bit)) > 0)
-					{
-						ret = bit+1;
-					}
-				}
-			}
-		}
-		return ret;
-	}
-
-
-	/**
 	 * Generate primes/bases through permutations of existing primes/bases.
 	 * @param optCurPrime
 	 * @return
@@ -207,12 +175,8 @@ public class PrimeGenImpl implements PrimeGenIntfc
 	private Optional<PrimeRefIntfc> genByPrimePermutation(@Min(0) final long idx, @Min(1) final OptionalLong optCurPrime, final boolean saveNew)
 	{
 		// Represents a X-bit search space of indexes for primes to add for next Prime.
-		final var numBitsForPrimeCount =  getBitsRequired(optCurPrime.getAsLong());
-		final var primeIndexMaxPermutation = new BitSet();
-		primeIndexMaxPermutation.set(numBitsForPrimeCount); // keep 'shifting' max bit left
+		final var primeIndexMaxPermutation =  Permutation.getBitsRequired(optCurPrime.getAsLong());
 
-		// no reason to perform work when no indexes
-		// selected so start with 1 index selected.
 		final var primeIndexPermutation = new BitSet();
 		primeIndexPermutation.set(0);
 
@@ -224,7 +188,7 @@ public class PrimeGenImpl implements PrimeGenIntfc
 		{
 			final long permutationSum = primeIndexPermutation
 					.stream()
-					.mapToObj(i -> primeSrc.getPrimeForIdx(i))
+					.mapToObj(primeSrc::getPrimeForIdx)
 					.filter(OptionalLong::isPresent)
 					.map(OptionalLong::getAsLong)
 					.reduce(optCurPrime.orElse(0), (a, b) -> a+b);
@@ -233,9 +197,10 @@ public class PrimeGenImpl implements PrimeGenIntfc
 			// that follows this related to "limits useless work". The permutation
 			// process based on a binary bitmask of primes to sum doesn't produce a stable sum
 			// by simply incrementing the binary bitmask value by 1 across all values.
-
-			// If exceed known prime then iteration is done - limits useless work
-			doLoop = permutationSum - sumCeiling <= 0;
+			//
+			//  The ">> 1" is trying to handle the boundary condition which is mentioned in the
+			// problem above.
+			doLoop = (permutationSum >> 1) - sumCeiling <= 0;
 			if (doLoop)
 			{
 				final var optCurPrimeVal = optCurPrime.getAsLong();
@@ -255,7 +220,7 @@ public class PrimeGenImpl implements PrimeGenIntfc
 				}
 				else
 				{
-					incrementPermutation(primeIndexPermutation);
+					Permutation.incrementPermutation(primeIndexPermutation);
 				}
 			}
 		}
@@ -265,22 +230,6 @@ public class PrimeGenImpl implements PrimeGenIntfc
 			LOG.fine("gen by prime permutation - foundPrime idx:" + idx + " prime:" + optCurPrime.getAsLong());
 		}
 		return Optional.ofNullable(foundPrime);
-	}
-
-	private void incrementPermutation(@NonNull final BitSet primePermutation)
-	{
-		var bit = 0;
-		// Generate next permutation of the bit indexes
-		for(;;)
-		{
-			// performs add and carry if needed
-			primePermutation.flip(bit);
-
-			if (primePermutation.get(bit++)) // true means no carry
-			{
-				break;
-			}
-		}
 	}
 
 	/**
@@ -303,5 +252,4 @@ public class PrimeGenImpl implements PrimeGenIntfc
 				(primeSum & 1) == 1
 			;
 	}
-
 }

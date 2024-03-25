@@ -47,8 +47,8 @@ class PrimeTree extends AbsPrimeBaseGen
 	@Override
 	public void genBasesForPrimeRef(final PrimeRefIntfc curPrime)
 	{
-		final var origBaseBases = curPrime.getPrimeBaseData().getPrimeBases().get(0);
-		final ImmutableLongList curPrimePrefixBases = origBaseBases.toList().toImmutable();
+		final var bases = findPrefixesLowFirst(curPrime);
+		final ImmutableLongList curPrimePrefixBases = bases.toList().toImmutable();
 
 		final var curPrefixIt = collectionTracker.iterator();
 		curPrimePrefixBases.forEach(basePrime ->
@@ -57,7 +57,7 @@ class PrimeTree extends AbsPrimeBaseGen
 				curPrefixIt.add(prime);
 			});
 
-		curPrime.getPrimeBaseData().addPrimeBases(MutableListFactoryImpl.INSTANCE.of(curPrefixIt.toCollection()), PrimeTreeBaseType.PRIME_TREE);
+		curPrime.getPrimeBaseData().addPrimeBases(curPrime.getPrimeRefIdx(), MutableListFactoryImpl.INSTANCE.of(curPrefixIt.toCollection()), PrimeTreeBaseType.PRIME_TREE);
 	}
 
 	/**

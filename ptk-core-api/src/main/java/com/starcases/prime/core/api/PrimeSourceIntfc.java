@@ -21,7 +21,7 @@ import lombok.NonNull;
  * and data for navigating amongst the primes.
  *
  */
-public interface PrimeSourceIntfc //extends Serializable
+public interface PrimeSourceIntfc
 {
 
 
@@ -87,6 +87,7 @@ public interface PrimeSourceIntfc //extends Serializable
 	 */
 	Optional<PrimeRefIntfc> getPrimeRefForPrime(@NonNull final LongSupplier longSupplier);
 
+
 	/**
 	 * Get the big integer [prime] from the prime ref associated with
 	 * the specified numerical index [if exists].
@@ -97,6 +98,17 @@ public interface PrimeSourceIntfc //extends Serializable
 	OptionalLong getPrimeForIdx(@Min(0) long primeIdx);
 	OptionalLong getPrimeForIdx(@Min(0) final long primeSubset, @Min(0) final int primeOffset);
 
+
+	/**
+	 * Get highest prime ref less than specified value and prime.
+	 *
+	 * @param longSupplier
+	 * @return
+	 */
+	Optional<PrimeRefIntfc> getPrimeRefCeiling(@NonNull final long value, final PrimeRefIntfc highPrime);
+
+	public record SearchResult(long retSubset, int retOffset) {}
+	SearchResult searchPrime(final long val);
 	/**
 	 *
 	 * @param nextPrimeIdx
@@ -113,5 +125,14 @@ public interface PrimeSourceIntfc //extends Serializable
 			@Min(0) final long primeSubset,
 			@Min(0) final int primeOffset,
 			@Min(1) final long newPrime
+			);
+
+	void generateBases(
+			@Min(0) final long primeSubset,
+			@Min(0) final int primeOffset
+			);
+
+	void generateBases(
+			@Min(0) final long index
 			);
 }

@@ -15,7 +15,7 @@
     <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.starcases.prime.PrimeToolKit"/>
     <stringAttribute key="org.eclipse.jdt.launching.MODULE_NAME" value="PrimeToolKit"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="init --max-count=75 --prefer-parallel=true&#10;--base=TRIPLE --base=NPRIME --base=PRIME_TREE --base=PREFIX  &#10;--output=BASES   --use-base-file &#10;--enable-cmd-listener   &#10;--load-primes --clear-cached-primes"/>
-    <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="PrimeToolKit"/>
+    <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="ptk"/>
     <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.m2e.launchconfig.sourcepathProvider"/>
     <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dcom.level=fine"/>
 </launchConfiguration>

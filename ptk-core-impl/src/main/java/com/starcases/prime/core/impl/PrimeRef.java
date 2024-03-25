@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 import com.starcases.prime.base.api.PrimeBaseIntfc;
+import com.starcases.prime.base.impl.PrimeMultiBaseContainer;
 import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
@@ -21,7 +22,6 @@ import lombok.NonNull;
 * the sum of some subset of previous primes.
 *
 **/
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class PrimeRef implements PrimeRefFactoryIntfc
 {
 	private static final Logger LOG = Logger.getLogger(PrimeRef.class.getName());
@@ -39,7 +39,7 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	/**
 	 * Base data
 	 */
-	private PrimeBaseIntfc primeBaseData;
+	private PrimeBaseIntfc primeBaseData = new PrimeMultiBaseContainer();
 
 	/**
 	 * Handle simple Prime where the base is simply itself - i.e. 1, 2
@@ -56,10 +56,29 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 		offset = offsetLocal[0];
 	}
 
+	public PrimeRef(
+			final long primeIdx
+			,@NonNull final Supplier<PrimeBaseIntfc> primeBaseSupplier
+		)
+	{
+		this(primeIdx);
+		primeBaseData = primeBaseSupplier.get();
+	}
+
 	public PrimeRef(final long subset, final int offset)
 	{
 		this.subset = subset;
 		this.offset = offset;
+	}
+
+	public PrimeRef(
+				final long subset
+				, final int offset
+				,@NonNull final Supplier<PrimeBaseIntfc> primeBaseSupplier
+			)
+	{
+		this(subset, offset);
+		primeBaseData = primeBaseSupplier.get();
 	}
 
 	/**
@@ -73,6 +92,7 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 			 @NonNull final Supplier<PrimeBaseIntfc> primeBaseSupplier
 			)
 	{
+		LOG.fine("****** PrimeRef::init ******");
 		primeBaseData = primeBaseSupplier.get();
 		return this;
 	}
@@ -205,7 +225,6 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 		return result;
 	}
 
-	@SuppressWarnings("PMD.ConfusingTernary")
 	@Override
 	public boolean equals(Object obj)
 	{

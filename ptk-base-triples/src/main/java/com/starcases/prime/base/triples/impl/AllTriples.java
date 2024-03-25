@@ -78,10 +78,13 @@ public class AllTriples
 
 	/**
 	 * constructor for creating base type of "triples".
+	 *
+	 * package visibility due to service provider provisioning service.
+	 *
 	 * @param primeSrc
 	 * @param targetPrime
 	 */
-	public AllTriples(@NonNull final PrimeSourceIntfc primeSrc)
+	AllTriples(@NonNull final PrimeSourceIntfc primeSrc)
 	{
 		this.primeSrc = primeSrc;
 	}
@@ -130,7 +133,8 @@ public class AllTriples
 	{
 		tripleStream()
 			.filter(partialTriple)
-			.takeWhile(nonNullTriple).peek(pt -> System.out.println("peek - triple " + Arrays.toString(pt)))
+			.takeWhile(nonNullTriple)
+
 			.filter(t -> Arrays.stream(t).collect(Collectors.summingLong(p -> p.getPrime()) ) == primeRef.getPrime())
 			.forEach(triple ->
 
@@ -144,6 +148,6 @@ public class AllTriples
 	private void addPrimeBases(final @NonNull PrimeRefIntfc prime, final @NonNull PrimeRefIntfc [] triple)
 	{
 		final ImmutableLongCollection primeBase = Sets.immutable.of(triple).collectLong(PrimeRefIntfc::getPrime);
-		prime.getPrimeBaseData().addPrimeBases(primeBase, TripleBaseType.TRIPLE);
+		prime.getPrimeBaseData().addPrimeBases(prime.getPrimeRefIdx(), primeBase, TripleBaseType.TRIPLE);
 	}
 }

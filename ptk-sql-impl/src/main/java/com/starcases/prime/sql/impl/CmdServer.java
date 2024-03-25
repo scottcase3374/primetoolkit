@@ -74,12 +74,17 @@ class CmdServer implements CmdServerIntfc
 			final ChannelFuture future = bootStrap.bind(port).sync();
 			future.channel().closeFuture().sync();
 		}
-		catch(final Exception e)
+		catch(final InterruptedException e)
 		{
 			if (LOG.isLoggable(Level.SEVERE))
 			{
 				LOG.severe(e.toString());
 			}
+			throw e;
+		}
+		catch(Exception e)
+		{
+			// Catch plain exceptions and ignore
 		}
 	}
 

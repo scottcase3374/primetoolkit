@@ -34,27 +34,27 @@ public interface PrimeBaseIntfc
 	 * @param primeBase
 	 * @param metadata
 	 */
-	void addPrimeBases(@NonNull BaseTypesIntfc baseType, @NonNull MutableList<ImmutableLongCollection> primeBase, @NonNull BaseMetadataIntfc metadata);
+	void addPrimeBases(long primeIdx, @NonNull BaseTypesIntfc baseType, @NonNull MutableList<ImmutableLongCollection> primeBase, @NonNull BaseMetadataIntfc metadata);
 
 	/**
 	 * Add sets of primes to current base
 	 * @param primeBase
 	 */
-	void addPrimeBases(@NonNull MutableList<ImmutableLongCollection> primeBase);
+	void addPrimeBases(long primeIdx, @NonNull MutableList<ImmutableLongCollection> primeBase);
 
 	/**
 	 * Add sets of primes for specified base.
 	 * @param primeBase
 	 * @param baseType
 	 */
-	void addPrimeBases(@NonNull MutableList<ImmutableLongCollection> primeBase, @NonNull BaseTypesIntfc baseType);
+	void addPrimeBases(long primeIdx, @NonNull MutableList<ImmutableLongCollection> primeBase, @NonNull BaseTypesIntfc baseType);
 
 	/**
 	 * Add sets of primes for specified base.
 	 * @param primeBase
 	 * @param baseType
 	 */
-	void addPrimeBases(@NonNull ImmutableLongCollection primeBase, @NonNull BaseTypesIntfc baseType);
+	void addPrimeBases(long primeIdx, @NonNull ImmutableLongCollection primeBase, @NonNull BaseTypesIntfc baseType);
 
 	/**
 	 * Get the base meta data container for the specified base type.

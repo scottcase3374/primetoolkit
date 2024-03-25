@@ -55,7 +55,7 @@ public class JSONOutputSvcImpl implements OutputServiceIntfc
 		{
 			final ExclFieldNameStrategy excludes = new ExclFieldNameStrategy();
 			excludeFields.forEach(excludes::addExcludedField);
-
+			System.out.println("JSON Output - basetype " + baseType);
 			final Gson gson = new GsonBuilder().setExclusionStrategies(excludes).serializeNulls().create();
 			result.setResult(
 					gson.toJson(

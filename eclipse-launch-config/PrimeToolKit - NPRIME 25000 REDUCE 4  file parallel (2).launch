@@ -16,6 +16,6 @@
     <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.starcases.prime.PrimeToolKit"/>
     <stringAttribute key="org.eclipse.jdt.launching.MODULE_NAME" value="PrimeToolKit"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="init --max-count=250 --base=NPRIME --base=PREFIX --base=PRIME_TREE  --max-reduce=4 --use-base-file --prefer-parallel=true --graph=NPRIME"/>
-    <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="PrimeToolKit"/>
+    <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="ptk"/>
     <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.m2e.launchconfig.sourcepathProvider"/>
 </launchConfiguration>

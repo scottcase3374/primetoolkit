@@ -12,5 +12,5 @@ import lombok.NonNull;
 
 public interface PrimeTextFileLoaderProviderIntfc extends SvcProviderBaseIntfc
 {
-	Optional<PrimeTextFileloaderIntfc> create(@NonNull final PersistedCacheIntfc<Long> cache, @NonNull final Path path, final ImmutableMap<String,Object> settings);
+	Optional<PrimeTextFileloaderIntfc> create(@NonNull final PersistedCacheIntfc<Long,Long> cache, @NonNull final Path path, final ImmutableMap<String,Object> settings);
 }

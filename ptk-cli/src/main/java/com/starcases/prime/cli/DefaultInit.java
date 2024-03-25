@@ -9,7 +9,6 @@ import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -33,24 +32,21 @@ import org.jgrapht.graph.DefaultEdge;
 import com.starcases.prime.base.api.BaseProviderIntfc;
 import com.starcases.prime.base.api.BaseTypesProviderIntfc;
 import com.starcases.prime.base.api.LogPrimeDataProviderIntfc;
-import com.starcases.prime.base.api.BaseGenDecorProviderIntfc;
-import com.starcases.prime.base.api.BaseGenIntfc;
 import com.starcases.prime.base.impl.BaseTypes;
-import com.starcases.prime.base.impl.PrimeMultiBaseContainer;
-
 import com.starcases.prime.cache.api.CacheProviderIntfc;
+import com.starcases.prime.cache.api.CachePrefixProviderIntfc;
 import com.starcases.prime.cache.api.PersistedCacheIntfc;
+import com.starcases.prime.cache.api.PersistedPrefixCacheIntfc;
 import com.starcases.prime.cache.api.persistload.PersistLoaderProviderIntfc;
+import com.starcases.prime.cache.api.persistload.PersistPrefixLoaderProviderIntfc;
 import com.starcases.prime.cache.api.primetext.PrimeTextFileLoaderProviderIntfc;
+import com.starcases.prime.cache.api.subset.PrefixSubsetProviderIntfc;
 import com.starcases.prime.cache.api.subset.PrimeSubsetProviderIntfc;
 import com.starcases.prime.cache.impl.prime.PrimeSubsetCacheImpl;
-import com.starcases.prime.cli.MetricsOpts.MetricOpt;
-import com.starcases.prime.common.api.OutputOper;
 import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceFactoryIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
-import com.starcases.prime.core.api.ProgressProviderIntfc;
 import com.starcases.prime.core.impl.PrimeRef;
 import com.starcases.prime.core.impl.PrimeSource;
 import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
@@ -64,8 +60,6 @@ import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
 import com.starcases.prime.kern.api.StatusHandlerIntfc;
 import com.starcases.prime.logging.LogGraphStructure;
 import com.starcases.prime.logging.LogNodeStructure;
-import com.starcases.prime.metrics.api.MetricProviderIntfc;
-import com.starcases.prime.metrics.api.MetricsRegistryProviderIntfc;
 import com.starcases.prime.service.impl.SvcLoader;
 import com.starcases.prime.sql.api.SqlProviderIntfc;
 
@@ -145,22 +139,12 @@ public class DefaultInit implements Runnable
 	private GraphOpts graphOpts;
 
 	/**
-	 * flags indicating metrics to manage
-	 */
-	@Getter
-	@Setter
-	@ArgGroup(exclusive = false, validate = false)
-	private MetricsOpts metricOpts;
-
-	/**
 	 * flags indicating to export GML
 	 */
 	@Getter
 	@Setter
 	@ArgGroup(exclusive = false, validate = false)
 	private ExportOpts exportOpts;
-
-	private static final  MetricOpt [] NULL_OPTS = new MetricOpt[0];
 
 	/**
 	 * list/container for actions to execute - is never null or replaced.
@@ -184,12 +168,6 @@ public class DefaultInit implements Runnable
 					.map(p -> p.create(null))
 					.orElse(null);
 
-	private static final SvcLoader<MetricProviderIntfc, Class<MetricProviderIntfc>> metricProviderSvc = new SvcLoader< >(MetricProviderIntfc.class);
-	private static final MetricProviderIntfc metricProvider = metricProviderSvc
-					.provider(Lists.immutable.of("METRIC_PROVIDER"))
-					.map(p -> p.create(null))
-					.orElse(null);
-
 	/**
 	 * Pull all the settings together and execute all the desired functionality.
 	 */
@@ -204,11 +182,9 @@ public class DefaultInit implements Runnable
 
 		setFactoryDefaults();
 
-		actionEnableMetrics();
-
 		actionCreatePrimeSrc();
 
-		actionPrepAdditionalBases();
+		actionInitBaseGenerators();
 
 		actionInitPrimeSourceData();
 
@@ -367,25 +343,6 @@ public class DefaultInit implements Runnable
 		}
 	}
 
-	private void actionEnableMetrics()
-	{
-		// TODO allow enablement of individual metrics
-
-		if (LOG.isLoggable(Level.INFO))
-		{
-			LOG.info("CLI - Check metrics enablement.");
-		}
-		if (Arrays.asList((metricOpts != null) ? metricOpts.getMetricType() : NULL_OPTS).contains(MetricOpt.ALL))
-		{
-			final SvcLoader<MetricsRegistryProviderIntfc, Class<MetricsRegistryProviderIntfc>> registryProviders = new SvcLoader< >(MetricsRegistryProviderIntfc.class);
-			final ImmutableCollection<String> attributes = Lists.immutable.of("METRICS");
-			actions.add(s ->  registryProviders
-								.providers(attributes)
-								.tap(p -> LOG.info("metric: " + p.toString()))
-								.forEach(p -> p.create(null).create(null)));
-		}
-	}
-
 	private void actionEnableCmdListener()
 	{
 		if (LOG.isLoggable(Level.INFO))
@@ -432,54 +389,70 @@ public class DefaultInit implements Runnable
 
 		actions.add(s -> {
 
+			//
+			//  Primes setup
+			//
+
 			// Create cache instance and if requested - clear out existing primes [persisted]; no in-memory primes should
 			// exist yet since we haven't loaded the raw primes nor have we tried to load persisted primes.
-			@SuppressWarnings({"PMD.LocalVariableNamingConventions"})
 			final String CACHE_NAME = "primes";
 			final String inputFolderPath = initOpts.getInputDataFolder();
 			final boolean loadRawPrimes = initOpts.isLoadPrimes();
 			final Path CACHE_PATH = Path.of(replaceTildeHome(initOpts.getOutputFolder()), CACHE_NAME);
-			final PersistedCacheIntfc<Long> cache = new SvcLoader< >(CacheProviderIntfc.class)
-													.provider(Lists.immutable.of("CACHE", "PRIMES"))
-													.map(p -> p.create(
-																CACHE_PATH,
-																loadRawPrimes /* clear any existing prime cache first */
-																) )
-													.orElseThrow();
+
+			final PersistedCacheIntfc<Long,Long> primeCache =
+				new SvcLoader<>(CacheProviderIntfc.class)
+					.provider(Lists.immutable.of("PRIME_CACHE_PROVIDER"))
+					.map(provider -> provider.create(CACHE_PATH, loadRawPrimes))/* clear any existing prime cache first */
+					.orElseThrow();
 
 			final var inputFoldExist = ensureFolderExist(inputFolderPath);
 
 			// Setup for persistent data load
-			final PrimeSubsetProviderIntfc subsetProvider = new SvcLoader<PrimeSubsetProviderIntfc, Class<PrimeSubsetProviderIntfc>>(PrimeSubsetProviderIntfc.class)
+			final PrimeSubsetProviderIntfc primeSubsetProvider = new SvcLoader<PrimeSubsetProviderIntfc, Class<PrimeSubsetProviderIntfc>>(PrimeSubsetProviderIntfc.class)
 					.provider(Lists.immutable.of("PRIMESUBSET")).orElseThrow();
 
 			// Load previously persisted primes (primes previously cached - NOT the raw text prime data)
 			new SvcLoader< >(PersistLoaderProviderIntfc.class)
 				.provider(Lists.immutable.of("PERSISTLOADER", "PRIMES"))
-				.ifPresent(p -> p.create(cache, CACHE_PATH, subsetProvider, null).process());
+				.ifPresent(p -> p.create(primeCache, CACHE_PATH, primeSubsetProvider, null).process());
 
-//			new SvcLoader< >(PersistLoaderProviderIntfc.class)
-//				.provider(Lists.immutable.of("PERSISTLOADER", "BASES"))
-//				.ifPresent(p -> p.create(cache, CACHE_PATH, subsetProvider, null).process());
 
-			if (loadRawPrimes && (cache.get(0L) == null))
+			//
+			// Prefix setup
+			//
+
+			final SvcLoader<CachePrefixProviderIntfc, Class<CachePrefixProviderIntfc>> prefixCacheLoader =
+					new SvcLoader<>(CachePrefixProviderIntfc.class);
+
+			final String cacheNameForPrefixType = "PREFIX";
+			final Path cachePathForPrefixType = Path.of(replaceTildeHome(initOpts.getOutputFolder()), cacheNameForPrefixType);
+			ensureFolderExist(cachePathForPrefixType.toString());
+
+			final PersistedPrefixCacheIntfc prefixCache =
+					prefixCacheLoader
+					.provider(Lists.immutable.of("PREFIX_CACHE_PROVIDER"))
+					.map(provider -> provider.create(cachePathForPrefixType, false,0))/* clear any existing prefix cache first */
+					.orElseThrow();
+
+			if (loadRawPrimes && (primeCache.get(0L) == null))
 			{
 				if (LOG.isLoggable(Level.INFO))
 				{
 					LOG.info(String.format("CREATING PrimeSrc : Loading cache from raw files ; Input folder exists: [%b], do-load-raw-primes[%b]", inputFoldExist, loadRawPrimes));
 				}
 
-				final SvcLoader<PrimeTextFileLoaderProviderIntfc, Class<PrimeTextFileLoaderProviderIntfc>> preloadProvider =
+				final SvcLoader<PrimeTextFileLoaderProviderIntfc, Class<PrimeTextFileLoaderProviderIntfc>> primePreloadProvider =
 						new SvcLoader< >(PrimeTextFileLoaderProviderIntfc.class);
 
-				// Constructor calls required methods to load data.
-				preloadProvider
+				// Constructor calls methods to load data.
+				primePreloadProvider
 						.provider(Lists.immutable.of("PRELOADER"))
-						.map(p -> p.create(cache, Path.of(replaceTildeHome(inputFolderPath)), null).orElse(null))
+						.map(p -> p.create(primeCache, Path.of(replaceTildeHome(inputFolderPath)), null).orElse(null))
 						.orElse(null);
 
-				primeSrc = getPrimeSource(cache);
-				cache.unwrap(PrimeSubsetCacheImpl.class).persistAll();
+				primeSrc = getPrimeSource(primeCache, cachePathForPrefixType, prefixCache);
+				primeCache.unwrap(PrimeSubsetCacheImpl.class).persistAll();
 			}
 			else
 			{
@@ -488,121 +461,108 @@ public class DefaultInit implements Runnable
 					LOG.info(String.format("CREATING PrimeSrc: NOT loading Cache ; Input folder exists: [%b], do-load-raw-primes[%b]", inputFoldExist, loadRawPrimes));
 				}
 
-				primeSrc = getPrimeSource(cache);
+				primeSrc = getPrimeSource(primeCache, cachePathForPrefixType, prefixCache);
 			}
-
-			if (outputOpts.getOutputOpers().contains(OutputOper.PROGRESS))
-			{
-				final SvcLoader<ProgressProviderIntfc, Class<ProgressProviderIntfc>> progressProvider = new SvcLoader< >(ProgressProviderIntfc.class);
-				final ImmutableList<String> attributes = Lists.immutable.of("PROGRESS");
-
-				progressProvider
-					.provider(attributes)
-					.map(p -> p.create(null))
-					.ifPresentOrElse(p -> primeSrc.setDisplayProgress(p),
-							() -> statusHandler.handleError(() -> "No Progress provider", Level.SEVERE, false));
-			}
-
-			primeSrc.setDisplayDefaultBaseMetrics(outputOpts.getOutputOpers().contains(OutputOper.PRIMETREE_METRICS));
 		});
 	}
 
-	private PrimeSourceFactoryIntfc getPrimeSource(@NonNull PersistedCacheIntfc<Long> cache)
+	private PrimeSourceFactoryIntfc getPrimeSource(@NonNull final PersistedCacheIntfc<Long,Long> primeCache, final Path prefixBaseCachePath, final PersistedPrefixCacheIntfc prefixCache)
 	{
 		final Consumer<PrimeSourceIntfc> c = PrimeRef::setPrimeSource;
 		final ImmutableList<Consumer<PrimeSourceIntfc>> consumers = Lists.immutable.of(c);
-		final Function<Long, PrimeRefFactoryIntfc>  f = i -> new PrimeRef(i).init(PrimeMultiBaseContainer::new);
+		final Function<Long, PrimeRefFactoryIntfc>  f = PrimeRef::new;
 
-		return new PrimeSource(initOpts.getMaxCount()
+		var pSrc = new PrimeSource(initOpts.getMaxCount()
 				, consumers
 				, f
 				,collTracker
-				,cache
-				,metricProvider
+				,primeCache
+				,prefixCache
 				);
+
+		final PrefixSubsetProviderIntfc prefixSubsetProvider = new SvcLoader<PrefixSubsetProviderIntfc, Class<PrefixSubsetProviderIntfc>>(PrefixSubsetProviderIntfc.class)
+				.provider(Lists.immutable.of("PREFIX_SUBSET")).orElseThrow();
+
+		final SvcLoader<PersistPrefixLoaderProviderIntfc, Class<PersistPrefixLoaderProviderIntfc>> prefixBaseProvider = new SvcLoader< >(PersistPrefixLoaderProviderIntfc.class);
+		Optional<PersistPrefixLoaderProviderIntfc> bp = prefixBaseProvider.provider(Lists.immutable.of("PERSISTLOADER", "PREFIXES"));
+		bp.ifPresentOrElse( prov -> pSrc.setPrefixLoader(prov.create(prefixCache, prefixBaseCachePath, prefixSubsetProvider, null)),
+							() -> Logger.getGlobal().fine("No Persistent loader for PREFIX base."));
+
+		return pSrc;
 	}
 
 	private void actionInitPrimeSourceData()
 	{
-
 		actions.add(s -> primeSrc.init());
 	}
 
-	private void actionPrepAdditionalBases()
+	private void actionInitBaseGenerators()
 	{
 		statusHandler.dbgOutput("%s", "CLI - Check enablement of bases.");
 		if (baseOpts != null && baseOpts.getBases() != null)
 		{
 			final SvcLoader<BaseProviderIntfc, Class<BaseProviderIntfc>> baseProvider = new SvcLoader< >(BaseProviderIntfc.class);
 
-			baseOpts.getBases().forEach(baseType ->
+			baseOpts.getBases().forEach(
+					baseType ->
 			{
 				setupBaseLogConfig(baseType);
 
-				final var trackGenTime = true;
-				final var method = "DefaultInit::actionHandleAdditionalBases - base :" + baseType.name();
+				// base cache setup
+				final String cacheNameForBaseType = baseType.name();
+				final Path cachePathForBaseType = Path.of(replaceTildeHome(initOpts.getOutputFolder()), cacheNameForBaseType);
+				ensureFolderExist(cachePathForBaseType.toString());
+
+				final SvcLoader<CachePrefixProviderIntfc, Class<CachePrefixProviderIntfc>> cacheLoader =
+						new SvcLoader<>(CachePrefixProviderIntfc.class);
+
+				final PersistedPrefixCacheIntfc cache =
+						cacheLoader
+						.provider(Lists.immutable.of("PREFIX_CACHE_PROVIDER"))
+						.map(provider -> provider.create(cachePathForBaseType, false,0))/* clear any existing prime cache first */
+						.orElseThrow();
+
+				// base generator setup
 				final ImmutableList<String> baseProviderAttributes = Lists.immutable.of(baseType.name(), "DEFAULT");
 
 				statusHandler.dbgOutput("CLI - Prep base: %s", baseType.name());
-				switch(baseType.name())
+
+				ImmutableMap<String, Object> settings = Maps.immutable.empty();
+				if (baseType.name().equals("NPRIME"))
 				{
-					case "PREFIX", "TRIPLE":
-						baseProvider
-							.provider(baseProviderAttributes)
-							.ifPresentOrElse
-								(
-									p -> actions.add(s -> primeSrc
-															.addBaseGenerator(
-																	addBaseDecorators(
-																			p.create(null)
-																			 .assignPrimeSrc(primeSrc)
-																			 .doPreferParallel(initOpts.isPreferParallel())
-																			,trackGenTime, baseType)))
-									, () -> statusHandler.errorOutput(baseType, "ERROR: No provider for %s", baseType.toString())
-								);
-						break;
-
-					case "NPRIME":
-						{	// braces creates a local scope for "settings" variable here and in PRIME_TREE option below.
-							final ImmutableMap<String, Object> settings = Maps.immutable.of("maxReduce", baseOpts.getMaxReduce());
-							baseProvider
-								.provider(baseProviderAttributes)
-								.ifPresentOrElse
-									(
-										p -> actions.add(s -> primeSrc.addBaseGenerator(addBaseDecorators(p.create(settings).assignPrimeSrc(primeSrc), trackGenTime, baseType)))
-										, () -> statusHandler.dbgOutput(baseType, "ERROR: No provider for %s", baseType.toString())
-									);
-						}
-						break;
-
-					case "PRIME_TREE":
-						{ 	// braces creates a local scope for "settings" variable here and in NPRIME option above.
-							final ImmutableMap<String, Object> settings = Maps.immutable.of("collTracker", collTracker);
-							baseProvider
-							.provider(baseProviderAttributes)
-							.ifPresentOrElse
-								(
-									p -> actions.add(s -> primeSrc
-																.addBaseGenerator(
-																		addBaseDecorators(
-																				p.create(settings)
-																					.assignPrimeSrc(primeSrc)
-																				, trackGenTime, baseType)))
-									, () -> statusHandler.dbgOutput(baseType, "ERROR: No provider for %s", baseType.toString())
-								);
-						}
-						break;
-
-					default:
-						if(LOG.isLoggable(Level.FINE))
-						{
-							LOG.fine(String.format("%s%s",method, baseOpts.getBases()));
-						}
-						break;
+					settings = Maps.immutable.of("maxReduce", baseOpts.getMaxReduce());
 				}
+				else if (baseType.name().equals("PRIME_TREE"))
+				{
+					settings = Maps.immutable.of("collTracker", collTracker);
+				}
+				else if (baseType.name().equals("PREFIX"))
+				{
+					LOG.fine("Base generator PREFIX - setting cache");
+					settings = Maps.immutable.of("BASES_CACHE", cache);
+				}
+
+				// System provided: TRIPLE, TRIPLENG, PREFIX_PRIME + user provided
+				final ImmutableMap<String, Object> settingsFinal = settings;
+				baseProvider
+					.provider(baseProviderAttributes)
+					.ifPresentOrElse
+						(
+							p ->
+								actions.add(s -> primeSrc
+												 .addBaseGenerator(
+																	p.create(settingsFinal)
+																	 .assignPrimeSrc(primeSrc)
+																	 .doPreferParallel(initOpts.isPreferParallel())
+																	)
+										   )
+								, () -> statusHandler.errorOutput(baseType, "ERROR: No provider for %s", baseType.toString() // OrElse
+									)
+						);
 			}
 		);
 		}
+
 	}
 
 	private void setupBaseLogConfig(@NonNull final BaseTypesIntfc baseType)
@@ -611,44 +571,6 @@ public class DefaultInit implements Runnable
 		{
 			statusHandler.setOutput(baseType.name(), this.decorateFileName(baseType.name(), "base", "log"));
 		}
-	}
-
-	private BaseGenIntfc addBaseDecorators(@NonNull final BaseGenIntfc base, final boolean trackGenTime, @NonNull final BaseTypesIntfc baseType)
-	{
-		if (LOG.isLoggable(Level.INFO))
-		{
-			LOG.info(String.format("DECORATE base supplier - base[%s] track-gen-time[%b]", baseType.name(), trackGenTime));
-		}
-
-		final BaseGenIntfc [] decoratedBase = {base};
-
-		if (trackGenTime)
-		{
-			final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("METRIC_BASE_GENERATOR_DECORATOR");
-			final SvcLoader<BaseGenDecorProviderIntfc, Class<BaseGenDecorProviderIntfc>> metricDecorProvider =
-					new SvcLoader< >(BaseGenDecorProviderIntfc.class);
-
-			if (LOG.isLoggable(Level.INFO))
-			{
-				LOG.info(String.format("DECORATE base supplier [%s] with Timer", baseType.name()));
-			}
-
-			metricDecorProvider.provider(ATTRIBUTES).ifPresentOrElse(p -> decoratedBase[0] = p.create(decoratedBase[0]), () -> statusHandler.errorOutput(baseType, "ERROR: No Metric-decor-provider"));
-		}
-
-		if (outputOpts.getOutputOpers().contains(OutputOper.CREATE_PRIMES))
-		{
-			final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("LOG_BASE_GENERATOR_DECORATOR");
-			final SvcLoader<BaseGenDecorProviderIntfc, Class<BaseGenDecorProviderIntfc>> logDecorProvider =
-					new SvcLoader< >(BaseGenDecorProviderIntfc.class);
-
-			if (LOG.isLoggable(Level.INFO))
-			{
-				LOG.info(String.format("DECORATE base supplier [%s] with Logger", baseType.name()));
-			}
-			logDecorProvider.provider(ATTRIBUTES).ifPresentOrElse(p -> decoratedBase[0] = p.create(decoratedBase[0]), () -> statusHandler.dbgOutput(baseType, "ERROR: No Log-decor-provider"));
-		}
-		return decoratedBase[0];
 	}
 
 	private void actionHandleOutputs()

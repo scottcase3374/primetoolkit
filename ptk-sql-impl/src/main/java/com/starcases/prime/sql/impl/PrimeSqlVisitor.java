@@ -224,6 +224,7 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 		}
 
 		fieldExclusionFields = excludes.toImmutable();
+
 		return result;
 	}
 

@@ -126,6 +126,6 @@ class BaseReduceNPrime extends AbsPrimeBaseGen
 
 		curPrime
 			.getPrimeBaseData()
-			.addPrimeBases(NPrimeBaseType.NPRIME, lst, npbmd);
+			.addPrimeBases(curPrime.getPrimeRefIdx(), NPrimeBaseType.NPRIME, lst, npbmd);
 	}
 }

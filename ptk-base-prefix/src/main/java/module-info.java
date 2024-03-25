@@ -1,5 +1,6 @@
 module com.starcases.prime.base.prefix.impl
 {
+	requires transitive com.starcases.prime.cache.api;
 	requires transitive com.starcases.prime.core.api;
 	requires com.starcases.prime.core.impl;
 	requires transitive com.starcases.prime.kern.api;

@@ -1,12 +1,12 @@
-package com.starcases.prime.cache.impl.bases;
+package com.starcases.prime.cache.impl.prefixes;
 
 import com.beanit.asn1bean.ber.ReverseByteArrayOutputStream;
 import com.beanit.asn1bean.ber.types.BerInteger;
-import com.starcases.prime.cache.api.PersistedCacheIntfc;
-import com.starcases.prime.cache.api.subset.SubsetIntfc;
-import com.starcases.prime.cache.impl.BasesAsn;
-import com.starcases.prime.cache.impl.CollBaseAsn;
+import com.starcases.prime.cache.api.PersistedPrefixCacheIntfc;
+import com.starcases.prime.cache.api.subset.PrefixSubsetIntfc;
 import com.starcases.prime.cache.impl.CollPrimeAsn;
+import com.starcases.prime.cache.impl.PrefixAsn;
+import com.starcases.prime.kern.api.PtkException;
 import com.starcases.prime.kern.api.StatusHandlerIntfc;
 import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
 import com.starcases.prime.service.impl.SvcLoader;
@@ -21,7 +21,6 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -49,7 +48,7 @@ import lombok.NonNull;
  * @param <K> Long
  * @param <V> SubsetIntfc
  */
-public class PersistedBaseCacheImpl implements PersistedCacheIntfc<Long[][]>
+public class PrefixesSubsetCacheImpl implements PersistedPrefixCacheIntfc
 {
 	private final  StatusHandlerIntfc statusHandler =
 			new SvcLoader<StatusHandlerProviderIntfc, Class<StatusHandlerProviderIntfc>>(StatusHandlerProviderIntfc.class)
@@ -57,14 +56,14 @@ public class PersistedBaseCacheImpl implements PersistedCacheIntfc<Long[][]>
 	/**
 	 * default logger
 	 */
-	private static final Logger LOG = Logger.getLogger(PersistedBaseCacheImpl.class.getName());
+	private static final Logger LOG = Logger.getLogger(PrefixesSubsetCacheImpl.class.getName());
 
 	private final Path pathToCacheDir;
 
 	/**
 	 *  Map subset idx to subset of prefix arrays
 	 */
-	private final MutableMap<Long,SubsetIntfc<Long[][]>> keysToValue = Maps.mutable.empty();
+	private final MutableMap<Long,PrefixSubsetIntfc> keysToValue = Maps.mutable.empty();
 
 	private boolean closed = false;
 
@@ -77,7 +76,7 @@ public class PersistedBaseCacheImpl implements PersistedCacheIntfc<Long[][]>
 	 * @param cacheName
 	 * @param pathToCacheDirs
 	 */
-	public PersistedBaseCacheImpl(@NonNull final String cacheName, @NonNull final Path pathToCacheDirs, final boolean clearCache)
+	public PrefixesSubsetCacheImpl(@NonNull final String cacheName, @NonNull final Path pathToCacheDirs, final boolean clearCache)
 	{
 		try
 		{
@@ -96,7 +95,7 @@ public class PersistedBaseCacheImpl implements PersistedCacheIntfc<Long[][]>
 		}
 		catch(final IOException e)
 		{
-			throw new RuntimeException("can't create cache directory");
+			throw new PtkException("can't create cache directory");
 		}
 	}
 
@@ -110,18 +109,18 @@ public class PersistedBaseCacheImpl implements PersistedCacheIntfc<Long[][]>
 		    }
 		} catch (IOException | DirectoryIteratorException x)
 		{
-			LOG.severe(x.toString());
+		    LOG.severe(x.toString());
 		}
 	}
 
 	@Override
-	public SubsetIntfc<Long[][]> get(@NonNull final Long key)
+	public PrefixSubsetIntfc get(@NonNull final Long key)
 	{
 		return keysToValue.get(key);
 	}
 
 	@Override
-	public Map<Long, SubsetIntfc<Long[][]>> getAll(@NonNull final Set<? extends Long> keys)
+	public Map<Long, PrefixSubsetIntfc> getAll(@NonNull final Set<? extends Long> keys)
 	{
 		return Maps.mutable.empty();
 	}
@@ -139,7 +138,7 @@ public class PersistedBaseCacheImpl implements PersistedCacheIntfc<Long[][]>
 	}
 
 	@Override
-	public void put(@NonNull final Long key, @NonNull final SubsetIntfc<Long[][]> value)
+	public void put(@NonNull final Long key, @NonNull final PrefixSubsetIntfc value)
 	{
 		keysToValue.put(key, value);
 		numCacheEntries++;
@@ -153,47 +152,40 @@ public class PersistedBaseCacheImpl implements PersistedCacheIntfc<Long[][]>
 	}
 
 	@Override
-	public void persist(@NonNull final Long keyVal, @NonNull final SubsetIntfc<Long[][]> subset)
+	public void persist(@NonNull final Long keyVal, @NonNull final PrefixSubsetIntfc subset)
 	  {
 		  try
 		  {
-			  final var basesAsn = new BasesAsn();
-			  final var basePrimes = basesAsn.getPrimes();
-			  final List<CollBaseAsn> collBaseAsn = basePrimes.getCollBaseAsn();
+			  final var subsetAsn = new PrefixAsn();
+			  final var collPrimes = subsetAsn.getCollPrimeAsn();
 
-			  final Long [][][] primes = subset.getEntries();
-			  for (int i=0; i< primes.length; i++)
+			  final int maxOffsetAssigned = subset.getMaxOffsetAssigned();
+			  final Long [][] entries = subset.getEntries();
+
+			  for (int x=0; x <= maxOffsetAssigned && entries != null && entries.length > 0 && entries[x] != null; x++)
 			  {
-				  final CollBaseAsn collBase = new CollBaseAsn();
-				  collBaseAsn.add(collBase);
-
-				  for (int j=0; j< primes[i].length; j++)
+				  final CollPrimeAsn collPrimeAsn = new CollPrimeAsn();
+				  final var list = collPrimeAsn.getBerInteger();
+				  for (Long i : entries[x])
 				  {
-					  final List<CollPrimeAsn> collPrimes = collBase.getCollPrimeAsn();
-					  final CollPrimeAsn collPrimeAsn = new CollPrimeAsn();
-					  collPrimes.add(collPrimeAsn);
-
-					  for (int l=0; l < primes[i][j].length; l++)
-					  {
-						  final List<BerInteger> primeAsn = collPrimeAsn.getBerInteger();
-						  primeAsn.add(new BerInteger(primes[i][j][l]));
-					  }
+					  list.add(new BerInteger(i));
 				  }
+				  collPrimes.add(collPrimeAsn);
 			  }
 
 			  final ReverseByteArrayOutputStream os = new ReverseByteArrayOutputStream(1_000_000, true);
 
-			  basesAsn.encode(os, true);
+			  subsetAsn.encode(os, true);
 
-			  try (	OutputStream oos = new FileOutputStream(Path.of(pathToCacheDir.toString(), keyVal.toString()).toFile());
-					InputStream is = new ByteArrayInputStream(os.getArray());)
+			  try (final	OutputStream oos = new FileOutputStream(Path.of(pathToCacheDir.toString(), keyVal.toString()).toFile());
+					final InputStream is = new ByteArrayInputStream(os.getArray());)
 			  {
 				  is.transferTo(oos);
 			  }
 
 			  if (LOG.isLoggable(Level.INFO))
 			  {
-				  LOG.info(String.format("Persist batch: [%s] src-rec-count: [%d]", keyVal, primes.length));
+				  LOG.info(String.format("PrefixesSubsetCacheImpl::persist batch: [%d] max-offset-assigned: [%d]", keyVal, maxOffsetAssigned));
 			  }
 		  } catch(IOException e)
 		  {
@@ -203,19 +195,19 @@ public class PersistedBaseCacheImpl implements PersistedCacheIntfc<Long[][]>
 	}
 
 	@Override
-	public SubsetIntfc<Long[][]> getAndPut(@NonNull final Long key, @NonNull final SubsetIntfc<Long[][]> value)
+	public PrefixSubsetIntfc getAndPut(@NonNull final Long key, @NonNull final PrefixSubsetIntfc value)
 	{
 		return null;
 	}
 
 	@Override
-	public void putAll(@NonNull final Map<? extends Long, ? extends SubsetIntfc<Long[][]>> map)
+	public void putAll(@NonNull final Map<? extends Long, ? extends PrefixSubsetIntfc> map)
 	{
 		/* ignored */
 	}
 
 	@Override
-	public boolean putIfAbsent(@NonNull final Long key, @NonNull final SubsetIntfc<Long[][]> value)
+	public boolean putIfAbsent(@NonNull final Long key, @NonNull final PrefixSubsetIntfc value)
 	{
 		return keysToValue.putIfAbsent(key, value) != null;
 	}
@@ -227,34 +219,34 @@ public class PersistedBaseCacheImpl implements PersistedCacheIntfc<Long[][]>
 	}
 
 	@Override
-	public boolean remove(@NonNull final Long key, @NonNull final SubsetIntfc<Long[][]> oldValue)
+	public boolean remove(@NonNull final Long key, @NonNull final PrefixSubsetIntfc oldValue)
 	{
 		return keysToValue.remove(key, oldValue);
 	}
 
 	@Override
-	public SubsetIntfc<Long[][]> getAndRemove(@NonNull final Long key)
+	public PrefixSubsetIntfc getAndRemove(@NonNull final Long key)
 	{
 		// no-op
 		return null;
 	}
 
 	@Override
-	public boolean replace(@NonNull final Long key, @NonNull final SubsetIntfc<Long[][]> oldValue, @NonNull final SubsetIntfc<Long[][]> newValue)
+	public boolean replace(@NonNull final Long key, @NonNull final PrefixSubsetIntfc oldValue, @NonNull final PrefixSubsetIntfc newValue)
 	{
 		// no-op
 		return false;
 	}
 
 	@Override
-	public boolean replace(@NonNull final Long key, @NonNull final SubsetIntfc<Long[][]> value)
+	public boolean replace(@NonNull final Long key, @NonNull final PrefixSubsetIntfc value)
 	{
 		// no-op
 		return false;
 	}
 
 	@Override
-	public SubsetIntfc<Long[][]> getAndReplace(@NonNull final Long key, @NonNull final SubsetIntfc<Long[][]> value)
+	public PrefixSubsetIntfc getAndReplace(@NonNull final Long key, @NonNull final PrefixSubsetIntfc value)
 	{
 		// no-op
 		return null;
@@ -279,20 +271,20 @@ public class PersistedBaseCacheImpl implements PersistedCacheIntfc<Long[][]>
 	}
 
 	@Override
-	public <C extends Configuration<Long, SubsetIntfc<Long[][]>>> C getConfiguration(@NonNull final Class<C> clazz)
+	public <C extends Configuration<Long, PrefixSubsetIntfc>> C getConfiguration(@NonNull final Class<C> clazz)
 	{
 		return null;
 	}
 
 	@Override
-	public <T> T invoke(@NonNull final Long key, @NonNull final EntryProcessor<Long, SubsetIntfc<Long[][]>, T> entryProcessor, @NonNull final Object... arguments)
+	public <T> T invoke(@NonNull final Long key, @NonNull final EntryProcessor<Long, PrefixSubsetIntfc, T> entryProcessor, @NonNull final Object... arguments)
 			throws EntryProcessorException
 	{
 		return null;
 	}
 
 	@Override
-	public <T> Map<Long, EntryProcessorResult<T>> invokeAll(@NonNull final Set<? extends Long> keys, @NonNull final EntryProcessor<Long, SubsetIntfc<Long[][]>, T> entryProcessor,
+	public <T> Map<Long, EntryProcessorResult<T>> invokeAll(@NonNull final Set<? extends Long> keys, @NonNull final EntryProcessor<Long, PrefixSubsetIntfc, T> entryProcessor,
 			@NonNull final Object... arguments)
 	{
 		return Maps.mutable.empty();
@@ -329,19 +321,19 @@ public class PersistedBaseCacheImpl implements PersistedCacheIntfc<Long[][]>
 	}
 
 	@Override
-	public void registerCacheEntryListener(@NonNull final CacheEntryListenerConfiguration<Long, SubsetIntfc<Long[][]>> cacheEntryListenerConfiguration)
+	public void registerCacheEntryListener(@NonNull final CacheEntryListenerConfiguration<Long, PrefixSubsetIntfc> cacheEntryListenerConfiguration)
 	{
 		/* ignored */
 	}
 
 	@Override
-	public void deregisterCacheEntryListener(@NonNull final CacheEntryListenerConfiguration<Long, SubsetIntfc<Long[][]>> cacheEntryListenerConfiguration)
+	public void deregisterCacheEntryListener(@NonNull final CacheEntryListenerConfiguration<Long, PrefixSubsetIntfc> cacheEntryListenerConfiguration)
 	{
 		/* ignored */
 	}
 
 	@Override
-	public Iterator<Entry<Long, SubsetIntfc<Long[][]>>> iterator()
+	public Iterator<Entry<Long, PrefixSubsetIntfc>> iterator()
 	{
 		// no-op
 		return null;

@@ -24,19 +24,6 @@ public interface PrimeSourceFactoryIntfc extends PrimeSourceIntfc
 	void addBaseGenerator(final BaseGenIntfc baseGenerator);
 
 	/**
-	 * output progress of initial base creation.
-	 * @param doDisplay
-	 */
-	void setDisplayProgress(final ProgressIntfc progress);
-
-	/**
-	 * set flag indicating whether to output metrics regarding the
-	 * base data generated for initial base.
-	 * @param doDisplay
-	 */
-	void setDisplayDefaultBaseMetrics(final boolean doDisplay);
-
-	/**
 	 * DefaultInit base info.
 	 */
 	void init();

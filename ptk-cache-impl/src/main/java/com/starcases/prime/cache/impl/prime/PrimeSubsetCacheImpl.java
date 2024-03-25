@@ -49,7 +49,7 @@ import lombok.NonNull;
  * @param <K> Long
  * @param <V> SubsetIntfc
  */
-public class PrimeSubsetCacheImpl implements PersistedCacheIntfc<Long>
+public class PrimeSubsetCacheImpl implements PersistedCacheIntfc<Long,Long>
 {
 	private final  StatusHandlerIntfc statusHandler =
 			new SvcLoader<StatusHandlerProviderIntfc, Class<StatusHandlerProviderIntfc>>(StatusHandlerProviderIntfc.class)
@@ -178,7 +178,7 @@ public class PrimeSubsetCacheImpl implements PersistedCacheIntfc<Long>
 
 			  if (LOG.isLoggable(Level.INFO))
 			  {
-				  LOG.info(String.format("Persist batch: [%s] max-offset-assigned: [%d]", keyVal, maxOffsetAssigned));
+				  LOG.info(String.format("PrimeSubsetCacheImpl::persist batch: [%s] max-offset-assigned: [%d]", keyVal, maxOffsetAssigned));
 			  }
 		  } catch(IOException e)
 		  {

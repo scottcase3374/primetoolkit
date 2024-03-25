@@ -30,7 +30,7 @@ public class PrimeTextFileLoaderProvider implements PrimeTextFileLoaderProviderI
 	 * create target service.
 	 */
 	@Override
-	public Optional<PrimeTextFileloaderIntfc> create(@NonNull final PersistedCacheIntfc<Long> cache, @NonNull final Path path, final ImmutableMap<String,Object> settings)
+	public Optional<PrimeTextFileloaderIntfc> create(@NonNull final PersistedCacheIntfc<Long,Long> cache, @NonNull final Path path, final ImmutableMap<String,Object> settings)
 	{
 		final var  preloader = new PrimeTextFileLoaderImpl(cache, path);
 

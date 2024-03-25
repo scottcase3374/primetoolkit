@@ -9,8 +9,13 @@ import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 
 import com.starcases.prime.base.api.BaseMetadataIntfc;
 import com.starcases.prime.base.api.PrimeBaseIntfc;
+import com.starcases.prime.cache.api.PersistedPrefixCacheIntfc;
+import com.starcases.prime.kern.api.Arrays;
 import com.starcases.prime.kern.api.BaseTypesIntfc;
+import com.starcases.prime.kern.api.IdxToSubsetMapperIntfc;
+import com.starcases.prime.kern.impl.IdxToSubsetMapperImpl;
 
+import jakarta.validation.constraints.Min;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
@@ -28,6 +33,11 @@ public class PrimeMultiBaseContainer implements PrimeBaseIntfc
 	 */
 	@NonNull
 	private final Map<BaseTypesIntfc, MutableList<ImmutableLongCollection>> primeBases = new ConcurrentHashMap<>();
+
+	private final Map<BaseTypesIntfc, PersistedPrefixCacheIntfc> baseCaches = new ConcurrentHashMap<>();
+
+	private static final IdxToSubsetMapperIntfc idxMap = new IdxToSubsetMapperImpl();
+	private long primeIdx;
 
 	/**
 	 * Optional Metadata regarding base types of interest
@@ -50,7 +60,7 @@ public class PrimeMultiBaseContainer implements PrimeBaseIntfc
 	 * @param primeBase
 	 */
 	@Override
-	public void addPrimeBases(@NonNull final BaseTypesIntfc baseType, @NonNull final MutableList<ImmutableLongCollection> primeBase, final BaseMetadataIntfc baseMetadata)
+	public void addPrimeBases(@Min(0) long primeIdx, @NonNull final BaseTypesIntfc baseType, @NonNull final MutableList<ImmutableLongCollection> primeBase, final BaseMetadataIntfc baseMetadata)
 	{
 		this.primeBases.compute(baseType,
 				(k, v) ->
@@ -63,12 +73,12 @@ public class PrimeMultiBaseContainer implements PrimeBaseIntfc
 						v.addAll(primeBase);
 						return v;
 					});
-
+		this.primeIdx = primeIdx;
 		this.baseMetadata.computeIfAbsent(baseType, a -> baseMetadata);
 	}
 
 	@Override
-	public void addPrimeBases(@NonNull final ImmutableLongCollection primeBase, @NonNull final BaseTypesIntfc baseType)
+	public void addPrimeBases(@Min(0) long primeIdx, @NonNull final ImmutableLongCollection primeBase, @NonNull final BaseTypesIntfc baseType)
 	{
 		this.primeBases.compute(baseType,
 				(k, v) ->
@@ -81,6 +91,7 @@ public class PrimeMultiBaseContainer implements PrimeBaseIntfc
 						v.add(primeBase);
 						return v;
 					});
+		this.primeIdx = primeIdx;
 
 	}
 
@@ -89,15 +100,15 @@ public class PrimeMultiBaseContainer implements PrimeBaseIntfc
 	 * @param primeBase
 	 */
 	@Override
-	public void addPrimeBases(@NonNull final MutableList<ImmutableLongCollection> primeBase)
+	public void addPrimeBases(@Min(0) long primeIdx, @NonNull final MutableList<ImmutableLongCollection> primeBase)
 	{
-		addPrimeBases(BaseTypes.DEFAULT, primeBase, null);
+		addPrimeBases(primeIdx, BaseTypes.DEFAULT, primeBase, null);
 	}
 
 	@Override
-	public void addPrimeBases(@NonNull final MutableList<ImmutableLongCollection> primeBase, @NonNull final BaseTypesIntfc baseType)
+	public void addPrimeBases(@Min(0) long primeIdx, @NonNull final MutableList<ImmutableLongCollection> primeBase, @NonNull final BaseTypesIntfc baseType)
 	{
-		addPrimeBases(baseType, primeBase, null);
+		addPrimeBases(primeIdx, baseType, primeBase, null);
 	}
 
 	/**
@@ -112,6 +123,17 @@ public class PrimeMultiBaseContainer implements PrimeBaseIntfc
 	@Override
 	public MutableList<ImmutableLongCollection> getPrimeBases(@NonNull final BaseTypesIntfc baseType)
 	{
-		return primeBases.getOrDefault(baseType, MutableListFactoryImpl.INSTANCE.empty());
+		final long [] retSubset = {-1};
+		final int [] retOffset = {-1};
+		idxMap.convertIdxToSubsetAndOffset(this.primeIdx, retSubset, retOffset);
+
+		MutableList<ImmutableLongCollection> ret = null;
+
+		var cachedResult = this.baseCaches.get(baseType).get(retSubset[0]).get(retOffset[0]);
+		if (cachedResult != null)
+		{
+			ret = MutableListFactoryImpl.INSTANCE.of(Arrays.arrayToImmutableLongColl(cachedResult));
+		}
+		return ret != null ? ret : primeBases.getOrDefault(baseType, MutableListFactoryImpl.INSTANCE.empty());
 	}
 }

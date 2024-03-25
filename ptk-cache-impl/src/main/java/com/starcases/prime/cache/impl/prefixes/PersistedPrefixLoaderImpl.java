@@ -16,8 +16,8 @@ import java.util.stream.Stream;
 import javax.cache.Cache;
 
 import com.starcases.prime.cache.api.persistload.PersistLoaderIntfc;
+import com.starcases.prime.cache.api.subset.PrefixSubsetIntfc;
 import com.starcases.prime.cache.api.subset.PrefixSubsetProviderIntfc;
-import com.starcases.prime.cache.api.subset.SubsetIntfc;
 import com.starcases.prime.cache.impl.CollPrimeAsn;
 import com.starcases.prime.cache.impl.PrefixAsn;
 import com.starcases.prime.kern.api.PtkException;
@@ -32,11 +32,11 @@ class PersistedPrefixLoaderImpl implements PersistLoaderIntfc
 {
 	private static final Logger LOG = Logger.getLogger(PersistedPrefixLoaderImpl.class.getName());
 
-	private final Cache<Long, SubsetIntfc<Long[]>> prefixCache;
+	private final Cache<Long, PrefixSubsetIntfc> prefixCache;
 	private final PrefixSubsetProviderIntfc subsetProvider;
 	private final Path pathToCacheDir;
 
-	public PersistedPrefixLoaderImpl(@NonNull final Cache<Long, SubsetIntfc<Long[]>> prefixCache,
+	public PersistedPrefixLoaderImpl(@NonNull final Cache<Long, PrefixSubsetIntfc> prefixCache,
 									@NonNull final Path pathToCacheDir,
 									@NonNull final PrefixSubsetProviderIntfc subsetProvider)
 	{
@@ -52,19 +52,26 @@ class PersistedPrefixLoaderImpl implements PersistLoaderIntfc
 
 				(key, primes) ->
 					{
-						prefixCache.put(key, subsetProvider.create(primes.length, primes));
+						prefixCache.put(key, subsetProvider.create( primes));
 						return 0;
 					}
 			);
 	}
 
+	/**
+	 * Load entire cache from files
+	 *
+	 * @param loader
+	 * @return
+	 */
 	private boolean loadCache(@NonNull final BiFunction<Long, long[][], Integer> loader)
 	{
 		boolean ok = true;
 		try (Stream<Path> stream = Files
 				.list(pathToCacheDir)
-				.parallel()
-				.filter(f -> f.getFileName().toString().matches("\\d"))
+				//.parallel()
+				.filter(f -> f.getFileName().toString().matches("\\d+"))
+				.sorted((a, b) -> Integer.valueOf(a.getFileName().toString()).compareTo( Integer.valueOf(b.getFileName().toString())))
 				)
 		{
 		    stream.forEach(path ->
@@ -91,7 +98,7 @@ class PersistedPrefixLoaderImpl implements PersistLoaderIntfc
 						  }
 					  }
 
-					  LOG.info(String.format("Loading Persisted Prefix Cache-file: %s", path.getFileName().toString()));
+					  //LOG.info(String.format("Loading Persisted Prefix Cache-file: %s prime-count: %d", path.getFileName().toString(), primes.length));
 					  loader.apply(Long.valueOf(path.getFileName().toString()), primes);
 				  }
 				  catch(final IOException e)
