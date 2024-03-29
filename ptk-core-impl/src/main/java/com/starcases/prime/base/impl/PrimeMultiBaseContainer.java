@@ -34,7 +34,7 @@ public class PrimeMultiBaseContainer implements PrimeBaseIntfc
 	@NonNull
 	private final Map<BaseTypesIntfc, MutableList<ImmutableLongCollection>> primeBases = new ConcurrentHashMap<>();
 
-	private final Map<BaseTypesIntfc, PersistedPrefixCacheIntfc> baseCaches = new ConcurrentHashMap<>();
+
 
 	private static final IdxToSubsetMapperIntfc idxMap = new IdxToSubsetMapperImpl();
 	private long primeIdx;
@@ -123,16 +123,12 @@ public class PrimeMultiBaseContainer implements PrimeBaseIntfc
 	@Override
 	public MutableList<ImmutableLongCollection> getPrimeBases(@NonNull final BaseTypesIntfc baseType)
 	{
-		final long [] retSubset = {-1};
-		final int [] retOffset = {-1};
-		idxMap.convertIdxToSubsetAndOffset(this.primeIdx, retSubset, retOffset);
-
 		MutableList<ImmutableLongCollection> ret = null;
 
-		var cachedResult = this.baseCaches.get(baseType).get(retSubset[0]).get(retOffset[0]);
+		var cachedResult = primeBases.get(primeIdx);
 		if (cachedResult != null)
 		{
-			ret = MutableListFactoryImpl.INSTANCE.of(Arrays.arrayToImmutableLongColl(cachedResult));
+			ret = cachedResult;
 		}
 		return ret != null ? ret : primeBases.getOrDefault(baseType, MutableListFactoryImpl.INSTANCE.empty());
 	}

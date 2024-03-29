@@ -23,8 +23,6 @@ import lombok.NonNull;
  */
 public interface PrimeSourceIntfc
 {
-
-
 	/**
 	 * Iterator to PrimeRefIntfc instances.
 	 *
@@ -38,7 +36,6 @@ public interface PrimeSourceIntfc
 	 * @return
 	 */
 	Iterator<PrimeRefIntfc> getPrimeRefIter(long startIdx);
-	Iterator<PrimeRefIntfc> getPrimeRefIter(@Min(0) final long subset, @Min(0) final int offset);
 
 	/**
 	 * Get a stream of prime refs and indicate whether parallel stream ops
@@ -67,7 +64,6 @@ public interface PrimeSourceIntfc
 	 * @return
 	 */
 	Optional<PrimeRefIntfc> getPrimeRefForIdx(@Min(0) long primeIdx);
-	Optional<PrimeRefIntfc> getPrimeRefForIdx(@Min(0) final long primeSubset, @Min(0) final int primeOffset);
 
 	/**
 	 * Get prime ref associated with the specified long
@@ -96,8 +92,6 @@ public interface PrimeSourceIntfc
 	 * @return
 	 */
 	OptionalLong getPrimeForIdx(@Min(0) long primeIdx);
-	OptionalLong getPrimeForIdx(@Min(0) final long primeSubset, @Min(0) final int primeOffset);
-
 
 	/**
 	 * Get highest prime ref less than specified value and prime.
@@ -107,8 +101,7 @@ public interface PrimeSourceIntfc
 	 */
 	Optional<PrimeRefIntfc> getPrimeRefCeiling(@NonNull final long value, final PrimeRefIntfc highPrime);
 
-	public record SearchResult(long retSubset, int retOffset) {}
-	SearchResult searchPrime(final long val);
+	long searchPrime(final long val);
 	/**
 	 *
 	 * @param nextPrimeIdx
@@ -119,17 +112,6 @@ public interface PrimeSourceIntfc
 	PrimeRefFactoryIntfc addPrimeRef(
 			@Min(0) final long nextPrimeIdx,
 			@Min(1) final long newPrime
-			);
-
-	PrimeRefFactoryIntfc addPrimeRef(
-			@Min(0) final long primeSubset,
-			@Min(0) final int primeOffset,
-			@Min(1) final long newPrime
-			);
-
-	void generateBases(
-			@Min(0) final long primeSubset,
-			@Min(0) final int primeOffset
 			);
 
 	void generateBases(

@@ -1,8 +1,6 @@
 package com.starcases.prime.core.impl;
 
-import java.io.Serializable;
 import java.time.LocalTime;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -14,24 +12,16 @@ import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.starcases.prime.base.api.BaseGenIntfc;
-import com.starcases.prime.cache.api.PersistedCacheIntfc;
-import com.starcases.prime.cache.api.PersistedPrefixCacheIntfc;
-import com.starcases.prime.cache.api.persistload.PersistLoaderIntfc;
-import com.starcases.prime.cache.api.subset.SubsetIntfc;
 import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceFactoryIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
-import com.starcases.prime.core.api.ProgressIntfc;
 import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
 import com.starcases.prime.datamgmt.impl.PrimeRefIterator;
 import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
-import com.starcases.prime.kern.impl.IdxToSubsetMapperImpl;
-import com.starcases.prime.kern.api.IdxToSubsetMapperIntfc;
 import com.starcases.prime.kern.api.StatusHandlerIntfc;
 import com.starcases.prime.service.impl.SvcLoader;
 
@@ -45,10 +35,8 @@ import jakarta.validation.constraints.Min;
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.impl.parallel.ParallelIterate;
-import org.mapdb.DB;
-import org.mapdb.DBMaker;
-import org.mapdb.HTreeMap;
-import org.mapdb.Serializer;
+import org.mapdb.BTreeMap;
+
 
 /**
  * Provides data structure holding the core data and objects that provide
@@ -86,21 +74,6 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	@Getter(AccessLevel.PRIVATE)
 	private final AtomicBoolean logMismatch = new AtomicBoolean(true);
 
-	/**
-	 * flag indicating whether to output prefix/tree
-	 * metrics from initial prime creation
-	 */
-	@Getter(AccessLevel.PRIVATE)
-	private boolean displayPrimeTreeMetrics;
-
-	/**
-	 * dest of output progress tracking
-	 * during initial base creation
-	 */
-	@Getter(AccessLevel.PRIVATE)
-	@Setter(AccessLevel.PRIVATE)
-	private ProgressIntfc progress;
-
 	@Getter
 	@Setter
 	private boolean createBases;
@@ -123,45 +96,22 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	@Getter(AccessLevel.PRIVATE)
 	private final Function<Long, PrimeRefFactoryIntfc> primeRefRawCtor;
 
-	@Setter
-	PersistLoaderIntfc prefixLoader;
-
 	//
 	// Internal data used/generated during prime/base creation
 	//
 
 	private List<BaseGenIntfc> baseGenerators = Lists.mutable.empty();
 
-	private DB db = DBMaker
-		    .fileDB("ptk.db")
-		    .fileMmapEnable()            // Always enable mmap
-		    .fileMmapPreclearDisable()   // Make mmap file faster
-		    .allocateStartSize(5L * 1024 * 1024 * 1024) // 5 GB
-		    .allocateIncrement(1024L * 1024 * 1024) // 1 GB
-		    .checksumHeaderBypass()
-		    .make();
-
-	private record SubsetOffsetMap(long subset, int offset) implements Serializable {}
-	private final ConcurrentMap<Long, SubsetOffsetMap> primeToSubsetOffsetMap;
-
-	private final HTreeMap<Long, Long> primeMap;
-	private final HTreeMap<Long, long[]> primeBaseMap = db.hashMap("some_other_map", Serializer.LONG, Serializer.LONG_ARRAY).createOrOpen();
-
-	// Lookup primes by subset/ offset which can be calculated from the index.
-	// Cache use is intended to allow only storing a limited number of primes
-	// in-memory at a particular point in time.
-	private final PersistedCacheIntfc<Long,Long> primeCache;
-
-	private final PersistedPrefixCacheIntfc prefixCache;
+	/**
+	 * Map Index to prime.
+	 */
+	private final BTreeMap<Long, Long> primeMap;
 
 	/**
 	 * Multi-level container for the tree of primes - all in memory.
 	 */
 	@Getter(AccessLevel.PRIVATE)
 	private CollectionTrackerIntfc collTracker;
-
-
-	private static final IdxToSubsetMapperIntfc idxMap = new IdxToSubsetMapperImpl();
 
 	//
 	// initialization
@@ -180,17 +130,13 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 			@NonNull final ImmutableList<Consumer<PrimeSourceIntfc>> consumersSetPrimeSrc,
 			@NonNull final Function<Long, PrimeRefFactoryIntfc> primeRefRawCtor,
 			final CollectionTrackerIntfc collTracker,
-			final PersistedCacheIntfc<Long,Long> primeCache,
-			final PersistedPrefixCacheIntfc prefixCache
+			BTreeMap<Long, Long> primeMap
 			)
 	{
 		super();
 
 		this.collTracker = collTracker;
-		this.primeCache = primeCache;
-		this.prefixCache = prefixCache;
-
-		primeToSubsetOffsetMap = db.hashMap("primeToSubsetOffsetMap", Serializer.LONG, Serializer.JAVA).createOrOpen();
+		this.primeMap = primeMap;
 
 		targetPrimeCount = maxCount;
 
@@ -217,29 +163,8 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 			@Min(1) final long newPrime
 			)
 	{
-		final long [] subset = {-1};
-		final int [] offset = {-1};
-
-		PrimeSource.idxMap.convertIdxToSubsetAndOffset(nextPrimeIdx, subset, offset);
-		return addPrimeRef(subset[0], offset[0], newPrime);
+		return primeRefRawCtor.apply(nextPrimeIdx);
 	}
-
-	@Override
-	public PrimeRefFactoryIntfc addPrimeRef(
-			@Min(0) final long primeSubset,
-			@Min(0) final int primeOffset,
-			@Min(1) final long newPrime
-			)
-	{
-		final long primeIdx = primeSubset * IdxToSubsetMapperIntfc.SUBSET_SIZE + primeOffset;
-		final PrimeRefFactoryIntfc ret = primeRefRawCtor.apply(primeIdx);
-
-		updateMaps(primeSubset, primeOffset, newPrime);
-		ret.generateBases(getBasesGenerator());
-
-		return ret;
-	}
-
 
 	private Consumer<PrimeRefFactoryIntfc> getBasesGenerator()
 	{
@@ -251,50 +176,14 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	@Override
 	public OptionalLong getPrimeForIdx(@Min(0) final long primeIdx)
 	{
-		final long [] retSubset = {-1};
-		final int [] retOffset = {-1};
-		idxMap.convertIdxToSubsetAndOffset(primeIdx, retSubset, retOffset);
-
-		return getPrimeForIdx(retSubset[0], retOffset[0]);
-	}
-
-	@Override
-	public OptionalLong getPrimeForIdx(@Min(0) final long primeSubset, @Min(0) final int primeOffset)
-	{
-		final var val = this.primeCache.get(primeSubset);
-		final var prime = val.get(primeOffset);
-		return OptionalLong.of(prime);
+		var tmp = primeMap.get(primeIdx);
+		return null != tmp ? OptionalLong.of(tmp) : OptionalLong.empty();
 	}
 
 	@Override
 	public Optional<PrimeRefIntfc> getPrimeRefForIdx(@Min(0) final long primeIdx)
 	{
-		final long [] retSubset = {-1};
-		final int [] retOffset = {-1};
-		idxMap.convertIdxToSubsetAndOffset(primeIdx, retSubset, retOffset);
-
-		return getPrimeRefForIdx(retSubset[0], retOffset[0]);
-	}
-
-	@Override
-	public Optional<PrimeRefIntfc> getPrimeRefForIdx(@Min(0) final long primeSubset, @Min(0) final int primeOffset)
-	{
-		final Optional [] ret = { Optional.empty() };
-
-		final var valOpt = Optional.ofNullable(this.primeCache.get(primeSubset));
-		valOpt.ifPresent( val ->
-				{
-					if (primeSubset <= val.getMaxOffsetAssigned())
-					{
-						final var prime = val.get(primeOffset);
-						ret[0] = prime == null ? Optional.empty() : Optional.of(new PrimeRef(primeSubset, primeOffset));
-					}
-					else
-					{
-						statusHandler.output("primeIdx overflow: subset %d offset %d maxassigned-idx %d", primeSubset, primeOffset, val.getMaxOffsetAssigned());
-				}});
-
-		return ret[0];
+		return Optional.of(new PrimeRef(primeIdx));
 	}
 
 	/**
@@ -324,55 +213,67 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	}
 
 	/**
-	 * Similar result to getPrimeRefCeiling but result is represented
-	 * differently. Offset is either positive meaning it is the
-	 * index of the searched value (which would be prime in this case)
-	 * or the index is negative which represents -(insertion index -1).
-	 * See Arrays.binarySearch for further details related to the offset
-	 * value here.
+	 * TODO Do I really need this method?
 	 *
-	 * @param val
+	 * @param possiblePrime
 	 * @return
 	 */
-	public SearchResult searchPrime(final long val)
+	@Override
+	public long searchPrime(final long possiblePrime)
 	{
-		SearchResult searchResult = null;
-
-		long subsetIdx = -1;
-		int idx = -1;
-		SubsetIntfc<Long> subset;
-		while ((subset = primeCache.get(++subsetIdx)) != null)
+		long ret = -1;
+		final var it = primeMap.entryIterator();
+		boolean done=false;
+		while (it.hasNext() && !done)
 		{
-			final long curMax = subset.get(subset.getMaxOffset());
-			if ( val <= curMax )
+			var entry = it.next();
+			if (entry.getValue() == possiblePrime)
 			{
-				idx = Arrays.binarySearch(subset.getEntries(), val);
-				searchResult = new SearchResult(subsetIdx, idx);
-				break;
+				ret = entry.getKey();
+				done=true;
+			}
+			else if (entry.getValue() > possiblePrime)
+			{
+				done=true;
 			}
 		}
-		return searchResult;
+
+		return ret;
 	}
 
 	@Override
 	public Optional<PrimeRefIntfc> getPrimeRefForPrime(@Min(0) final long prime)
 	{
-		final var subsetAndOffset = primeToSubsetOffsetMap.get(prime);
-		return  subsetAndOffset == null ? Optional.empty() : getPrimeRefForIdx(subsetAndOffset.subset, subsetAndOffset.offset);
+		Optional<PrimeRefIntfc> ret = Optional.empty();
+		final var it = primeMap.entryIterator();
+		boolean done=false;
+		while (it.hasNext() && !done)
+		{
+			var entry = it.next();
+			if (entry.getValue() == prime)
+			{
+				ret = getPrimeRefForIdx(entry.getKey());
+				done=true;
+			}
+			else if (entry.getValue() > prime)
+			{
+				done=true;
+			}
+		}
+		return  ret;
 	}
 
 	@Override
 	public Optional<PrimeRefIntfc> getPrimeRefForPrime(@NonNull final LongSupplier longSupplier)
 	{
 		final long prime = longSupplier.getAsLong();
-		final var subsetAndOffset = primeToSubsetOffsetMap.get(prime);
-		return this.getPrimeRefForIdx(subsetAndOffset.subset, subsetAndOffset.offset);
+		return this.getPrimeRefForPrime(prime);
 	}
 
 	@Override
 	public Iterator<PrimeRefIntfc> getPrimeRefIter()
 	{
-		return new PrimeRefIterator(new PrimeRef(0,0));
+		return new PrimeRefIterator(new PrimeRef(0));
 	}
 
 	@Override
@@ -381,11 +282,6 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 		return new PrimeRefIterator(new PrimeRef(idx));
 	}
 
-	@Override
-	public Iterator<PrimeRefIntfc> getPrimeRefIter(@Min(0) final long subset, @Min(0) final int offset)
-	{
-		return new PrimeRefIterator(new PrimeRef(subset, offset));
-	}
 
 	@Override
 	public Stream<PrimeRefIntfc> getPrimeRefStream(final boolean preferParallel)
@@ -404,61 +300,39 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	@Override
 	public void init()
 	{
+
 		if (doInit.compareAndExchangeAcquire(false, true))
 		{
+			statusHandler.dbgOutput("PrimeSource::init - skipping redundant init.");
 			// Prevent double init - various valid combinations of code can attempt that.
 			return;
 		}
+		else
+		{
+			statusHandler.dbgOutput("PrimeSource::init");
+		}
 
-		// Random choice of index to check for existence of map entries
-		// created at a prior time.
-		var mapsUninitialized = primeToSubsetOffsetMap.get(17L) == null;
-
-		getPrimeRefStream(true).forEach
-			(
-				pRef ->
-					{
-						final long index = pRef.getPrimeRefIdx();
-
-						if (mapsUninitialized)
+		if (createBases)
+		{
+			getPrimeRefStream(true).forEach
+				(
+					pRef ->
 						{
-							this.updateMaps(index, pRef.getPrime());
-						}
+							final long index = pRef.getPrimeRefIdx();
 
-						if (index % 10000 == 0)
-						{
-							statusHandler.dbgOutput("PrimeSource::init - updated maps for index %d", index);
-						}
+							if (index % 10000 == 0)
+							{
+								statusHandler.dbgOutput("PrimeSource::init - generate bases for idx: [%d]", index);
+							}
 
-						if (createBases)
-						{
 							final var baseData = pRef.getPrimeBaseData();
 							if (baseData == null || baseData.getPrimeBases().isEmpty())
 							{
 								this.generateBases(index);
 							}
 						}
-					}
-			);
-
-		if (!createBases && prefixLoader != null)
-		{
-			prefixLoader.process();
+				);
 		}
-	}
-
-	public void updateMaps(@Min(0) final long index, @Min(1) final long prime)
-	{
-		final long [] retSubset = {-1};
-		final int [] retOffset = {-1};
-		idxMap.convertIdxToSubsetAndOffset(index, retSubset, retOffset);
-		updateMaps(retSubset[0], retOffset[0], prime);
-	}
-
-	private void updateMaps(@Min(0) final long subset, @Min(0) final int offset, @Min(1) final long newPrime)
-	{
-		primeToSubsetOffsetMap.put(newPrime, new SubsetOffsetMap(subset, offset));
-		db.commit();
 	}
 
 	@Override
@@ -469,23 +343,14 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	}
 
 	@Override
-	public void generateBases(final @Min(0) long primeSubset, final @Min(0) int primeOffset)
+	public void generateBases(final @Min(0) long primeIdx)
 	{
-		final var pRef = this.getPrimeRefForIdx(primeSubset, primeOffset);
+		final var pRef = this.getPrimeRefForIdx(primeIdx);
 		pRef.ifPresent(ref -> baseGenerators.forEach(bGen -> bGen.genBasesForPrimeRef(ref)) );
 
-		if (primeOffset % 10000 == 0)
+		if (primeIdx % 10000 == 0)
 		{
-			statusHandler.dbgOutput("baseSubset %d offset %d at %s", primeSubset, primeOffset, LocalTime.now().toString());
+			statusHandler.dbgOutput("prime Idx %d at %s", primeIdx, LocalTime.now().toString());
 		}
-	}
-
-	@Override
-	public void generateBases(final @Min(0) long index)
-	{
-		final long [] retSubset = {-1};
-		final int [] retOffset = {-1};
-		idxMap.convertIdxToSubsetAndOffset(index, retSubset, retOffset);
-		generateBases(retSubset[0], retOffset[0]);
 	}
 }

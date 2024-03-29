@@ -28,21 +28,18 @@ import org.eclipse.collections.api.multimap.ImmutableMultimap;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.jgrapht.event.GraphListener;
 import org.jgrapht.graph.DefaultEdge;
+import org.mapdb.BTreeMap;
+import org.mapdb.DB;
+import org.mapdb.DBMaker;
+import org.mapdb.Serializer;
 
 import com.starcases.prime.base.api.BaseProviderIntfc;
 import com.starcases.prime.base.api.BaseTypesProviderIntfc;
 import com.starcases.prime.base.api.LogPrimeDataProviderIntfc;
 import com.starcases.prime.base.impl.BaseTypes;
-import com.starcases.prime.cache.api.CacheProviderIntfc;
 import com.starcases.prime.cache.api.CachePrefixProviderIntfc;
-import com.starcases.prime.cache.api.PersistedCacheIntfc;
 import com.starcases.prime.cache.api.PersistedPrefixCacheIntfc;
-import com.starcases.prime.cache.api.persistload.PersistLoaderProviderIntfc;
-import com.starcases.prime.cache.api.persistload.PersistPrefixLoaderProviderIntfc;
 import com.starcases.prime.cache.api.primetext.PrimeTextFileLoaderProviderIntfc;
-import com.starcases.prime.cache.api.subset.PrefixSubsetProviderIntfc;
-import com.starcases.prime.cache.api.subset.PrimeSubsetProviderIntfc;
-import com.starcases.prime.cache.impl.prime.PrimeSubsetCacheImpl;
 import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceFactoryIntfc;
@@ -98,7 +95,10 @@ public class DefaultInit implements Runnable
 	/**
 	 * for matching output type names to base-type names
 	 */
-	private static Predicate2<BaseTypesIntfc, String> baseMatchPred = (base, outputType) -> base.name().equals(outputType);
+	private static final Predicate2<BaseTypesIntfc, String> baseMatchPred = (base, outputType) -> base.name().equals(outputType);
+
+
+	private static DB ptkDB;
 
 	/**
 	 * prime source - for prime/prime ref lookups
@@ -281,6 +281,13 @@ public class DefaultInit implements Runnable
 		return path.replaceFirst("^~", System.getenv("HOME"));
 	}
 
+	/**
+	 * Normalize the path and insert identification info into the filename.
+	 * @param base
+	 * @param fileName
+	 * @param extension
+	 * @return
+	 */
 	private Path decorateFileName(final String base, final String fileName, final String extension)
 	{
 		Path ret = null;
@@ -396,46 +403,30 @@ public class DefaultInit implements Runnable
 			// Create cache instance and if requested - clear out existing primes [persisted]; no in-memory primes should
 			// exist yet since we haven't loaded the raw primes nor have we tried to load persisted primes.
 			final String CACHE_NAME = "primes";
+
 			final String inputFolderPath = initOpts.getInputDataFolder();
-			final boolean loadRawPrimes = initOpts.isLoadPrimes();
-			final Path CACHE_PATH = Path.of(replaceTildeHome(initOpts.getOutputFolder()), CACHE_NAME);
-
-			final PersistedCacheIntfc<Long,Long> primeCache =
-				new SvcLoader<>(CacheProviderIntfc.class)
-					.provider(Lists.immutable.of("PRIME_CACHE_PROVIDER"))
-					.map(provider -> provider.create(CACHE_PATH, loadRawPrimes))/* clear any existing prime cache first */
-					.orElseThrow();
-
 			final var inputFoldExist = ensureFolderExist(inputFolderPath);
 
-			// Setup for persistent data load
-			final PrimeSubsetProviderIntfc primeSubsetProvider = new SvcLoader<PrimeSubsetProviderIntfc, Class<PrimeSubsetProviderIntfc>>(PrimeSubsetProviderIntfc.class)
-					.provider(Lists.immutable.of("PRIMESUBSET")).orElseThrow();
+			final Path homePath =  Path.of(replaceTildeHome(inputFolderPath)).getParent();
+			final Path dbPath = Path.of(homePath.normalize().toString(), "ptkdb.mapdb");
 
-			// Load previously persisted primes (primes previously cached - NOT the raw text prime data)
-			new SvcLoader< >(PersistLoaderProviderIntfc.class)
-				.provider(Lists.immutable.of("PERSISTLOADER", "PRIMES"))
-				.ifPresent(p -> p.create(primeCache, CACHE_PATH, primeSubsetProvider, null).process());
+			ptkDB = DBMaker
+		    .fileDB(dbPath.normalize().toString())
+		    .fileMmapEnable()            // Always enable mmap
+		    .fileMmapPreclearDisable()   // Make mmap file faster
+		    .allocateStartSize(5L * 1024 * 1024 * 1024) // 5 GB
+		    .allocateIncrement(1024L * 1024 * 1024) // 1 GB
+		    .checksumHeaderBypass()
+		    .make();
 
+			final boolean loadRawPrimes = initOpts.isLoadPrimes();
+			var primeCache = ptkDB
+								.treeMap(CACHE_NAME)
+								.keySerializer(Serializer.LONG)
+								.valueSerializer(Serializer.LONG)
+								.createOrOpen();
 
-			//
-			// Prefix setup
-			//
-
-			final SvcLoader<CachePrefixProviderIntfc, Class<CachePrefixProviderIntfc>> prefixCacheLoader =
-					new SvcLoader<>(CachePrefixProviderIntfc.class);
-
-			final String cacheNameForPrefixType = "PREFIX";
-			final Path cachePathForPrefixType = Path.of(replaceTildeHome(initOpts.getOutputFolder()), cacheNameForPrefixType);
-			ensureFolderExist(cachePathForPrefixType.toString());
-
-			final PersistedPrefixCacheIntfc prefixCache =
-					prefixCacheLoader
-					.provider(Lists.immutable.of("PREFIX_CACHE_PROVIDER"))
-					.map(provider -> provider.create(cachePathForPrefixType, false,0))/* clear any existing prefix cache first */
-					.orElseThrow();
-
-			if (loadRawPrimes && (primeCache.get(0L) == null))
+			if (loadRawPrimes)
 			{
 				if (LOG.isLoggable(Level.INFO))
 				{
@@ -449,10 +440,11 @@ public class DefaultInit implements Runnable
 				primePreloadProvider
 						.provider(Lists.immutable.of("PRELOADER"))
 						.map(p -> p.create(primeCache, Path.of(replaceTildeHome(inputFolderPath)), null).orElse(null))
-						.orElse(null);
-
-				primeSrc = getPrimeSource(primeCache, cachePathForPrefixType, prefixCache);
-				primeCache.unwrap(PrimeSubsetCacheImpl.class).persistAll();
+						.ifPresentOrElse(
+								 preloader -> 	{
+									 				LOG.fine("Raw source primes loaded.");
+								 				}
+								, () -> LOG.warning("No Prime Raw Text preloader found."));
 			}
 			else
 			{
@@ -460,13 +452,15 @@ public class DefaultInit implements Runnable
 				{
 					LOG.info(String.format("CREATING PrimeSrc: NOT loading Cache ; Input folder exists: [%b], do-load-raw-primes[%b]", inputFoldExist, loadRawPrimes));
 				}
-
-				primeSrc = getPrimeSource(primeCache, cachePathForPrefixType, prefixCache);
 			}
+
+			primeSrc = getPrimeSource(primeCache);
+
+			System.out.println(String.format("***** Prime for index 4: [%d]", primeSrc.getPrimeForIdx(4L).orElse(-1)));
 		});
 	}
 
-	private PrimeSourceFactoryIntfc getPrimeSource(@NonNull final PersistedCacheIntfc<Long,Long> primeCache, final Path prefixBaseCachePath, final PersistedPrefixCacheIntfc prefixCache)
+	private PrimeSourceFactoryIntfc getPrimeSource(@NonNull final BTreeMap<Long, Long> primeCache)
 	{
 		final Consumer<PrimeSourceIntfc> c = PrimeRef::setPrimeSource;
 		final ImmutableList<Consumer<PrimeSourceIntfc>> consumers = Lists.immutable.of(c);
@@ -477,16 +471,7 @@ public class DefaultInit implements Runnable
 				, f
 				,collTracker
 				,primeCache
-				,prefixCache
 				);
-
-		final PrefixSubsetProviderIntfc prefixSubsetProvider = new SvcLoader<PrefixSubsetProviderIntfc, Class<PrefixSubsetProviderIntfc>>(PrefixSubsetProviderIntfc.class)
-				.provider(Lists.immutable.of("PREFIX_SUBSET")).orElseThrow();
-
-		final SvcLoader<PersistPrefixLoaderProviderIntfc, Class<PersistPrefixLoaderProviderIntfc>> prefixBaseProvider = new SvcLoader< >(PersistPrefixLoaderProviderIntfc.class);
-		Optional<PersistPrefixLoaderProviderIntfc> bp = prefixBaseProvider.provider(Lists.immutable.of("PERSISTLOADER", "PREFIXES"));
-		bp.ifPresentOrElse( prov -> pSrc.setPrefixLoader(prov.create(prefixCache, prefixBaseCachePath, prefixSubsetProvider, null)),
-							() -> Logger.getGlobal().fine("No Persistent loader for PREFIX base."));
 
 		return pSrc;
 	}

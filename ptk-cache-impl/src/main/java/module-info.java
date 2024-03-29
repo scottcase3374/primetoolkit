@@ -15,6 +15,7 @@ module com.starcases.prime.cache.impl
 	requires transitive org.eclipse.collections.api;
 	requires com.beanit.asn1bean;
 	requires org.eclipse.collections.impl;
+	requires mapdb;
 
 	//provides javax.cache.CacheManager 													with com.starcases.prime.cache.impl.prime.PrimeCacheProvider;
 

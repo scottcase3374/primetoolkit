@@ -20,9 +20,9 @@ class BasePrefixes extends AbsPrimeBaseGen
 	 * constructor for creation of Base prefixes.
 	 * @param primeSrc
 	 */
-	public BasePrefixes(@NonNull final BaseTypesIntfc baseType, PersistedPrefixCacheIntfc cache)
+	public BasePrefixes(@NonNull final BaseTypesIntfc baseType)
 	{
-		super(baseType, cache);
+		super(baseType);
 	}
 
 	/**

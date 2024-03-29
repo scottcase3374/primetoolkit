@@ -26,8 +26,7 @@ public class PrefixProvider implements BaseProviderIntfc
 	@Override
 	public BaseGenFactoryIntfc create(final ImmutableMap<String,Object> settings)
 	{
-		final PersistedPrefixCacheIntfc cache = (PersistedPrefixCacheIntfc) settings.get("BASES_CACHE");
-		return new BasePrefixes(PrefixBaseType.PREFIX, cache);
+		return new BasePrefixes(PrefixBaseType.PREFIX);
 	}
 
 	/**

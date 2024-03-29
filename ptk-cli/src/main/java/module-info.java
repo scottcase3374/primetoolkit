@@ -21,6 +21,7 @@ open module com.starcases.prime.cli
 	requires transitive org.eclipse.collections.api;
 	requires org.eclipse.collections.impl;
 	requires org.jgrapht.core;
+	requires mapdb;
 
 	uses com.starcases.prime.cache.api.CachePrefixProviderIntfc;
 	uses com.starcases.prime.base.api.BaseTypesProviderIntfc;

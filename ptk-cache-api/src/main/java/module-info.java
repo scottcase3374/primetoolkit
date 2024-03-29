@@ -10,4 +10,5 @@ module com.starcases.prime.cache.api
 	requires transitive cache.api;
 	requires static lombok;
 	requires transitive org.eclipse.collections.api;
+	requires mapdb;
 }

@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 import org.eclipse.collections.api.map.ImmutableMap;
+import org.mapdb.BTreeMap;
 
 import com.starcases.prime.cache.api.PersistedCacheIntfc;
 import com.starcases.prime.service.api.SvcProviderBaseIntfc;
@@ -12,5 +13,5 @@ import lombok.NonNull;
 
 public interface PrimeTextFileLoaderProviderIntfc extends SvcProviderBaseIntfc
 {
-	Optional<PrimeTextFileloaderIntfc> create(@NonNull final PersistedCacheIntfc<Long,Long> cache, @NonNull final Path path, final ImmutableMap<String,Object> settings);
+	Optional<PrimeTextFileloaderIntfc> create(@NonNull final BTreeMap<Long, Long>  cache, @NonNull final Path path, final ImmutableMap<String,Object> settings);
 }
