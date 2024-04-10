@@ -82,4 +82,20 @@ class InitOpts
 	@Setter
 	@Option(names = {"--load-primes"},  description = "Load and cache raw primes from files", required = false)
 	private boolean loadPrimes;
+
+	/**
+	 * flag for enabling listening for remote commands based on a SQL like grammar.
+	 */
+	@Getter
+	@Setter
+	@Option(names = {"--enable-cmd-listener"}, description = "Listen for remote commands", required = false)
+	private boolean enableCmmandListener;
+
+	/**
+	 * flag for setting port of command listener (which processes SQL-like commands, etc).
+	 */
+	@Getter
+	@Setter
+	@Option(names = {"--cmd-listener-port"}, description = "Port for the command (SQL) listener", defaultValue = "8690", required = false )
+	private int cmdListenerPort;
 }

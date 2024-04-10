@@ -102,19 +102,6 @@ public interface PrimeSourceIntfc
 	Optional<PrimeRefIntfc> getPrimeRefCeiling(@NonNull final long value, final PrimeRefIntfc highPrime);
 
 	long searchPrime(final long val);
-	/**
-	 *
-	 * @param nextPrimeIdx
-	 * @param newPrime
-	 * @param defaultBase
-	 * @return
-	 */
-	PrimeRefFactoryIntfc addPrimeRef(
-			@Min(0) final long nextPrimeIdx,
-			@Min(1) final long newPrime
-			);
 
-	void generateBases(
-			@Min(0) final long index
-			);
+
 }

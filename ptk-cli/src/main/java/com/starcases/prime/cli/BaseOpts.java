@@ -42,20 +42,12 @@ class BaseOpts
 	private boolean useBaseFile;
 
 	/**
-	 * flag for enabling listening for remote commands based on a SQL like grammar.
+	 * flag indicating whether to create bases
 	 */
 	@Getter
 	@Setter
-	@Option(names = {"--enable-cmd-listener"}, description = "Listen for remote commands", required = false)
-	private boolean enableCmmandListener;
-
-	/**
-	 * flag for setting port of command listener (which processes SQL-like commands, etc).
-	 */
-	@Getter
-	@Setter
-	@Option(names = {"--cmd-listener-port"}, description = "Port for the command (SQL) listener", defaultValue = "8690", required = false )
-	private int cmdListenerPort;
+	@Option(names = {"--create-bases"}, description = "Create bases if they don't exist", required = false)
+	private boolean createBases;
 
 	/**
 	 * Get bases to process

@@ -57,6 +57,13 @@ public interface PrimeBaseIntfc
 	void addPrimeBases(long primeIdx, @NonNull ImmutableLongCollection primeBase, @NonNull BaseTypesIntfc baseType);
 
 	/**
+	 * Add array of primes for specified base.
+	 * @param primeBase
+	 * @param baseType
+	 */
+	void addPrimeBases(long primeIdx, @NonNull long[] primeBase, @NonNull BaseTypesIntfc baseType);
+
+	/**
 	 * Get the base meta data container for the specified base type.
 	 * @param baseType
 	 * @return

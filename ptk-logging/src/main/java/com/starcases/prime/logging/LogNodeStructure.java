@@ -1,5 +1,6 @@
 package com.starcases.prime.logging;
 
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -51,41 +52,12 @@ public class LogNodeStructure extends AbstractPrimeBaseLog
 		primeIt.forEachRemaining(
 				primeRef ->
 					{
-						// A good question is the effect of moving this out of
-						// this block and into the outer block of the method.
-						// That implies same string builder is used and
-						// any memory allocations made would remain for each
-						// of the iterations that follow.  Would that
-						// improve speed by reducing memory allocation or
-						// possible have little effect.  May reduce garbage
-						// generated but maybe other consequences.
-						final var outputStr = new StringBuilder("\t");
-
-						final long [] cnt = {0};
 						statusHandler.output(String.format("%nPrime [%d] idx[%d]",
 								primeRef.getPrime(),
 								idx[0]++
 								));
 
-						primeRef
-							.getPrimeBaseData()
-							.getPrimeBases()
-							.collect(p -> p.makeString("[", ",", "]"))
-							.forEach( s ->
-										{
-											cnt[0]++;
-											outputStr.append(s);
-											if (cnt[0] % 5 == 0 || cnt[0] >= primeRef.getPrimeBaseData().getPrimeBases().get(0).size())
-											{
-												statusHandler.output( "\t%s", outputStr);
-												outputStr.setLength(0);
-											}
-											else
-											{
-												outputStr.append(',');
-											}
-										}
-									);
+						statusHandler.output( "\t%s", Arrays.toString(primeRef.getPrimeBases()));
 					});
 	}
 }

@@ -1,16 +1,22 @@
 package com.starcases.prime.core.impl;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.logging.Logger;
+
+import org.eclipse.collections.api.LongIterable;
+import org.eclipse.collections.api.map.MutableMap;
+import org.eclipse.collections.impl.map.mutable.MutableMapFactoryImpl;
+import org.mapdb.BTreeMap;
 
 import com.starcases.prime.base.api.PrimeBaseIntfc;
-import com.starcases.prime.base.impl.PrimeMultiBaseContainer;
+import com.starcases.prime.base.impl.BaseTypes;
 import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
+import com.starcases.prime.kern.api.BaseTypesIntfc;
 
 import lombok.NonNull;
 
@@ -23,20 +29,17 @@ import lombok.NonNull;
 **/
 public class PrimeRef implements PrimeRefFactoryIntfc
 {
-	private static final Logger LOG = Logger.getLogger(PrimeRef.class.getName());
-
 	/**
 	 * Access lookup for prime/primeRefs
 	 */
 	@NonNull
 	private static PrimeSourceIntfc primeSrc;
 
+	private static MutableMap<BaseTypesIntfc, BTreeMap<Long, long[]>> primeBases = MutableMapFactoryImpl.INSTANCE.empty();
+
 	private final long primeIdx;
 
-	/**
-	 * Base data
-	 */
-	private PrimeBaseIntfc primeBaseData = new PrimeMultiBaseContainer();
+
 
 	/**
 	 * Handle simple Prime where the base is simply itself - i.e. 1, 2
@@ -47,15 +50,6 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	public PrimeRef(final long primeIdx)
 	{
 		this.primeIdx = primeIdx;
-	}
-
-	public PrimeRef(
-			final long primeIdx
-			,@NonNull final Supplier<PrimeBaseIntfc> primeBaseSupplier
-		)
-	{
-		this(primeIdx);
-		primeBaseData = primeBaseSupplier.get();
 	}
 
 	/**
@@ -69,8 +63,23 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 			 @NonNull final Supplier<PrimeBaseIntfc> primeBaseSupplier
 			)
 	{
-		primeBaseData = primeBaseSupplier.get();
 		return this;
+	}
+
+
+	/**
+	 * For DEFAULT base type
+	 */
+	@Override
+	public long[] getPrimeBases()
+	{
+		return getPrimeBases(BaseTypes.DEFAULT);
+	}
+
+	@Override
+	public long[] getPrimeBases(@NonNull final BaseTypesIntfc baseType)
+	{
+		return primeBases.get(baseType).get(this.primeIdx);
 	}
 
 	@Override
@@ -78,12 +87,6 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	{
 		basesGenerate.accept(this);
 		return this;
-	}
-
-	@Override
-	public PrimeBaseIntfc getPrimeBaseData()
-	{
-		return primeBaseData;
 	}
 
 	/**
@@ -162,6 +165,13 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 		return result.isPresent() ? OptionalLong.of(result.get().getPrime() - getPrime()) : OptionalLong.empty();
 	}
 
+
+	@Override
+	public void addPrimeBases(@NonNull final BaseTypesIntfc baseType, @NonNull final LongIterable primeBase)
+	{
+		primeBases.get(baseType).computeIfAbsent(this.primeIdx, (k) -> primeBase.toArray());
+	}
+
 	@Override
 	public String toString()
 	{
@@ -188,5 +198,10 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 		}
 		PrimeRef other = (PrimeRef) obj;
 		return primeIdx == other.primeIdx;
+	}
+
+	public static void setPrimeBases(BaseTypesIntfc baseType, BTreeMap<Long, long[]> primeBase)
+	{
+		primeBases.putIfAbsent(baseType, primeBase);
 	}
 }

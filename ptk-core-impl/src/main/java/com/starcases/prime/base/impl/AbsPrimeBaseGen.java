@@ -6,19 +6,16 @@ import java.util.OptionalLong;
 
 import org.eclipse.collections.api.factory.primitive.LongLists;
 import org.eclipse.collections.api.list.MutableList;
-import org.eclipse.collections.api.list.primitive.ImmutableLongList;
 import org.eclipse.collections.api.list.primitive.MutableLongList;
 import org.eclipse.collections.impl.list.mutable.MutableListFactoryImpl;
 
 import com.starcases.prime.base.api.BaseGenFactoryIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
-import com.starcases.prime.kern.api.BaseTypesIntfc;
 import com.starcases.prime.kern.api.Permutation;
 
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.NonNull;
 
 /**
  *
@@ -27,11 +24,9 @@ import lombok.NonNull;
  */
 public abstract class AbsPrimeBaseGen implements BaseGenFactoryIntfc
 {
+	private int MAX_PRIME_BITS = 64;
+
 	protected MutableList<Long[]> subsetColl = MutableListFactoryImpl.INSTANCE.empty();
-
-	@Getter
-	private final BaseTypesIntfc baseType;
-
 
 	/**
 	 * Access to lookup of prime/primerefs and the init of base information.
@@ -55,9 +50,8 @@ public abstract class AbsPrimeBaseGen implements BaseGenFactoryIntfc
 	 * Constructor for secondary bases.
 	 * @param primeSrc
 	 */
-	protected AbsPrimeBaseGen(@NonNull final BaseTypesIntfc baseType)
+	protected AbsPrimeBaseGen()
 	{
-		this.baseType = baseType;
 	}
 
 	/**
@@ -79,7 +73,7 @@ public abstract class AbsPrimeBaseGen implements BaseGenFactoryIntfc
 		return this;
 	}
 
-	protected ImmutableLongList findPrefixes2(final PrimeRefIntfc curPrime)
+	protected MutableLongList findPrefixes2(final PrimeRefIntfc curPrime)
 	{
 		final MutableLongList bases = LongLists.mutable.of();
 
@@ -118,14 +112,7 @@ public abstract class AbsPrimeBaseGen implements BaseGenFactoryIntfc
 			}
 		}
 
-		var immutBases = bases.toImmutable();
-		cacheBase(curPrime, bases);
-		return immutBases;
-	}
-
-	private void cacheBase(final PrimeRefIntfc curPrime, final MutableLongList bases)
-	{
-
+		return bases;
 	}
 
 	/**
@@ -134,7 +121,7 @@ public abstract class AbsPrimeBaseGen implements BaseGenFactoryIntfc
 	 * @param tgtPrime
 	 * @return
 	 */
-	protected ImmutableLongList findPrefixesLowFirst(final PrimeRefIntfc tgtPrime)
+	protected MutableLongList findPrefixesLowFirst(final PrimeRefIntfc tgtPrime)
 	{
 		final MutableLongList bases = LongLists.mutable.of();
 
@@ -151,7 +138,6 @@ public abstract class AbsPrimeBaseGen implements BaseGenFactoryIntfc
 
 			// n-bit permutation starting with value of 0
 			final var primeIndexPermutation = new BitSet();
-
 			boolean done = false;
 			do
 			{
@@ -175,22 +161,26 @@ public abstract class AbsPrimeBaseGen implements BaseGenFactoryIntfc
 				}
 				else
 				{
-					if (primeIndexPermutation.size() <= 62)
+					if (primeIndexPermutation.length() <= MAX_PRIME_BITS)
 					{
 						Permutation.incrementPermutation(primeIndexPermutation);
 					}
-					else
+					else // ensure we don't increment forever
 					{
-						// ensure we don't increment forever
+						System.out.println(String
+								.format("findPrefixesLowFirst [incomplete bases] - tgtIdx: %d tgtPrime: %d perm-sum: %d, remain: %d, permutation: %s",
+										tgtPrime.getPrimeRefIdx(),
+										tgtPrime.getPrime(),
+										permutationSum,
+										remain,
+										primeIndexPermutation.toString()));
+
 						done = true;
 					}
 				}
 			}
 			while (!done);
 		}
-
-		var immutBases = bases.toImmutable();
-		cacheBase(tgtPrime, bases);
-		return immutBases;
+		return bases;
 	}
 }

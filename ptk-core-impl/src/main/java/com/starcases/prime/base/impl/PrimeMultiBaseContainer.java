@@ -9,11 +9,7 @@ import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 
 import com.starcases.prime.base.api.BaseMetadataIntfc;
 import com.starcases.prime.base.api.PrimeBaseIntfc;
-import com.starcases.prime.cache.api.PersistedPrefixCacheIntfc;
-import com.starcases.prime.kern.api.Arrays;
 import com.starcases.prime.kern.api.BaseTypesIntfc;
-import com.starcases.prime.kern.api.IdxToSubsetMapperIntfc;
-import com.starcases.prime.kern.impl.IdxToSubsetMapperImpl;
 
 import jakarta.validation.constraints.Min;
 import lombok.AccessLevel;
@@ -33,11 +29,6 @@ public class PrimeMultiBaseContainer implements PrimeBaseIntfc
 	 */
 	@NonNull
 	private final Map<BaseTypesIntfc, MutableList<ImmutableLongCollection>> primeBases = new ConcurrentHashMap<>();
-
-
-
-	private static final IdxToSubsetMapperIntfc idxMap = new IdxToSubsetMapperImpl();
-	private long primeIdx;
 
 	/**
 	 * Optional Metadata regarding base types of interest
@@ -73,7 +64,7 @@ public class PrimeMultiBaseContainer implements PrimeBaseIntfc
 						v.addAll(primeBase);
 						return v;
 					});
-		this.primeIdx = primeIdx;
+		//this.primeIdx = primeIdx;
 		this.baseMetadata.computeIfAbsent(baseType, a -> baseMetadata);
 	}
 
@@ -91,7 +82,7 @@ public class PrimeMultiBaseContainer implements PrimeBaseIntfc
 						v.add(primeBase);
 						return v;
 					});
-		this.primeIdx = primeIdx;
+		//this.primeIdx = primeIdx;
 
 	}
 
@@ -125,11 +116,18 @@ public class PrimeMultiBaseContainer implements PrimeBaseIntfc
 	{
 		MutableList<ImmutableLongCollection> ret = null;
 
-		var cachedResult = primeBases.get(primeIdx);
-		if (cachedResult != null)
-		{
-			ret = cachedResult;
-		}
+//		var cachedResult = primeBases.get(primeIdx);
+//		if (cachedResult != null)
+//		{
+//			ret = cachedResult;
+//		}
 		return ret != null ? ret : primeBases.getOrDefault(baseType, MutableListFactoryImpl.INSTANCE.empty());
+	}
+
+	@Override
+	public void addPrimeBases(long primeIdx, @NonNull long[] primeBase, @NonNull BaseTypesIntfc baseType)
+	{
+		// TODO Auto-generated method stub
+
 	}
 }

@@ -1,11 +1,10 @@
 package com.starcases.prime.base.primetree.impl;
 
 import org.eclipse.collections.api.list.primitive.ImmutableLongList;
-import org.eclipse.collections.impl.list.mutable.MutableListFactoryImpl;
 
 import com.starcases.prime.base.api.BaseGenFactoryIntfc;
 import com.starcases.prime.base.impl.AbsPrimeBaseGen;
-import com.starcases.prime.core.api.PrimeRefIntfc;
+import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
 import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
 import com.starcases.prime.kern.api.BaseTypesIntfc;
 
@@ -35,9 +34,9 @@ class PrimeTree extends AbsPrimeBaseGen
 	 * @param primeSrc
 	 * @param collectionTracker
 	 */
-	public PrimeTree(@NonNull final BaseTypesIntfc baseType, @NonNull final CollectionTrackerIntfc collectionTracker)
+	public PrimeTree(@NonNull final CollectionTrackerIntfc collectionTracker)
 	{
-		super(baseType);
+		super();
 		this.collectionTracker = collectionTracker;
 	}
 
@@ -45,7 +44,7 @@ class PrimeTree extends AbsPrimeBaseGen
 	 * Generate bases for defined base types for the specified prime.
 	 */
 	@Override
-	public void genBasesForPrimeRef(final PrimeRefIntfc curPrime)
+	public void genBasesForPrimeRef(final PrimeRefFactoryIntfc curPrime)
 	{
 		final var bases = findPrefixesLowFirst(curPrime);
 		final ImmutableLongList curPrimePrefixBases = bases.toList().toImmutable();
@@ -57,7 +56,7 @@ class PrimeTree extends AbsPrimeBaseGen
 				curPrefixIt.add(prime);
 			});
 
-		curPrime.getPrimeBaseData().addPrimeBases(curPrime.getPrimeRefIdx(), MutableListFactoryImpl.INSTANCE.of(curPrefixIt.toCollection()), PrimeTreeBaseType.PRIME_TREE);
+		curPrime.addPrimeBases(getBaseType(), curPrefixIt.toCollection());
 	}
 
 	/**
@@ -71,5 +70,11 @@ class PrimeTree extends AbsPrimeBaseGen
 	{
 		this.preferParallel = false;
 		return this;
+	}
+
+	@Override
+	public BaseTypesIntfc getBaseType()
+	{
+		return PrimeTreeBaseType.PRIME_TREE;
 	}
 }

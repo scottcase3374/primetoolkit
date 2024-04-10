@@ -25,7 +25,7 @@ public class TriplengProvider implements BaseProviderIntfc
 	@Override
 	public BaseGenFactoryIntfc create(final ImmutableMap<String,Object> settings)
 	{
-		return new BaseReduceTripleng(TriplengBaseType.TRIPLENG);
+		return new BaseReduceTripleng();
 	}
 
 	/**

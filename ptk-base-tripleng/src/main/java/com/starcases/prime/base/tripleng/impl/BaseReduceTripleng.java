@@ -6,6 +6,7 @@ import org.eclipse.collections.api.list.primitive.ImmutableLongList;
 import org.eclipse.collections.impl.list.immutable.primitive.ImmutableLongListFactoryImpl;
 
 import com.starcases.prime.base.impl.AbsPrimeBaseGen;
+import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.kern.api.BaseTypesIntfc;
 
@@ -65,9 +66,9 @@ class BaseReduceTripleng extends AbsPrimeBaseGen
 	 *
 	 * @param primeSrc
 	 */
-	public BaseReduceTripleng(@NonNull final BaseTypesIntfc baseType)
+	public BaseReduceTripleng()
 	{
-		super(baseType);
+		super();
 	}
 
 	private boolean adjustIndexes(@NonNull final long [] lowIdx, @NonNull final long [] mediumIdx, @NonNull final long [] highIdx)
@@ -96,7 +97,7 @@ class BaseReduceTripleng extends AbsPrimeBaseGen
 	 * Generate base for specified prime
 	 */
 	@Override
-	public void genBasesForPrimeRef(@NonNull final PrimeRefIntfc curPrime)
+	public void genBasesForPrimeRef(@NonNull final PrimeRefFactoryIntfc curPrime)
 	{
 		final long [] lowIdx = {-1};
 		final long [] mediumIdx = {0};
@@ -127,9 +128,15 @@ class BaseReduceTripleng extends AbsPrimeBaseGen
 		}
 	}
 
-	private void addPrimeBases(@NonNull final PrimeRefIntfc prime, @NonNull final ImmutableLongList triple)
+	private void addPrimeBases(@NonNull final PrimeRefFactoryIntfc prime, @NonNull final ImmutableLongList triple)
 	{
 //		cache.ifPresent(c -> c.put(prime.getPrime(), triple.toArray()));
-		prime.getPrimeBaseData().addPrimeBases(prime.getPrimeRefIdx(), triple, TriplengBaseType.TRIPLENG);
+		prime.addPrimeBases(getBaseType(), triple);
+	}
+
+	@Override
+	public BaseTypesIntfc getBaseType()
+	{
+		return TriplengBaseType.TRIPLENG;
 	}
 }

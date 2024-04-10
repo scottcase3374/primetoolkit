@@ -12,6 +12,7 @@ import org.eclipse.collections.impl.bag.mutable.primitive.MutableLongBagFactoryI
 import org.eclipse.collections.impl.list.mutable.MutableListFactoryImpl;
 
 import com.starcases.prime.base.impl.AbsPrimeBaseGen;
+import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.kern.api.BaseTypesIntfc;
 
@@ -84,7 +85,6 @@ class BaseReduceNPrime extends AbsPrimeBaseGen
 		MutableLongCollection subBases = MutableLongBagFactoryImpl.INSTANCE.empty();
 
 		primeRef
-			.getPrimeBaseData()
 			.getPrimeBases()
 			.flatCollectLong(c -> c, bases)
 			;
@@ -103,7 +103,6 @@ class BaseReduceNPrime extends AbsPrimeBaseGen
 						.getPrimeRefForPrime(l)
 						.ifPresent(b1 ->
 								b1
-								.getPrimeBaseData()
 								.getPrimeBases()
 								.flatCollectLong(c1 -> c1, tmpSubBases)
 						  ));
@@ -117,7 +116,7 @@ class BaseReduceNPrime extends AbsPrimeBaseGen
 	}
 
 	@Override
-	public void genBasesForPrimeRef(@NonNull final PrimeRefIntfc curPrime)
+	public void genBasesForPrimeRef(@NonNull final PrimeRefFactoryIntfc curPrime)
 	{
 		final MutableLongBag retBases = MutableLongBagFactoryImpl.INSTANCE.empty();
 		primeReduction(curPrime, retBases);
@@ -125,7 +124,6 @@ class BaseReduceNPrime extends AbsPrimeBaseGen
 		final NPrimeBaseMetadata npbmd = new NPrimeBaseMetadata(retBases.toImmutable());
 
 		curPrime
-			.getPrimeBaseData()
 			.addPrimeBases(curPrime.getPrimeRefIdx(), NPrimeBaseType.NPRIME, lst, npbmd);
 	}
 }

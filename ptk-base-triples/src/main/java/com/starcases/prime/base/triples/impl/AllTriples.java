@@ -12,6 +12,7 @@ import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
 
 import org.eclipse.collections.impl.factory.Sets;
 
+import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
 
@@ -108,17 +109,17 @@ public class AllTriples
 		}
 	}
 
-	private Stream<PrimeRefIntfc[]> tripleStream()
+	private Stream<PrimeRefFactoryIntfc[]> tripleStream()
 	{
 		final long [] indices = {TripleMember.BOT.ordinal(), TripleMember.MID.ordinal(), TripleMember.TOP.ordinal()};
-		final PrimeRefIntfc [] triple = {null, null, null};
+		final PrimeRefFactoryIntfc [] triple = {null, null, null};
 
 		return Stream.generate(
 				() ->
 				{
 					incrementIndices(indices);
 					Arrays.stream(TripleMember.values())
-					.forEach( memberIdx -> triple[memberIdx.ordinal()] = primeSrc.getPrimeRefForIdx(indices[memberIdx.ordinal()]).orElse(null));
+					.forEach( memberIdx -> triple[memberIdx.ordinal()] = (PrimeRefFactoryIntfc) primeSrc.getPrimeRefForIdx(indices[memberIdx.ordinal()]).orElse(null));
 					return triple;
 				}
 			);
@@ -140,14 +141,14 @@ public class AllTriples
 
 							primeSrc
 								.getPrimeRefForPrime(() -> sumTriple.apply(triple))
-								.ifPresent(prim -> addPrimeBases(prim, triple))
+								.ifPresent(prim -> addPrimeBases((PrimeRefFactoryIntfc)prim, triple))
 
 					);
 	}
 
-	private void addPrimeBases(final @NonNull PrimeRefIntfc prime, final @NonNull PrimeRefIntfc [] triple)
+	private void addPrimeBases(final @NonNull PrimeRefFactoryIntfc prime, final @NonNull PrimeRefFactoryIntfc [] triple)
 	{
 		final ImmutableLongCollection primeBase = Sets.immutable.of(triple).collectLong(PrimeRefIntfc::getPrime);
-		prime.getPrimeBaseData().addPrimeBases(prime.getPrimeRefIdx(), primeBase, TripleBaseType.TRIPLE);
+		prime.addPrimeBases(TripleBaseType.TRIPLE, primeBase);
 	}
 }

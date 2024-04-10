@@ -57,40 +57,36 @@ class LogBases3AllTripleng  extends AbstractPrimeBaseLog
 		primeSrc
 			.getPrimeRefStream(5L, false)
 			.forEach( primeRef ->
-
-				Optional.ofNullable(primeRef.getPrimeBaseData())
-					.ifPresent(pb ->
 					{
-						final var size = pb.getPrimeBases(TriplengBaseType.TRIPLENG).size();
-						statusHandler.output(TriplengBaseType.TRIPLENG,
-							String.format("%nPrime [%d] idx[%d] #-bases[%d]",
-								primeRef.getPrime(),
-								idx[0]++,
-								size
-								));
-
-						final long [] cnt = {0};
-						final StringBuilder outputStr = new StringBuilder(150);
-						primeRef
-							.getPrimeBaseData()
-							.getPrimeBases(TriplengBaseType.TRIPLENG)
-							.forEach( baseColl ->
-										{
-											cnt[0]++;
-											outputStr.append(baseColl.makeString("[", ",", "]"));
-											if (cnt[0] < size)
-											{
-												outputStr.append(", ");
-											}
-
-											if (cnt[0] % maxBasesInRow == 0 || cnt[0] >= size)
-											{
-												statusHandler.output(TriplengBaseType.TRIPLENG, "\t%s", outputStr);
-												outputStr.setLength(0);
-											}
-										}
-									);
-								})
-						);
+//						final var size = primeRef.getPrimeBases(TriplengBaseType.TRIPLENG).length;
+//						statusHandler.output(TriplengBaseType.TRIPLENG,
+//							String.format("%nPrime [%d] idx[%d] #-bases[%d]",
+//								primeRef.getPrime(),
+//								idx[0]++,
+//								size
+//								));
+//
+//						final long [] cnt = {0};
+//						final StringBuilder outputStr = new StringBuilder(150);
+//						primeRef
+//							.getPrimeBases(TriplengBaseType.TRIPLENG)
+//							.forEach( baseColl ->
+//										{
+//											cnt[0]++;
+//											outputStr.append(baseColl.makeString("[", ",", "]"));
+//											if (cnt[0] < size)
+//											{
+//												outputStr.append(", ");
+//											}
+//
+//											if (cnt[0] % maxBasesInRow == 0 || cnt[0] >= size)
+//											{
+//												statusHandler.output(TriplengBaseType.TRIPLENG, "\t%s", outputStr);
+//												outputStr.setLength(0);
+//											}
+//										}
+//									);
+					} )
+						;
 	}
 }

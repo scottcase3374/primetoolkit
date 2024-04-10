@@ -5,7 +5,7 @@ import java.util.logging.Level;
 import org.eclipse.collections.api.factory.Lists;
 
 import com.starcases.prime.base.api.BaseGenIntfc;
-import com.starcases.prime.core.api.PrimeRefIntfc;
+import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
 import com.starcases.prime.kern.api.BaseTypesIntfc;
 import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
 import com.starcases.prime.kern.api.StatusHandlerIntfc;
@@ -42,7 +42,7 @@ public class BaseGenTimerMetricDecor  implements BaseGenIntfc
 	 * Wrapper bases generation with metric timer
 	 */
 	@Override
-	public void genBasesForPrimeRef(@NonNull final PrimeRefIntfc curPrime)
+	public void genBasesForPrimeRef(@NonNull final PrimeRefFactoryIntfc curPrime)
 	{
 		try (MetricIntfc metric = metricProvider.timer(base, "BASES_GEN", base.toString()))
 		{

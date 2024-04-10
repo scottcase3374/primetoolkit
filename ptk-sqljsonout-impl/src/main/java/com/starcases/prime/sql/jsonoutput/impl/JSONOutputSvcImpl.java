@@ -20,7 +20,7 @@ import lombok.NonNull;
 
 public class JSONOutputSvcImpl implements OutputServiceIntfc
 {
-	private static final Object[] EMPTY_ARRAY = {};
+	private static final long[] EMPTY_ARRAY = {};
 	private static final ImmutableList<BaseTypesIntfc> BASE_TYPES =
 			new SvcLoader<BaseTypesProviderIntfc, Class<BaseTypesProviderIntfc>>(BaseTypesProviderIntfc.class)
 				.provider( Lists.immutable.of("GLOBAL_BASE_TYPES"))
@@ -52,7 +52,7 @@ public class JSONOutputSvcImpl implements OutputServiceIntfc
 			)
 	{
 		try
-		{
+		{			
 			final ExclFieldNameStrategy excludes = new ExclFieldNameStrategy();
 			excludeFields.forEach(excludes::addExcludedField);
 			System.out.println("JSON Output - basetype " + baseType);
@@ -66,13 +66,13 @@ public class JSONOutputSvcImpl implements OutputServiceIntfc
 								pRef.getPrimeRefIdx(),
 								pRef.getPrime(),
 								baseType != null
-									? pRef.getPrimeBaseData()
+									? pRef
 										.getPrimeBases(BASE_TYPES.select(base -> base.name().equals(baseType)).getOnly())
-										.stream()
+										//.stream()
 										// Filter tuples out of bases for each matched prime which where tuple doesn't meet the match criteria
-										.filter(baseFilter)
-										.map(lc -> lc.toArray())
-										.toArray()
+										//.filter(baseFilter)
+										//.map(lc -> lc.toArray())
+										//.toArray()
 									: EMPTY_ARRAY))
 						.toArray()));
 		}

@@ -10,6 +10,7 @@ module com.starcases.prime.base.prefix.impl
 	requires java.logging;
 	requires static lombok;
 	requires transitive org.eclipse.collections.api;
+	requires mapdb;
 
 	provides com.starcases.prime.base.api.BaseTypesProviderIntfc with com.starcases.prime.base.prefix.impl.PrefixBaseTypeProvider;
 	provides com.starcases.prime.base.api.BaseProviderIntfc with com.starcases.prime.base.prefix.impl.PrefixProvider;

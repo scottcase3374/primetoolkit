@@ -9,6 +9,7 @@ import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -24,8 +25,10 @@ import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.factory.Maps;
 import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.map.ImmutableMap;
+import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.api.multimap.ImmutableMultimap;
 import org.eclipse.collections.impl.list.mutable.FastList;
+import org.eclipse.collections.impl.map.mutable.MutableMapFactoryImpl;
 import org.jgrapht.event.GraphListener;
 import org.jgrapht.graph.DefaultEdge;
 import org.mapdb.BTreeMap;
@@ -37,8 +40,6 @@ import com.starcases.prime.base.api.BaseProviderIntfc;
 import com.starcases.prime.base.api.BaseTypesProviderIntfc;
 import com.starcases.prime.base.api.LogPrimeDataProviderIntfc;
 import com.starcases.prime.base.impl.BaseTypes;
-import com.starcases.prime.cache.api.CachePrefixProviderIntfc;
-import com.starcases.prime.cache.api.PersistedPrefixCacheIntfc;
 import com.starcases.prime.cache.api.primetext.PrimeTextFileLoaderProviderIntfc;
 import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
@@ -83,7 +84,6 @@ import picocli.CommandLine.Command;
  * interface function is just a dummy value - not used.
  *
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals"})
 @Command(name = "init", description = "Default initial setup")
 public class DefaultInit implements Runnable
 {
@@ -97,8 +97,8 @@ public class DefaultInit implements Runnable
 	 */
 	private static final Predicate2<BaseTypesIntfc, String> baseMatchPred = (base, outputType) -> base.name().equals(outputType);
 
-
 	private static DB ptkDB;
+	private static final MutableMap<String, DB> baseDBS = MutableMapFactoryImpl.INSTANCE.empty();
 
 	/**
 	 * prime source - for prime/prime ref lookups
@@ -356,21 +356,28 @@ public class DefaultInit implements Runnable
 		{
 			LOG.info("CLI - Check SQL listener enablement.");
 		}
-		if (baseOpts != null && baseOpts.isEnableCmmandListener())
+		if (baseOpts != null && initOpts.isEnableCmmandListener())
 		{
 			final ImmutableCollection<String> attributes = Lists.immutable.of("SQLPRIME");
 			final SvcLoader<SqlProviderIntfc, Class<SqlProviderIntfc>> sqlCmdProviders = new SvcLoader< >(SqlProviderIntfc.class);
 
 			actions.add(s -> {
 
+					var pRef = primeSrc.getPrimeRefForIdx(32).get();
+					System.out.println(String.format("##### Index: %d, Prime: %d, BaseType: %s, Bases: %s ",
+							pRef.getPrimeRefIdx(),
+							pRef.getPrime(),
+							BASE_TYPES.select(b -> b.name().equals("PREFIX")).getOnly(),
+							Arrays.toString(pRef.getPrimeBases(BASE_TYPES.select(b -> b.name().equals("PREFIX")).getOnly() ))));
+
 					if (LOG.isLoggable(Level.INFO))
 					{
-						LOG.info("Starting SQL command listener - port:" + baseOpts.getCmdListenerPort());
+						LOG.info("Starting SQL command listener - port:" + initOpts.getCmdListenerPort());
 					}
 
 					sqlCmdProviders
 						.provider(attributes)
-						.map(p -> p.create(primeSrc, baseOpts.getCmdListenerPort()))
+						.map(p -> p.create(primeSrc, initOpts.getCmdListenerPort()))
 						.ifPresentOrElse(p ->
 									{
 										try
@@ -478,7 +485,11 @@ public class DefaultInit implements Runnable
 
 	private void actionInitPrimeSourceData()
 	{
-		actions.add(s -> primeSrc.init());
+		actions.add(s -> {
+			primeSrc.setCreateBases(baseOpts != null ? baseOpts.isCreateBases() : false);
+			primeSrc.init();
+			baseDBS.forEach(b -> b.commit());
+		});
 	}
 
 	private void actionInitBaseGenerators()
@@ -498,19 +509,29 @@ public class DefaultInit implements Runnable
 				final Path cachePathForBaseType = Path.of(replaceTildeHome(initOpts.getOutputFolder()), cacheNameForBaseType);
 				ensureFolderExist(cachePathForBaseType.toString());
 
-				final SvcLoader<CachePrefixProviderIntfc, Class<CachePrefixProviderIntfc>> cacheLoader =
-						new SvcLoader<>(CachePrefixProviderIntfc.class);
-
-				final PersistedPrefixCacheIntfc cache =
-						cacheLoader
-						.provider(Lists.immutable.of("PREFIX_CACHE_PROVIDER"))
-						.map(provider -> provider.create(cachePathForBaseType, false,0))/* clear any existing prime cache first */
-						.orElseThrow();
-
 				// base generator setup
 				final ImmutableList<String> baseProviderAttributes = Lists.immutable.of(baseType.name(), "DEFAULT");
 
 				statusHandler.dbgOutput("CLI - Prep base: %s", baseType.name());
+
+				final String inputFolderPath = initOpts.getInputDataFolder();
+				final Path homePath =  Path.of(replaceTildeHome(inputFolderPath)).getParent();
+				final Path dbPath = Path.of(homePath.normalize().toString(), baseType.name() + ".mapdb");
+
+				final DB db = DBMaker
+					    .fileDB(dbPath.normalize().toString())
+					    .fileMmapEnable()            // Always enable mmap
+					    .fileMmapPreclearDisable()   // Make mmap file faster
+					    .allocateStartSize(5L * 1024 * 1024 * 1024) // 5 GB
+					    .allocateIncrement(1024L * 1024 * 1024) // 1 GB
+					    .transactionEnable()
+					    .checksumHeaderBypass()
+					    .make();
+
+				baseDBS.put(baseType.name(), db);
+
+				final var baseSrc = db.treeMap(cacheNameForBaseType, Serializer.LONG, Serializer.LONG_ARRAY).createOrOpen();
+				PrimeRef.setPrimeBases(baseType, baseSrc);
 
 				ImmutableMap<String, Object> settings = Maps.immutable.empty();
 				if (baseType.name().equals("NPRIME"))
@@ -521,10 +542,9 @@ public class DefaultInit implements Runnable
 				{
 					settings = Maps.immutable.of("collTracker", collTracker);
 				}
-				else if (baseType.name().equals("PREFIX"))
+				else
 				{
-					LOG.fine("Base generator PREFIX - setting cache");
-					settings = Maps.immutable.of("BASES_CACHE", cache);
+					settings = Maps.immutable.empty();
 				}
 
 				// System provided: TRIPLE, TRIPLENG, PREFIX_PRIME + user provided

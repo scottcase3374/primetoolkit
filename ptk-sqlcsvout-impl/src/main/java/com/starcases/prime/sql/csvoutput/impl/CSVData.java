@@ -15,9 +15,9 @@ public class CSVData
 
 	@Setter
 	@Getter
-	public Object[] base;
+	public long[] base;
 
-	public CSVData(final long index, final long prime, final Object[] bases)
+	public CSVData(final long index, final long prime, final long[] bases)
 	{
 		this.index = index;
 		this.prime = prime;

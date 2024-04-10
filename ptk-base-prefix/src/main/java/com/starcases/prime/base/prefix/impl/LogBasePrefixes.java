@@ -54,21 +54,16 @@ class LogBasePrefixes extends AbstractPrimeBaseLog
 		primeSrc
 			.getPrimeRefStream(false)
 			.forEach( primeRef ->
-									Optional.ofNullable(  primeRef.getPrimeBaseData())
-										.ifPresent(bd ->
-											Optional.ofNullable(bd.getPrimeBases(PrefixBaseType.PREFIX))
-											.ifPresent(bd1 ->
-													bd1.forEach(
-															primeBases ->
-															{
+									Optional.ofNullable(  primeRef.getPrimeBases(PrefixBaseType.PREFIX))
+											.ifPresent(bd1 ->{
 																outputStr.append(String.format("Prime [%d] Prefix: \t", primeRef.getPrime()));
 
-																primeBases.appendString(outputStr, "[", ",", "]");
+																//primeBases.appendString(outputStr, "[", ",", "]");
 
 																statusHandler.output(PrefixBaseType.PREFIX, "%s%n", outputStr);
 																outputStr.setLength(0);
 																itemIdx[0]++;
-															}))));
+												}));
 	}
 }
 

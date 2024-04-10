@@ -1,6 +1,6 @@
 package com.starcases.prime.base.api;
 
-import com.starcases.prime.core.api.PrimeRefIntfc;
+import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
 import com.starcases.prime.kern.api.BaseTypesIntfc;
 
 /**
@@ -11,6 +11,6 @@ import com.starcases.prime.kern.api.BaseTypesIntfc;
  */
 public interface BaseGenIntfc
 {
-	void genBasesForPrimeRef(final PrimeRefIntfc curPrime);
+	void genBasesForPrimeRef(final PrimeRefFactoryIntfc curPrime);
 	BaseTypesIntfc getBaseType();
 }

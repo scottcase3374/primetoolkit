@@ -25,7 +25,7 @@ public class TripleProvider implements BaseProviderIntfc
 	@Override
 	public BaseGenFactoryIntfc create(final ImmutableMap<String,Object> settings)
 	{
-		return new BaseReduceTriple(TripleBaseType.TRIPLE);
+		return new BaseReduceTriple();
 	}
 
 	/**

@@ -31,7 +31,7 @@ public class PrimeTreeProvider implements BaseProviderIntfc
 	{
 		final CollectionTrackerIntfc collTracker = (CollectionTrackerIntfc)settings.get("collTracker");
 
-		return new PrimeTree(PrimeTreeBaseType.PRIME_TREE, collTracker);
+		return new PrimeTree(collTracker);
 	}
 
 	/**

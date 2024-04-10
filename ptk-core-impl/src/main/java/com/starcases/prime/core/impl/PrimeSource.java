@@ -33,7 +33,6 @@ import lombok.Setter;
 import jakarta.validation.constraints.Min;
 
 import org.eclipse.collections.api.factory.Lists;
-import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.impl.parallel.ParallelIterate;
 import org.mapdb.BTreeMap;
 
@@ -127,7 +126,7 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	 */
 	public PrimeSource(
 			@Min(1) final long maxCount,
-			@NonNull final ImmutableList<Consumer<PrimeSourceIntfc>> consumersSetPrimeSrc,
+			@NonNull final Iterable<Consumer<PrimeSourceIntfc>> consumersSetPrimeSrc,
 			@NonNull final Function<Long, PrimeRefFactoryIntfc> primeRefRawCtor,
 			final CollectionTrackerIntfc collTracker,
 			BTreeMap<Long, Long> primeMap
@@ -183,7 +182,12 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	@Override
 	public Optional<PrimeRefIntfc> getPrimeRefForIdx(@Min(0) final long primeIdx)
 	{
-		return Optional.of(new PrimeRef(primeIdx));
+		Optional<PrimeRefIntfc> ret = Optional.empty();
+		if (primeMap.containsKey(primeIdx))
+		{
+			 ret = Optional.of(new PrimeRef(primeIdx));
+		}
+		return ret;
 	}
 
 	/**
@@ -273,15 +277,14 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	@Override
 	public Iterator<PrimeRefIntfc> getPrimeRefIter()
 	{
-		return new PrimeRefIterator(new PrimeRef(0));
+		return new PrimeRefIterator<>(new PrimeRef(0));
 	}
 
 	@Override
 	public Iterator<PrimeRefIntfc> getPrimeRefIter(final long idx)
 	{
-		return new PrimeRefIterator(new PrimeRef(idx));
+		return new PrimeRefIterator<>(new PrimeRef(idx));
 	}
-
 
 	@Override
 	public Stream<PrimeRefIntfc> getPrimeRefStream(final boolean preferParallel)
@@ -294,6 +297,32 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	{
 		final Iterator<PrimeRefIntfc> iter = getPrimeRefIter(skipCount-1);
 		final Supplier<PrimeRefIntfc> supplier = () -> { var it = iter; return it.hasNext() ? it.next() : null; };
+		return Stream.generate(supplier).takeWhile( Objects::nonNull);
+	}
+
+	@Override
+	public Iterator<PrimeRefFactoryIntfc> getPrimeFactoryRefIter()
+	{
+		return new PrimeRefIterator<>(new PrimeRef(0));
+	}
+
+	@Override
+	public Iterator<PrimeRefFactoryIntfc> getPrimeFactoryRefIter(@Min(0) final long idx)
+	{
+		return new PrimeRefIterator<>(new PrimeRef(idx));
+	}
+
+	@Override
+	public Stream<PrimeRefFactoryIntfc> getPrimeFactoryRefStream(final boolean preferParallel)
+	{
+		return getPrimeFactoryRefStream(0, preferParallel);
+	}
+
+	@Override
+	public Stream<PrimeRefFactoryIntfc> getPrimeFactoryRefStream(@Min(0) final long skipCount, final boolean preferParallel)
+	{
+		final Iterator<PrimeRefFactoryIntfc> iter = getPrimeFactoryRefIter(skipCount);
+		final Supplier<PrimeRefFactoryIntfc> supplier = () -> { var it = iter; return it.hasNext() ? it.next() : null; };
 		return Stream.generate(supplier).takeWhile( Objects::nonNull);
 	}
 
@@ -314,24 +343,8 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 
 		if (createBases)
 		{
-			getPrimeRefStream(true).forEach
-				(
-					pRef ->
-						{
-							final long index = pRef.getPrimeRefIdx();
-
-							if (index % 10000 == 0)
-							{
-								statusHandler.dbgOutput("PrimeSource::init - generate bases for idx: [%d]", index);
-							}
-
-							final var baseData = pRef.getPrimeBaseData();
-							if (baseData == null || baseData.getPrimeBases().isEmpty())
-							{
-								this.generateBases(index);
-							}
-						}
-				);
+			statusHandler.dbgOutput("PrimeSource::init - generating bases.");
+			getPrimeFactoryRefStream(false).forEach(this::generateBases);
 		}
 	}
 
@@ -343,14 +356,14 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	}
 
 	@Override
-	public void generateBases(final @Min(0) long primeIdx)
+	public void generateBases(final PrimeRefFactoryIntfc pRef)
 	{
-		final var pRef = this.getPrimeRefForIdx(primeIdx);
-		pRef.ifPresent(ref -> baseGenerators.forEach(bGen -> bGen.genBasesForPrimeRef(ref)) );
+		baseGenerators.forEach(bGen -> bGen.genBasesForPrimeRef(pRef) );
 
-		if (primeIdx % 10000 == 0)
+		var idx = pRef.getPrimeRefIdx();
+		if (idx % 1_000_000 == 0)
 		{
-			statusHandler.dbgOutput("prime Idx %d at %s", primeIdx, LocalTime.now().toString());
+			statusHandler.dbgOutput("prime Idx %d at %s", idx, LocalTime.now().toString());
 		}
 	}
 }

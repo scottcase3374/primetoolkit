@@ -60,7 +60,6 @@ class CmdServer implements CmdServerIntfc
 	@Override
 	public void run() throws InterruptedException
 	{
-
 		try (CmdEventLoopGroup listenGroup = createEventLoopGroup();
 			 CmdEventLoopGroup workerGroup = createEventLoopGroup();)
 		{

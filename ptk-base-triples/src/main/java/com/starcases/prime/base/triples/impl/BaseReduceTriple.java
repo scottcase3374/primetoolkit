@@ -1,10 +1,8 @@
 package com.starcases.prime.base.triples.impl;
 
 import com.starcases.prime.base.impl.AbsPrimeBaseGen;
-import com.starcases.prime.core.api.PrimeRefIntfc;
+import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
 import com.starcases.prime.kern.api.BaseTypesIntfc;
-
-import lombok.NonNull;
 
 /*
  *  Given a Prime, find EVERY set of 3 pre-existing primes
@@ -60,17 +58,23 @@ class BaseReduceTriple extends AbsPrimeBaseGen
 	 *
 	 * @param primeSrc
 	 */
-	public BaseReduceTriple(@NonNull final BaseTypesIntfc baseType)
+	public BaseReduceTriple()
 	{
-		super(baseType);
+		super();
 	}
 
 	/**
 	 * Generate base for specified prime
 	 */
 	@Override
-	public void genBasesForPrimeRef(final PrimeRefIntfc curPrime)
+	public void genBasesForPrimeRef(final PrimeRefFactoryIntfc curPrime)
 	{
 		new AllTriples(primeSrc).process(curPrime);
+	}
+
+	@Override
+	public BaseTypesIntfc getBaseType()
+	{
+		return TripleBaseType.TRIPLE;
 	}
 }

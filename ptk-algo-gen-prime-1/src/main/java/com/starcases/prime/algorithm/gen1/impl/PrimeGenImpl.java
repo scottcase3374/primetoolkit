@@ -14,6 +14,7 @@ import com.starcases.prime.common.api.OutputOper;
 import com.starcases.prime.core.api.PrimeGenIntfc;
 import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
+import com.starcases.prime.core.api.PrimeSourceFactoryIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
 import com.starcases.prime.core.api.ProgressIntfc;
 import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
@@ -55,7 +56,7 @@ public class PrimeGenImpl implements PrimeGenIntfc
 	@Getter
 	private final MetricProviderIntfc metricProvider;
 
-	private PrimeSourceIntfc primeSrc;
+	private PrimeSourceFactoryIntfc primeSrc;
 
 	/**
 	 * dest of output progress tracking
@@ -68,7 +69,7 @@ public class PrimeGenImpl implements PrimeGenIntfc
 
 	private CollectionTrackerIntfc collTracker;
 
-	public PrimeGenImpl(@NonNull final PrimeSourceIntfc primeSrc, @NonNull final CollectionTrackerIntfc collTracker, @NonNull final MetricProviderIntfc metricProvider)
+	public PrimeGenImpl(@NonNull final PrimeSourceFactoryIntfc primeSrc, @NonNull final CollectionTrackerIntfc collTracker, @NonNull final MetricProviderIntfc metricProvider)
 	{
 		this.primeSrc = primeSrc;
 		this.collTracker = collTracker;
