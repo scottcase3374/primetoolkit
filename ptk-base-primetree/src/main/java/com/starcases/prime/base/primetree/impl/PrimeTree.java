@@ -34,9 +34,9 @@ class PrimeTree extends AbsPrimeBaseGen
 	 * @param primeSrc
 	 * @param collectionTracker
 	 */
-	public PrimeTree(@NonNull final CollectionTrackerIntfc collectionTracker)
+	public PrimeTree(final int minIdx, final int maxIdx, @NonNull final CollectionTrackerIntfc collectionTracker)
 	{
-		super();
+		super(minIdx, maxIdx);
 		this.collectionTracker = collectionTracker;
 	}
 

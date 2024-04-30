@@ -45,13 +45,17 @@ public abstract class AbsPrimeBaseGen implements BaseGenFactoryIntfc
 	@Getter(AccessLevel.PROTECTED)
 	protected boolean preferParallel;
 
+	protected final int minIdx;
+	protected final int maxIdx;
 
 	/**
 	 * Constructor for secondary bases.
 	 * @param primeSrc
 	 */
-	protected AbsPrimeBaseGen()
+	protected AbsPrimeBaseGen(final int minIdx, final int maxIdx)
 	{
+		this.minIdx = minIdx;
+		this.maxIdx = maxIdx;
 	}
 
 	/**

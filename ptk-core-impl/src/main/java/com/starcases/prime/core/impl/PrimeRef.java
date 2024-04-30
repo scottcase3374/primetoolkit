@@ -109,7 +109,7 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	@Override
 	public Optional<PrimeRefIntfc> getPrevPrimeRef()
 	{
-		return primeIdx > 0 ? Optional.empty() : primeSrc.getPrimeRefForIdx(primeIdx-1);
+		return primeIdx > 0 ? primeSrc.getPrimeRefForIdx(primeIdx-1) : Optional.empty();
 	}
 
 	@Override
@@ -170,6 +170,19 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	public void addPrimeBases(@NonNull final BaseTypesIntfc baseType, @NonNull final LongIterable primeBase)
 	{
 		primeBases.get(baseType).computeIfAbsent(this.primeIdx, (k) -> primeBase.toArray());
+	}
+
+	@Override
+	public void addPrimeBases(@NonNull final BaseTypesIntfc baseType, @NonNull final long [] primeBase)
+	{
+		primeBases.get(baseType).computeIfAbsent(this.primeIdx, (k) -> primeBase);
+	}
+
+	@Override
+	public void addPrimeBases(@NonNull final BaseTypesIntfc baseType, @NonNull final PrimeRefIntfc [] primeBase)
+	{
+		primeBases.get(baseType).computeIfAbsent(this.primeIdx, (k) ->
+			com.starcases.prime.kern.api.Arrays.longArrayToLongArray((Long[])Arrays.asList(primeBase).stream().map(bref -> bref.getPrime()).toArray()));
 	}
 
 	@Override

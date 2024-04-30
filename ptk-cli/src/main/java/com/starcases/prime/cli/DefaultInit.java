@@ -364,11 +364,11 @@ public class DefaultInit implements Runnable
 			actions.add(s -> {
 
 					var pRef = primeSrc.getPrimeRefForIdx(32).get();
-					System.out.println(String.format("##### Index: %d, Prime: %d, BaseType: %s, Bases: %s ",
-							pRef.getPrimeRefIdx(),
-							pRef.getPrime(),
-							BASE_TYPES.select(b -> b.name().equals("PREFIX")).getOnly(),
-							Arrays.toString(pRef.getPrimeBases(BASE_TYPES.select(b -> b.name().equals("PREFIX")).getOnly() ))));
+//					System.out.println(String.format("##### Index: %d, Prime: %d, BaseType: %s, Bases: %s ",
+//							pRef.getPrimeRefIdx(),
+//							pRef.getPrime(),
+//							BASE_TYPES.select(b -> b.name().equals("PREFIX")).getOnly(),
+//							Arrays.toString(pRef.getPrimeBases(BASE_TYPES.select(b -> b.name().equals("PREFIX")).getOnly() ))));
 
 					if (LOG.isLoggable(Level.INFO))
 					{
@@ -409,7 +409,7 @@ public class DefaultInit implements Runnable
 
 			// Create cache instance and if requested - clear out existing primes [persisted]; no in-memory primes should
 			// exist yet since we haven't loaded the raw primes nor have we tried to load persisted primes.
-			final String CACHE_NAME = "primes";
+
 
 			final String inputFolderPath = initOpts.getInputDataFolder();
 			final var inputFoldExist = ensureFolderExist(inputFolderPath);
@@ -426,9 +426,18 @@ public class DefaultInit implements Runnable
 		    .checksumHeaderBypass()
 		    .make();
 
+			final String PRIME_CACHE_NAME = "primes";
 			final boolean loadRawPrimes = initOpts.isLoadPrimes();
 			var primeCache = ptkDB
-								.treeMap(CACHE_NAME)
+								.treeMap(PRIME_CACHE_NAME)
+								.keySerializer(Serializer.LONG)
+								.valueSerializer(Serializer.LONG)
+								.createOrOpen();
+
+
+			final String PRIME_TO_IDX_CACHE_NAME = "primes_idx";
+			var primeIdxCache = ptkDB
+								.treeMap(PRIME_TO_IDX_CACHE_NAME)
 								.keySerializer(Serializer.LONG)
 								.valueSerializer(Serializer.LONG)
 								.createOrOpen();
@@ -461,34 +470,33 @@ public class DefaultInit implements Runnable
 				}
 			}
 
-			primeSrc = getPrimeSource(primeCache);
+			primeSrc = getPrimeSource(primeCache, primeIdxCache);
 
 			System.out.println(String.format("***** Prime for index 4: [%d]", primeSrc.getPrimeForIdx(4L).orElse(-1)));
 		});
 	}
 
-	private PrimeSourceFactoryIntfc getPrimeSource(@NonNull final BTreeMap<Long, Long> primeCache)
+	private PrimeSourceFactoryIntfc getPrimeSource(@NonNull final BTreeMap<Long, Long> primeCache , @NonNull final BTreeMap<Long, Long> primeIdxCache)
 	{
 		final Consumer<PrimeSourceIntfc> c = PrimeRef::setPrimeSource;
 		final ImmutableList<Consumer<PrimeSourceIntfc>> consumers = Lists.immutable.of(c);
 		final Function<Long, PrimeRefFactoryIntfc>  f = PrimeRef::new;
 
-		var pSrc = new PrimeSource(initOpts.getMaxCount()
-				, consumers
+		return new PrimeSource(
+				 consumers
 				, f
 				,collTracker
 				,primeCache
+				,primeIdxCache
 				);
-
-		return pSrc;
 	}
 
 	private void actionInitPrimeSourceData()
 	{
 		actions.add(s -> {
-			primeSrc.setCreateBases(baseOpts != null ? baseOpts.isCreateBases() : false);
+			primeSrc.setCreateBases(baseOpts != null && baseOpts.isCreateBases() );
 			primeSrc.init();
-			baseDBS.forEach(b -> b.commit());
+			baseDBS.forEach(DB::commit);
 		});
 	}
 
@@ -556,7 +564,7 @@ public class DefaultInit implements Runnable
 							p ->
 								actions.add(s -> primeSrc
 												 .addBaseGenerator(
-																	p.create(settingsFinal)
+																	p.create(initOpts.getMinIdx(), initOpts.getMaxIdx(), settingsFinal)
 																	 .assignPrimeSrc(primeSrc)
 																	 .doPreferParallel(initOpts.isPreferParallel())
 																	)

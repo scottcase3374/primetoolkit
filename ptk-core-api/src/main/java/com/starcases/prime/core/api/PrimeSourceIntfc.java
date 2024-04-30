@@ -94,12 +94,12 @@ public interface PrimeSourceIntfc
 	OptionalLong getPrimeForIdx(@Min(0) long primeIdx);
 
 	/**
-	 * Get highest prime ref less than specified value and prime.
+	 * Get highest prime ref less than or equal to specified value .
 	 *
 	 * @param longSupplier
 	 * @return
 	 */
-	Optional<PrimeRefIntfc> getPrimeRefCeiling(@NonNull final long value, final PrimeRefIntfc highPrime);
+	Optional<PrimeRefIntfc> getPrimeRefCeiling(@NonNull final long value);
 
 	long searchPrime(final long val);
 

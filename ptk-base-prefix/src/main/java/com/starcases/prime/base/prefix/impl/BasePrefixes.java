@@ -17,9 +17,9 @@ class BasePrefixes extends AbsPrimeBaseGen
 	 * constructor for creation of Base prefixes.
 	 * @param primeSrc
 	 */
-	public BasePrefixes() //@NonNull final BaseTypesIntfc baseType, @NonNull final BTreeMap<Long, long[]> cache)
+	public BasePrefixes(final int minIdx, final int maxIdx)
 	{
-		super(); //baseType);
+		super(minIdx, maxIdx);
 	}
 
 	/**

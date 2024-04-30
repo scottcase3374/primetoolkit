@@ -1,6 +1,5 @@
 package com.starcases.prime.base.primetree.impl;
 
-import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

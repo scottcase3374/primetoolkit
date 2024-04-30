@@ -16,12 +16,20 @@ import picocli.CommandLine.Option;
 class InitOpts
 {
 	/**
-	 * maximum number of primes to manage
+	 * maximum prime idx to manage
 	 */
 	@Getter
 	@Setter
-	@Option(names = {"-m", "--max-count"}, paramLabel = "COUNT", description = "Max count of primes to process", defaultValue = "1500", required = false)
-	private int maxCount;
+	@Option(names = {"-m", "--max-idx"}, paramLabel = "INDEX", description = "Max idx of primes to process", defaultValue = "1500", required = false)
+	private int maxIdx;
+
+	/**
+	 * maximum prime idx to manage
+	 */
+	@Getter
+	@Setter
+	@Option(names = {"-i", "--min-idx"}, paramLabel = "INDEX", description = "Min idx of primes to process", defaultValue = "0", required = false)
+	private int minIdx;
 
 	/**
 	 * Log level

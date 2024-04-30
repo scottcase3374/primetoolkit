@@ -23,9 +23,9 @@ public class TriplengProvider implements BaseProviderIntfc
 	 * create target service instance
 	 */
 	@Override
-	public BaseGenFactoryIntfc create(final ImmutableMap<String,Object> settings)
+	public BaseGenFactoryIntfc create(final int minIdx, final int maxIdx, final ImmutableMap<String,Object> settings)
 	{
-		return new BaseReduceTripleng();
+		return new BaseReduceTripleng(minIdx, maxIdx);
 	}
 
 	/**

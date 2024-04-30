@@ -17,4 +17,6 @@ public interface PrimeRefFactoryIntfc extends PrimeRefIntfc
 	PrimeRefFactoryIntfc generateBases(@NonNull final Consumer<PrimeRefFactoryIntfc> basesGenerate);
 
 	void addPrimeBases(@NonNull final BaseTypesIntfc baseType, @NonNull final LongIterable primeBase);
+	void addPrimeBases(@NonNull final BaseTypesIntfc baseType, @NonNull final long [] basePrimes);
+	void addPrimeBases(@NonNull final BaseTypesIntfc baseType, @NonNull final PrimeRefIntfc [] basePrimes);
 }

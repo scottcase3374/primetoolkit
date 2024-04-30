@@ -177,13 +177,11 @@ public class PrefixCacheProvider implements CachePrefixProviderIntfc
 
 	@Override
 	public URI getDefaultURI() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Properties getDefaultProperties() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -201,19 +199,14 @@ public class PrefixCacheProvider implements CachePrefixProviderIntfc
 
 	@Override
 	public void close(ClassLoader classLoader) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void close(URI uri, ClassLoader classLoader) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public boolean isSupported(OptionalFeature optionalFeature) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 }

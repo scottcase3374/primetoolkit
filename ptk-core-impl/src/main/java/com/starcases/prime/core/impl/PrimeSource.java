@@ -33,7 +33,6 @@ import lombok.Setter;
 import jakarta.validation.constraints.Min;
 
 import org.eclipse.collections.api.factory.Lists;
-import org.eclipse.collections.impl.parallel.ParallelIterate;
 import org.mapdb.BTreeMap;
 
 
@@ -82,12 +81,6 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	// this class
 	//
 
-	/**
-	 * number of base primes to generate
-	 */
-	@Getter(AccessLevel.PRIVATE)
-	private final long targetPrimeCount;
-
 	/** can be overridden by passing
 	* an appropriate "new" function ptr into the PrimeSource
 	* constructor  -> param primeRefCtor
@@ -105,6 +98,11 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	 * Map Index to prime.
 	 */
 	private final BTreeMap<Long, Long> primeMap;
+
+	/**
+	 * Map prime to Index.
+	 */
+	private final BTreeMap<Long, Long> primeToIdxMap;
 
 	/**
 	 * Multi-level container for the tree of primes - all in memory.
@@ -125,19 +123,18 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	 * @param collTrack
 	 */
 	public PrimeSource(
-			@Min(1) final long maxCount,
 			@NonNull final Iterable<Consumer<PrimeSourceIntfc>> consumersSetPrimeSrc,
 			@NonNull final Function<Long, PrimeRefFactoryIntfc> primeRefRawCtor,
 			final CollectionTrackerIntfc collTracker,
-			BTreeMap<Long, Long> primeMap
+			final BTreeMap<Long, Long> primeMap,
+			final BTreeMap<Long, Long> idxToPrimeMap
 			)
 	{
 		super();
 
 		this.collTracker = collTracker;
 		this.primeMap = primeMap;
-
-		targetPrimeCount = maxCount;
+		this.primeToIdxMap = idxToPrimeMap;
 
 		this.primeRefRawCtor = primeRefRawCtor;
 		consumersSetPrimeSrc
@@ -162,14 +159,25 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 			@Min(1) final long newPrime
 			)
 	{
+		primeToIdxMap.putIfAbsent(newPrime, nextPrimeIdx);
+		primeMap.putIfAbsent(nextPrimeIdx, newPrime);
 		return primeRefRawCtor.apply(nextPrimeIdx);
 	}
 
-	private Consumer<PrimeRefFactoryIntfc> getBasesGenerator()
+	/**
+	 * Used to create initial mapping which wasn't done at the time of
+	 * the prime map creation.
+	 */
+	public void initIdxToPrime()
 	{
-		return pRef -> ParallelIterate.forEach(
-							baseGenerators,
-							gen -> gen.genBasesForPrimeRef(pRef) );
+		for (long idx=0; idx <=50_000_000; idx++)
+		{
+			primeToIdxMap.putIfAbsent(primeMap.get(idx), idx);
+			if (idx % 100_000 == 0)
+			{
+				System.out.println(String.format("idxtoprime load: %d  prime %d", idx, primeToIdxMap.get(primeMap.get(idx))));
+			}
+		}
 	}
 
 	@Override
@@ -191,29 +199,20 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	}
 
 	/**
-	 * Get highest prime ref less than specified value and prime.
+	 * Get highest prime ref less than specified value.
 	 *
 	 */
 	@Override
-	public Optional<PrimeRefIntfc> getPrimeRefCeiling(final long value, @NonNull final PrimeRefIntfc highPrime)
+	public Optional<PrimeRefIntfc> getPrimeRefCeiling(final long value)
 	{
-		if (value > highPrime.getPrime())
-		{
-			return Optional.empty();
-		}
+		Optional<PrimeRefIntfc> ret = Optional.empty();
 
-		Optional<PrimeRefIntfc> prime = getPrimeRefForPrime(value);
-		if (prime.isEmpty())
+		var entry = primeToIdxMap.findLower(value, true);
+		if (entry != null)
 		{
-			Optional<PrimeRefIntfc> tmpPrime = highPrime.getPrevPrimeRef();
-			while( tmpPrime.isPresent() && value > tmpPrime.get().getPrime())
-			{
-				tmpPrime = tmpPrime.get().getPrevPrimeRef();
-			}
-			prime = tmpPrime;
+			ret = this.getPrimeRefForIdx(entry.getValue());
 		}
-
-		return prime;
+		return ret;
 	}
 
 	/**
@@ -249,20 +248,10 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	public Optional<PrimeRefIntfc> getPrimeRefForPrime(@Min(0) final long prime)
 	{
 		Optional<PrimeRefIntfc> ret = Optional.empty();
-		final var it = primeMap.entryIterator();
-		boolean done=false;
-		while (it.hasNext() && !done)
+		final Long primeIdx = primeToIdxMap.get(prime);
+		if (primeIdx != null)
 		{
-			var entry = it.next();
-			if (entry.getValue() == prime)
-			{
-				ret = getPrimeRefForIdx(entry.getKey());
-				done=true;
-			}
-			else if (entry.getValue() > prime)
-			{
-				done=true;
-			}
+			ret = getPrimeRefForIdx(primeIdx);
 		}
 		return  ret;
 	}
@@ -341,6 +330,7 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 			statusHandler.dbgOutput("PrimeSource::init");
 		}
 
+		//initIdxToPrime();
 		if (createBases)
 		{
 			statusHandler.dbgOutput("PrimeSource::init - generating bases.");

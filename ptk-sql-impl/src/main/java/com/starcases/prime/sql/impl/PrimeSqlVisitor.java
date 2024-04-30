@@ -373,10 +373,14 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 // 		// from the collection of groups.
  		if (!itemGroupColl.isEmpty())
  		{
-// 			primePredColl.add( Predicates.adapt(
-// 					pRef -> ImmutableListFactoryImpl.INSTANCE.of(pRef.getPrimeBases(BASE_TYPES.select(base -> base.name().equals(baseType.toUpperCase(Locale.ENGLISH))).getFirst()))
-// 								.anySatisfy(itemGroupColl.anySatisfybaseColl)))
-// 						);
+ 			primePredColl.add(
+ 					Predicates.adapt(
+ 							pRef -> ImmutableListFactoryImpl.INSTANCE.of(
+ 																		pRef.getPrimeBases(BASE_TYPES.select(base -> base.name().equals(baseType.toUpperCase(Locale.ENGLISH))).getFirst())
+ 																		)
+ 									.anySatisfy(b -> itemGroupColl.containsAllArguments( b))
+ 									)
+ 							);
  		}
 
 		// Predicate testing each prime's base tuples for any single item from a collection of items.

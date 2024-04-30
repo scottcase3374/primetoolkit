@@ -6,7 +6,6 @@ import java.util.Optional;
 import org.eclipse.collections.api.map.ImmutableMap;
 import org.mapdb.BTreeMap;
 
-import com.starcases.prime.cache.api.PersistedCacheIntfc;
 import com.starcases.prime.service.api.SvcProviderBaseIntfc;
 
 import lombok.NonNull;

@@ -23,11 +23,9 @@ public class PrefixProvider implements BaseProviderIntfc
 	 * create target service
 	 */
 	@Override
-	public BaseGenFactoryIntfc create(final ImmutableMap<String,Object> settings)
+	public BaseGenFactoryIntfc create(final int minIdx, final int maxIdx, final ImmutableMap<String,Object> settings)
 	{
-		//final BTreeMap<Long, long[]> prefixdb = (BTreeMap<Long, long[]>)settings.get("BASES_DB");
-
-		return new BasePrefixes();
+		return new BasePrefixes(minIdx, maxIdx);
 	}
 
 	/**

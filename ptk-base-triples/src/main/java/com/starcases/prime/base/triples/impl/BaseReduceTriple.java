@@ -1,8 +1,17 @@
 package com.starcases.prime.base.triples.impl;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
+import org.eclipse.collections.impl.factory.Sets;
+
 import com.starcases.prime.base.impl.AbsPrimeBaseGen;
 import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
+import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.kern.api.BaseTypesIntfc;
+
+import lombok.NonNull;
 
 /*
  *  Given a Prime, find EVERY set of 3 pre-existing primes
@@ -53,14 +62,16 @@ import com.starcases.prime.kern.api.BaseTypesIntfc;
  */
 class BaseReduceTriple extends AbsPrimeBaseGen
 {
+	private static final ExecutorService pool = Executors.newFixedThreadPool(8);
+
 	/**
 	 * Constructor
 	 *
 	 * @param primeSrc
 	 */
-	public BaseReduceTriple()
+	public BaseReduceTriple(final int minIdx, final int maxIdx)
 	{
-		super();
+		super(minIdx, maxIdx);
 	}
 
 	/**
@@ -69,7 +80,13 @@ class BaseReduceTriple extends AbsPrimeBaseGen
 	@Override
 	public void genBasesForPrimeRef(final PrimeRefFactoryIntfc curPrime)
 	{
-		new AllTriples(primeSrc).process(curPrime);
+		pool.execute(new AllTriples(primeSrc, curPrime, this));
+	}
+
+	public void addPrimeBases(final @NonNull PrimeRefFactoryIntfc prime, final @NonNull PrimeRefFactoryIntfc [] triple)
+	{
+		final ImmutableLongCollection primeBase = Sets.immutable.of(triple).collectLong(PrimeRefIntfc::getPrime);
+		prime.addPrimeBases(getBaseType(), primeBase);
 	}
 
 	@Override

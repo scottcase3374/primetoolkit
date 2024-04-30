@@ -66,9 +66,9 @@ class BaseReduceTripleng extends AbsPrimeBaseGen
 	 *
 	 * @param primeSrc
 	 */
-	public BaseReduceTripleng()
+	public BaseReduceTripleng(final int minIdx, final int maxIdx)
 	{
-		super();
+		super(minIdx, maxIdx);
 	}
 
 	private boolean adjustIndexes(@NonNull final long [] lowIdx, @NonNull final long [] mediumIdx, @NonNull final long [] highIdx)
@@ -124,13 +124,13 @@ class BaseReduceTripleng extends AbsPrimeBaseGen
 															));
 				lowIdx[0] = -1;
 				mediumIdx[0] = 0;
+				break;
 			}
 		}
 	}
 
 	private void addPrimeBases(@NonNull final PrimeRefFactoryIntfc prime, @NonNull final ImmutableLongList triple)
 	{
-//		cache.ifPresent(c -> c.put(prime.getPrime(), triple.toArray()));
 		prime.addPrimeBases(getBaseType(), triple);
 	}
 

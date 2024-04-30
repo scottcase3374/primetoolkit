@@ -9,7 +9,6 @@ import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.map.ImmutableMap;
 import org.mapdb.BTreeMap;
 
-import com.starcases.prime.cache.api.PersistedCacheIntfc;
 import com.starcases.prime.cache.api.primetext.PrimeTextFileLoaderProviderIntfc;
 import com.starcases.prime.cache.api.primetext.PrimeTextFileloaderIntfc;
 
