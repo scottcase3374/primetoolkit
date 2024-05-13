@@ -12,6 +12,8 @@ import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.starcases.prime.base.api.BaseGenIntfc;
@@ -46,6 +48,8 @@ import org.mapdb.BTreeMap;
  */
 public class PrimeSource implements PrimeSourceFactoryIntfc
 {
+	private static  ExecutorService pool = Executors.newVirtualThreadPerTaskExecutor();
+
 	private final  StatusHandlerIntfc statusHandler =
 			new SvcLoader<StatusHandlerProviderIntfc, Class<StatusHandlerProviderIntfc>>(StatusHandlerProviderIntfc.class)
 				.provider(Lists.immutable.of("STATUS_HANDLER")).orElseThrow().create();
@@ -170,12 +174,15 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	 */
 	public void initIdxToPrime()
 	{
-		for (long idx=0; idx <=50_000_000; idx++)
+		if (primeMap.get(0L) != null)
 		{
-			primeToIdxMap.putIfAbsent(primeMap.get(idx), idx);
-			if (idx % 100_000 == 0)
+			for (long idx=0; idx <=50_000_000; idx++)
 			{
-				System.out.println(String.format("idxtoprime load: %d  prime %d", idx, primeToIdxMap.get(primeMap.get(idx))));
+				primeToIdxMap.putIfAbsent(primeMap.get(idx), idx);
+				if (idx % 1_000_000 == 0)
+				{
+					statusHandler.dbgOutput(String.format("idxtoprime load: %d  prime %d", idx, primeToIdxMap.get(primeMap.get(idx))));
+				}
 			}
 		}
 	}
@@ -330,7 +337,10 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 			statusHandler.dbgOutput("PrimeSource::init");
 		}
 
-		//initIdxToPrime();
+		if (!primeToIdxMap.containsKey(0L))
+		{
+			initIdxToPrime();
+		}
 		if (createBases)
 		{
 			statusHandler.dbgOutput("PrimeSource::init - generating bases.");
@@ -348,12 +358,12 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	@Override
 	public void generateBases(final PrimeRefFactoryIntfc pRef)
 	{
-		baseGenerators.forEach(bGen -> bGen.genBasesForPrimeRef(pRef) );
+		baseGenerators.forEach(bGen -> pool.execute( ()	->	bGen.genBasesForPrimeRef(pRef)	));
 
 		var idx = pRef.getPrimeRefIdx();
 		if (idx % 1_000_000 == 0)
 		{
-			statusHandler.dbgOutput("prime Idx %d at %s", idx, LocalTime.now().toString());
+			statusHandler.output("prime Idx %d", idx);
 		}
 	}
 }

@@ -9,10 +9,10 @@ import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -34,6 +34,7 @@ import org.jgrapht.graph.DefaultEdge;
 import org.mapdb.BTreeMap;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
+import org.mapdb.HTreeMap;
 import org.mapdb.Serializer;
 
 import com.starcases.prime.base.api.BaseProviderIntfc;
@@ -363,13 +364,6 @@ public class DefaultInit implements Runnable
 
 			actions.add(s -> {
 
-					var pRef = primeSrc.getPrimeRefForIdx(32).get();
-//					System.out.println(String.format("##### Index: %d, Prime: %d, BaseType: %s, Bases: %s ",
-//							pRef.getPrimeRefIdx(),
-//							pRef.getPrime(),
-//							BASE_TYPES.select(b -> b.name().equals("PREFIX")).getOnly(),
-//							Arrays.toString(pRef.getPrimeBases(BASE_TYPES.select(b -> b.name().equals("PREFIX")).getOnly() ))));
-
 					if (LOG.isLoggable(Level.INFO))
 					{
 						LOG.info("Starting SQL command listener - port:" + initOpts.getCmdListenerPort());
@@ -526,19 +520,36 @@ public class DefaultInit implements Runnable
 				final Path homePath =  Path.of(replaceTildeHome(inputFolderPath)).getParent();
 				final Path dbPath = Path.of(homePath.normalize().toString(), baseType.name() + ".mapdb");
 
-				final DB db = DBMaker
+				// https://mapdb.org/book/htreemap/
+
+				final DB dbDisk = DBMaker
 					    .fileDB(dbPath.normalize().toString())
-					    .fileMmapEnable()            // Always enable mmap
-					    .fileMmapPreclearDisable()   // Make mmap file faster
 					    .allocateStartSize(5L * 1024 * 1024 * 1024) // 5 GB
 					    .allocateIncrement(1024L * 1024 * 1024) // 1 GB
-					    .transactionEnable()
 					    .checksumHeaderBypass()
 					    .make();
 
-				baseDBS.put(baseType.name(), db);
+				final DB dbMem = DBMaker
+					    .memoryDB()
+					    .transactionEnable()
+					    .checksumHeaderBypass()
+					    .closeOnJvmShutdown()
+					    .make();
 
-				final var baseSrc = db.treeMap(cacheNameForBaseType, Serializer.LONG, Serializer.LONG_ARRAY).createOrOpen();
+				HTreeMap onDisk = dbDisk.hashMap(dbPath.normalize().toString()).createOrOpen();
+
+				System.out.println(String.format("basetype %s  idx: 5  bases: %s", baseType.name(), onDisk.get(5L)) );
+
+				baseDBS.put(baseType.name(), dbMem);
+
+				final HTreeMap baseSrc = dbMem
+						.hashMap(cacheNameForBaseType, Serializer.LONG, Serializer.LONG_ARRAY)
+						.expireMaxSize(50_000)
+						.expireOverflow(onDisk)
+						.expireAfterCreate()
+						.expireExecutor(Executors.newScheduledThreadPool(2))
+						.createOrOpen();
+
 				PrimeRef.setPrimeBases(baseType, baseSrc);
 
 				ImmutableMap<String, Object> settings = Maps.immutable.empty();

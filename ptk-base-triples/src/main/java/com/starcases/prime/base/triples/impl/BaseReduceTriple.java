@@ -1,8 +1,5 @@
 package com.starcases.prime.base.triples.impl;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
 import org.eclipse.collections.impl.factory.Sets;
 
@@ -14,7 +11,7 @@ import com.starcases.prime.kern.api.BaseTypesIntfc;
 import lombok.NonNull;
 
 /*
- *  Given a Prime, find EVERY set of 3 pre-existing primes
+ *  Given a Prime, find a set of 3 pre-existing primes
  *   that sum to the Prime.
  *
  *
@@ -62,8 +59,6 @@ import lombok.NonNull;
  */
 class BaseReduceTriple extends AbsPrimeBaseGen
 {
-	private static final ExecutorService pool = Executors.newFixedThreadPool(8);
-
 	/**
 	 * Constructor
 	 *
@@ -80,7 +75,7 @@ class BaseReduceTriple extends AbsPrimeBaseGen
 	@Override
 	public void genBasesForPrimeRef(final PrimeRefFactoryIntfc curPrime)
 	{
-		pool.execute(new AllTriples(primeSrc, curPrime, this));
+		new AllTriples(primeSrc, curPrime, this).run();
 	}
 
 	public void addPrimeBases(final @NonNull PrimeRefFactoryIntfc prime, final @NonNull PrimeRefFactoryIntfc [] triple)

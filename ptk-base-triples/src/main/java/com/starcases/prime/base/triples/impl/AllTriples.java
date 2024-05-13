@@ -1,15 +1,19 @@
 package com.starcases.prime.base.triples.impl;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 import java.util.stream.Collectors;
+
+import org.eclipse.collections.api.factory.Lists;
 
 import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
+import com.starcases.prime.kern.api.StatusHandlerIntfc;
+import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
+import com.starcases.prime.service.impl.SvcLoader;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -47,17 +51,15 @@ enum TripleMember
  */
 public class AllTriples implements Runnable
 {
+	private static final  StatusHandlerIntfc statusHandler =
+			new SvcLoader<StatusHandlerProviderIntfc, Class<StatusHandlerProviderIntfc>>(StatusHandlerProviderIntfc.class)
+				.provider(Lists.immutable.of("STATUS_HANDLER")).orElseThrow().create();
+
+	public static AtomicInteger incFound = new AtomicInteger(0);
+	public static AtomicInteger decFound = new AtomicInteger(0);
+
 	private final PrimeRefFactoryIntfc primeRef;
-	private long prime;
 	private final BaseReduceTriple baseReduce;
-
-	private long topPrimeInit; 		// 3/6
-	private long bottomPrimeInit; 	// 1/6
-	private long midPrimeInit;	    // 2/6
-
-	private PrimeRefFactoryIntfc topPRefInit;
-	private PrimeRefFactoryIntfc midPRefInit;
-	private PrimeRefFactoryIntfc bottomPRefInit;
 
 	/**
 	 * prime source ref for lookup of prime/prime refs.
@@ -65,12 +67,6 @@ public class AllTriples implements Runnable
 	@NonNull
 	@Getter(AccessLevel.PRIVATE)
 	private final PrimeSourceIntfc primeSrc;
-
-	/**
-	 * no components null
-	 */
-	private final Predicate<PrimeRefIntfc[]> nonNullTriple =
-			prefArray -> Arrays.stream(prefArray).allMatch(Objects::nonNull);
 
 	/**
 	 * sum up the set of 3 primes.
@@ -90,7 +86,6 @@ public class AllTriples implements Runnable
 	{
 		this.primeSrc = primeSrc;
 		this.primeRef = primeRef;
-		this.prime = primeRef.getPrime();
 		this.baseReduce = baseReduce;
 	}
 
@@ -160,16 +155,18 @@ public class AllTriples implements Runnable
 	@Override
 	public void run()
 	{
+		final long prime = primeRef.getPrime();
+
 		boolean incDone = prime < 11;
 		boolean decDone = prime < 11;
 
-		this.topPrimeInit = Math.max((int)Math.ceil(prime / 2), 1);
-		this.bottomPrimeInit = Math.max((int)Math.ceil(prime / 6), 1);
-		this.midPrimeInit = Math.max(topPrimeInit - bottomPrimeInit, 1);
+		final long topPrimeInit = Math.max((int)Math.floor(prime / 2), 1);
+		final long bottomPrimeInit = Math.max((int)Math.ceil(prime / 6), 1);
+		final long midPrimeInit = Math.max(topPrimeInit - bottomPrimeInit, 1);
 
-		this.topPRefInit = (PrimeRefFactoryIntfc)primeSrc.getPrimeRefCeiling(topPrimeInit).get();
-		this.midPRefInit = (PrimeRefFactoryIntfc)primeSrc.getPrimeRefCeiling(midPrimeInit).get();
-		this.bottomPRefInit = (PrimeRefFactoryIntfc)primeSrc.getPrimeRefCeiling(bottomPrimeInit).get();
+		final PrimeRefFactoryIntfc topPRefInit = (PrimeRefFactoryIntfc)primeSrc.getPrimeRefCeiling(topPrimeInit).get();
+		final PrimeRefFactoryIntfc midPRefInit = (PrimeRefFactoryIntfc)primeSrc.getPrimeRefCeiling(midPrimeInit).get();
+		final PrimeRefFactoryIntfc bottomPRefInit = (PrimeRefFactoryIntfc)primeSrc.getPrimeRefCeiling(bottomPrimeInit).get();
 
 		final PrimeRefFactoryIntfc [] incIndiceRefs = {
 							bottomPRefInit,
@@ -183,43 +180,58 @@ public class AllTriples implements Runnable
 				topPRefInit
 			};
 
-		int rounds = 0;
+		int incRounds = 0;
+		int decRounds = 0;
 		boolean found = false;
 		while (!(incDone && decDone) && !found)
 		{
-			rounds++;
-			if (!decDone && sumTriple.apply(decIndiceRefs) == prime)
-			{
-				baseReduce.addPrimeBases(primeRef, decIndiceRefs);
-				found = true;
-			}
-			else if (!incDone && sumTriple.apply(incIndiceRefs) == prime)
+			if (!incDone && sumTriple.apply(incIndiceRefs) == prime)
 			{
 				baseReduce.addPrimeBases(primeRef, incIndiceRefs);
 				found = true;
+				incFound.incrementAndGet();
+				incRounds++;
 			}
-			else
+			else if (!decDone && sumTriple.apply(decIndiceRefs) == prime)
 			{
-				if (!decDone)
-				{
-					decDone = decrementIndices(decIndiceRefs);
-				}
+				baseReduce.addPrimeBases(primeRef, decIndiceRefs);
+				found = true;
+				decFound.incrementAndGet();
+				decRounds++;
+			}
+			else if (!found)
+			{
 				if (!incDone)
 				{
 					incDone = incrementIndices(incIndiceRefs, primeRef);
 				}
+				if (!decDone)
+				{
+					decDone = decrementIndices(decIndiceRefs);
+				}
 			}
 		}
+
+		if (primeRef.getPrimeRefIdx() % 1_000 == 0)
+		{
+			statusHandler.output(String.format("TRIPLE idxtoprime idx: %d inc-rounds: %d  dec-rounds: %d inc: %d  dec: %d",
+					primeRef.getPrimeRefIdx(),
+					incRounds,
+					decRounds,
+					incFound.get(),
+					decFound.get()));
+		}
+
 		if (prime >= 11 && !found)
 		{
-			System.out.println(String.format("##not-found %b prime-idx %d prime %d rounds %d decDone: %b incDone: %b",
+			statusHandler.errorOutput(String.format("##TRIPLE not-found %b prime-idx %d prime %d inc-rounds: %d dec-rounds: %d decDone: %b incDone: %b",
 					found,
 					primeRef.getPrimeRefIdx(),
 					primeRef.getPrime(),
-					rounds,
+					incRounds,
+					decRounds,
 					decDone,
 					incDone));
 		}
-
 	}
 }

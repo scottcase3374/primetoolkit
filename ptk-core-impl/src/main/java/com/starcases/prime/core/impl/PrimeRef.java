@@ -9,7 +9,7 @@ import java.util.function.Supplier;
 import org.eclipse.collections.api.LongIterable;
 import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.impl.map.mutable.MutableMapFactoryImpl;
-import org.mapdb.BTreeMap;
+import org.mapdb.HTreeMap;
 
 import com.starcases.prime.base.api.PrimeBaseIntfc;
 import com.starcases.prime.base.impl.BaseTypes;
@@ -35,7 +35,7 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	@NonNull
 	private static PrimeSourceIntfc primeSrc;
 
-	private static MutableMap<BaseTypesIntfc, BTreeMap<Long, long[]>> primeBases = MutableMapFactoryImpl.INSTANCE.empty();
+	private static MutableMap<BaseTypesIntfc, HTreeMap<Long, long[]>> primeBases = MutableMapFactoryImpl.INSTANCE.empty();
 
 	private final long primeIdx;
 
@@ -213,7 +213,7 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 		return primeIdx == other.primeIdx;
 	}
 
-	public static void setPrimeBases(BaseTypesIntfc baseType, BTreeMap<Long, long[]> primeBase)
+	public static void setPrimeBases(BaseTypesIntfc baseType, HTreeMap<Long, long[]> primeBase)
 	{
 		primeBases.putIfAbsent(baseType, primeBase);
 	}

@@ -37,9 +37,8 @@ Current processing on my i7 with 64Gb RAM reaches about 3-5 million (cmd line ar
 Some of the technology tried/used.
 - Java 18+
 - Picocli - command line handling
-- Protobuf - related to caching; removed this when I removed Infinispan caching.
-- ASN.1 - This with plain collections + some file handling created a very "low-feature" replacement of Infinispan and its data persistence to files.
 - Gson - PrimeSQL language results output as json
+- Mapdb - replaced Infinispan and my later work with custom code + ASN1.
 - Eclipse Collections - alternative for standard java for lower memory usage, etc.
 - Antlr4 - parsing and processing a very simple "SQL like" language for primes that
 I created..
@@ -48,7 +47,6 @@ I created..
 - Jakarta Validation - as replacement for javax validation.
 - JGrapht / JGraphx - some graphing POC
 - JUnit Jupiter - as replacement for JUnit4
-- JBoss Weld - some POC work for dependency injection with plain Java apps. Reverted this for now in favor of Java ServiceLoader.
 - Lombok - code generation / simplification
 - Java ServiceLoader support
 - Maven
@@ -354,7 +352,6 @@ Issues
 
 ## ToDo
 	- fix / add API documentation as needed after last major refactoring
-	- Enable more uses for caching; ON-GOING - primes are loaded from text files, persisted as ASN.1 to files and loaded at startup into the "cache" collection.
 	- Increase test coverage.
 	- Improve metrics handling.
 	- More generic / useful methods for identifying patterns in the bases/data.

@@ -102,7 +102,7 @@ class BaseReduceTripleng extends AbsPrimeBaseGen
 		final long [] lowIdx = {-1};
 		final long [] mediumIdx = {0};
 		final long [] highIdx = {curPrime.getPrimeRefIdx()};
-
+		boolean found = false;
 		while(adjustIndexes(lowIdx, mediumIdx, highIdx))
 		{
 			final long lowPrime = primeSrc.getPrimeForIdx(lowIdx[0]).getAsLong();
@@ -122,10 +122,20 @@ class BaseReduceTripleng extends AbsPrimeBaseGen
 															  primeSrc.getPrimeForIdx(mediumIdx[0]).getAsLong(),
 															  primeSrc.getPrimeForIdx(highIdx[0]).getAsLong()
 															));
+				found = true;
 				lowIdx[0] = -1;
 				mediumIdx[0] = 0;
 				break;
 			}
+		}
+
+		if (!found && curPrime.getPrime() >= 11)
+		{
+			System.out.println(String.format("##TRIPLENG not-found %b prime-idx %d prime %d",
+					found,
+					curPrime.getPrimeRefIdx(),
+					curPrime.getPrime()
+					));
 		}
 	}
 
