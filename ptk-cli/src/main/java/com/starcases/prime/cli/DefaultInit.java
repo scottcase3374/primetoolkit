@@ -1,42 +1,5 @@
 package com.starcases.prime.cli;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.concurrent.Executors;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
-import org.eclipse.collections.api.block.predicate.Predicate2;
-import org.eclipse.collections.api.collection.ImmutableCollection;
-import org.eclipse.collections.api.factory.Lists;
-import org.eclipse.collections.api.factory.Maps;
-import org.eclipse.collections.api.list.ImmutableList;
-import org.eclipse.collections.api.map.ImmutableMap;
-import org.eclipse.collections.api.map.MutableMap;
-import org.eclipse.collections.api.multimap.ImmutableMultimap;
-import org.eclipse.collections.impl.list.mutable.FastList;
-import org.eclipse.collections.impl.map.mutable.MutableMapFactoryImpl;
-import org.jgrapht.event.GraphListener;
-import org.jgrapht.graph.DefaultEdge;
-import org.mapdb.BTreeMap;
-import org.mapdb.DB;
-import org.mapdb.DBMaker;
-import org.mapdb.HTreeMap;
-import org.mapdb.Serializer;
-
 import com.starcases.prime.base.api.BaseProviderIntfc;
 import com.starcases.prime.base.api.BaseTypesProviderIntfc;
 import com.starcases.prime.base.api.LogPrimeDataProviderIntfc;
@@ -52,21 +15,58 @@ import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
 import com.starcases.prime.datamgmt.api.CollectionTrackerProviderIntfc;
 import com.starcases.prime.graph.export.api.ExportsProviderIntfc;
 import com.starcases.prime.graph.visualize.impl.ViewDefault;
-import com.starcases.prime.kern.api.BaseTypesIntfc;
-import com.starcases.prime.kern.api.OutputableIntfc;
-import com.starcases.prime.kern.api.PtkException;
-import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
-import com.starcases.prime.kern.api.StatusHandlerIntfc;
+import com.starcases.prime.kern.api.*;
 import com.starcases.prime.logging.LogGraphStructure;
 import com.starcases.prime.logging.LogNodeStructure;
 import com.starcases.prime.service.impl.SvcLoader;
 import com.starcases.prime.sql.api.SqlProviderIntfc;
-
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
+import jakarta.validation.constraints.NotNull;
+import org.eclipse.collections.api.block.predicate.Predicate2;
+import org.eclipse.collections.api.collection.ImmutableCollection;
+import org.eclipse.collections.api.factory.Lists;
+import org.eclipse.collections.api.factory.Maps;
+import org.eclipse.collections.api.list.ImmutableList;
+import org.eclipse.collections.api.map.ImmutableMap;
+import org.eclipse.collections.api.map.MutableMap;
+import org.eclipse.collections.api.multimap.ImmutableMultimap;
+import org.eclipse.collections.impl.list.mutable.FastList;
+import org.eclipse.collections.impl.map.mutable.MutableMapFactoryImpl;
+import org.ehcache.Cache;
+import org.ehcache.CacheManager;
+import org.ehcache.config.builders.CacheConfigurationBuilder;
+import org.ehcache.config.builders.CacheManagerBuilder;
+import org.ehcache.config.builders.ResourcePoolsBuilder;
+import org.ehcache.config.units.EntryUnit;
+import org.ehcache.config.units.MemoryUnit;
+import org.jgrapht.event.GraphListener;
+import org.jgrapht.graph.DefaultEdge;
+import org.mapdb.BTreeMap;
+import org.mapdb.DB;
+import org.mapdb.DBMaker;
+import org.mapdb.Serializer;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.LongBuffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
+
 
 /**
  *
@@ -99,68 +99,56 @@ public class DefaultInit implements Runnable
 	private static final Predicate2<BaseTypesIntfc, String> baseMatchPred = (base, outputType) -> base.name().equals(outputType);
 
 	private static DB ptkDB;
-	private static final MutableMap<String, DB> baseDBS = MutableMapFactoryImpl.INSTANCE.empty();
+	private static final MutableMap<String,Cache<Long, LongBuffer>> baseDBS = MutableMapFactoryImpl.INSTANCE.empty();
 
 	/**
 	 * prime source - for prime/prime ref lookups
 	 */
-	@Getter
-	@Setter
 	private PrimeSourceFactoryIntfc primeSrc;
 
 	/**
 	 * DefaultInit opts info from picocli
 	 */
-	@Getter
 	@ArgGroup(exclusive = false, validate = false)
 	private final InitOpts initOpts = new InitOpts();
 
 	/**
 	 * Base type selections
 	 */
-	@Getter
-	@Setter
 	@ArgGroup(exclusive = false, validate = false)
 	private BaseOpts baseOpts;
 
 	/**
 	 * flags for which data to output.
 	 */
-	@Getter
-	@Setter
 	@ArgGroup(exclusive = false, validate = false)
-	private OutputOpts outputOpts = new OutputOpts();
+	private final OutputOpts outputOpts = new OutputOpts();
 
 	/**
 	 * flags indicating a graph type to produce
 	 */
-	@Getter
-	@Setter
 	@ArgGroup(exclusive = false, validate = false)
 	private GraphOpts graphOpts;
 
 	/**
 	 * flags indicating to export GML
 	 */
-	@Getter
-	@Setter
 	@ArgGroup(exclusive = false, validate = false)
 	private ExportOpts exportOpts;
 
 	/**
 	 * list/container for actions to execute - is never null or replaced.
 	 */
-	@Getter
-	@NonNull
+	@NotNull
 	private final List<Consumer<String>> actions = new FastList<>();
 
 
 	private final  ImmutableCollection<BaseTypesIntfc> BASE_TYPES =
-			new SvcLoader<BaseTypesProviderIntfc, Class<BaseTypesProviderIntfc>>(BaseTypesProviderIntfc.class)
+			new SvcLoader<>(BaseTypesProviderIntfc.class)
 				.provider(Lists.immutable.of("GLOBAL_BASE_TYPES")).orElseThrow().create();
 
 	private final  StatusHandlerIntfc statusHandler =
-			new SvcLoader<StatusHandlerProviderIntfc, Class<StatusHandlerProviderIntfc>>(StatusHandlerProviderIntfc.class)
+			new SvcLoader<>(StatusHandlerProviderIntfc.class)
 				.provider(Lists.immutable.of("STATUS_HANDLER")).orElseThrow().create();
 
 	private static final SvcLoader<CollectionTrackerProviderIntfc, Class<CollectionTrackerProviderIntfc>> collTreeProvider = new SvcLoader< >(CollectionTrackerProviderIntfc.class);
@@ -234,7 +222,7 @@ public class DefaultInit implements Runnable
 		{
 			if (LOG.isLoggable(Level.SEVERE))
 			{
-				LOG.severe("IOExcetion: " + except.toString());
+				LOG.severe("IOExcetion: " + except);
 			}
 		}
 	}
@@ -243,7 +231,6 @@ public class DefaultInit implements Runnable
 	 * default export setup.
 	 *
 	 * @param primeSrc
-	 * @param exportFileDef
 	 */
 	private void export(final PrimeSourceIntfc primeSrc)
 	{
@@ -284,10 +271,10 @@ public class DefaultInit implements Runnable
 
 	/**
 	 * Normalize the path and insert identification info into the filename.
-	 * @param base
-	 * @param fileName
-	 * @param extension
-	 * @return
+	 * @param base Base name
+	 * @param fileName File name to decorate
+	 * @param extension Extension to decorate with
+	 * @return Decorated path
 	 */
 	private Path decorateFileName(final String base, final String fileName, final String extension)
 	{
@@ -319,7 +306,7 @@ public class DefaultInit implements Runnable
 		final File folder = new File(replaceTildeHome(folderPath));
 		if (folder.exists() || folder.mkdirs())
 		{
-			optFolder = Optional.ofNullable(folder);
+			optFolder = Optional.of(folder);
 		}
 
 		if (optFolder.isEmpty() && LOG.isLoggable(Level.SEVERE))
@@ -448,12 +435,10 @@ public class DefaultInit implements Runnable
 
 				// Constructor calls methods to load data.
 				primePreloadProvider
-						.provider(Lists.immutable.of("PRELOADER"))
-						.map(p -> p.create(primeCache, Path.of(replaceTildeHome(inputFolderPath)), null).orElse(null))
+                        .provider(Lists.immutable.of("PRELOADER"))
+						.flatMap(p -> p.create(primeCache, Path.of(replaceTildeHome(inputFolderPath)), null))
 						.ifPresentOrElse(
-								 preloader -> 	{
-									 				LOG.fine("Raw source primes loaded.");
-								 				}
+								 preloader -> 	LOG.fine("Raw source primes loaded.")
 								, () -> LOG.warning("No Prime Raw Text preloader found."));
 			}
 			else
@@ -470,7 +455,7 @@ public class DefaultInit implements Runnable
 		});
 	}
 
-	private PrimeSourceFactoryIntfc getPrimeSource(@NonNull final BTreeMap<Long, Long> primeCache , @NonNull final BTreeMap<Long, Long> primeIdxCache)
+	private PrimeSourceFactoryIntfc getPrimeSource(@NotNull final BTreeMap<Long, Long> primeCache , @NotNull final BTreeMap<Long, Long> primeIdxCache)
 	{
 		final Consumer<PrimeSourceIntfc> c = PrimeRef::setPrimeSource;
 		final ImmutableList<Consumer<PrimeSourceIntfc>> consumers = Lists.immutable.of(c);
@@ -490,7 +475,6 @@ public class DefaultInit implements Runnable
 		actions.add(s -> {
 			primeSrc.setCreateBases(baseOpts != null && baseOpts.isCreateBases() );
 			primeSrc.init();
-			baseDBS.forEach(DB::commit);
 		});
 	}
 
@@ -500,6 +484,7 @@ public class DefaultInit implements Runnable
 		if (baseOpts != null && baseOpts.getBases() != null)
 		{
 			final SvcLoader<BaseProviderIntfc, Class<BaseProviderIntfc>> baseProvider = new SvcLoader< >(BaseProviderIntfc.class);
+
 
 			baseOpts.getBases().forEach(
 					baseType ->
@@ -518,52 +503,33 @@ public class DefaultInit implements Runnable
 
 				final String inputFolderPath = initOpts.getInputDataFolder();
 				final Path homePath =  Path.of(replaceTildeHome(inputFolderPath)).getParent();
-				final Path dbPath = Path.of(homePath.normalize().toString(), baseType.name() + ".mapdb");
+				//final Path dbPath = Path.of(homePath.normalize().toString(), baseType.name() + ".mapdb");
+				CacheManager cacheManager = CacheManagerBuilder.newCacheManagerBuilder()
+						.with(CacheManagerBuilder.persistence(initOpts.getOutputFolder()))
+						.withSerializer(LongBuffer.class, LongBufferSerializer.class)
+						.withCache(baseType.name(),
+								CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, LongBuffer.class,
+										ResourcePoolsBuilder.newResourcePoolsBuilder()
+												.heap(50_000, EntryUnit.ENTRIES)
+												.disk(10, MemoryUnit.GB, true)))
+						.build(false);
+				cacheManager.init();
+				final Cache<Long, LongBuffer> cache = cacheManager.getCache(baseType.name(), Long.class, LongBuffer.class);
 
-				// https://mapdb.org/book/htreemap/
+				System.out.println(String.format("basetype %s  idx: 5  bases: %s", baseType.name(), cache.get(5L)) );
 
-				final DB dbDisk = DBMaker
-					    .fileDB(dbPath.normalize().toString())
-					    .allocateStartSize(5L * 1024 * 1024 * 1024) // 5 GB
-					    .allocateIncrement(1024L * 1024 * 1024) // 1 GB
-					    .checksumHeaderBypass()
-					    .make();
+				baseDBS.put(baseType.name(), cache);
 
-				final DB dbMem = DBMaker
-					    .memoryDB()
-					    .transactionEnable()
-					    .checksumHeaderBypass()
-					    .closeOnJvmShutdown()
-					    .make();
-
-				HTreeMap onDisk = dbDisk.hashMap(dbPath.normalize().toString()).createOrOpen();
-
-				System.out.println(String.format("basetype %s  idx: 5  bases: %s", baseType.name(), onDisk.get(5L)) );
-
-				baseDBS.put(baseType.name(), dbMem);
-
-				final HTreeMap baseSrc = dbMem
-						.hashMap(cacheNameForBaseType, Serializer.LONG, Serializer.LONG_ARRAY)
-						.expireMaxSize(50_000)
-						.expireOverflow(onDisk)
-						.expireAfterCreate()
-						.expireExecutor(Executors.newScheduledThreadPool(2))
-						.createOrOpen();
-
-				PrimeRef.setPrimeBases(baseType, baseSrc);
+				PrimeRef.setPrimeBases(baseType, cache);
 
 				ImmutableMap<String, Object> settings = Maps.immutable.empty();
-				if (baseType.name().equals("NPRIME"))
+				if ("NPRIME".equals(baseType.name()))
 				{
 					settings = Maps.immutable.of("maxReduce", baseOpts.getMaxReduce());
 				}
-				else if (baseType.name().equals("PRIME_TREE"))
+				else if ("PRIME_TREE".equals(baseType.name()))
 				{
 					settings = Maps.immutable.of("collTracker", collTracker);
-				}
-				else
-				{
-					settings = Maps.immutable.empty();
 				}
 
 				// System provided: TRIPLE, TRIPLENG, PREFIX_PRIME + user provided
@@ -589,7 +555,7 @@ public class DefaultInit implements Runnable
 
 	}
 
-	private void setupBaseLogConfig(@NonNull final BaseTypesIntfc baseType)
+	private void setupBaseLogConfig(@NotNull final BaseTypesIntfc baseType)
 	{
 		if (baseOpts.isUseBaseFile())
 		{
@@ -724,3 +690,4 @@ public class DefaultInit implements Runnable
 		actions.forEach(c -> c.accept("execute action"));
 	}
 }
+
