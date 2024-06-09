@@ -23,9 +23,9 @@ public class PrefixProvider implements BaseProviderIntfc
 	 * create target service
 	 */
 	@Override
-	public BaseGenFactoryIntfc create(final ImmutableMap<String,Object> settings)
+	public BaseGenFactoryIntfc create(final int minIdx, final int maxIdx, final ImmutableMap<String,Object> settings)
 	{
-		return new BasePrefixes(PrefixBaseType.PREFIX);
+		return new BasePrefixes(minIdx, maxIdx);
 	}
 
 	/**

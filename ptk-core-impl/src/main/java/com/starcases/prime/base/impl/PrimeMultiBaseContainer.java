@@ -11,6 +11,7 @@ import com.starcases.prime.base.api.BaseMetadataIntfc;
 import com.starcases.prime.base.api.PrimeBaseIntfc;
 import com.starcases.prime.kern.api.BaseTypesIntfc;
 
+import jakarta.validation.constraints.Min;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
@@ -50,7 +51,7 @@ public class PrimeMultiBaseContainer implements PrimeBaseIntfc
 	 * @param primeBase
 	 */
 	@Override
-	public void addPrimeBases(@NonNull final BaseTypesIntfc baseType, @NonNull final MutableList<ImmutableLongCollection> primeBase, final BaseMetadataIntfc baseMetadata)
+	public void addPrimeBases(@Min(0) long primeIdx, @NonNull final BaseTypesIntfc baseType, @NonNull final MutableList<ImmutableLongCollection> primeBase, final BaseMetadataIntfc baseMetadata)
 	{
 		this.primeBases.compute(baseType,
 				(k, v) ->
@@ -63,12 +64,12 @@ public class PrimeMultiBaseContainer implements PrimeBaseIntfc
 						v.addAll(primeBase);
 						return v;
 					});
-
+		//this.primeIdx = primeIdx;
 		this.baseMetadata.computeIfAbsent(baseType, a -> baseMetadata);
 	}
 
 	@Override
-	public void addPrimeBases(@NonNull final ImmutableLongCollection primeBase, @NonNull final BaseTypesIntfc baseType)
+	public void addPrimeBases(@Min(0) long primeIdx, @NonNull final ImmutableLongCollection primeBase, @NonNull final BaseTypesIntfc baseType)
 	{
 		this.primeBases.compute(baseType,
 				(k, v) ->
@@ -81,6 +82,7 @@ public class PrimeMultiBaseContainer implements PrimeBaseIntfc
 						v.add(primeBase);
 						return v;
 					});
+		//this.primeIdx = primeIdx;
 
 	}
 
@@ -89,15 +91,15 @@ public class PrimeMultiBaseContainer implements PrimeBaseIntfc
 	 * @param primeBase
 	 */
 	@Override
-	public void addPrimeBases(@NonNull final MutableList<ImmutableLongCollection> primeBase)
+	public void addPrimeBases(@Min(0) long primeIdx, @NonNull final MutableList<ImmutableLongCollection> primeBase)
 	{
-		addPrimeBases(BaseTypes.DEFAULT, primeBase, null);
+		addPrimeBases(primeIdx, BaseTypes.DEFAULT, primeBase, null);
 	}
 
 	@Override
-	public void addPrimeBases(@NonNull final MutableList<ImmutableLongCollection> primeBase, @NonNull final BaseTypesIntfc baseType)
+	public void addPrimeBases(@Min(0) long primeIdx, @NonNull final MutableList<ImmutableLongCollection> primeBase, @NonNull final BaseTypesIntfc baseType)
 	{
-		addPrimeBases(baseType, primeBase, null);
+		addPrimeBases(primeIdx, baseType, primeBase, null);
 	}
 
 	/**
@@ -112,6 +114,20 @@ public class PrimeMultiBaseContainer implements PrimeBaseIntfc
 	@Override
 	public MutableList<ImmutableLongCollection> getPrimeBases(@NonNull final BaseTypesIntfc baseType)
 	{
-		return primeBases.getOrDefault(baseType, MutableListFactoryImpl.INSTANCE.empty());
+		MutableList<ImmutableLongCollection> ret = null;
+
+//		var cachedResult = primeBases.get(primeIdx);
+//		if (cachedResult != null)
+//		{
+//			ret = cachedResult;
+//		}
+		return ret != null ? ret : primeBases.getOrDefault(baseType, MutableListFactoryImpl.INSTANCE.empty());
+	}
+
+	@Override
+	public void addPrimeBases(long primeIdx, @NonNull long[] primeBase, @NonNull BaseTypesIntfc baseType)
+	{
+		// TODO Auto-generated method stub
+
 	}
 }

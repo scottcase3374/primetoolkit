@@ -27,11 +27,11 @@ public class PrimeTreeProvider implements BaseProviderIntfc
 	 * collTrack setting is required.
 	 */
 	@Override
-	public BaseGenFactoryIntfc create(final ImmutableMap<String,Object> settings)
+	public BaseGenFactoryIntfc create(final int minIdx, final int maxIdx, final ImmutableMap<String,Object> settings)
 	{
 		final CollectionTrackerIntfc collTracker = (CollectionTrackerIntfc)settings.get("collTracker");
 
-		return new PrimeTree(PrimeTreeBaseType.PRIME_TREE, collTracker);
+		return new PrimeTree(minIdx, maxIdx, collTracker);
 	}
 
 	/**

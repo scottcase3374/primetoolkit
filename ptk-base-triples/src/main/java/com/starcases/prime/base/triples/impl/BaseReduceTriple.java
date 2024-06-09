@@ -1,13 +1,17 @@
 package com.starcases.prime.base.triples.impl;
 
+import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
+import org.eclipse.collections.impl.factory.Sets;
+
 import com.starcases.prime.base.impl.AbsPrimeBaseGen;
+import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.kern.api.BaseTypesIntfc;
 
 import lombok.NonNull;
 
 /*
- *  Given a Prime, find EVERY set of 3 pre-existing primes
+ *  Given a Prime, find a set of 3 pre-existing primes
  *   that sum to the Prime.
  *
  *
@@ -60,17 +64,29 @@ class BaseReduceTriple extends AbsPrimeBaseGen
 	 *
 	 * @param primeSrc
 	 */
-	public BaseReduceTriple(@NonNull final BaseTypesIntfc baseType)
+	public BaseReduceTriple(final int minIdx, final int maxIdx)
 	{
-		super(baseType);
+		super(minIdx, maxIdx);
 	}
 
 	/**
 	 * Generate base for specified prime
 	 */
 	@Override
-	public void genBasesForPrimeRef(final PrimeRefIntfc curPrime)
+	public void genBasesForPrimeRef(final PrimeRefFactoryIntfc curPrime)
 	{
-		new AllTriples(primeSrc).process(curPrime);
+		new AllTriples(primeSrc, curPrime, this).run();
+	}
+
+	public void addPrimeBases(final @NonNull PrimeRefFactoryIntfc prime, final @NonNull PrimeRefFactoryIntfc [] triple)
+	{
+		final ImmutableLongCollection primeBase = Sets.immutable.of(triple).collectLong(PrimeRefIntfc::getPrime);
+		prime.addPrimeBases(getBaseType(), primeBase);
+	}
+
+	@Override
+	public BaseTypesIntfc getBaseType()
+	{
+		return TripleBaseType.TRIPLE;
 	}
 }

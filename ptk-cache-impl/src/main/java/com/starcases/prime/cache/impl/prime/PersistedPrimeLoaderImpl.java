@@ -78,7 +78,7 @@ public class PersistedPrimeLoaderImpl implements PersistLoaderIntfc
 						  primes[i] = subsetAsn.getBerInteger().get(i).longValue();
 					  }
 
-					  LOG.info(String.format("Loading Persisted Cache-file: %s", path.getFileName().toString()));
+					  LOG.info(String.format("Loading Persisted Prime Cache-file: %s", path.getFileName().toString()));
 					  loader.apply(Long.valueOf(path.getFileName().toString()), primes);
 				  }
 				  catch(final IOException e)

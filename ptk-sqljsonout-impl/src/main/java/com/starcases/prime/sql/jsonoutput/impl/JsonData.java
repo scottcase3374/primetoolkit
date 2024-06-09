@@ -15,9 +15,9 @@ public class JsonData
 
 	@Setter
 	@Getter
-	private Object[] base;
+	private long[] base;
 
-	public JsonData(final long index, final long prime, final Object[] bases)
+	public JsonData(final long index, final long prime, final long[] bases)
 	{
 		this.index = index;
 		this.prime = prime;

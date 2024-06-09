@@ -4,7 +4,7 @@ import java.util.ListIterator;
 
 import com.starcases.prime.core.api.PrimeRefIntfc;
 
-public interface PrimeRefIteratorIntfc extends ListIterator<PrimeRefIntfc>
+public interface PrimeRefIteratorIntfc<T extends PrimeRefIntfc> extends ListIterator<T>
 {
 
 }

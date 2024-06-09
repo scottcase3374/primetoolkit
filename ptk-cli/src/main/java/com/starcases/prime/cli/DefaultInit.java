@@ -9,10 +9,10 @@ import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -25,32 +25,27 @@ import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.factory.Maps;
 import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.map.ImmutableMap;
+import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.api.multimap.ImmutableMultimap;
 import org.eclipse.collections.impl.list.mutable.FastList;
+import org.eclipse.collections.impl.map.mutable.MutableMapFactoryImpl;
 import org.jgrapht.event.GraphListener;
 import org.jgrapht.graph.DefaultEdge;
+import org.mapdb.BTreeMap;
+import org.mapdb.DB;
+import org.mapdb.DBMaker;
+import org.mapdb.HTreeMap;
+import org.mapdb.Serializer;
 
 import com.starcases.prime.base.api.BaseProviderIntfc;
 import com.starcases.prime.base.api.BaseTypesProviderIntfc;
 import com.starcases.prime.base.api.LogPrimeDataProviderIntfc;
-import com.starcases.prime.base.api.BaseGenDecorProviderIntfc;
-import com.starcases.prime.base.api.BaseGenIntfc;
 import com.starcases.prime.base.impl.BaseTypes;
-import com.starcases.prime.base.impl.PrimeMultiBaseContainer;
-
-import com.starcases.prime.cache.api.CacheProviderIntfc;
-import com.starcases.prime.cache.api.PersistedCacheIntfc;
-import com.starcases.prime.cache.api.persistload.PersistLoaderProviderIntfc;
 import com.starcases.prime.cache.api.primetext.PrimeTextFileLoaderProviderIntfc;
-import com.starcases.prime.cache.api.subset.PrimeSubsetProviderIntfc;
-import com.starcases.prime.cache.impl.prime.PrimeSubsetCacheImpl;
-import com.starcases.prime.cli.MetricsOpts.MetricOpt;
-import com.starcases.prime.common.api.OutputOper;
 import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceFactoryIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
-import com.starcases.prime.core.api.ProgressProviderIntfc;
 import com.starcases.prime.core.impl.PrimeRef;
 import com.starcases.prime.core.impl.PrimeSource;
 import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
@@ -64,8 +59,6 @@ import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
 import com.starcases.prime.kern.api.StatusHandlerIntfc;
 import com.starcases.prime.logging.LogGraphStructure;
 import com.starcases.prime.logging.LogNodeStructure;
-import com.starcases.prime.metrics.api.MetricProviderIntfc;
-import com.starcases.prime.metrics.api.MetricsRegistryProviderIntfc;
 import com.starcases.prime.service.impl.SvcLoader;
 import com.starcases.prime.sql.api.SqlProviderIntfc;
 
@@ -92,7 +85,6 @@ import picocli.CommandLine.Command;
  * interface function is just a dummy value - not used.
  *
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals"})
 @Command(name = "init", description = "Default initial setup")
 public class DefaultInit implements Runnable
 {
@@ -104,7 +96,10 @@ public class DefaultInit implements Runnable
 	/**
 	 * for matching output type names to base-type names
 	 */
-	private static Predicate2<BaseTypesIntfc, String> baseMatchPred = (base, outputType) -> base.name().equals(outputType);
+	private static final Predicate2<BaseTypesIntfc, String> baseMatchPred = (base, outputType) -> base.name().equals(outputType);
+
+	private static DB ptkDB;
+	private static final MutableMap<String, DB> baseDBS = MutableMapFactoryImpl.INSTANCE.empty();
 
 	/**
 	 * prime source - for prime/prime ref lookups
@@ -145,22 +140,12 @@ public class DefaultInit implements Runnable
 	private GraphOpts graphOpts;
 
 	/**
-	 * flags indicating metrics to manage
-	 */
-	@Getter
-	@Setter
-	@ArgGroup(exclusive = false, validate = false)
-	private MetricsOpts metricOpts;
-
-	/**
 	 * flags indicating to export GML
 	 */
 	@Getter
 	@Setter
 	@ArgGroup(exclusive = false, validate = false)
 	private ExportOpts exportOpts;
-
-	private static final  MetricOpt [] NULL_OPTS = new MetricOpt[0];
 
 	/**
 	 * list/container for actions to execute - is never null or replaced.
@@ -184,12 +169,6 @@ public class DefaultInit implements Runnable
 					.map(p -> p.create(null))
 					.orElse(null);
 
-	private static final SvcLoader<MetricProviderIntfc, Class<MetricProviderIntfc>> metricProviderSvc = new SvcLoader< >(MetricProviderIntfc.class);
-	private static final MetricProviderIntfc metricProvider = metricProviderSvc
-					.provider(Lists.immutable.of("METRIC_PROVIDER"))
-					.map(p -> p.create(null))
-					.orElse(null);
-
 	/**
 	 * Pull all the settings together and execute all the desired functionality.
 	 */
@@ -204,11 +183,9 @@ public class DefaultInit implements Runnable
 
 		setFactoryDefaults();
 
-		actionEnableMetrics();
-
 		actionCreatePrimeSrc();
 
-		actionPrepAdditionalBases();
+		actionInitBaseGenerators();
 
 		actionInitPrimeSourceData();
 
@@ -305,6 +282,13 @@ public class DefaultInit implements Runnable
 		return path.replaceFirst("^~", System.getenv("HOME"));
 	}
 
+	/**
+	 * Normalize the path and insert identification info into the filename.
+	 * @param base
+	 * @param fileName
+	 * @param extension
+	 * @return
+	 */
 	private Path decorateFileName(final String base, final String fileName, final String extension)
 	{
 		Path ret = null;
@@ -367,32 +351,13 @@ public class DefaultInit implements Runnable
 		}
 	}
 
-	private void actionEnableMetrics()
-	{
-		// TODO allow enablement of individual metrics
-
-		if (LOG.isLoggable(Level.INFO))
-		{
-			LOG.info("CLI - Check metrics enablement.");
-		}
-		if (Arrays.asList((metricOpts != null) ? metricOpts.getMetricType() : NULL_OPTS).contains(MetricOpt.ALL))
-		{
-			final SvcLoader<MetricsRegistryProviderIntfc, Class<MetricsRegistryProviderIntfc>> registryProviders = new SvcLoader< >(MetricsRegistryProviderIntfc.class);
-			final ImmutableCollection<String> attributes = Lists.immutable.of("METRICS");
-			actions.add(s ->  registryProviders
-								.providers(attributes)
-								.tap(p -> LOG.info("metric: " + p.toString()))
-								.forEach(p -> p.create(null).create(null)));
-		}
-	}
-
 	private void actionEnableCmdListener()
 	{
 		if (LOG.isLoggable(Level.INFO))
 		{
 			LOG.info("CLI - Check SQL listener enablement.");
 		}
-		if (baseOpts != null && baseOpts.isEnableCmmandListener())
+		if (baseOpts != null && initOpts.isEnableCmmandListener())
 		{
 			final ImmutableCollection<String> attributes = Lists.immutable.of("SQLPRIME");
 			final SvcLoader<SqlProviderIntfc, Class<SqlProviderIntfc>> sqlCmdProviders = new SvcLoader< >(SqlProviderIntfc.class);
@@ -401,12 +366,12 @@ public class DefaultInit implements Runnable
 
 					if (LOG.isLoggable(Level.INFO))
 					{
-						LOG.info("Starting SQL command listener - port:" + baseOpts.getCmdListenerPort());
+						LOG.info("Starting SQL command listener - port:" + initOpts.getCmdListenerPort());
 					}
 
 					sqlCmdProviders
 						.provider(attributes)
-						.map(p -> p.create(primeSrc, baseOpts.getCmdListenerPort()))
+						.map(p -> p.create(primeSrc, initOpts.getCmdListenerPort()))
 						.ifPresentOrElse(p ->
 									{
 										try
@@ -432,54 +397,64 @@ public class DefaultInit implements Runnable
 
 		actions.add(s -> {
 
+			//
+			//  Primes setup
+			//
+
 			// Create cache instance and if requested - clear out existing primes [persisted]; no in-memory primes should
 			// exist yet since we haven't loaded the raw primes nor have we tried to load persisted primes.
-			@SuppressWarnings({"PMD.LocalVariableNamingConventions"})
-			final String CACHE_NAME = "primes";
-			final String inputFolderPath = initOpts.getInputDataFolder();
-			final boolean loadRawPrimes = initOpts.isLoadPrimes();
-			final Path CACHE_PATH = Path.of(replaceTildeHome(initOpts.getOutputFolder()), CACHE_NAME);
-			final PersistedCacheIntfc<Long> cache = new SvcLoader< >(CacheProviderIntfc.class)
-													.provider(Lists.immutable.of("CACHE", "PRIMES"))
-													.map(p -> p.create(
-																CACHE_PATH,
-																loadRawPrimes /* clear any existing prime cache first */
-																) )
-													.orElseThrow();
 
+
+			final String inputFolderPath = initOpts.getInputDataFolder();
 			final var inputFoldExist = ensureFolderExist(inputFolderPath);
 
-			// Setup for persistent data load
-			final PrimeSubsetProviderIntfc subsetProvider = new SvcLoader<PrimeSubsetProviderIntfc, Class<PrimeSubsetProviderIntfc>>(PrimeSubsetProviderIntfc.class)
-					.provider(Lists.immutable.of("PRIMESUBSET")).orElseThrow();
+			final Path homePath =  Path.of(replaceTildeHome(inputFolderPath)).getParent();
+			final Path dbPath = Path.of(homePath.normalize().toString(), "ptkdb.mapdb");
 
-			// Load previously persisted primes (primes previously cached - NOT the raw text prime data)
-			new SvcLoader< >(PersistLoaderProviderIntfc.class)
-				.provider(Lists.immutable.of("PERSISTLOADER", "PRIMES"))
-				.ifPresent(p -> p.create(cache, CACHE_PATH, subsetProvider, null).process());
+			ptkDB = DBMaker
+		    .fileDB(dbPath.normalize().toString())
+		    .fileMmapEnable()            // Always enable mmap
+		    .fileMmapPreclearDisable()   // Make mmap file faster
+		    .allocateStartSize(5L * 1024 * 1024 * 1024) // 5 GB
+		    .allocateIncrement(1024L * 1024 * 1024) // 1 GB
+		    .checksumHeaderBypass()
+		    .make();
 
-//			new SvcLoader< >(PersistLoaderProviderIntfc.class)
-//				.provider(Lists.immutable.of("PERSISTLOADER", "BASES"))
-//				.ifPresent(p -> p.create(cache, CACHE_PATH, subsetProvider, null).process());
+			final String PRIME_CACHE_NAME = "primes";
+			final boolean loadRawPrimes = initOpts.isLoadPrimes();
+			var primeCache = ptkDB
+								.treeMap(PRIME_CACHE_NAME)
+								.keySerializer(Serializer.LONG)
+								.valueSerializer(Serializer.LONG)
+								.createOrOpen();
 
-			if (loadRawPrimes && (cache.get(0L) == null))
+
+			final String PRIME_TO_IDX_CACHE_NAME = "primes_idx";
+			var primeIdxCache = ptkDB
+								.treeMap(PRIME_TO_IDX_CACHE_NAME)
+								.keySerializer(Serializer.LONG)
+								.valueSerializer(Serializer.LONG)
+								.createOrOpen();
+
+			if (loadRawPrimes)
 			{
 				if (LOG.isLoggable(Level.INFO))
 				{
 					LOG.info(String.format("CREATING PrimeSrc : Loading cache from raw files ; Input folder exists: [%b], do-load-raw-primes[%b]", inputFoldExist, loadRawPrimes));
 				}
 
-				final SvcLoader<PrimeTextFileLoaderProviderIntfc, Class<PrimeTextFileLoaderProviderIntfc>> preloadProvider =
+				final SvcLoader<PrimeTextFileLoaderProviderIntfc, Class<PrimeTextFileLoaderProviderIntfc>> primePreloadProvider =
 						new SvcLoader< >(PrimeTextFileLoaderProviderIntfc.class);
 
-				// Constructor calls required methods to load data.
-				preloadProvider
+				// Constructor calls methods to load data.
+				primePreloadProvider
 						.provider(Lists.immutable.of("PRELOADER"))
-						.map(p -> p.create(cache, Path.of(replaceTildeHome(inputFolderPath)), null).orElse(null))
-						.orElse(null);
-
-				primeSrc = getPrimeSource(cache);
-				cache.unwrap(PrimeSubsetCacheImpl.class).persistAll();
+						.map(p -> p.create(primeCache, Path.of(replaceTildeHome(inputFolderPath)), null).orElse(null))
+						.ifPresentOrElse(
+								 preloader -> 	{
+									 				LOG.fine("Raw source primes loaded.");
+								 				}
+								, () -> LOG.warning("No Prime Raw Text preloader found."));
 			}
 			else
 			{
@@ -487,122 +462,131 @@ public class DefaultInit implements Runnable
 				{
 					LOG.info(String.format("CREATING PrimeSrc: NOT loading Cache ; Input folder exists: [%b], do-load-raw-primes[%b]", inputFoldExist, loadRawPrimes));
 				}
-
-				primeSrc = getPrimeSource(cache);
 			}
 
-			if (outputOpts.getOutputOpers().contains(OutputOper.PROGRESS))
-			{
-				final SvcLoader<ProgressProviderIntfc, Class<ProgressProviderIntfc>> progressProvider = new SvcLoader< >(ProgressProviderIntfc.class);
-				final ImmutableList<String> attributes = Lists.immutable.of("PROGRESS");
+			primeSrc = getPrimeSource(primeCache, primeIdxCache);
 
-				progressProvider
-					.provider(attributes)
-					.map(p -> p.create(null))
-					.ifPresentOrElse(p -> primeSrc.setDisplayProgress(p),
-							() -> statusHandler.handleError(() -> "No Progress provider", Level.SEVERE, false));
-			}
-
-			primeSrc.setDisplayDefaultBaseMetrics(outputOpts.getOutputOpers().contains(OutputOper.PRIMETREE_METRICS));
+			System.out.println(String.format("***** Prime for index 4: [%d]", primeSrc.getPrimeForIdx(4L).orElse(-1)));
 		});
 	}
 
-	private PrimeSourceFactoryIntfc getPrimeSource(@NonNull PersistedCacheIntfc<Long> cache)
+	private PrimeSourceFactoryIntfc getPrimeSource(@NonNull final BTreeMap<Long, Long> primeCache , @NonNull final BTreeMap<Long, Long> primeIdxCache)
 	{
 		final Consumer<PrimeSourceIntfc> c = PrimeRef::setPrimeSource;
 		final ImmutableList<Consumer<PrimeSourceIntfc>> consumers = Lists.immutable.of(c);
-		final Function<Long, PrimeRefFactoryIntfc>  f = i -> new PrimeRef(i).init(PrimeMultiBaseContainer::new);
+		final Function<Long, PrimeRefFactoryIntfc>  f = PrimeRef::new;
 
-		return new PrimeSource(initOpts.getMaxCount()
-				, consumers
+		return new PrimeSource(
+				 consumers
 				, f
 				,collTracker
-				,cache
-				,metricProvider
+				,primeCache
+				,primeIdxCache
 				);
 	}
 
 	private void actionInitPrimeSourceData()
 	{
-
-		actions.add(s -> primeSrc.init());
+		actions.add(s -> {
+			primeSrc.setCreateBases(baseOpts != null && baseOpts.isCreateBases() );
+			primeSrc.init();
+			baseDBS.forEach(DB::commit);
+		});
 	}
 
-	private void actionPrepAdditionalBases()
+	private void actionInitBaseGenerators()
 	{
 		statusHandler.dbgOutput("%s", "CLI - Check enablement of bases.");
 		if (baseOpts != null && baseOpts.getBases() != null)
 		{
 			final SvcLoader<BaseProviderIntfc, Class<BaseProviderIntfc>> baseProvider = new SvcLoader< >(BaseProviderIntfc.class);
 
-			baseOpts.getBases().forEach(baseType ->
+			baseOpts.getBases().forEach(
+					baseType ->
 			{
 				setupBaseLogConfig(baseType);
 
-				final var trackGenTime = true;
-				final var method = "DefaultInit::actionHandleAdditionalBases - base :" + baseType.name();
+				// base cache setup
+				final String cacheNameForBaseType = baseType.name();
+				final Path cachePathForBaseType = Path.of(replaceTildeHome(initOpts.getOutputFolder()), cacheNameForBaseType);
+				ensureFolderExist(cachePathForBaseType.toString());
+
+				// base generator setup
 				final ImmutableList<String> baseProviderAttributes = Lists.immutable.of(baseType.name(), "DEFAULT");
 
 				statusHandler.dbgOutput("CLI - Prep base: %s", baseType.name());
-				switch(baseType.name())
+
+				final String inputFolderPath = initOpts.getInputDataFolder();
+				final Path homePath =  Path.of(replaceTildeHome(inputFolderPath)).getParent();
+				final Path dbPath = Path.of(homePath.normalize().toString(), baseType.name() + ".mapdb");
+
+				// https://mapdb.org/book/htreemap/
+
+				final DB dbDisk = DBMaker
+					    .fileDB(dbPath.normalize().toString())
+					    .allocateStartSize(5L * 1024 * 1024 * 1024) // 5 GB
+					    .allocateIncrement(1024L * 1024 * 1024) // 1 GB
+					    .checksumHeaderBypass()
+					    .make();
+
+				final DB dbMem = DBMaker
+					    .memoryDB()
+					    .transactionEnable()
+					    .checksumHeaderBypass()
+					    .closeOnJvmShutdown()
+					    .make();
+
+				HTreeMap onDisk = dbDisk.hashMap(dbPath.normalize().toString()).createOrOpen();
+
+				System.out.println(String.format("basetype %s  idx: 5  bases: %s", baseType.name(), onDisk.get(5L)) );
+
+				baseDBS.put(baseType.name(), dbMem);
+
+				final HTreeMap baseSrc = dbMem
+						.hashMap(cacheNameForBaseType, Serializer.LONG, Serializer.LONG_ARRAY)
+						.expireMaxSize(50_000)
+						.expireOverflow(onDisk)
+						.expireAfterCreate()
+						.expireExecutor(Executors.newScheduledThreadPool(2))
+						.createOrOpen();
+
+				PrimeRef.setPrimeBases(baseType, baseSrc);
+
+				ImmutableMap<String, Object> settings = Maps.immutable.empty();
+				if (baseType.name().equals("NPRIME"))
 				{
-					case "PREFIX", "TRIPLE":
-						baseProvider
-							.provider(baseProviderAttributes)
-							.ifPresentOrElse
-								(
-									p -> actions.add(s -> primeSrc
-															.addBaseGenerator(
-																	addBaseDecorators(
-																			p.create(null)
-																			 .assignPrimeSrc(primeSrc)
-																			 .doPreferParallel(initOpts.isPreferParallel())
-																			,trackGenTime, baseType)))
-									, () -> statusHandler.errorOutput(baseType, "ERROR: No provider for %s", baseType.toString())
-								);
-						break;
-
-					case "NPRIME":
-						{	// braces creates a local scope for "settings" variable here and in PRIME_TREE option below.
-							final ImmutableMap<String, Object> settings = Maps.immutable.of("maxReduce", baseOpts.getMaxReduce());
-							baseProvider
-								.provider(baseProviderAttributes)
-								.ifPresentOrElse
-									(
-										p -> actions.add(s -> primeSrc.addBaseGenerator(addBaseDecorators(p.create(settings).assignPrimeSrc(primeSrc), trackGenTime, baseType)))
-										, () -> statusHandler.dbgOutput(baseType, "ERROR: No provider for %s", baseType.toString())
-									);
-						}
-						break;
-
-					case "PRIME_TREE":
-						{ 	// braces creates a local scope for "settings" variable here and in NPRIME option above.
-							final ImmutableMap<String, Object> settings = Maps.immutable.of("collTracker", collTracker);
-							baseProvider
-							.provider(baseProviderAttributes)
-							.ifPresentOrElse
-								(
-									p -> actions.add(s -> primeSrc
-																.addBaseGenerator(
-																		addBaseDecorators(
-																				p.create(settings)
-																					.assignPrimeSrc(primeSrc)
-																				, trackGenTime, baseType)))
-									, () -> statusHandler.dbgOutput(baseType, "ERROR: No provider for %s", baseType.toString())
-								);
-						}
-						break;
-
-					default:
-						if(LOG.isLoggable(Level.FINE))
-						{
-							LOG.fine(String.format("%s%s",method, baseOpts.getBases()));
-						}
-						break;
+					settings = Maps.immutable.of("maxReduce", baseOpts.getMaxReduce());
 				}
+				else if (baseType.name().equals("PRIME_TREE"))
+				{
+					settings = Maps.immutable.of("collTracker", collTracker);
+				}
+				else
+				{
+					settings = Maps.immutable.empty();
+				}
+
+				// System provided: TRIPLE, TRIPLENG, PREFIX_PRIME + user provided
+				final ImmutableMap<String, Object> settingsFinal = settings;
+				baseProvider
+					.provider(baseProviderAttributes)
+					.ifPresentOrElse
+						(
+							p ->
+								actions.add(s -> primeSrc
+												 .addBaseGenerator(
+																	p.create(initOpts.getMinIdx(), initOpts.getMaxIdx(), settingsFinal)
+																	 .assignPrimeSrc(primeSrc)
+																	 .doPreferParallel(initOpts.isPreferParallel())
+																	)
+										   )
+								, () -> statusHandler.errorOutput(baseType, "ERROR: No provider for %s", baseType.toString() // OrElse
+									)
+						);
 			}
 		);
 		}
+
 	}
 
 	private void setupBaseLogConfig(@NonNull final BaseTypesIntfc baseType)
@@ -611,44 +595,6 @@ public class DefaultInit implements Runnable
 		{
 			statusHandler.setOutput(baseType.name(), this.decorateFileName(baseType.name(), "base", "log"));
 		}
-	}
-
-	private BaseGenIntfc addBaseDecorators(@NonNull final BaseGenIntfc base, final boolean trackGenTime, @NonNull final BaseTypesIntfc baseType)
-	{
-		if (LOG.isLoggable(Level.INFO))
-		{
-			LOG.info(String.format("DECORATE base supplier - base[%s] track-gen-time[%b]", baseType.name(), trackGenTime));
-		}
-
-		final BaseGenIntfc [] decoratedBase = {base};
-
-		if (trackGenTime)
-		{
-			final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("METRIC_BASE_GENERATOR_DECORATOR");
-			final SvcLoader<BaseGenDecorProviderIntfc, Class<BaseGenDecorProviderIntfc>> metricDecorProvider =
-					new SvcLoader< >(BaseGenDecorProviderIntfc.class);
-
-			if (LOG.isLoggable(Level.INFO))
-			{
-				LOG.info(String.format("DECORATE base supplier [%s] with Timer", baseType.name()));
-			}
-
-			metricDecorProvider.provider(ATTRIBUTES).ifPresentOrElse(p -> decoratedBase[0] = p.create(decoratedBase[0]), () -> statusHandler.errorOutput(baseType, "ERROR: No Metric-decor-provider"));
-		}
-
-		if (outputOpts.getOutputOpers().contains(OutputOper.CREATE_PRIMES))
-		{
-			final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("LOG_BASE_GENERATOR_DECORATOR");
-			final SvcLoader<BaseGenDecorProviderIntfc, Class<BaseGenDecorProviderIntfc>> logDecorProvider =
-					new SvcLoader< >(BaseGenDecorProviderIntfc.class);
-
-			if (LOG.isLoggable(Level.INFO))
-			{
-				LOG.info(String.format("DECORATE base supplier [%s] with Logger", baseType.name()));
-			}
-			logDecorProvider.provider(ATTRIBUTES).ifPresentOrElse(p -> decoratedBase[0] = p.create(decoratedBase[0]), () -> statusHandler.dbgOutput(baseType, "ERROR: No Log-decor-provider"));
-		}
-		return decoratedBase[0];
 	}
 
 	private void actionHandleOutputs()

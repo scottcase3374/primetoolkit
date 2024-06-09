@@ -14,6 +14,7 @@ import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.api.collection.MutableCollection;
 import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
 import org.eclipse.collections.impl.factory.Lists;
+import org.eclipse.collections.impl.list.immutable.ImmutableListFactoryImpl;
 import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
 
 import com.google.gson.Gson;
@@ -93,6 +94,7 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 	private boolean selUseParallel;
 
 	private String baseType;
+	private String baseTypeMatching;
 
 	private long greaterThanAttr = -1;
 	private long maxIndexCount = 0;
@@ -109,7 +111,6 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 		this.primeSrc = primeSrc;
 		this.contentType = contentType;
 	}
-
 
 	/**
 	 * Class defining possible data values to return to caller of the SQL-like
@@ -208,6 +209,7 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 				{
 					excludes.add(FIELD_INDEX);
 				}
+				this.baseType = ctx.base.getText();
 				break;
 
 			case PrimeSqlParser.SPLAT:
@@ -220,10 +222,12 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 				{
 					excludes.add(FIELD_EXCLUDE_NONE);
 				}
+				this.baseType = ctx.base.getText();
 				break;
 		}
 
 		fieldExclusionFields = excludes.toImmutable();
+
 		return result;
 	}
 
@@ -315,7 +319,7 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 	{
 		this.visitChildren(ctx);
 
-		baseType = ctx.getChild(1).getText();
+		baseTypeMatching = ctx.getChild(1).getText();
 		return result;
 	}
 
@@ -361,25 +365,22 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 		if (!anyItemsColl.isEmpty())
 		{
 	 		primePredColl.add( Predicates.adapt(
-	 			pRef -> pRef.getPrimeBaseData()
-	 						.getPrimeBases(BASE_TYPES.select(base -> base.name().equals(baseType.toUpperCase(Locale.ENGLISH))).getOnly())
-	 						.parallelStream()
-	 						.anyMatch(baseColl -> baseColl.containsAny(anyItemsColl)))
-				  );
+	 			pRef ->  ImmutableListFactoryImpl.INSTANCE.of(pRef.getPrimeBases(BASE_TYPES.select(base -> base.name().equals(baseType.toUpperCase(Locale.ENGLISH))).getFirst()))
+	 						.anySatisfy(anyItemsColl::containsAny) ) ) ;
 		}
 //		// Predicate testing each prime's base tuples for membership of a group of primes in a tuple.
 //		// The Prime is returned if any base tuple contains at least one group of primes
 // 		// from the collection of groups.
  		if (!itemGroupColl.isEmpty())
  		{
- 			primePredColl.add( Predicates.adapt(
- 					pRef -> pRef.getPrimeBaseData()
- 								.getPrimeBases(BASE_TYPES.select(base -> base.name().equals(baseType.toUpperCase(Locale.ENGLISH))).getOnly())
- 								.parallelStream()
- 								.anyMatch(baseColl -> itemGroupColl
- 														.stream()
- 														.anyMatch(baseColl::containsAll)))
- 						);
+ 			primePredColl.add(
+ 					Predicates.adapt(
+ 							pRef -> ImmutableListFactoryImpl.INSTANCE.of(
+ 																		pRef.getPrimeBases(BASE_TYPES.select(base -> base.name().equals(baseType.toUpperCase(Locale.ENGLISH))).getFirst())
+ 																		)
+ 									.anySatisfy(b -> itemGroupColl.containsAllArguments( b))
+ 									)
+ 							);
  		}
 
 		// Predicate testing each prime's base tuples for any single item from a collection of items.

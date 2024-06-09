@@ -5,6 +5,5 @@ import java.util.OptionalLong;
 public interface PrimeTextFileloaderIntfc
 {
 	 OptionalLong retrieve(final long idx);
-	 long getMaxOffset();
 	 boolean primeTextloader();
 }

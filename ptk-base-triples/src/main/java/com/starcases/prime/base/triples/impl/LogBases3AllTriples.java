@@ -58,38 +58,37 @@ class LogBases3AllTriples  extends AbstractPrimeBaseLog
 			.getPrimeRefStream(5L, false)
 			.forEach( primeRef ->
 
-				Optional.ofNullable(primeRef.getPrimeBaseData())
+				Optional.ofNullable(primeRef)
 					.ifPresent(pb ->
 					{
-						final var size = pb.getPrimeBases(TripleBaseType.TRIPLE).size();
-						statusHandler.output(TripleBaseType.TRIPLE,
-							String.format("%nPrime [%d] idx[%d] #-bases[%d]",
-								primeRef.getPrime(),
-								idx[0]++,
-								size
-								));
-
-						final long [] cnt = {0};
-						final StringBuilder outputStr = new StringBuilder(150);
-						primeRef
-							.getPrimeBaseData()
-							.getPrimeBases(TripleBaseType.TRIPLE)
-							.forEach( baseColl ->
-										{
-											cnt[0]++;
-											outputStr.append(baseColl.makeString("[", ",", "]"));
-											if (cnt[0] < size)
-											{
-												outputStr.append(", ");
-											}
-
-											if (cnt[0] % maxBasesInRow == 0 || cnt[0] >= size)
-											{
-												statusHandler.output(TripleBaseType.TRIPLE, "\t%s", outputStr);
-												outputStr.setLength(0);
-											}
-										}
-									);
+//						final var size = pb.getPrimeBases(TripleBaseType.TRIPLE).size();
+//						statusHandler.output(TripleBaseType.TRIPLE,
+//							String.format("%nPrime [%d] idx[%d] #-bases[%d]",
+//								primeRef.getPrime(),
+//								idx[0]++,
+//								size
+//								));
+//
+//						final long [] cnt = {0};
+//						final StringBuilder outputStr = new StringBuilder(150);
+//						primeRef
+//							.getPrimeBases(TripleBaseType.TRIPLE)
+//							.forEach( baseColl ->
+//										{
+//											cnt[0]++;
+//											outputStr.append(baseColl.makeString("[", ",", "]"));
+//											if (cnt[0] < size)
+//											{
+//												outputStr.append(", ");
+//											}
+//
+//											if (cnt[0] % maxBasesInRow == 0 || cnt[0] >= size)
+//											{
+//												statusHandler.output(TripleBaseType.TRIPLE, "\t%s", outputStr);
+//												outputStr.setLength(0);
+//											}
+//										}
+//									);
 								})
 						);
 	}

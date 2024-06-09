@@ -7,8 +7,8 @@ import org.eclipse.collections.api.collection.ImmutableCollection;
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.map.ImmutableMap;
+import org.mapdb.BTreeMap;
 
-import com.starcases.prime.cache.api.PersistedCacheIntfc;
 import com.starcases.prime.cache.api.primetext.PrimeTextFileLoaderProviderIntfc;
 import com.starcases.prime.cache.api.primetext.PrimeTextFileloaderIntfc;
 
@@ -30,7 +30,7 @@ public class PrimeTextFileLoaderProvider implements PrimeTextFileLoaderProviderI
 	 * create target service.
 	 */
 	@Override
-	public Optional<PrimeTextFileloaderIntfc> create(@NonNull final PersistedCacheIntfc<Long> cache, @NonNull final Path path, final ImmutableMap<String,Object> settings)
+	public Optional<PrimeTextFileloaderIntfc> create(@NonNull final BTreeMap<Long,Long> cache, @NonNull final Path path, final ImmutableMap<String,Object> settings)
 	{
 		final var  preloader = new PrimeTextFileLoaderImpl(cache, path);
 

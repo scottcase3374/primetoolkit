@@ -1,16 +1,22 @@
 package com.starcases.prime.core.impl;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.logging.Logger;
+
+import org.eclipse.collections.api.LongIterable;
+import org.eclipse.collections.api.map.MutableMap;
+import org.eclipse.collections.impl.map.mutable.MutableMapFactoryImpl;
+import org.mapdb.HTreeMap;
 
 import com.starcases.prime.base.api.PrimeBaseIntfc;
+import com.starcases.prime.base.impl.BaseTypes;
 import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
-import com.starcases.prime.kern.impl.IdxToSubsetMapperImpl;
+import com.starcases.prime.kern.api.BaseTypesIntfc;
 
 import lombok.NonNull;
 
@@ -21,25 +27,19 @@ import lombok.NonNull;
 * the sum of some subset of previous primes.
 *
 **/
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class PrimeRef implements PrimeRefFactoryIntfc
 {
-	private static final Logger LOG = Logger.getLogger(PrimeRef.class.getName());
-
 	/**
 	 * Access lookup for prime/primeRefs
 	 */
 	@NonNull
 	private static PrimeSourceIntfc primeSrc;
 
-	private static final IdxToSubsetMapperImpl idxToSubsetMapper = new IdxToSubsetMapperImpl();
-	private final long subset;
-	private final int offset;
+	private static MutableMap<BaseTypesIntfc, HTreeMap<Long, long[]>> primeBases = MutableMapFactoryImpl.INSTANCE.empty();
 
-	/**
-	 * Base data
-	 */
-	private PrimeBaseIntfc primeBaseData;
+	private final long primeIdx;
+
+
 
 	/**
 	 * Handle simple Prime where the base is simply itself - i.e. 1, 2
@@ -49,17 +49,7 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	 */
 	public PrimeRef(final long primeIdx)
 	{
-		final long [] subsetLocal = { -1 };
-		final int [] offsetLocal = { -1 };
-		idxToSubsetMapper.convertIdxToSubsetAndOffset(primeIdx, subsetLocal, offsetLocal);
-		subset = subsetLocal[0];
-		offset = offsetLocal[0];
-	}
-
-	public PrimeRef(final long subset, final int offset)
-	{
-		this.subset = subset;
-		this.offset = offset;
+		this.primeIdx = primeIdx;
 	}
 
 	/**
@@ -73,8 +63,23 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 			 @NonNull final Supplier<PrimeBaseIntfc> primeBaseSupplier
 			)
 	{
-		primeBaseData = primeBaseSupplier.get();
 		return this;
+	}
+
+
+	/**
+	 * For DEFAULT base type
+	 */
+	@Override
+	public long[] getPrimeBases()
+	{
+		return getPrimeBases(BaseTypes.DEFAULT);
+	}
+
+	@Override
+	public long[] getPrimeBases(@NonNull final BaseTypesIntfc baseType)
+	{
+		return primeBases.get(baseType).get(this.primeIdx);
 	}
 
 	@Override
@@ -82,12 +87,6 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	{
 		basesGenerate.accept(this);
 		return this;
-	}
-
-	@Override
-	public PrimeBaseIntfc getPrimeBaseData()
-	{
-		return primeBaseData;
 	}
 
 	/**
@@ -104,53 +103,38 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	@Override
 	public Optional<PrimeRefIntfc> getNextPrimeRef()
 	{
-		final int [] offsetLocal = {offset};
-		final long [] subsetLocal = {subset};
-		idxToSubsetMapper.increment(subsetLocal, offsetLocal);
-		return primeSrc.getPrimeRefForIdx(subsetLocal[0], offsetLocal[0]);
+		return primeSrc.getPrimeRefForIdx(primeIdx+1);
 	}
 
 	@Override
 	public Optional<PrimeRefIntfc> getPrevPrimeRef()
 	{
-		final int[] offsetLocal = {offset};
-		final long [] subsetLocal = {subset};
-
-		idxToSubsetMapper.decrement(subsetLocal, offsetLocal);
-		return subset < 0 ? Optional.empty() : primeSrc.getPrimeRefForIdx(subsetLocal[0], offsetLocal[0]);
+		return primeIdx > 0 ? primeSrc.getPrimeRefForIdx(primeIdx-1) : Optional.empty();
 	}
 
 	@Override
 	public boolean hasNext()
 	{
-		final int[] offsetLocal = {offset};
-		final long [] subsetLocal = {subset};
-
-		idxToSubsetMapper.increment(subsetLocal, offsetLocal);
-		return primeSrc.getPrimeRefForIdx(subsetLocal[0], offsetLocal[0]).isPresent();
+		return primeSrc.getPrimeRefForIdx(primeIdx+1).isPresent();
 	}
 
 	@Override
 	public boolean hasPrev()
 	{
-		final int[] offsetLocal = {offset};
-		final long [] subsetLocal = {subset};
-
-		idxToSubsetMapper.decrement(subsetLocal, offsetLocal);
-		return subsetLocal[0] >= 0 && primeSrc.getPrimeRefForIdx(subsetLocal[0], offsetLocal[0]).isPresent();
+		return primeIdx > 0 && primeSrc.getPrimeRefForIdx(primeIdx-1).isPresent();
 	}
 
 	@Override
 	public long getPrime()
 	{
-		return primeSrc.getPrimeForIdx(subset, offset)
+		return primeSrc.getPrimeForIdx(primeIdx)
 				.orElseThrow();
 	}
 
 	@Override
 	public long getPrimeRefIdx()
 	{
-		return  subset * IdxToSubsetMapperImpl.SUBSET_SIZE + offset;
+		return  primeIdx;
 	}
 
 	/**
@@ -162,11 +146,7 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	@Override
 	public OptionalLong getDistToNextPrime()
 	{
-		final int[] offsetLocal = {offset};
-		final long [] subsetLocal = {subset};
-
-		idxToSubsetMapper.increment(subsetLocal, offsetLocal);
-		final var result = primeSrc.getPrimeRefForIdx(subsetLocal[0], offsetLocal[0]);
+		final var result = primeSrc.getPrimeRefForIdx(primeIdx);
 
 		return  result.isPresent() ? OptionalLong.of(result.get().getPrime() - getPrime()) : OptionalLong.empty();
 	}
@@ -180,13 +160,29 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	@Override
 	public OptionalLong getDistToPrevPrime()
 	{
-		final int[] offsetLocal = {offset};
-		final long [] subsetLocal = {subset};
-
-		idxToSubsetMapper.decrement(subsetLocal, offsetLocal);
-		final var result =  primeSrc.getPrimeRefForIdx(subsetLocal[0], offsetLocal[0]);
+		final var result =  primeSrc.getPrimeRefForIdx(primeIdx);
 
 		return result.isPresent() ? OptionalLong.of(result.get().getPrime() - getPrime()) : OptionalLong.empty();
+	}
+
+
+	@Override
+	public void addPrimeBases(@NonNull final BaseTypesIntfc baseType, @NonNull final LongIterable primeBase)
+	{
+		primeBases.get(baseType).computeIfAbsent(this.primeIdx, (k) -> primeBase.toArray());
+	}
+
+	@Override
+	public void addPrimeBases(@NonNull final BaseTypesIntfc baseType, @NonNull final long [] primeBase)
+	{
+		primeBases.get(baseType).computeIfAbsent(this.primeIdx, (k) -> primeBase);
+	}
+
+	@Override
+	public void addPrimeBases(@NonNull final BaseTypesIntfc baseType, @NonNull final PrimeRefIntfc [] primeBase)
+	{
+		primeBases.get(baseType).computeIfAbsent(this.primeIdx, (k) ->
+			com.starcases.prime.kern.api.Arrays.longArrayToLongArray((Long[])Arrays.asList(primeBase).stream().map(bref -> bref.getPrime()).toArray()));
 	}
 
 	@Override
@@ -198,14 +194,9 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	@Override
 	public int hashCode()
 	{
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + offset;
-		result = prime * result + (int)subset;
-		return result;
+		return (int)primeIdx*31+5;
 	}
 
-	@SuppressWarnings("PMD.ConfusingTernary")
 	@Override
 	public boolean equals(Object obj)
 	{
@@ -219,6 +210,11 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 			return false;
 		}
 		PrimeRef other = (PrimeRef) obj;
-		return offset == other.offset && subset == other.subset;
+		return primeIdx == other.primeIdx;
+	}
+
+	public static void setPrimeBases(BaseTypesIntfc baseType, HTreeMap<Long, long[]> primeBase)
+	{
+		primeBases.putIfAbsent(baseType, primeBase);
 	}
 }

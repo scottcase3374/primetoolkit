@@ -3,53 +3,59 @@ package com.starcases.prime.datamgmt.impl;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.datamgmt.api.PrimeRefIteratorIntfc;
 
-public class PrimeRefIterator implements PrimeRefIteratorIntfc
-{
-	private PrimeRefIntfc primeRef;
+import lombok.NonNull;
 
-	public PrimeRefIterator(final PrimeRefIntfc primeRef)
+public class PrimeRefIterator<T extends PrimeRefIntfc> implements PrimeRefIteratorIntfc<T>
+{
+	private Object primeRef;
+
+	public PrimeRefIterator(@NonNull final T primeRef)
 	{
 		this.primeRef = primeRef;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean hasNext()
 	{
-		return primeRef.hasNext();
+		return ((T)primeRef).hasNext();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public PrimeRefIntfc next()
+	public T next()
 	{
-		final var ret = primeRef.getNextPrimeRef().orElse(null);
-		primeRef = ret;
-		return ret;
+		primeRef = ((T)primeRef).getNextPrimeRef().orElse(null);
+		return (T)primeRef;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean hasPrevious()
 	{
-		return primeRef.hasPrev();
+		return ((T)primeRef).hasPrev();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public PrimeRefIntfc previous()
+	public T previous()
 	{
-		final var ret = primeRef.getPrevPrimeRef().orElseThrow();
-		primeRef = ret;
-		return ret;
+		primeRef = ((T)primeRef).getPrevPrimeRef().orElseThrow();
+		return (T)primeRef;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public int nextIndex()
 	{
-		return (int)primeRef.getNextPrimeRef().orElseThrow().getPrimeRefIdx();
+		return (int)((T)primeRef).getNextPrimeRef().orElseThrow().getPrimeRefIdx();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public int previousIndex()
 	{
-		return (int)primeRef.getPrevPrimeRef().orElseThrow().getPrimeRefIdx();
+		return (int)((T)primeRef).getPrevPrimeRef().orElseThrow().getPrimeRefIdx();
 	}
 
 	@Override
@@ -59,13 +65,13 @@ public class PrimeRefIterator implements PrimeRefIteratorIntfc
 	}
 
 	@Override
-	public void set(PrimeRefIntfc e)
+	public void set(T e)
 	{
 		// NO-OP
 	}
 
 	@Override
-	public void add(PrimeRefIntfc e)
+	public void add(T e)
 	{
 		// NO-OP
 	}

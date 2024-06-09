@@ -26,8 +26,8 @@ public class BaseTypesGlobalProvider implements BaseTypesProviderIntfc
 		return baseTypeProviders
 				.providers(BASE_PROVIDERS_ATTRIBUTES)
 				//.tap(p -> System.out.println("BaseTypesGlobalProvider provider attrs:" + p.getProviderAttributes().makeString()))
-				.flatCollect(BaseTypesProviderIntfc::create)
+				.flatCollect(BaseTypesProviderIntfc::create);
 				//.tap(p -> System.out.println("BaseTypesGlobalProvider provider:" + p.name()))
-				.toImmutableList();
+				//.toImmutableList();
 	}
 }

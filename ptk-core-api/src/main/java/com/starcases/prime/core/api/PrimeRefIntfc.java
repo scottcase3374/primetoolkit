@@ -4,7 +4,9 @@ import java.util.Comparator;
 import java.util.Optional;
 import java.util.OptionalLong;
 
-import com.starcases.prime.base.api.PrimeBaseIntfc;
+import com.starcases.prime.kern.api.BaseTypesIntfc;
+
+import lombok.NonNull;
 
 /**
  *
@@ -58,12 +60,6 @@ public interface PrimeRefIntfc
 	long getPrime();
 
 	/**
-	 * Get container for prime base data.
-	 * @return
-	 */
-	PrimeBaseIntfc getPrimeBaseData();
-
-	/**
 	 *
 	 * @return int representing representing index in
 	 * overall list of primes.
@@ -72,4 +68,7 @@ public interface PrimeRefIntfc
 
 	boolean hasNext();
 	boolean hasPrev();
+
+	long[] getPrimeBases();
+	long[] getPrimeBases(@NonNull final BaseTypesIntfc baseType);
 }

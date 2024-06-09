@@ -23,9 +23,9 @@ public class TripleProvider implements BaseProviderIntfc
 	 * create target service instance
 	 */
 	@Override
-	public BaseGenFactoryIntfc create(final ImmutableMap<String,Object> settings)
+	public BaseGenFactoryIntfc create(final int minIdx, final int maxIdx, final ImmutableMap<String,Object> settings)
 	{
-		return new BaseReduceTriple(TripleBaseType.TRIPLE);
+		return new BaseReduceTriple(minIdx, maxIdx);
 	}
 
 	/**

@@ -3,7 +3,7 @@ package com.starcases.prime.base.impl;
 import org.eclipse.collections.api.factory.Lists;
 
 import com.starcases.prime.base.api.BaseGenIntfc;
-import com.starcases.prime.core.api.PrimeRefIntfc;
+import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
 import com.starcases.prime.kern.api.BaseTypesIntfc;
 import com.starcases.prime.kern.api.StatusHandlerIntfc;
 import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
@@ -25,7 +25,7 @@ public class LogBaseGenDecor implements BaseGenIntfc
 	}
 
 	  @Override
-	  public void genBasesForPrimeRef(@NonNull final PrimeRefIntfc curPrime)
+	  public void genBasesForPrimeRef(@NonNull final PrimeRefFactoryIntfc curPrime)
 	  {
 		  statusHandler.output(generator.getBaseType(), "Base gen: prime [%d] index [%d]%n",
 					  getBaseType().name(),

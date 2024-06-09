@@ -1,19 +1,19 @@
 package com.starcases.prime.base.triples.impl;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
+import org.eclipse.collections.api.factory.Lists;
 
-import org.eclipse.collections.impl.factory.Sets;
-
+import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
+import com.starcases.prime.kern.api.StatusHandlerIntfc;
+import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
+import com.starcases.prime.service.impl.SvcLoader;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -49,26 +49,24 @@ enum TripleMember
  * new primes that were not handled at an earlier time.
  *
  */
-public class AllTriples
+public class AllTriples implements Runnable
 {
+	private static final  StatusHandlerIntfc statusHandler =
+			new SvcLoader<StatusHandlerProviderIntfc, Class<StatusHandlerProviderIntfc>>(StatusHandlerProviderIntfc.class)
+				.provider(Lists.immutable.of("STATUS_HANDLER")).orElseThrow().create();
+
+	public static AtomicInteger incFound = new AtomicInteger(0);
+	public static AtomicInteger decFound = new AtomicInteger(0);
+
+	private final PrimeRefFactoryIntfc primeRef;
+	private final BaseReduceTriple baseReduce;
+
 	/**
 	 * prime source ref for lookup of prime/prime refs.
 	 */
 	@NonNull
 	@Getter(AccessLevel.PRIVATE)
 	private final PrimeSourceIntfc primeSrc;
-
-	/**
-	 * at least 1 non-null component
-	 */
-	private final Predicate<PrimeRefIntfc[]> partialTriple =
-			prefArray -> Arrays.stream(prefArray).anyMatch(Objects::nonNull);
-
-	/**
-	 * no components null
-	 */
-	private final Predicate<PrimeRefIntfc[]> nonNullTriple =
-			prefArray -> Arrays.stream(prefArray).allMatch(Objects::nonNull);
 
 	/**
 	 * sum up the set of 3 primes.
@@ -78,72 +76,162 @@ public class AllTriples
 
 	/**
 	 * constructor for creating base type of "triples".
+	 *
+	 * package visibility due to service provider provisioning service.
+	 *
 	 * @param primeSrc
 	 * @param targetPrime
 	 */
-	public AllTriples(@NonNull final PrimeSourceIntfc primeSrc)
+	AllTriples(@NonNull final PrimeSourceIntfc primeSrc, @NonNull final PrimeRefFactoryIntfc primeRef, @NonNull final BaseReduceTriple baseReduce)
 	{
 		this.primeSrc = primeSrc;
+		this.primeRef = primeRef;
+		this.baseReduce = baseReduce;
 	}
 
-	private void incrementIndices(final long [] indices)
+	private boolean decrementIndices(final PrimeRefFactoryIntfc [] indices)
 	{
-		if (indices[TripleMember.BOT.ordinal()]+1 < indices[TripleMember.MID.ordinal()])
+		boolean done = false;
+
+		if (indices[TripleMember.BOT.ordinal()].getPrimeRefIdx()-1 > 0)
 		{
-			indices[TripleMember.BOT.ordinal()]++;
+			// Adjust bottom
+			indices[TripleMember.BOT.ordinal()] = (PrimeRefFactoryIntfc)indices[TripleMember.BOT.ordinal()].getPrevPrimeRef().get();
 		}
-		else if (indices[TripleMember.MID.ordinal()]+1 < indices[TripleMember.TOP.ordinal()])
+		else if (indices[TripleMember.MID.ordinal()].getPrimeRefIdx()-1 > 1)
 		{
-			indices[TripleMember.BOT.ordinal()] = 0;
-			indices[TripleMember.MID.ordinal()]++;
+			// adjust mid
+			indices[TripleMember.MID.ordinal()] = (PrimeRefFactoryIntfc)indices[TripleMember.MID.ordinal()].getPrevPrimeRef().get();
+
+			// reset bottom to mid-1
+			indices[TripleMember.BOT.ordinal()] = (PrimeRefFactoryIntfc)indices[TripleMember.MID.ordinal()].getPrevPrimeRef().get();
+
+		}
+		else if (indices[TripleMember.TOP.ordinal()].getPrimeRefIdx()-1 > 3)
+		{
+			// adjust top
+			indices[TripleMember.TOP.ordinal()] = (PrimeRefFactoryIntfc)indices[TripleMember.TOP.ordinal()].getPrevPrimeRef().get();
+
+			// adjust mid to top-1
+			indices[TripleMember.MID.ordinal()] = (PrimeRefFactoryIntfc)indices[TripleMember.TOP.ordinal()].getPrevPrimeRef().get();
+
+			// adjust bot to mid-1
+			indices[TripleMember.BOT.ordinal()] = (PrimeRefFactoryIntfc)indices[TripleMember.MID.ordinal()].getPrevPrimeRef().get();
 		}
 		else
 		{
-			indices[TripleMember.BOT.ordinal()] = 0;
-			indices[TripleMember.MID.ordinal()] = 1;
-			indices[TripleMember.TOP.ordinal()]++;
+			done = true;
 		}
+
+		return done;
 	}
 
-	private Stream<PrimeRefIntfc[]> tripleStream()
+	private boolean incrementIndices(final PrimeRefFactoryIntfc [] indices, @NonNull PrimeRefFactoryIntfc prime)
 	{
-		final long [] indices = {TripleMember.BOT.ordinal(), TripleMember.MID.ordinal(), TripleMember.TOP.ordinal()};
-		final PrimeRefIntfc [] triple = {null, null, null};
+		boolean done = false;
+		if (indices[TripleMember.BOT.ordinal()].getPrimeRefIdx()+1 < indices[TripleMember.MID.ordinal()].getPrimeRefIdx())
+		{
+			indices[TripleMember.BOT.ordinal()] = (PrimeRefFactoryIntfc)indices[TripleMember.BOT.ordinal()].getNextPrimeRef().get();
+		}
+		else if (indices[TripleMember.MID.ordinal()].getPrimeRefIdx()+1 < indices[TripleMember.TOP.ordinal()].getPrimeRefIdx())
+		{
+			indices[TripleMember.MID.ordinal()] = (PrimeRefFactoryIntfc)indices[TripleMember.MID.ordinal()].getNextPrimeRef().get();
+			indices[TripleMember.BOT.ordinal()] = (PrimeRefFactoryIntfc)primeSrc.getPrimeRefForIdx(0).get();
+		}
+		else if (indices[TripleMember.TOP.ordinal()].getPrimeRefIdx()+1 < prime.getPrimeRefIdx())
+		{
+			indices[TripleMember.TOP.ordinal()] = (PrimeRefFactoryIntfc)indices[TripleMember.TOP.ordinal()].getNextPrimeRef().get();
+			indices[TripleMember.BOT.ordinal()] = (PrimeRefFactoryIntfc)primeSrc.getPrimeRefForIdx(0).get();
+			indices[TripleMember.MID.ordinal()] = (PrimeRefFactoryIntfc)indices[TripleMember.BOT.ordinal()].getNextPrimeRef().get();
+		}
+		else
+		{
+			done = true;
+		}
 
-		return Stream.generate(
-				() ->
+		return done;
+	}
+
+	@Override
+	public void run()
+	{
+		final long prime = primeRef.getPrime();
+
+		boolean incDone = prime < 11;
+		boolean decDone = prime < 11;
+
+		final long topPrimeInit = Math.max((int)Math.floor(prime / 2), 1);
+		final long bottomPrimeInit = Math.max((int)Math.ceil(prime / 6), 1);
+		final long midPrimeInit = Math.max(topPrimeInit - bottomPrimeInit, 1);
+
+		final PrimeRefFactoryIntfc topPRefInit = (PrimeRefFactoryIntfc)primeSrc.getPrimeRefCeiling(topPrimeInit).get();
+		final PrimeRefFactoryIntfc midPRefInit = (PrimeRefFactoryIntfc)primeSrc.getPrimeRefCeiling(midPrimeInit).get();
+		final PrimeRefFactoryIntfc bottomPRefInit = (PrimeRefFactoryIntfc)primeSrc.getPrimeRefCeiling(bottomPrimeInit).get();
+
+		final PrimeRefFactoryIntfc [] incIndiceRefs = {
+							bottomPRefInit,
+							midPRefInit,
+							topPRefInit
+						};
+
+		final PrimeRefFactoryIntfc [] decIndiceRefs = {
+				bottomPRefInit,
+				midPRefInit,
+				topPRefInit
+			};
+
+		int incRounds = 0;
+		int decRounds = 0;
+		boolean found = false;
+		while (!(incDone && decDone) && !found)
+		{
+			if (!incDone && sumTriple.apply(incIndiceRefs) == prime)
+			{
+				baseReduce.addPrimeBases(primeRef, incIndiceRefs);
+				found = true;
+				incFound.incrementAndGet();
+				incRounds++;
+			}
+			else if (!decDone && sumTriple.apply(decIndiceRefs) == prime)
+			{
+				baseReduce.addPrimeBases(primeRef, decIndiceRefs);
+				found = true;
+				decFound.incrementAndGet();
+				decRounds++;
+			}
+			else if (!found)
+			{
+				if (!incDone)
 				{
-					incrementIndices(indices);
-					Arrays.stream(TripleMember.values())
-					.forEach( memberIdx -> triple[memberIdx.ordinal()] = primeSrc.getPrimeRefForIdx(indices[memberIdx.ordinal()]).orElse(null));
-					return triple;
+					incDone = incrementIndices(incIndiceRefs, primeRef);
 				}
-			);
-	}
+				if (!decDone)
+				{
+					decDone = decrementIndices(decIndiceRefs);
+				}
+			}
+		}
 
-	/**
-	 * Main entry point to this processing - produce all viable triples and add each to the corresponding prime base.
+		if (primeRef.getPrimeRefIdx() % 1_000 == 0)
+		{
+			statusHandler.output(String.format("TRIPLE idxtoprime idx: %d inc-rounds: %d  dec-rounds: %d inc: %d  dec: %d",
+					primeRef.getPrimeRefIdx(),
+					incRounds,
+					decRounds,
+					incFound.get(),
+					decFound.get()));
+		}
 
-	 * This is a "mostly brute force" method which is shown by pretty slow performance.
-	 */
-	public void process(final PrimeRefIntfc primeRef)
-	{
-		tripleStream()
-			.filter(partialTriple)
-			.takeWhile(nonNullTriple).peek(pt -> System.out.println("peek - triple " + Arrays.toString(pt)))
-			.filter(t -> Arrays.stream(t).collect(Collectors.summingLong(p -> p.getPrime()) ) == primeRef.getPrime())
-			.forEach(triple ->
-
-							primeSrc
-								.getPrimeRefForPrime(() -> sumTriple.apply(triple))
-								.ifPresent(prim -> addPrimeBases(prim, triple))
-
-					);
-	}
-
-	private void addPrimeBases(final @NonNull PrimeRefIntfc prime, final @NonNull PrimeRefIntfc [] triple)
-	{
-		final ImmutableLongCollection primeBase = Sets.immutable.of(triple).collectLong(PrimeRefIntfc::getPrime);
-		prime.getPrimeBaseData().addPrimeBases(primeBase, TripleBaseType.TRIPLE);
+		if (prime >= 11 && !found)
+		{
+			statusHandler.errorOutput(String.format("##TRIPLE not-found %b prime-idx %d prime %d inc-rounds: %d dec-rounds: %d decDone: %b incDone: %b",
+					found,
+					primeRef.getPrimeRefIdx(),
+					primeRef.getPrime(),
+					incRounds,
+					decRounds,
+					decDone,
+					incDone));
+		}
 	}
 }

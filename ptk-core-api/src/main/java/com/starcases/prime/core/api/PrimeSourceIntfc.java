@@ -21,10 +21,8 @@ import lombok.NonNull;
  * and data for navigating amongst the primes.
  *
  */
-public interface PrimeSourceIntfc //extends Serializable
+public interface PrimeSourceIntfc
 {
-
-
 	/**
 	 * Iterator to PrimeRefIntfc instances.
 	 *
@@ -38,7 +36,6 @@ public interface PrimeSourceIntfc //extends Serializable
 	 * @return
 	 */
 	Iterator<PrimeRefIntfc> getPrimeRefIter(long startIdx);
-	Iterator<PrimeRefIntfc> getPrimeRefIter(@Min(0) final long subset, @Min(0) final int offset);
 
 	/**
 	 * Get a stream of prime refs and indicate whether parallel stream ops
@@ -67,7 +64,6 @@ public interface PrimeSourceIntfc //extends Serializable
 	 * @return
 	 */
 	Optional<PrimeRefIntfc> getPrimeRefForIdx(@Min(0) long primeIdx);
-	Optional<PrimeRefIntfc> getPrimeRefForIdx(@Min(0) final long primeSubset, @Min(0) final int primeOffset);
 
 	/**
 	 * Get prime ref associated with the specified long
@@ -87,6 +83,7 @@ public interface PrimeSourceIntfc //extends Serializable
 	 */
 	Optional<PrimeRefIntfc> getPrimeRefForPrime(@NonNull final LongSupplier longSupplier);
 
+
 	/**
 	 * Get the big integer [prime] from the prime ref associated with
 	 * the specified numerical index [if exists].
@@ -95,23 +92,16 @@ public interface PrimeSourceIntfc //extends Serializable
 	 * @return
 	 */
 	OptionalLong getPrimeForIdx(@Min(0) long primeIdx);
-	OptionalLong getPrimeForIdx(@Min(0) final long primeSubset, @Min(0) final int primeOffset);
 
 	/**
+	 * Get highest prime ref less than or equal to specified value .
 	 *
-	 * @param nextPrimeIdx
-	 * @param newPrime
-	 * @param defaultBase
+	 * @param longSupplier
 	 * @return
 	 */
-	PrimeRefFactoryIntfc addPrimeRef(
-			@Min(0) final long nextPrimeIdx,
-			@Min(1) final long newPrime
-			);
+	Optional<PrimeRefIntfc> getPrimeRefCeiling(@NonNull final long value);
 
-	PrimeRefFactoryIntfc addPrimeRef(
-			@Min(0) final long primeSubset,
-			@Min(0) final int primeOffset,
-			@Min(1) final long newPrime
-			);
+	long searchPrime(final long val);
+
+
 }

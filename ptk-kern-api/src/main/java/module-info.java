@@ -7,7 +7,7 @@ module com.starcases.prime.kern.api
 	requires transitive java.logging;
 	requires static lombok;
 	requires transitive org.eclipse.collections.impl;
-	requires org.eclipse.collections.api;
+	requires transitive org.eclipse.collections.api;
 
 	uses com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
 }

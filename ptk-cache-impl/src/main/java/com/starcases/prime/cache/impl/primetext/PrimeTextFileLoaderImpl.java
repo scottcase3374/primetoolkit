@@ -12,17 +12,13 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 import java.util.zip.ZipFile;
 
-import javax.cache.Cache;
-
 import org.eclipse.collections.api.factory.Lists;
+import org.mapdb.BTreeMap;
 
 import com.starcases.prime.cache.api.primetext.PrimeTextFileloaderIntfc;
-import com.starcases.prime.cache.api.subset.SubsetIntfc;
-import com.starcases.prime.cache.impl.subset.Subset;
-import com.starcases.prime.kern.api.IdxToSubsetMapperIntfc;
+
 import com.starcases.prime.kern.api.StatusHandlerIntfc;
 import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
-import com.starcases.prime.kern.impl.IdxToSubsetMapperImpl;
 import com.starcases.prime.service.impl.SvcLoader;
 
 import lombok.Getter;
@@ -45,12 +41,6 @@ class PrimeTextFileLoaderImpl implements PrimeTextFileloaderIntfc
 
 
 	/**
-	 * represents max-assigned offset for a batch (subset).
-	 */
-	@Getter
-	private long maxOffset = -1;
-
-	/**
 	 * Paths to source folders containing files of any pre-computed prime/base info.
 	 */
 	@Getter
@@ -58,59 +48,30 @@ class PrimeTextFileLoaderImpl implements PrimeTextFileloaderIntfc
 	private Path [] sourceFolders;
 
 	/**
-	 * Container for the batches
-	 */
-	@Getter
-	@Setter
-	private Subset<Long> subsetOfIdxToPrime;
-
-	/**
 	 * Cache object - both in-memory and persisted data
 	 * 	Map index to prime#.
 	 */
 	@Getter(AccessLevel.PRIVATE)
-	private final Cache<Long,SubsetIntfc<Long>> idxToPrimeCache;
+	private final BTreeMap<Long,Long> idxToPrimeCache;
 
-	/**
-	 * Break linear index range into indexed batches of indexed items.
-	 */
-	@Getter(AccessLevel.PRIVATE)
-	@Setter(AccessLevel.PRIVATE)
-	private long subsetIdx;
+
 
 	private static final String ZIP_FOLDER_ISSUE_MSG = "Problem with input zip-file or folder";
-
-	private static final IdxToSubsetMapperIntfc idxMap = new IdxToSubsetMapperImpl();
 
 	/**
 	 * Constructor for class responsible for loading pre-generated prime/base info.
 	 *
 	 * @param sourceFolders
 	 */
-	public PrimeTextFileLoaderImpl(@NonNull final Cache<Long, SubsetIntfc<Long>> idxToPrimeCache, final Path ... sourceFolders)
+	public PrimeTextFileLoaderImpl(@NonNull final BTreeMap<Long,Long> idxToPrimeCache, final Path ... sourceFolders)
 	{
 		this.idxToPrimeCache = idxToPrimeCache;
 		this.sourceFolders = sourceFolders;
-		subsetOfIdxToPrime = new Subset<>(Long.class, IdxToSubsetMapperIntfc.SUBSET_SIZE);
 	}
 
 	private void assign(final long idx, final long val)
 	{
-		final long [] subset = {0};
-		final int [] offset = {0};
-
-		idxMap.convertIdxToSubsetAndOffset(idx, subset, offset);
-
-		if (subset[0] != subsetIdx)
-		{
-			idxToPrimeCache.put(subsetIdx, subsetOfIdxToPrime);
-
-			subsetOfIdxToPrime = new Subset<>(Long.class, IdxToSubsetMapperIntfc.SUBSET_SIZE);
-			subsetIdx = subset[0];
-		}
-
-		subsetOfIdxToPrime.set(offset[0], val);
-		maxOffset = offset[0];
+		idxToPrimeCache.putIfAbsent(idx, val);
 	}
 
 	/**
@@ -122,12 +83,8 @@ class PrimeTextFileLoaderImpl implements PrimeTextFileloaderIntfc
 	@Override
 	public OptionalLong retrieve(final long idx)
 	{
-		final long [] retSubset = {0};
-		final int [] retOffset = {0};
-		idxMap.convertIdxToSubsetAndOffset(idx, retSubset, retOffset);
-
-		final SubsetIntfc<Long> subset = idxToPrimeCache.get(retSubset[0]);
-		return subset != null ? OptionalLong.of(subset.get(retOffset[0])) : OptionalLong.empty();
+		var ret = idxToPrimeCache.get(idx);
+		return ret != null ? OptionalLong.of(ret) : OptionalLong.empty();
 	}
 
 	/**
@@ -142,7 +99,12 @@ class PrimeTextFileLoaderImpl implements PrimeTextFileloaderIntfc
 	{
 		if (null == sourceFolders)
 		{
+			statusHandler.errorOutput("Source folders is not defined.");
 			return false;
+		}
+		else
+		{
+			statusHandler.dbgOutput("Raw text source folder: %s", sourceFolders);
 		}
 
 		final int [] index = {0};
@@ -225,8 +187,6 @@ class PrimeTextFileLoaderImpl implements PrimeTextFileloaderIntfc
 						}
 					}
 				);
-
-		idxToPrimeCache.put(subsetIdx++, subsetOfIdxToPrime);
 
 		return true;
 	}

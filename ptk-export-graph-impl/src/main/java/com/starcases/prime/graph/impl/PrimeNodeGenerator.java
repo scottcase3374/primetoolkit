@@ -129,7 +129,6 @@ public class PrimeNodeGenerator
 	{
 		// Link from Prime node to Prime bases (i.e. unique set of smaller primes that sums to this Prime).
 		primeRef
-			.getPrimeBaseData()
 			.getPrimeBases(baseType)
 			 .get(0)
 			.forEach(
