@@ -13,14 +13,14 @@ public interface IdxToSubsetMapperIntfc
 	 * spent in idxToPrimeCache activities.
 	 */
 	@Getter(AccessLevel.PRIVATE)
-	static int SUBSET_BITS = 17;
+	int SUBSET_BITS = 17;
 
 	/**
 	 * Convert the number of bits into the size of an array for the
 	 * caching.
 	 */
 	@Getter(AccessLevel.PRIVATE)
-	static int SUBSET_SIZE = 1 << SUBSET_BITS;
+	int SUBSET_SIZE = 1 << SUBSET_BITS;
 
 	/**
 	 *

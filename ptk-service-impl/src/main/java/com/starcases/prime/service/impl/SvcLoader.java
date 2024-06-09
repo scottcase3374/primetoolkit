@@ -1,15 +1,13 @@
 package com.starcases.prime.service.impl;
 
-import java.util.Optional;
-import java.util.ServiceLoader;
-
+import com.starcases.prime.service.api.SvcProviderBaseIntfc;
+import lombok.NonNull;
 import org.eclipse.collections.api.collection.ImmutableCollection;
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.ImmutableList;
 
-import com.starcases.prime.service.api.SvcProviderBaseIntfc;
-
-import lombok.NonNull;
+import java.util.Optional;
+import java.util.ServiceLoader;
 
 /**
  * Wrapper class which provides service loading.
@@ -111,10 +109,10 @@ public class SvcLoader< T extends SvcProviderBaseIntfc, C extends Class<T>>
 			  .stream()
 			  .peek(p -> SvcProviderBaseIntfc.LOG.info(String.format("Svcloader - requested attrs: [%s] provider-attributes: [%s] provider: [%s]", attributes.makeString(), p.get().getProviderAttributes().makeString(), p.get().getClass().getName())))
 			  .filter(x -> { var p = x.get(); return p.countAttributesMatch(attributes) >= Math.min(attributes.size(), p.getProviderAttributes().size()); })
-			  .map(p -> p.get())
+			  .map(ServiceLoader.Provider::get)
 			);
 
-    	if (result == null || result.size() == 0)
+    	if (result == null || result.isEmpty())
     	{
     		System.out.println("ERROR: SvcLoader providers() - no matches for provided attributes: " + attributes.makeString());
     	}

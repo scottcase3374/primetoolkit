@@ -42,6 +42,19 @@
 		    </exclusions>
 		</dependency>
 
+		<dependency>
+			<groupId>org.ehcache</groupId>
+			<artifactId>ehcache</artifactId>
+			<version>3.10.0</version>
+    <exclusions>
+        <exclusion>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </exclusion>
+    </exclusions>			
+
+		</dependency>
+
 		<!-- Provided deps -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -118,15 +131,15 @@
 		<module>ptk-kern-api</module>
 		<module>ptk-kern-impl</module>
 		<module>ptk-logging</module>
-		<module>ptk-metrics-api</module>
-		<module>ptk-metrics-impl</module>
+		<!-- <module>ptk-metrics-api</module> -->
+		<!-- <module>ptk-metrics-impl</module> -->
 		<module>ptk-service-api</module>
 		<module>ptk-service-impl</module>
 		<module>ptk-sql-api</module>
 		<module>ptk-sql-impl</module>
 		<module>ptk-sqlcsvout-impl</module>
 		<module>ptk-sqljsonout-impl</module>
-		<module>ptk-algo-gen-prime-1</module>
+		<!-- <module>ptk-algo-gen-prime-1</module> -->
 	</modules>
 
 	<profiles>

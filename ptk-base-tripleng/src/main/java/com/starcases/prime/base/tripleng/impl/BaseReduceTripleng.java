@@ -1,16 +1,14 @@
 package com.starcases.prime.base.tripleng.impl;
 
-import java.util.Optional;
-
-import org.eclipse.collections.api.list.primitive.ImmutableLongList;
-import org.eclipse.collections.impl.list.immutable.primitive.ImmutableLongListFactoryImpl;
-
 import com.starcases.prime.base.impl.AbsPrimeBaseGen;
 import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.kern.api.BaseTypesIntfc;
-
 import lombok.NonNull;
+import org.eclipse.collections.api.list.primitive.ImmutableLongList;
+import org.eclipse.collections.impl.list.immutable.primitive.ImmutableLongListFactoryImpl;
+
+import java.util.Optional;
 
 /*
  *  Given a Prime, find EVERY set of 3 pre-existing primes
@@ -71,7 +69,7 @@ class BaseReduceTripleng extends AbsPrimeBaseGen
 		super(minIdx, maxIdx);
 	}
 
-	private boolean adjustIndexes(@NonNull final long [] lowIdx, @NonNull final long [] mediumIdx, @NonNull final long [] highIdx)
+	private boolean adjustIndexes( final long [] lowIdx, final long [] mediumIdx, final long [] highIdx)
 	{
 		boolean retVal = true;
 		lowIdx[0]++;

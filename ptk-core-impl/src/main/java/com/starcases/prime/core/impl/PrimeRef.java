@@ -1,24 +1,23 @@
 package com.starcases.prime.core.impl;
 
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.OptionalLong;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-
-import org.eclipse.collections.api.LongIterable;
-import org.eclipse.collections.api.map.MutableMap;
-import org.eclipse.collections.impl.map.mutable.MutableMapFactoryImpl;
-import org.mapdb.HTreeMap;
-
 import com.starcases.prime.base.api.PrimeBaseIntfc;
 import com.starcases.prime.base.impl.BaseTypes;
 import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
 import com.starcases.prime.kern.api.BaseTypesIntfc;
-
 import lombok.NonNull;
+import org.eclipse.collections.api.LongIterable;
+import org.eclipse.collections.api.map.MutableMap;
+import org.eclipse.collections.impl.map.mutable.MutableMapFactoryImpl;
+import org.ehcache.Cache;
+
+import java.nio.LongBuffer;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.OptionalLong;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Default Prime representation.
@@ -32,10 +31,9 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	/**
 	 * Access lookup for prime/primeRefs
 	 */
-	@NonNull
 	private static PrimeSourceIntfc primeSrc;
 
-	private static MutableMap<BaseTypesIntfc, HTreeMap<Long, long[]>> primeBases = MutableMapFactoryImpl.INSTANCE.empty();
+	private static final MutableMap<BaseTypesIntfc, Cache<Long, LongBuffer>> primeBases = MutableMapFactoryImpl.INSTANCE.empty();
 
 	private final long primeIdx;
 
@@ -45,25 +43,16 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	 * Handle simple Prime where the base is simply itself - i.e. 1, 2
 	 * Simplifies bootstrapping
 	 *
-	 * @param Prime
+	 * @param primeIdx Index of prime
 	 */
 	public PrimeRef(final long primeIdx)
 	{
 		this.primeIdx = primeIdx;
 	}
 
-	/**
-	 * alt constructor
-	 * @param primeBaseSupplier
-	 * @param primeBases
-	 * @return
-	 */
-	@Override
-	public PrimeRefFactoryIntfc init(
-			 @NonNull final Supplier<PrimeBaseIntfc> primeBaseSupplier
-			)
+	public static void setPrimeBases(BaseTypesIntfc baseType, Cache<Long, LongBuffer> primeBase)
 	{
-		return this;
+		primeBases.putIfAbsent(baseType, primeBase);
 	}
 
 
@@ -76,10 +65,17 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 		return getPrimeBases(BaseTypes.DEFAULT);
 	}
 
+	/**
+	 * alt constructor
+	 * @param primeBaseSupplier
+	 * @return Self
+	 */
 	@Override
-	public long[] getPrimeBases(@NonNull final BaseTypesIntfc baseType)
+	public PrimeRefFactoryIntfc init(
+			 @NonNull final Supplier<PrimeBaseIntfc> primeBaseSupplier
+			)
 	{
-		return primeBases.get(baseType).get(this.primeIdx);
+		return this;
 	}
 
 	@Override
@@ -147,15 +143,19 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	public OptionalLong getDistToNextPrime()
 	{
 		final var result = primeSrc.getPrimeRefForIdx(primeIdx);
-
 		return  result.isPresent() ? OptionalLong.of(result.get().getPrime() - getPrime()) : OptionalLong.empty();
+	}
+
+	@Override
+	public long[] getPrimeBases(@NonNull final BaseTypesIntfc baseType)
+	{
+		return primeBases.get(baseType).get(this.primeIdx).array();
 	}
 
 	/**
 	 * absolute value of difference with prev Prime
 	 * if the prev Prime is known/exists.
-	 *
-	 * empty optional if prev Prime is unknown/doesn't exist
+	 * Empty optional if prev Prime is unknown/doesn't exist
 	 */
 	@Override
 	public OptionalLong getDistToPrevPrime()
@@ -165,24 +165,16 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 		return result.isPresent() ? OptionalLong.of(result.get().getPrime() - getPrime()) : OptionalLong.empty();
 	}
 
-
 	@Override
 	public void addPrimeBases(@NonNull final BaseTypesIntfc baseType, @NonNull final LongIterable primeBase)
 	{
-		primeBases.get(baseType).computeIfAbsent(this.primeIdx, (k) -> primeBase.toArray());
+		primeBases.get(baseType).put(this.primeIdx, LongBuffer.wrap( primeBase.toArray()));
 	}
 
 	@Override
 	public void addPrimeBases(@NonNull final BaseTypesIntfc baseType, @NonNull final long [] primeBase)
 	{
-		primeBases.get(baseType).computeIfAbsent(this.primeIdx, (k) -> primeBase);
-	}
-
-	@Override
-	public void addPrimeBases(@NonNull final BaseTypesIntfc baseType, @NonNull final PrimeRefIntfc [] primeBase)
-	{
-		primeBases.get(baseType).computeIfAbsent(this.primeIdx, (k) ->
-			com.starcases.prime.kern.api.Arrays.longArrayToLongArray((Long[])Arrays.asList(primeBase).stream().map(bref -> bref.getPrime()).toArray()));
+		primeBases.get(baseType).put(this.primeIdx, LongBuffer.wrap(primeBase));
 	}
 
 	@Override
@@ -213,8 +205,10 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 		return primeIdx == other.primeIdx;
 	}
 
-	public static void setPrimeBases(BaseTypesIntfc baseType, HTreeMap<Long, long[]> primeBase)
+	@Override
+	public void addPrimeBases(@NonNull final BaseTypesIntfc baseType, @NonNull final PrimeRefIntfc [] primeBase)
 	{
-		primeBases.putIfAbsent(baseType, primeBase);
+		primeBases.get(baseType).put(this.primeIdx,
+			LongBuffer.wrap(com.starcases.prime.kern.api.Arrays.longArrayToLongArray((Long[])Arrays.stream(primeBase).map(PrimeRefIntfc::getPrime).toArray())));
 	}
 }

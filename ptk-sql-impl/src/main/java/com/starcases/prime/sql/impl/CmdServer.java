@@ -1,18 +1,17 @@
 package com.starcases.prime.sql.impl;
 
-import java.lang.reflect.Proxy;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.starcases.prime.core.api.PrimeSourceIntfc;
 import com.starcases.prime.sql.api.CmdServerIntfc;
-
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+
+import java.lang.reflect.Proxy;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Receive commands and process via an antlr parser (SQL-like processing
@@ -61,7 +60,7 @@ class CmdServer implements CmdServerIntfc
 	public void run() throws InterruptedException
 	{
 		try (CmdEventLoopGroup listenGroup = createEventLoopGroup();
-			 CmdEventLoopGroup workerGroup = createEventLoopGroup();)
+			 CmdEventLoopGroup workerGroup = createEventLoopGroup())
 		{
 			final ServerBootstrap bootStrap = new ServerBootstrap();
 			bootStrap

@@ -1,21 +1,5 @@
 package com.starcases.prime.core.impl;
 
-import java.time.LocalTime;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.OptionalLong;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.LongSupplier;
-import java.util.function.Supplier;
-import java.util.logging.Logger;
-import java.util.stream.Stream;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.starcases.prime.base.api.BaseGenIntfc;
 import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
@@ -23,19 +7,23 @@ import com.starcases.prime.core.api.PrimeSourceFactoryIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
 import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
 import com.starcases.prime.datamgmt.impl.PrimeRefIterator;
-import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
 import com.starcases.prime.kern.api.StatusHandlerIntfc;
+import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
 import com.starcases.prime.service.impl.SvcLoader;
-
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
-
 import jakarta.validation.constraints.Min;
-
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.collections.api.factory.Lists;
 import org.mapdb.BTreeMap;
+
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.LongSupplier;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 
 /**
@@ -48,16 +36,11 @@ import org.mapdb.BTreeMap;
  */
 public class PrimeSource implements PrimeSourceFactoryIntfc
 {
-	private static  ExecutorService pool = Executors.newVirtualThreadPerTaskExecutor();
+	private static final  ExecutorService pool = Executors.newVirtualThreadPerTaskExecutor();
 
 	private final  StatusHandlerIntfc statusHandler =
 			new SvcLoader<StatusHandlerProviderIntfc, Class<StatusHandlerProviderIntfc>>(StatusHandlerProviderIntfc.class)
 				.provider(Lists.immutable.of("STATUS_HANDLER")).orElseThrow().create();
-	/**
-	 * default logger
-	 */
-	@Getter(AccessLevel.PRIVATE)
-	private static final Logger LOG = Logger.getLogger(PrimeSource.class.getName());
 
 	//
 	// Flags conveyed into this class
@@ -66,18 +49,8 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	/**
 	 * atomic flag preventing duplicate init
 	 */
-	@Getter(AccessLevel.PRIVATE)
 	private final AtomicBoolean doInit = new AtomicBoolean(false);
 
-	/**
-	 * Flag indicating whether to currently log mismatch between prime/base
-	 * found and the next actual prime in the sequence.
-	 */
-	@Getter(AccessLevel.PRIVATE)
-	private final AtomicBoolean logMismatch = new AtomicBoolean(true);
-
-	@Getter
-	@Setter
 	private boolean createBases;
 
 	//
@@ -89,14 +62,13 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	* an appropriate "new" function ptr into the PrimeSource
 	* constructor  -> param primeRefCtor
 	*/
-	@Getter(AccessLevel.PRIVATE)
 	private final Function<Long, PrimeRefFactoryIntfc> primeRefRawCtor;
 
 	//
 	// Internal data used/generated during prime/base creation
 	//
 
-	private List<BaseGenIntfc> baseGenerators = Lists.mutable.empty();
+	private final List<BaseGenIntfc> baseGenerators = Lists.mutable.empty();
 
 	/**
 	 * Map Index to prime.
@@ -111,8 +83,7 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	/**
 	 * Multi-level container for the tree of primes - all in memory.
 	 */
-	@Getter(AccessLevel.PRIVATE)
-	private CollectionTrackerIntfc collTracker;
+	private final CollectionTrackerIntfc collTracker;
 
 	//
 	// initialization
@@ -120,15 +91,13 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 
 	/**
 	 * primary constructor of prime source - for lookups of prime/prime refs.
-	 * @param maxCount
 	 * @param consumersSetPrimeSrc
-	 * @param confidenceLevel
 	 * @param primeRefRawCtor
-	 * @param collTrack
+	 * @param collTracker
 	 */
 	public PrimeSource(
-			@NonNull final Iterable<Consumer<PrimeSourceIntfc>> consumersSetPrimeSrc,
-			@NonNull final Function<Long, PrimeRefFactoryIntfc> primeRefRawCtor,
+			@NotNull final Iterable<Consumer<PrimeSourceIntfc>> consumersSetPrimeSrc,
+			@NotNull final Function<Long, PrimeRefFactoryIntfc> primeRefRawCtor,
 			final CollectionTrackerIntfc collTracker,
 			final BTreeMap<Long, Long> primeMap,
 			final BTreeMap<Long, Long> idxToPrimeMap
@@ -155,7 +124,7 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	/**
 	 * Add new Prime to shared set of all primes
 	 *
-	 * @param aPrime
+	 * @param newPrime
 	 */
 	@Override
 	public PrimeRefFactoryIntfc addPrimeRef(
@@ -206,7 +175,7 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	}
 
 	/**
-	 * Get highest prime ref less than specified value.
+	 * Get the highest prime ref less than specified value.
 	 *
 	 */
 	@Override
@@ -264,7 +233,7 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	}
 
 	@Override
-	public Optional<PrimeRefIntfc> getPrimeRefForPrime(@NonNull final LongSupplier longSupplier)
+	public Optional<PrimeRefIntfc> getPrimeRefForPrime(@NotNull final LongSupplier longSupplier)
 	{
 		final long prime = longSupplier.getAsLong();
 		return this.getPrimeRefForPrime(prime);
@@ -289,9 +258,9 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	}
 
 	@Override
-	public Stream<PrimeRefIntfc> getPrimeRefStream(@Min(1) final long skipCount, final boolean preferParallel)
+	public Stream<PrimeRefIntfc> getPrimeRefStream(@Min(0) final long skipCount, final boolean preferParallel)
 	{
-		final Iterator<PrimeRefIntfc> iter = getPrimeRefIter(skipCount-1);
+		final Iterator<PrimeRefIntfc> iter = getPrimeRefIter(skipCount);
 		final Supplier<PrimeRefIntfc> supplier = () -> { var it = iter; return it.hasNext() ? it.next() : null; };
 		return Stream.generate(supplier).takeWhile( Objects::nonNull);
 	}
@@ -365,5 +334,10 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 		{
 			statusHandler.output("prime Idx %d", idx);
 		}
+	}
+
+	@Override
+	public void setCreateBases(boolean createBases) {
+		this.createBases = createBases;
 	}
 }

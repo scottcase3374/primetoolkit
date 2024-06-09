@@ -25,7 +25,7 @@ class MetricsOpts
 		 * all metrics and registries.
 		 */
 		ALL
-		;
+
 	}
 
 	/**

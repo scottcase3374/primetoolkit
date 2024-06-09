@@ -1,5 +1,16 @@
 package com.starcases.prime.cache.impl.primetext;
 
+import com.starcases.prime.cache.api.primetext.PrimeTextFileloaderIntfc;
+import com.starcases.prime.kern.api.StatusHandlerIntfc;
+import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
+import com.starcases.prime.service.impl.SvcLoader;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
+import org.eclipse.collections.api.factory.Lists;
+import org.mapdb.BTreeMap;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -11,20 +22,6 @@ import java.util.StringTokenizer;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import java.util.zip.ZipFile;
-
-import org.eclipse.collections.api.factory.Lists;
-import org.mapdb.BTreeMap;
-
-import com.starcases.prime.cache.api.primetext.PrimeTextFileloaderIntfc;
-
-import com.starcases.prime.kern.api.StatusHandlerIntfc;
-import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
-import com.starcases.prime.service.impl.SvcLoader;
-
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
-import lombok.AccessLevel;
 
 /**
  * manage primes which were pre-determined from another source.
@@ -158,8 +155,7 @@ class PrimeTextFileLoaderImpl implements PrimeTextFileloaderIntfc
 					 											}
 															});
 	 											}
-	 											return;
-	 										}
+                                            }
 	 										else
 	 										{
 		 										Files

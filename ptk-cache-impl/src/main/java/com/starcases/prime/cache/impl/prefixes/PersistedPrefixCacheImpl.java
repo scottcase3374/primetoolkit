@@ -10,12 +10,20 @@ import com.starcases.prime.cache.impl.CollPrimeAsn;
 import com.starcases.prime.kern.api.StatusHandlerIntfc;
 import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
 import com.starcases.prime.service.impl.SvcLoader;
+import lombok.Getter;
+import lombok.NonNull;
+import org.eclipse.collections.api.factory.Lists;
+import org.eclipse.collections.api.factory.Maps;
+import org.eclipse.collections.api.map.MutableMap;
 
-import java.io.ByteArrayInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import javax.cache.CacheManager;
+import javax.cache.configuration.CacheEntryListenerConfiguration;
+import javax.cache.configuration.Configuration;
+import javax.cache.integration.CompletionListener;
+import javax.cache.processor.EntryProcessor;
+import javax.cache.processor.EntryProcessorException;
+import javax.cache.processor.EntryProcessorResult;
+import java.io.*;
 import java.nio.file.DirectoryIteratorException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -26,21 +34,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.cache.CacheManager;
-import javax.cache.configuration.CacheEntryListenerConfiguration;
-import javax.cache.configuration.Configuration;
-import javax.cache.integration.CompletionListener;
-import javax.cache.processor.EntryProcessor;
-import javax.cache.processor.EntryProcessorException;
-import javax.cache.processor.EntryProcessorResult;
-
-import org.eclipse.collections.api.factory.Lists;
-import org.eclipse.collections.api.factory.Maps;
-import org.eclipse.collections.api.map.MutableMap;
-
-import lombok.Getter;
-import lombok.NonNull;
 
 /**
  *
@@ -81,7 +74,7 @@ public class PersistedPrefixCacheImpl implements PersistedPrefixCacheIntfc
 		{
 			if (LOG.isLoggable(Level.INFO))
 			{
-				LOG.info(String.format("Cache ctor : cacheName [%s] pathToCacheDirs: [%s]", cacheName, pathToCacheDirs.toString()));
+				LOG.info(String.format("Cache ctor : cacheName [%s] pathToCacheDirs: [%s]", cacheName, pathToCacheDirs));
 			}
 
 			final Path pathToCache = Path.of(pathToCacheDirs.toString(), cacheName).normalize();
@@ -160,30 +153,28 @@ public class PersistedPrefixCacheImpl implements PersistedPrefixCacheIntfc
 			  final List<CollBaseAsn> collBaseAsn = basePrimes.getCollBaseAsn();
 
 			  final Long [][] primes = subset.getEntries();
-			  for (int i=0; i< primes.length; i++)
-			  {
-				  // for prefixes, each entry gets exactly 1 collBaseAsn
-				  final CollBaseAsn collBase = new CollBaseAsn();
-				  collBaseAsn.add(collBase);
+              for (Long[] prime : primes) {
+                  // for prefixes, each entry gets exactly 1 collBaseAsn
+                  final CollBaseAsn collBase = new CollBaseAsn();
+                  collBaseAsn.add(collBase);
 
 
-				  final List<CollPrimeAsn> collPrimes = collBase.getCollPrimeAsn();
-				  final CollPrimeAsn collPrimeAsn = new CollPrimeAsn();
-				  collPrimes.add(collPrimeAsn);
+                  final List<CollPrimeAsn> collPrimes = collBase.getCollPrimeAsn();
+                  final CollPrimeAsn collPrimeAsn = new CollPrimeAsn();
+                  collPrimes.add(collPrimeAsn);
 
-				  for (int baseIdx=0; baseIdx< primes[i].length; baseIdx++)
-				  {
-					  final List<BerInteger> primeAsn = collPrimeAsn.getBerInteger();
-					  primeAsn.add(new BerInteger(primes[i][baseIdx]));
-				  }
-			  }
+                  for (Long aLong : prime) {
+                      final List<BerInteger> primeAsn = collPrimeAsn.getBerInteger();
+                      primeAsn.add(new BerInteger(aLong));
+                  }
+              }
 
 			  final ReverseByteArrayOutputStream os = new ReverseByteArrayOutputStream(1_000_000, true);
 
 			  basesAsn.encode(os, true);
 
 			  try (	OutputStream oos = new FileOutputStream(Path.of(pathToCacheDir.toString(), keyVal.toString()).toFile());
-					InputStream is = new ByteArrayInputStream(os.getArray());)
+					InputStream is = new ByteArrayInputStream(os.getArray()))
 			  {
 				  is.transferTo(oos);
 			  }

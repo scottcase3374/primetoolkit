@@ -1,14 +1,14 @@
 package com.starcases.prime.kern.api;
 
-import java.util.BitSet;
-
 import lombok.NonNull;
+
+import java.util.BitSet;
 
 public interface Permutation
 {
-	static final long [] masks = { 0xFFL, 0xFF00L, 0xFF000000L,  0xFF00000000000000L };
-	static final int [] bitStart = {7, 15, 31, 63};
-	static final int [] bitEnd = {0, 8, 16, 32};
+	long [] masks = { 0xFFL, 0xFF00L, 0xFF000000L,  0xFF00000000000000L };
+	int [] bitStart = {7, 15, 31, 63};
+	int [] bitEnd = {0, 8, 16, 32};
 
 	static void incrementPermutation(@NonNull final BitSet primePermutation)
 	{
@@ -35,7 +35,7 @@ public interface Permutation
 			{
 				for(int bit = bitStart[idx] ; bit > bitEnd[idx]; bit--)
 				{
-					if ( (value & (1<<bit)) > 0)
+					if ( (value & (1L<<bit)) > 0)
 					{
 						ret = bit+1;
 					}
@@ -60,7 +60,7 @@ public interface Permutation
 			{
 				for(int bit = bitStart[idx] ; bit > bitEnd[idx]; bit--)
 				{
-					if ( (value & (1<<bit)) > 0)
+					if ( (value & (1L<<bit)) > 0)
 					{
 						ret = bit+1;
 					}

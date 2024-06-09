@@ -1,23 +1,19 @@
 package com.starcases.prime.base.triples.impl;
 
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.Arrays;
-import java.util.function.Function;
-
-import java.util.stream.Collectors;
-
-import org.eclipse.collections.api.factory.Lists;
-
 import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
 import com.starcases.prime.kern.api.StatusHandlerIntfc;
 import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
 import com.starcases.prime.service.impl.SvcLoader;
-
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
+import org.eclipse.collections.api.factory.Lists;
+
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 enum TripleMember
 {
@@ -35,7 +31,7 @@ enum TripleMember
      * index for top item
      */
 	TOP
-	;
+
 }
 
 /**
@@ -55,8 +51,8 @@ public class AllTriples implements Runnable
 			new SvcLoader<StatusHandlerProviderIntfc, Class<StatusHandlerProviderIntfc>>(StatusHandlerProviderIntfc.class)
 				.provider(Lists.immutable.of("STATUS_HANDLER")).orElseThrow().create();
 
-	public static AtomicInteger incFound = new AtomicInteger(0);
-	public static AtomicInteger decFound = new AtomicInteger(0);
+	public static final AtomicInteger incFound = new AtomicInteger(0);
+	public static final AtomicInteger decFound = new AtomicInteger(0);
 
 	private final PrimeRefFactoryIntfc primeRef;
 	private final BaseReduceTriple baseReduce;
@@ -72,7 +68,7 @@ public class AllTriples implements Runnable
 	 * sum up the set of 3 primes.
 	 */
 	private final Function<PrimeRefIntfc[], Long> sumTriple =
-			prefArray -> Arrays.stream(prefArray).collect(Collectors.summingLong(p -> p.getPrime()));
+			prefArray -> (Long) Arrays.stream(prefArray).mapToLong(PrimeRefIntfc::getPrime).sum();
 
 	/**
 	 * constructor for creating base type of "triples".
@@ -160,8 +156,8 @@ public class AllTriples implements Runnable
 		boolean incDone = prime < 11;
 		boolean decDone = prime < 11;
 
-		final long topPrimeInit = Math.max((int)Math.floor(prime / 2), 1);
-		final long bottomPrimeInit = Math.max((int)Math.ceil(prime / 6), 1);
+		final long topPrimeInit = Math.max((int)Math.floor(prime / 2.0), 1);
+		final long bottomPrimeInit = Math.max((int)Math.ceil(prime / 6.0), 1);
 		final long midPrimeInit = Math.max(topPrimeInit - bottomPrimeInit, 1);
 
 		final PrimeRefFactoryIntfc topPRefInit = (PrimeRefFactoryIntfc)primeSrc.getPrimeRefCeiling(topPrimeInit).get();
@@ -199,7 +195,7 @@ public class AllTriples implements Runnable
 				decFound.incrementAndGet();
 				decRounds++;
 			}
-			else if (!found)
+			else
 			{
 				if (!incDone)
 				{

@@ -37,7 +37,7 @@ public enum OutputOper implements OutputableIntfc
 	/**
 	 * Dumps the list of tree prefixes and the number of counts for each.
 	 */
-	PRIMETREE_METRICS;
+	PRIMETREE_METRICS
 
 
 }

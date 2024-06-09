@@ -1,22 +1,5 @@
 package com.starcases.prime.sql.impl;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Locale;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.eclipse.collections.impl.block.factory.Predicates;
-import org.eclipse.collections.api.block.predicate.Predicate;
-import org.eclipse.collections.api.block.predicate.primitive.LongPredicate;
-import org.eclipse.collections.api.list.ImmutableList;
-import org.eclipse.collections.api.list.MutableList;
-import org.eclipse.collections.api.collection.MutableCollection;
-import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
-import org.eclipse.collections.impl.factory.Lists;
-import org.eclipse.collections.impl.list.immutable.ImmutableListFactoryImpl;
-import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.starcases.prime.base.api.BaseTypesProviderIntfc;
@@ -26,18 +9,27 @@ import com.starcases.prime.kern.api.BaseTypesIntfc;
 import com.starcases.prime.service.impl.SvcLoader;
 import com.starcases.prime.sql.antlrimpl.PrimeSqlBaseVisitor;
 import com.starcases.prime.sql.antlrimpl.PrimeSqlParser;
-import com.starcases.prime.sql.antlrimpl.PrimeSqlParser.ArrayItemContext;
-import com.starcases.prime.sql.antlrimpl.PrimeSqlParser.Array_top_clauseContext;
-import com.starcases.prime.sql.antlrimpl.PrimeSqlParser.BaseMatchContext;
-import com.starcases.prime.sql.antlrimpl.PrimeSqlParser.Idx_boundsContext;
-import com.starcases.prime.sql.antlrimpl.PrimeSqlParser.InsertContext;
-import com.starcases.prime.sql.antlrimpl.PrimeSqlParser.Sel_optsContext;
-import com.starcases.prime.sql.antlrimpl.PrimeSqlParser.SubArrayContext;
+import com.starcases.prime.sql.antlrimpl.PrimeSqlParser.*;
 import com.starcases.prime.sql.api.OutputProviderIntfc;
-
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
+import org.eclipse.collections.api.block.predicate.Predicate;
+import org.eclipse.collections.api.block.predicate.primitive.LongPredicate;
+import org.eclipse.collections.api.collection.MutableCollection;
+import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
+import org.eclipse.collections.api.list.ImmutableList;
+import org.eclipse.collections.api.list.MutableList;
+import org.eclipse.collections.impl.block.factory.Predicates;
+import org.eclipse.collections.impl.factory.Lists;
+import org.eclipse.collections.impl.list.immutable.ImmutableListFactoryImpl;
+import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Visit the parse tree nodes, gather values needed for the query and add/apply
@@ -79,8 +71,8 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 	private final MutableCollection<LongPredicate> primeBaseItemPredColl = Lists.mutable.empty();
 	private final MutableCollection<Predicates<ImmutableLongCollection>> primeBaseTuplePredColl = Lists.mutable.empty();
 
-	private LongArrayList anyItemsColl = new LongArrayList();
-	private MutableCollection<long[]> itemGroupColl = Lists.mutable.empty();
+	private final LongArrayList anyItemsColl = new LongArrayList();
+	private final MutableCollection<long[]> itemGroupColl = Lists.mutable.empty();
 
 
 	private static final String FIELD_INDEX = "index";
@@ -254,19 +246,12 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 		{
 			final long great = Long.parseLong(ctx.gval.getText());
 			greaterThanAttr = great;
-			switch(ctx.opG.getType())
-			{
-				case PrimeSqlParser.GT:
-					pred = Predicates.attributeGreaterThan(PrimeRefIntfc::getPrimeRefIdx, great);
-					break;
-
-				case PrimeSqlParser.GT_EQUAL:
-					pred = Predicates.attributeGreaterThanOrEqualTo(PrimeRefIntfc::getPrimeRefIdx, great);
-					break;
-
-				default:
-					pred = Predicates.attributeGreaterThanOrEqualTo(PrimeRefIntfc::getPrimeRefIdx, 0L);
-			}
+            pred = switch (ctx.opG.getType()) {
+                case PrimeSqlParser.GT -> Predicates.attributeGreaterThan(PrimeRefIntfc::getPrimeRefIdx, great);
+                case PrimeSqlParser.GT_EQUAL ->
+                        Predicates.attributeGreaterThanOrEqualTo(PrimeRefIntfc::getPrimeRefIdx, great);
+                default -> Predicates.attributeGreaterThanOrEqualTo(PrimeRefIntfc::getPrimeRefIdx, 0L);
+            };
 		}
 
 		if (ctx.opL != null)
@@ -274,22 +259,14 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 			final long less = Long.parseLong(ctx.lval.getText());
 			this.maxIndexCount = Math.max(0, less - greaterThanAttr);
 
-			final Predicates<PrimeRefIntfc> pred2;
-			switch(ctx.opL.getType())
-			{
-				case PrimeSqlParser.LT:
-					pred2 = Predicates.attributeLessThan(PrimeRefIntfc::getPrimeRefIdx, less);
-					break;
+			final Predicates<PrimeRefIntfc> pred2 = switch (ctx.opL.getType()) {
+                case PrimeSqlParser.LT -> Predicates.attributeLessThan(PrimeRefIntfc::getPrimeRefIdx, less);
+                case PrimeSqlParser.LT_EQUAL ->
+                        Predicates.attributeLessThanOrEqualTo(PrimeRefIntfc::getPrimeRefIdx, less);
+                default -> null;
+            };
 
-				case PrimeSqlParser.LT_EQUAL:
-					pred2 = Predicates.attributeLessThanOrEqualTo(PrimeRefIntfc::getPrimeRefIdx, less);
-					break;
-
-				default:
-					pred2 = null;
-			}
-
-			if (pred != null)
+            if (pred != null)
 			{
 				if (pred2 != null)
 				{

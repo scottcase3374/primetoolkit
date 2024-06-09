@@ -22,8 +22,9 @@ open module com.starcases.prime.cli
 	requires org.eclipse.collections.impl;
 	requires org.jgrapht.core;
 	requires mapdb;
+    requires ehcache;
 
-	uses com.starcases.prime.cache.api.CachePrefixProviderIntfc;
+    uses com.starcases.prime.cache.api.CachePrefixProviderIntfc;
 	uses com.starcases.prime.base.api.BaseTypesProviderIntfc;
 	uses com.starcases.prime.cache.api.persistload.PersistLoaderProviderIntfc;
 	uses com.starcases.prime.cache.api.primetext.PrimeTextFileLoaderProviderIntfc;

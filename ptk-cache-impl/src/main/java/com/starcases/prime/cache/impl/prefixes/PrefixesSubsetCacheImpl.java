@@ -10,12 +10,20 @@ import com.starcases.prime.kern.api.PtkException;
 import com.starcases.prime.kern.api.StatusHandlerIntfc;
 import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
 import com.starcases.prime.service.impl.SvcLoader;
+import lombok.Getter;
+import lombok.NonNull;
+import org.eclipse.collections.api.factory.Lists;
+import org.eclipse.collections.api.factory.Maps;
+import org.eclipse.collections.api.map.MutableMap;
 
-import java.io.ByteArrayInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import javax.cache.CacheManager;
+import javax.cache.configuration.CacheEntryListenerConfiguration;
+import javax.cache.configuration.Configuration;
+import javax.cache.integration.CompletionListener;
+import javax.cache.processor.EntryProcessor;
+import javax.cache.processor.EntryProcessorException;
+import javax.cache.processor.EntryProcessorResult;
+import java.io.*;
 import java.nio.file.DirectoryIteratorException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -25,21 +33,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.cache.CacheManager;
-import javax.cache.configuration.CacheEntryListenerConfiguration;
-import javax.cache.configuration.Configuration;
-import javax.cache.integration.CompletionListener;
-import javax.cache.processor.EntryProcessor;
-import javax.cache.processor.EntryProcessorException;
-import javax.cache.processor.EntryProcessorResult;
-
-import org.eclipse.collections.api.factory.Lists;
-import org.eclipse.collections.api.factory.Maps;
-import org.eclipse.collections.api.map.MutableMap;
-
-import lombok.Getter;
-import lombok.NonNull;
 
 /**
  *
@@ -82,7 +75,7 @@ public class PrefixesSubsetCacheImpl implements PersistedPrefixCacheIntfc
 		{
 			if (LOG.isLoggable(Level.INFO))
 			{
-				LOG.info(String.format("Cache ctor : cacheName [%s] pathToCacheDirs: [%s]", cacheName, pathToCacheDirs.toString()));
+				LOG.info(String.format("Cache ctor : cacheName [%s] pathToCacheDirs: [%s]", cacheName, pathToCacheDirs));
 			}
 
 			final Path pathToCache = Path.of(pathToCacheDirs.toString(), cacheName).normalize();
@@ -178,7 +171,7 @@ public class PrefixesSubsetCacheImpl implements PersistedPrefixCacheIntfc
 			  subsetAsn.encode(os, true);
 
 			  try (final	OutputStream oos = new FileOutputStream(Path.of(pathToCacheDir.toString(), keyVal.toString()).toFile());
-					final InputStream is = new ByteArrayInputStream(os.getArray());)
+					final InputStream is = new ByteArrayInputStream(os.getArray()))
 			  {
 				  is.transferTo(oos);
 			  }

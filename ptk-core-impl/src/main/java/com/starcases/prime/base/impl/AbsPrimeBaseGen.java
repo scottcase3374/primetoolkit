@@ -1,21 +1,19 @@
 package com.starcases.prime.base.impl;
 
-import java.util.BitSet;
-import java.util.Optional;
-import java.util.OptionalLong;
-
+import com.starcases.prime.base.api.BaseGenFactoryIntfc;
+import com.starcases.prime.core.api.PrimeRefIntfc;
+import com.starcases.prime.core.api.PrimeSourceIntfc;
+import com.starcases.prime.kern.api.Permutation;
+import lombok.AccessLevel;
+import lombok.Getter;
 import org.eclipse.collections.api.factory.primitive.LongLists;
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.api.list.primitive.MutableLongList;
 import org.eclipse.collections.impl.list.mutable.MutableListFactoryImpl;
 
-import com.starcases.prime.base.api.BaseGenFactoryIntfc;
-import com.starcases.prime.core.api.PrimeRefIntfc;
-import com.starcases.prime.core.api.PrimeSourceIntfc;
-import com.starcases.prime.kern.api.Permutation;
-
-import lombok.AccessLevel;
-import lombok.Getter;
+import java.util.BitSet;
+import java.util.Optional;
+import java.util.OptionalLong;
 
 /**
  *
@@ -24,7 +22,7 @@ import lombok.Getter;
  */
 public abstract class AbsPrimeBaseGen implements BaseGenFactoryIntfc
 {
-	private int MAX_PRIME_BITS = 64;
+	private final int MAX_PRIME_BITS = 64;
 
 	protected MutableList<Long[]> subsetColl = MutableListFactoryImpl.INSTANCE.empty();
 
@@ -151,7 +149,7 @@ public abstract class AbsPrimeBaseGen implements BaseGenFactoryIntfc
 						.mapToObj(primeSrc::getPrimeForIdx)
 						.filter(OptionalLong::isPresent)
 						.map(OptionalLong::getAsLong)
-						.reduce(0L, (a, b) -> a+b);
+						.reduce(0L, Long::sum);
 
 				if (permutationSum == remain)
 				{
@@ -177,7 +175,7 @@ public abstract class AbsPrimeBaseGen implements BaseGenFactoryIntfc
 										tgtPrime.getPrime(),
 										permutationSum,
 										remain,
-										primeIndexPermutation.toString()));
+										primeIndexPermutation));
 
 						done = true;
 					}

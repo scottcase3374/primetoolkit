@@ -1,5 +1,12 @@
 package com.starcases.prime.kern.impl;
 
+import com.starcases.prime.kern.api.BaseTypesIntfc;
+import com.starcases.prime.kern.api.PtkException;
+import com.starcases.prime.kern.api.StatusHandlerIntfc;
+import lombok.NonNull;
+import org.eclipse.collections.api.map.MutableMap;
+import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -8,15 +15,6 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.eclipse.collections.api.map.MutableMap;
-import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
-
-import com.starcases.prime.kern.api.BaseTypesIntfc;
-import com.starcases.prime.kern.api.PtkException;
-import com.starcases.prime.kern.api.StatusHandlerIntfc;
-
-import lombok.NonNull;
-
 public class StatusHandlerImpl implements StatusHandlerIntfc
 {
 	/**
@@ -24,7 +22,7 @@ public class StatusHandlerImpl implements StatusHandlerIntfc
 	 */
 	private static final Logger LOG = Logger.getLogger(StatusHandlerImpl.class.getName());
 
-	private static MutableMap<String, Path> outputs = new ConcurrentHashMap<>();
+	private static final MutableMap<String, Path> outputs = new ConcurrentHashMap<>();
 
 	/**
 	 * Associate a path instance to a key where the path is
@@ -38,7 +36,7 @@ public class StatusHandlerImpl implements StatusHandlerIntfc
 	{
 		if (LOG.isLoggable(Level.INFO))
 		{
-			LOG.info(String.format("set output [key=%s, path=%s]", key, outputPath.toAbsolutePath().toString()));
+			LOG.info(String.format("set output [key=%s, path=%s]", key, outputPath.toAbsolutePath()));
 		}
 
 		outputs.putIfAbsent(key, outputPath.toAbsolutePath());
@@ -79,7 +77,7 @@ public class StatusHandlerImpl implements StatusHandlerIntfc
 			{
 				if (LOG.isLoggable(Level.SEVERE))
 				{
-					LOG.severe("Unable to write to file:" + path.toString());
+					LOG.severe("Unable to write to file:" + path);
 				}
 				if (LOG.isLoggable(Level.INFO))
 				{

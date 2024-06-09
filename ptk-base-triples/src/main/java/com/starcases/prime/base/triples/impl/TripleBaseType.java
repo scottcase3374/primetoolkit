@@ -15,5 +15,5 @@ public enum TripleBaseType implements BaseTypesIntfc
 	 *
 	 * [241,263,269], [239,263,271], [233,269,271], [239,257,277]
 	 */
-	TRIPLE ;
+	TRIPLE
 }

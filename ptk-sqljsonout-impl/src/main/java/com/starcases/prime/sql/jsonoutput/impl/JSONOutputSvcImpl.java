@@ -1,11 +1,5 @@
 package com.starcases.prime.sql.jsonoutput.impl;
 
-import java.util.function.Predicate;
-
-import org.eclipse.collections.api.list.ImmutableList;
-import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
-import org.eclipse.collections.impl.factory.Lists;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.starcases.prime.base.api.BaseTypesProviderIntfc;
@@ -15,8 +9,12 @@ import com.starcases.prime.kern.api.BaseTypesIntfc;
 import com.starcases.prime.service.impl.SvcLoader;
 import com.starcases.prime.sql.api.OutputServiceIntfc;
 import com.starcases.prime.sql.api.PrimeResultIntfc;
-
 import lombok.NonNull;
+import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
+import org.eclipse.collections.api.list.ImmutableList;
+import org.eclipse.collections.impl.factory.Lists;
+
+import java.util.function.Predicate;
 
 public class JSONOutputSvcImpl implements OutputServiceIntfc
 {
@@ -78,7 +76,7 @@ public class JSONOutputSvcImpl implements OutputServiceIntfc
 		}
 		catch(final Exception e)
 		{
-			System.out.println("*** Json output exception " + e.toString());
+			System.out.println("*** Json output exception " + e);
 			e.printStackTrace();
 		}
 	}
