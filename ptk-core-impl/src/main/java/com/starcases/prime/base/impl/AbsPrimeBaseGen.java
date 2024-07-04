@@ -24,7 +24,7 @@ import lombok.Getter;
  */
 public abstract class AbsPrimeBaseGen implements BaseGenFactoryIntfc
 {
-	private int MAX_PRIME_BITS = 64;
+	private static final int MAX_PRIME_BITS = 64;
 
 	protected MutableList<Long[]> subsetColl = MutableListFactoryImpl.INSTANCE.empty();
 
@@ -50,7 +50,6 @@ public abstract class AbsPrimeBaseGen implements BaseGenFactoryIntfc
 
 	/**
 	 * Constructor for secondary bases.
-	 * @param primeSrc
 	 */
 	protected AbsPrimeBaseGen(final int minIdx, final int maxIdx)
 	{
@@ -60,8 +59,8 @@ public abstract class AbsPrimeBaseGen implements BaseGenFactoryIntfc
 
 	/**
 	 * fluent style method for setting flag for whether base construction can use multiple CPU cores.
-	 * @param preferParallel
-	 * @return
+	 * @param preferParallel Boolean for whether to try and use parallel/concurrent processing.
+	 * @return self
 	 */
 	@Override
 	public BaseGenFactoryIntfc doPreferParallel(final boolean preferParallel)
@@ -122,8 +121,8 @@ public abstract class AbsPrimeBaseGen implements BaseGenFactoryIntfc
 	/**
 	 * Should produce the longest prefix due to starting with lowest values first.
 	 *
-	 * @param tgtPrime
-	 * @return
+	 * @param tgtPrime Target prime ref
+	 * @return prefix of base
 	 */
 	protected MutableLongList findPrefixesLowFirst(final PrimeRefIntfc tgtPrime)
 	{
@@ -151,7 +150,7 @@ public abstract class AbsPrimeBaseGen implements BaseGenFactoryIntfc
 						.mapToObj(primeSrc::getPrimeForIdx)
 						.filter(OptionalLong::isPresent)
 						.map(OptionalLong::getAsLong)
-						.reduce(0L, (a, b) -> a+b);
+						.reduce(0L, Long::sum);
 
 				if (permutationSum == remain)
 				{
@@ -171,13 +170,12 @@ public abstract class AbsPrimeBaseGen implements BaseGenFactoryIntfc
 					}
 					else // ensure we don't increment forever
 					{
-						System.out.println(String
-								.format("findPrefixesLowFirst [incomplete bases] - tgtIdx: %d tgtPrime: %d perm-sum: %d, remain: %d, permutation: %s",
-										tgtPrime.getPrimeRefIdx(),
-										tgtPrime.getPrime(),
-										permutationSum,
-										remain,
-										primeIndexPermutation.toString()));
+						System.out.printf("findPrefixesLowFirst [incomplete bases] - tgtIdx: %d tgtPrime: %d perm-sum: %d, remain: %d, permutation: %s%n",
+                                tgtPrime.getPrimeRefIdx(),
+                                tgtPrime.getPrime(),
+                                permutationSum,
+                                remain,
+                                primeIndexPermutation.toString());
 
 						done = true;
 					}

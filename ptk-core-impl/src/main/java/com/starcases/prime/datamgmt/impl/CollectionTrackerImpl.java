@@ -51,7 +51,6 @@ class CollectionTrackerImpl implements CollectionTrackerIntfc
 
 	/**
 	 * Constructor for the collection tree
-	 * @param collectionTracker
 	 */
 	public CollectionTrackerImpl()
 	{
@@ -60,7 +59,7 @@ class CollectionTrackerImpl implements CollectionTrackerIntfc
 
 	/**
 	 * get iterator to the tree info
-	 * @return
+	 * @return Iteterator (self) for tree.
 	 */
 	@Override
 	public CollectionTreeIteratorIntfc iterator()

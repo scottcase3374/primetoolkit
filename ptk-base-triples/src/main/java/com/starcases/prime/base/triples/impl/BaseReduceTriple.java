@@ -61,8 +61,6 @@ class BaseReduceTriple extends AbsPrimeBaseGen
 {
 	/**
 	 * Constructor
-	 *
-	 * @param primeSrc
 	 */
 	public BaseReduceTriple(final int minIdx, final int maxIdx)
 	{

@@ -29,11 +29,10 @@ public final class PrimeToolKit
 	private @Spec CommandSpec spec;
 
 	/**
-	 * entry point
-	 *
+	 * entry point.
 	 * see docs README.md for more info.
 	 *
-	 * @param args
+	 * @param args CLI args.
 	 */
 	public static void main(@NonNull final String [] args)
 	{

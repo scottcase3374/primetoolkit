@@ -4,8 +4,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.Arrays;
 import java.util.function.Function;
 
-import java.util.stream.Collectors;
-
 import org.eclipse.collections.api.factory.Lists;
 
 import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
@@ -41,7 +39,6 @@ enum TripleMember
 /**
  *
  * Class implementing the logic for finding all viable triples.
- *
  * Sum combinations of 3 primes and if result is a (pre-existing) prime
  * then add the 3 primes a "base". Current method works fine when starting
  * from low primes and working higher but would be very inefficient if
@@ -72,15 +69,14 @@ public class AllTriples implements Runnable
 	 * sum up the set of 3 primes.
 	 */
 	private final Function<PrimeRefIntfc[], Long> sumTriple =
-			prefArray -> Arrays.stream(prefArray).collect(Collectors.summingLong(p -> p.getPrime()));
+			prefArray -> (Long) Arrays.stream(prefArray).mapToLong(PrimeRefIntfc::getPrime).sum();
 
 	/**
 	 * constructor for creating base type of "triples".
+	 * Package visibility due to service provider provisioning service.
 	 *
-	 * package visibility due to service provider provisioning service.
-	 *
-	 * @param primeSrc
-	 * @param targetPrime
+	 * @param primeSrc PrimeSource reference.
+	 * @param primeRef The target prime ref.
 	 */
 	AllTriples(@NonNull final PrimeSourceIntfc primeSrc, @NonNull final PrimeRefFactoryIntfc primeRef, @NonNull final BaseReduceTriple baseReduce)
 	{
@@ -160,8 +156,8 @@ public class AllTriples implements Runnable
 		boolean incDone = prime < 11;
 		boolean decDone = prime < 11;
 
-		final long topPrimeInit = Math.max((int)Math.floor(prime / 2), 1);
-		final long bottomPrimeInit = Math.max((int)Math.ceil(prime / 6), 1);
+		final long topPrimeInit = Math.max((int)Math.floor(prime / 2.0), 1);
+		final long bottomPrimeInit = Math.max((int)Math.ceil(prime / 6.0), 1);
 		final long midPrimeInit = Math.max(topPrimeInit - bottomPrimeInit, 1);
 
 		final PrimeRefFactoryIntfc topPRefInit = (PrimeRefFactoryIntfc)primeSrc.getPrimeRefCeiling(topPrimeInit).get();
@@ -199,7 +195,7 @@ public class AllTriples implements Runnable
 				decFound.incrementAndGet();
 				decRounds++;
 			}
-			else if (!found)
+			else
 			{
 				if (!incDone)
 				{

@@ -21,7 +21,7 @@ class CmdChannelInit extends ChannelInitializer<SocketChannel>
 	/**
 	 * Constructor
 	 *
-	 * @param primeSrc
+	 * @param primeSrc Prime source ref
 	 */
 	public CmdChannelInit(final PrimeSourceIntfc primeSrc)
 	{

@@ -42,7 +42,6 @@ import lombok.NonNull;
 /**
  * Visit the parse tree nodes, gather values needed for the query and add/apply
  * the correct predicates/operations to the prime collection.
- *
  * NOTE: There is likely some further cleanup that can be done here. I would
  * also like to update it to improve the ability to add new operations to the
  * pipeline of stream operations.
@@ -79,8 +78,8 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 	private final MutableCollection<LongPredicate> primeBaseItemPredColl = Lists.mutable.empty();
 	private final MutableCollection<Predicates<ImmutableLongCollection>> primeBaseTuplePredColl = Lists.mutable.empty();
 
-	private LongArrayList anyItemsColl = new LongArrayList();
-	private MutableCollection<long[]> itemGroupColl = Lists.mutable.empty();
+	private final LongArrayList anyItemsColl = new LongArrayList();
+	private final MutableCollection<long[]> itemGroupColl = Lists.mutable.empty();
 
 
 	private static final String FIELD_INDEX = "index";
@@ -103,7 +102,7 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 	 * Constructor for the visitor type; the PrimeSourceIntfc provides access to the
 	 * set of primes needed to perform search/filter/etc operations.
 	 *
-	 * @param primeSrc
+	 * @param primeSrc Prime Source reference
 	 */
 	public PrimeSqlVisitor(@NonNull final PrimeSourceIntfc primeSrc, @NonNull final String contentType)
 	{
@@ -157,10 +156,10 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 		final Predicate<? super PrimeRefIntfc> idxFilter =
 				 pRef -> primePredColl.stream().allMatch(primeFilt -> primeFilt.accept(pRef));
 
-		final Predicate<? super ImmutableLongCollection> baseFilter =
-				 baseColl ->
-					   primeBaseItemPredColl.stream().anyMatch(baseColl::anySatisfy)
-					|| primeBaseTuplePredColl.stream().anyMatch(tupleFilt -> tupleFilt.accept(baseColl));
+		final LongPredicate baseFilter =
+				 baseLong ->
+					   primeBaseItemPredColl.stream().anyMatch((pred) -> pred.accept(baseLong)); // return partial tuples - only matching portion
+					// || primeBaseTuplePredColl.stream().allMatch((tupleFilt) -> tupleFilt.accept(baseLong));
 		try
 		{
 			 new SvcLoader<OutputProviderIntfc, Class<OutputProviderIntfc>>(OutputProviderIntfc.class)
@@ -192,7 +191,7 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 	{
 		visitChildren(ctx);
 		final MutableList<String> excludes = Lists.mutable.empty();
-
+		excludes.add("keep");
 		switch (ctx.sel.getType())
 		{
 			case PrimeSqlParser.PRIMES:
@@ -252,21 +251,13 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 
 		if (ctx.opG != null)
 		{
-			final long great = Long.parseLong(ctx.gval.getText());
-			greaterThanAttr = great;
-			switch(ctx.opG.getType())
-			{
-				case PrimeSqlParser.GT:
-					pred = Predicates.attributeGreaterThan(PrimeRefIntfc::getPrimeRefIdx, great);
-					break;
-
-				case PrimeSqlParser.GT_EQUAL:
-					pred = Predicates.attributeGreaterThanOrEqualTo(PrimeRefIntfc::getPrimeRefIdx, great);
-					break;
-
-				default:
-					pred = Predicates.attributeGreaterThanOrEqualTo(PrimeRefIntfc::getPrimeRefIdx, 0L);
-			}
+			greaterThanAttr =  Long.parseLong(ctx.gval.getText());
+            pred = switch (ctx.opG.getType()) {
+                case PrimeSqlParser.GT -> Predicates.attributeGreaterThan(PrimeRefIntfc::getPrimeRefIdx, greaterThanAttr);
+                case PrimeSqlParser.GT_EQUAL ->
+                        Predicates.attributeGreaterThanOrEqualTo(PrimeRefIntfc::getPrimeRefIdx, greaterThanAttr);
+                default -> Predicates.attributeGreaterThanOrEqualTo(PrimeRefIntfc::getPrimeRefIdx, 0L);
+            };
 		}
 
 		if (ctx.opL != null)
@@ -274,22 +265,14 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 			final long less = Long.parseLong(ctx.lval.getText());
 			this.maxIndexCount = Math.max(0, less - greaterThanAttr);
 
-			final Predicates<PrimeRefIntfc> pred2;
-			switch(ctx.opL.getType())
-			{
-				case PrimeSqlParser.LT:
-					pred2 = Predicates.attributeLessThan(PrimeRefIntfc::getPrimeRefIdx, less);
-					break;
+			final Predicates<PrimeRefIntfc> pred2 = switch (ctx.opL.getType()) {
+                case PrimeSqlParser.LT -> Predicates.attributeLessThan(PrimeRefIntfc::getPrimeRefIdx, less);
+                case PrimeSqlParser.LT_EQUAL ->
+                        Predicates.attributeLessThanOrEqualTo(PrimeRefIntfc::getPrimeRefIdx, less);
+                default -> null;
+            };
 
-				case PrimeSqlParser.LT_EQUAL:
-					pred2 = Predicates.attributeLessThanOrEqualTo(PrimeRefIntfc::getPrimeRefIdx, less);
-					break;
-
-				default:
-					pred2 = null;
-			}
-
-			if (pred != null)
+            if (pred != null)
 			{
 				if (pred2 != null)
 				{
@@ -378,7 +361,7 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
  							pRef -> ImmutableListFactoryImpl.INSTANCE.of(
  																		pRef.getPrimeBases(BASE_TYPES.select(base -> base.name().equals(baseType.toUpperCase(Locale.ENGLISH))).getFirst())
  																		)
- 									.anySatisfy(b -> itemGroupColl.containsAllArguments( b))
+ 									.anySatisfy(itemGroupColl::containsAllArguments)
  									)
  							);
  		}
@@ -387,7 +370,7 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 		// The tuple is returned if the tuple has at least one item out of the collection.
 		if (!anyItemsColl.isEmpty())
 		{
-	 		primeBaseItemPredColl.add(baseItem ->  anyItemsColl.contains(baseItem));
+	 		primeBaseItemPredColl.add(anyItemsColl::contains);
 		}
 		// Predicate testing each prime's base tuples for membership of a group of primes in a tuple.
 		// The tuple is returned if the tuple contains at least one group of primes

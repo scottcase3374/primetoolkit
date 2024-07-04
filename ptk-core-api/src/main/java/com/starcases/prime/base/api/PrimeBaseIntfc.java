@@ -1,5 +1,6 @@
 package com.starcases.prime.base.api;
 
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
 import org.eclipse.collections.api.list.MutableList;
 
@@ -34,41 +35,41 @@ public interface PrimeBaseIntfc
 	 * @param primeBase
 	 * @param metadata
 	 */
-	void addPrimeBases(long primeIdx, @NonNull BaseTypesIntfc baseType, @NonNull MutableList<ImmutableLongCollection> primeBase, @NonNull BaseMetadataIntfc metadata);
+	void addPrimeBases(long primeIdx, @NotNull BaseTypesIntfc baseType, @NotNull MutableList<ImmutableLongCollection> primeBase, @NotNull BaseMetadataIntfc metadata);
 
 	/**
 	 * Add sets of primes to current base
 	 * @param primeBase
 	 */
-	void addPrimeBases(long primeIdx, @NonNull MutableList<ImmutableLongCollection> primeBase);
+	void addPrimeBases(long primeIdx, @NotNull MutableList<ImmutableLongCollection> primeBase);
 
 	/**
 	 * Add sets of primes for specified base.
 	 * @param primeBase
 	 * @param baseType
 	 */
-	void addPrimeBases(long primeIdx, @NonNull MutableList<ImmutableLongCollection> primeBase, @NonNull BaseTypesIntfc baseType);
+	void addPrimeBases(long primeIdx, @NotNull MutableList<ImmutableLongCollection> primeBase, @NotNull BaseTypesIntfc baseType);
 
 	/**
 	 * Add sets of primes for specified base.
 	 * @param primeBase
 	 * @param baseType
 	 */
-	void addPrimeBases(long primeIdx, @NonNull ImmutableLongCollection primeBase, @NonNull BaseTypesIntfc baseType);
+	void addPrimeBases(long primeIdx, @NotNull ImmutableLongCollection primeBase, @NotNull BaseTypesIntfc baseType);
 
 	/**
 	 * Add array of primes for specified base.
 	 * @param primeBase
 	 * @param baseType
 	 */
-	void addPrimeBases(long primeIdx, @NonNull long[] primeBase, @NonNull BaseTypesIntfc baseType);
+	void addPrimeBases(long primeIdx, @NotNull long[] primeBase, @NotNull BaseTypesIntfc baseType);
 
 	/**
 	 * Get the base meta data container for the specified base type.
 	 * @param baseType
 	 * @return
 	 */
-	BaseMetadataIntfc getBaseMetadata(@NonNull BaseTypesIntfc baseType);
+	BaseMetadataIntfc getBaseMetadata(@NotNull BaseTypesIntfc baseType);
 
 	/**
 	 *
@@ -83,5 +84,5 @@ public interface PrimeBaseIntfc
 	 * Not every use case needs multiple bases per Prime
 	 * @return
 	 */
-	MutableList<ImmutableLongCollection> getPrimeBases(@NonNull BaseTypesIntfc baseType);
+	MutableList<ImmutableLongCollection> getPrimeBases(@NotNull BaseTypesIntfc baseType);
 }

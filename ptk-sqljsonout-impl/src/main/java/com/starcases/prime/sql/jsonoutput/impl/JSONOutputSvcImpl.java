@@ -1,9 +1,11 @@
 package com.starcases.prime.sql.jsonoutput.impl;
 
+import java.util.Arrays;
 import java.util.function.Predicate;
 
+import org.eclipse.collections.api.block.predicate.primitive.LongPredicate;
 import org.eclipse.collections.api.list.ImmutableList;
-import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
+//import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
 import org.eclipse.collections.impl.factory.Lists;
 
 import com.google.gson.Gson;
@@ -47,15 +49,17 @@ public class JSONOutputSvcImpl implements OutputServiceIntfc
 			,final long maxIndexes
 			,final boolean useParallel
 			,@NonNull final Predicate<? super PrimeRefIntfc> idxFilter
-			,@NonNull final Predicate<? super ImmutableLongCollection> baseFilter
+			,@NonNull final LongPredicate baseFilter
 			,@NonNull final ImmutableList<String> excludeFields
 			)
 	{
 		try
-		{			
+		{
+
 			final ExclFieldNameStrategy excludes = new ExclFieldNameStrategy();
 			excludeFields.forEach(excludes::addExcludedField);
-			System.out.println("JSON Output - basetype " + baseType);
+			System.out.printf("JSON Output - basetype[%s] startIdx[%d] ", baseType, startIdx);
+			System.out.printf("JSON output - first prime in stream [%d]", primeSrc.getPrimeRefStream(startIdx, useParallel).findFirst().get().getPrime());
 			final Gson gson = new GsonBuilder().setExclusionStrategies(excludes).serializeNulls().create();
 			result.setResult(
 					gson.toJson(
@@ -63,17 +67,23 @@ public class JSONOutputSvcImpl implements OutputServiceIntfc
 						.getPrimeRefStream(startIdx, useParallel)
 						.limit(maxIndexes)
 						.<JsonData>map(pRef -> new JsonData(
+								
 								pRef.getPrimeRefIdx(),
+								
 								pRef.getPrime(),
+								
 								baseType != null
-									? pRef
-										.getPrimeBases(BASE_TYPES.select(base -> base.name().equals(baseType)).getOnly())
-										//.stream()
-										// Filter tuples out of bases for each matched prime which where tuple doesn't meet the match criteria
-										//.filter(baseFilter)
-										//.map(lc -> lc.toArray())
-										//.toArray()
-									: EMPTY_ARRAY))
+								? pRef
+									.getPrimeBases(BASE_TYPES.select(base -> base.name().equals(baseType)).getOnly())
+								: EMPTY_ARRAY,	
+								
+								baseType != null
+									? Arrays.stream(pRef
+										.getPrimeBases(BASE_TYPES.select(base -> base.name().equals(baseType)).getOnly()))
+										.anyMatch(baseFilter)										
+									: true))
+					
+						.filter(json -> baseType == null || json.isKeep())
 						.toArray()));
 		}
 		catch(final Exception e)

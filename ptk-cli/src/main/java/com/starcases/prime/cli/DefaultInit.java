@@ -19,6 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.collections.api.block.predicate.Predicate2;
 import org.eclipse.collections.api.collection.ImmutableCollection;
 import org.eclipse.collections.api.factory.Lists;
@@ -71,10 +72,8 @@ import picocli.CommandLine.Command;
 /**
  *
  * Ties all the command line interface options/processing together.
- *
  * The command line parms are parsed and then mapped to PTKKfactory
  *  static data members for convenience/consolidation.
- *
  * The command line params determine what actions the toolkit takes
  * and adds a functional "consumer" interface to a list for each "action"
  * to be executed.  Some actions are required as part of initialization so
@@ -203,8 +202,8 @@ public class DefaultInit implements Runnable
 	/**
 	 * default graph setup
 	 *
-	 * @param primeSrc
-	 * @param baseType
+	 * @param primeSrc Prime source reference.
+	 * @param baseType Base type reference.
 	 */
 	private void graph(final PrimeSourceIntfc primeSrc, final BaseTypesIntfc baseType)
 	{
@@ -242,8 +241,7 @@ public class DefaultInit implements Runnable
 	/**
 	 * default export setup.
 	 *
-	 * @param primeSrc
-	 * @param exportFileDef
+	 * @param primeSrc The prime source reference.
 	 */
 	private void export(final PrimeSourceIntfc primeSrc)
 	{
@@ -284,10 +282,10 @@ public class DefaultInit implements Runnable
 
 	/**
 	 * Normalize the path and insert identification info into the filename.
-	 * @param base
-	 * @param fileName
-	 * @param extension
-	 * @return
+	 * @param base Base name
+	 * @param fileName Bare file name.
+	 * @param extension Target file extension name.
+	 * @return Filename decorated with base and extension.
 	 */
 	private Path decorateFileName(final String base, final String fileName, final String extension)
 	{
@@ -313,13 +311,13 @@ public class DefaultInit implements Runnable
 		LOG.info("CLI - Setting defaults");
 	}
 
-	private boolean ensureFolderExist(final String folderPath)
+	private boolean ensureFolderExist(@NotNull final String folderPath)
 	{
 		Optional<File> optFolder = Optional.empty();
 		final File folder = new File(replaceTildeHome(folderPath));
 		if (folder.exists() || folder.mkdirs())
 		{
-			optFolder = Optional.ofNullable(folder);
+			optFolder = Optional.of(folder);
 		}
 
 		if (optFolder.isEmpty() && LOG.isLoggable(Level.SEVERE))
@@ -448,8 +446,8 @@ public class DefaultInit implements Runnable
 
 				// Constructor calls methods to load data.
 				primePreloadProvider
-						.provider(Lists.immutable.of("PRELOADER"))
-						.map(p -> p.create(primeCache, Path.of(replaceTildeHome(inputFolderPath)), null).orElse(null))
+                        .provider(Lists.immutable.of("PRELOADER"))
+						.flatMap(p -> p.create(primeCache, Path.of(replaceTildeHome(inputFolderPath)), null))
 						.ifPresentOrElse(
 								 preloader -> 	{
 									 				LOG.fine("Raw source primes loaded.");
@@ -464,13 +462,16 @@ public class DefaultInit implements Runnable
 				}
 			}
 
-			primeSrc = getPrimeSource(primeCache, primeIdxCache);
+			primeSrc = getPrimeSource(primeCache, primeIdxCache, initOpts.getMaxIdx());
 
-			System.out.println(String.format("***** Prime for index 4: [%d]", primeSrc.getPrimeForIdx(4L).orElse(-1)));
+			System.out.printf("***** Prime for index 0: [%d]%n", primeSrc.getPrimeForIdx(0L).orElse(-1));
+			System.out.printf("***** Prime for index 4: [%d]%n", primeSrc.getPrimeForIdx(4L).orElse(-1));
 		});
 	}
 
-	private PrimeSourceFactoryIntfc getPrimeSource(@NonNull final BTreeMap<Long, Long> primeCache , @NonNull final BTreeMap<Long, Long> primeIdxCache)
+	private PrimeSourceFactoryIntfc getPrimeSource(@NonNull final BTreeMap<Long, Long> primeCache ,
+												   @NonNull final BTreeMap<Long, Long> primeIdxCache,
+												   int maxIdx)
 	{
 		final Consumer<PrimeSourceIntfc> c = PrimeRef::setPrimeSource;
 		final ImmutableList<Consumer<PrimeSourceIntfc>> consumers = Lists.immutable.of(c);
@@ -482,6 +483,7 @@ public class DefaultInit implements Runnable
 				,collTracker
 				,primeCache
 				,primeIdxCache
+				, maxIdx
 				);
 	}
 
@@ -536,9 +538,9 @@ public class DefaultInit implements Runnable
 					    .closeOnJvmShutdown()
 					    .make();
 
-				HTreeMap onDisk = dbDisk.hashMap(dbPath.normalize().toString()).createOrOpen();
+				final HTreeMap onDisk = dbDisk.hashMap(dbPath.normalize().toString()).createOrOpen();
 
-				System.out.println(String.format("basetype %s  idx: 5  bases: %s", baseType.name(), onDisk.get(5L)) );
+				System.out.printf("basetype %s  idx: 5  bases: %s%n", baseType.name(), onDisk.get(5L));
 
 				baseDBS.put(baseType.name(), dbMem);
 

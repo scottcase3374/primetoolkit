@@ -10,19 +10,16 @@ import java.util.logging.Logger;
 
 import org.eclipse.collections.api.factory.Lists;
 
-import com.starcases.prime.common.api.OutputOper;
 import com.starcases.prime.core.api.PrimeGenIntfc;
 import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceFactoryIntfc;
-import com.starcases.prime.core.api.PrimeSourceIntfc;
 import com.starcases.prime.core.api.ProgressIntfc;
 import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
 import com.starcases.prime.datamgmt.api.PData;
 import com.starcases.prime.kern.api.Permutation;
 import com.starcases.prime.kern.api.StatusHandlerIntfc;
 import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
-import com.starcases.prime.metrics.api.MetricIntfc;
 import com.starcases.prime.metrics.api.MetricProviderIntfc;
 import com.starcases.prime.service.impl.SvcLoader;
 
@@ -56,7 +53,7 @@ public class PrimeGenImpl implements PrimeGenIntfc
 	@Getter
 	private final MetricProviderIntfc metricProvider;
 
-	private PrimeSourceFactoryIntfc primeSrc;
+	private final PrimeSourceFactoryIntfc primeSrc;
 
 	/**
 	 * dest of output progress tracking
@@ -67,7 +64,7 @@ public class PrimeGenImpl implements PrimeGenIntfc
 	private ProgressIntfc progress;
 
 
-	private CollectionTrackerIntfc collTracker;
+	private final CollectionTrackerIntfc collTracker;
 
 	public PrimeGenImpl(@NonNull final PrimeSourceFactoryIntfc primeSrc, @NonNull final CollectionTrackerIntfc collTracker, @NonNull final MetricProviderIntfc metricProvider)
 	{
@@ -97,7 +94,7 @@ public class PrimeGenImpl implements PrimeGenIntfc
 		long nextPrimeTmpIdx = Long.MAX_VALUE;
 		do
 		{
-			try(MetricIntfc metric = metricProvider.longTimer(OutputOper.CREATE_PRIMES, "PrimeSource", "genPrimes"))
+			try
 			{
 				final int nextPrimeIdx = (int) nextIdx.incrementAndGet();
 				final int lastPrimeIdx = nextPrimeIdx -1;
@@ -133,7 +130,7 @@ public class PrimeGenImpl implements PrimeGenIntfc
 	 * processing need to an extent.
 	 *
 	 * @param optCurPrime
-	 * @return
+	 * @return Optional Prime Reference
 	 */
 	private Optional<PrimeRefIntfc> genByListPermutation(@Min(0) final long nextPrimeIdx, @Min(1) final OptionalLong optCurPrime, final boolean saveNew)
 	{

@@ -1,6 +1,5 @@
 package com.starcases.prime.core.impl;
 
-import java.time.LocalTime;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -27,9 +26,9 @@ import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
 import com.starcases.prime.kern.api.StatusHandlerIntfc;
 import com.starcases.prime.service.impl.SvcLoader;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.Setter;
 
 import jakarta.validation.constraints.Min;
@@ -48,7 +47,7 @@ import org.mapdb.BTreeMap;
  */
 public class PrimeSource implements PrimeSourceFactoryIntfc
 {
-	private static  ExecutorService pool = Executors.newVirtualThreadPerTaskExecutor();
+	private final static  ExecutorService pool = Executors.newVirtualThreadPerTaskExecutor();
 
 	private final  StatusHandlerIntfc statusHandler =
 			new SvcLoader<StatusHandlerProviderIntfc, Class<StatusHandlerProviderIntfc>>(StatusHandlerProviderIntfc.class)
@@ -96,7 +95,7 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	// Internal data used/generated during prime/base creation
 	//
 
-	private List<BaseGenIntfc> baseGenerators = Lists.mutable.empty();
+	private final List<BaseGenIntfc> baseGenerators = Lists.mutable.empty();
 
 	/**
 	 * Map Index to prime.
@@ -112,7 +111,12 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	 * Multi-level container for the tree of primes - all in memory.
 	 */
 	@Getter(AccessLevel.PRIVATE)
-	private CollectionTrackerIntfc collTracker;
+	private final CollectionTrackerIntfc collTracker;
+
+	/**
+	 * Max idxs to process
+	 */
+	private final int maxIdx;
 
 	//
 	// initialization
@@ -120,18 +124,17 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 
 	/**
 	 * primary constructor of prime source - for lookups of prime/prime refs.
-	 * @param maxCount
-	 * @param consumersSetPrimeSrc
-	 * @param confidenceLevel
-	 * @param primeRefRawCtor
-	 * @param collTrack
+	 * @param consumersSetPrimeSrc Iteratable to consumers of prime src
+	 * @param primeRefRawCtor CTOR for prime references
+	 * @param collTracker Collection tracker
 	 */
 	public PrimeSource(
-			@NonNull final Iterable<Consumer<PrimeSourceIntfc>> consumersSetPrimeSrc,
-			@NonNull final Function<Long, PrimeRefFactoryIntfc> primeRefRawCtor,
+			@NotNull final Iterable<Consumer<PrimeSourceIntfc>> consumersSetPrimeSrc,
+			@NotNull final Function<Long, PrimeRefFactoryIntfc> primeRefRawCtor,
 			final CollectionTrackerIntfc collTracker,
 			final BTreeMap<Long, Long> primeMap,
-			final BTreeMap<Long, Long> idxToPrimeMap
+			final BTreeMap<Long, Long> idxToPrimeMap,
+			final int maxIdx
 			)
 	{
 		super();
@@ -139,6 +142,7 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 		this.collTracker = collTracker;
 		this.primeMap = primeMap;
 		this.primeToIdxMap = idxToPrimeMap;
+		this.maxIdx = maxIdx;
 
 		this.primeRefRawCtor = primeRefRawCtor;
 		consumersSetPrimeSrc
@@ -153,9 +157,7 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	}
 
 	/**
-	 * Add new Prime to shared set of all primes
-	 *
-	 * @param aPrime
+	 * Add new Prime to shared set of all prime.
 	 */
 	@Override
 	public PrimeRefFactoryIntfc addPrimeRef(
@@ -181,7 +183,7 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 				primeToIdxMap.putIfAbsent(primeMap.get(idx), idx);
 				if (idx % 1_000_000 == 0)
 				{
-					statusHandler.dbgOutput(String.format("idxtoprime load: %d  prime %d", idx, primeToIdxMap.get(primeMap.get(idx))));
+					statusHandler.dbgOutput(String.format("initIdxToPrime load: %d  prime %d", idx, primeToIdxMap.get(primeMap.get(idx))));
 				}
 			}
 		}
@@ -225,8 +227,8 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	/**
 	 * TODO Do I really need this method?
 	 *
-	 * @param possiblePrime
-	 * @return
+	 * @param possiblePrime Number which could be prime
+	 * @return -1 for non-prime/not-found or the key idx if found.
 	 */
 	@Override
 	public long searchPrime(final long possiblePrime)
@@ -252,7 +254,7 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	}
 
 	@Override
-	public Optional<PrimeRefIntfc> getPrimeRefForPrime(@Min(0) final long prime)
+	public Optional<PrimeRefIntfc> getPrimeRefForPrime(@Min(1) final long prime)
 	{
 		Optional<PrimeRefIntfc> ret = Optional.empty();
 		final Long primeIdx = primeToIdxMap.get(prime);
@@ -264,7 +266,7 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	}
 
 	@Override
-	public Optional<PrimeRefIntfc> getPrimeRefForPrime(@NonNull final LongSupplier longSupplier)
+	public Optional<PrimeRefIntfc> getPrimeRefForPrime(@NotNull final LongSupplier longSupplier)
 	{
 		final long prime = longSupplier.getAsLong();
 		return this.getPrimeRefForPrime(prime);
@@ -289,10 +291,11 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	}
 
 	@Override
-	public Stream<PrimeRefIntfc> getPrimeRefStream(@Min(1) final long skipCount, final boolean preferParallel)
+	public Stream<PrimeRefIntfc> getPrimeRefStream(@Min(0) final long skipCount, final boolean preferParallel)
 	{
+		// Uses skipCount -1 since 'next' needs to handle returning the 0 index.
 		final Iterator<PrimeRefIntfc> iter = getPrimeRefIter(skipCount-1);
-		final Supplier<PrimeRefIntfc> supplier = () -> { var it = iter; return it.hasNext() ? it.next() : null; };
+		final Supplier<PrimeRefIntfc> supplier = () -> { return iter.hasNext() ? iter.next() : null; };
 		return Stream.generate(supplier).takeWhile( Objects::nonNull);
 	}
 
@@ -317,8 +320,12 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	@Override
 	public Stream<PrimeRefFactoryIntfc> getPrimeFactoryRefStream(@Min(0) final long skipCount, final boolean preferParallel)
 	{
+
 		final Iterator<PrimeRefFactoryIntfc> iter = getPrimeFactoryRefIter(skipCount);
-		final Supplier<PrimeRefFactoryIntfc> supplier = () -> { var it = iter; return it.hasNext() ? it.next() : null; };
+		int []remain = {maxIdx};
+		final Supplier<PrimeRefFactoryIntfc> supplier = () -> {
+
+            return iter.hasNext() && (--remain[0] >= 0) ? iter.next() : null; };
 		return Stream.generate(supplier).takeWhile( Objects::nonNull);
 	}
 
@@ -344,7 +351,7 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 		if (createBases)
 		{
 			statusHandler.dbgOutput("PrimeSource::init - generating bases.");
-			getPrimeFactoryRefStream(false).forEach(this::generateBases);
+			getPrimeFactoryRefStream(0, false).forEach(this::generateBases);
 		}
 	}
 

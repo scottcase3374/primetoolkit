@@ -1,13 +1,14 @@
 package com.starcases.prime.sql.csvoutput.impl;
 
 import java.io.StringWriter;
+import java.util.Arrays;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.eclipse.collections.api.list.ImmutableList;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
-import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
+import org.eclipse.collections.api.block.predicate.primitive.LongPredicate;
 import org.eclipse.collections.impl.factory.Lists;
 
 import com.starcases.prime.base.api.BaseTypesProviderIntfc;
@@ -48,14 +49,14 @@ public class CSVOutputSvcImpl implements OutputServiceIntfc
 		this.result = result;
 		return this;
 	}
-
+	
 	@Override
 	public void output(	final String baseType,
 						final long startIdx,
 						final long maxIndexes,
 						final boolean useParallel,
 						@NonNull final Predicate<? super PrimeRefIntfc> idxFilter,
-						@NonNull final Predicate<? super ImmutableLongCollection> baseFilter,
+						@NonNull final LongPredicate baseFilter,
 						final ImmutableList<String> excludeFields
 						)
 	{
@@ -82,16 +83,19 @@ public class CSVOutputSvcImpl implements OutputServiceIntfc
 				  primeSrc
 				  	.getPrimeRefStream(startIdx, useParallel)
 				  	.limit(maxIndexes)
-				  	.<CSVData>map(pRef -> new CSVData( pRef.getPrimeRefIdx(), pRef.getPrime(),
+				  	.<CSVData>map(pRef -> new CSVData( 
+				  			pRef.getPrimeRefIdx(), 
+				  			pRef.getPrime(),
 				  			baseType != null ?
 				  					pRef
 				  					.getPrimeBases(BASE_TYPES.select(base -> base.name().equals(baseType)).getOnly())
-				  					//.stream()
-				  					// Filter tuples out of bases for each matched prime which where tuple doesn't meet the match criteria
-				  					//.filter(baseFilter)
-				  					//.map(lc -> lc.toArray())
-				  					//.toArray()
-				  				: EMPTY_ARRAY))
+				  				: EMPTY_ARRAY,
+
+		  			baseType != null ?
+		  					Arrays.stream(pRef.getPrimeBases(BASE_TYPES.select(base -> base.name().equals(baseType)).getOnly()))  					
+		  					.anyMatch(baseFilter)
+		  				: true))
+				  	
 				  				.forEach(p -> {
 				  							try
 				  							{
@@ -128,4 +132,6 @@ public class CSVOutputSvcImpl implements OutputServiceIntfc
 				result.setError(e.toString());
 		}
 	}
+
+
 }

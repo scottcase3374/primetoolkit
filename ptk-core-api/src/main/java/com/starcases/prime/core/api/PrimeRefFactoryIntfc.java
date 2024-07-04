@@ -12,7 +12,7 @@ import lombok.NonNull;
 
 public interface PrimeRefFactoryIntfc extends PrimeRefIntfc
 {
-	PrimeRefFactoryIntfc init( @NonNull final Supplier<PrimeBaseIntfc> primeBaseSupplier);
+	//PrimeRefFactoryIntfc init( @NonNull final Supplier<PrimeBaseIntfc> primeBaseSupplier);
 
 	PrimeRefFactoryIntfc generateBases(@NonNull final Consumer<PrimeRefFactoryIntfc> basesGenerate);
 

@@ -24,14 +24,14 @@ public class StatusHandlerImpl implements StatusHandlerIntfc
 	 */
 	private static final Logger LOG = Logger.getLogger(StatusHandlerImpl.class.getName());
 
-	private static MutableMap<String, Path> outputs = new ConcurrentHashMap<>();
+	private static final MutableMap<String, Path> outputs = new ConcurrentHashMap<>();
 
 	/**
 	 * Associate a path instance to a key where the path is
 	 * used to sink output data for that key.
 	 *
-	 * @param key
-	 * @param outputPath
+	 * @param key Output key name
+	 * @param outputPath Path to associate with key
 	 */
 	@SuppressWarnings("PMD.LawOfDemeter")
 	public void setOutput(final String key, final Path outputPath)
@@ -48,9 +48,8 @@ public class StatusHandlerImpl implements StatusHandlerIntfc
 	 * Method to send out to a printstream which may by
 	 * default be stdout or renamed to a specific file.
 	 *
-	 * @param format
-	 * @param params
-	 * @throws IOException
+	 * @param format Format specifiers
+	 * @param params Params to output
 	 */
 	public void output(final BaseTypesIntfc baseType, final String format, final Object...params)
 	{
@@ -61,9 +60,8 @@ public class StatusHandlerImpl implements StatusHandlerIntfc
 	 * Method to send out to a printstream which may by
 	 * default be stdout or renamed to a specific file.
 	 *
-	 * @param format
-	 * @param params
-	 * @throws IOException
+	 * @param format Format specifiers
+	 * @param params Params to output
 	 */
 	@SuppressWarnings("PMD.SystemPrintln")
 	private void output(final String baseType, final String format, final Object...params)
@@ -97,8 +95,8 @@ public class StatusHandlerImpl implements StatusHandlerIntfc
 	 * Method to send out to a printstream which may by
 	 * default be stdout or renamed to a specific file.
 	 *
-	 * @param format
-	 * @param params
+	 * @param format Format specifiers
+	 * @param params Params to output
 	 */
 	public void output(final String format, final Object...params)
 	{
@@ -110,8 +108,8 @@ public class StatusHandlerImpl implements StatusHandlerIntfc
 	 * a different method provides an easier way to search
 	 * for items which don't need to remain in the code base.
 	 *
-	 * @param format
-	 * @param params
+	 * @param format Format specifiers
+	 * @param params Params to output
 	 */
 	public void dbgOutput(final BaseTypesIntfc baseType, final String format, final Object...params)
 	{
@@ -123,8 +121,8 @@ public class StatusHandlerImpl implements StatusHandlerIntfc
 	 * a different method provides an easier way to search
 	 * for items which don't need to remain in the code base.
 	 *
-	 * @param format
-	 * @param params
+	 * @param format Format specifiers
+	 * @param params Params to output
 	 */
 	public void dbgOutput(final String format, final Object...params)
 	{
@@ -134,8 +132,8 @@ public class StatusHandlerImpl implements StatusHandlerIntfc
 	/**
 	 * method for error out
 	 *
-	 * @param format
-	 * @param params
+	 * @param format Format specifiers
+	 * @param params Params to output
 	 */
 	public void errorOutput(final BaseTypesIntfc baseType, final String format, final Object...params)
 	{
@@ -145,8 +143,8 @@ public class StatusHandlerImpl implements StatusHandlerIntfc
 	/**
 	 * method for error out
 	 *
-	 * @param format
-	 * @param params
+	 * @param format Format specifiers
+	 * @param params Params to output
 	 */
 	public void errorOutput(final String format, final Object...params)
 	{

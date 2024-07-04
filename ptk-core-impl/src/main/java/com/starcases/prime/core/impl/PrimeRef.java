@@ -4,14 +4,12 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import org.eclipse.collections.api.LongIterable;
 import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.impl.map.mutable.MutableMapFactoryImpl;
 import org.mapdb.HTreeMap;
 
-import com.starcases.prime.base.api.PrimeBaseIntfc;
 import com.starcases.prime.base.impl.BaseTypes;
 import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
@@ -22,7 +20,6 @@ import lombok.NonNull;
 
 /**
  * Default Prime representation.
- *
 * The general algorithm idea is that the next Prime is derived from
 * the sum of some subset of previous primes.
 *
@@ -32,10 +29,9 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	/**
 	 * Access lookup for prime/primeRefs
 	 */
-	@NonNull
 	private static PrimeSourceIntfc primeSrc;
 
-	private static MutableMap<BaseTypesIntfc, HTreeMap<Long, long[]>> primeBases = MutableMapFactoryImpl.INSTANCE.empty();
+	private static final MutableMap<BaseTypesIntfc, HTreeMap<Long, long[]>> primeBases = MutableMapFactoryImpl.INSTANCE.empty();
 
 	private final long primeIdx;
 
@@ -45,27 +41,12 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	 * Handle simple Prime where the base is simply itself - i.e. 1, 2
 	 * Simplifies bootstrapping
 	 *
-	 * @param Prime
+	 * @param primeIdx Index of target prime
 	 */
 	public PrimeRef(final long primeIdx)
 	{
 		this.primeIdx = primeIdx;
 	}
-
-	/**
-	 * alt constructor
-	 * @param primeBaseSupplier
-	 * @param primeBases
-	 * @return
-	 */
-	@Override
-	public PrimeRefFactoryIntfc init(
-			 @NonNull final Supplier<PrimeBaseIntfc> primeBaseSupplier
-			)
-	{
-		return this;
-	}
-
 
 	/**
 	 * For DEFAULT base type
@@ -93,7 +74,7 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	 * Assign the prime source reference for performing
 	 * prime/primeref lookups.
 	 *
-	 * @param primeSrcIntfc
+	 * @param primeSrcIntfc PrimeSrc reference
 	 */
 	public static void setPrimeSource(@NonNull final PrimeSourceIntfc primeSrcIntfc)
 	{
@@ -140,7 +121,6 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	/**
 	 * absolute value of difference with next Prime
 	 * if the next Prime is known.
-	 *
 	 * empty optional if next Prime is unknown/not calculated
 	 */
 	@Override
@@ -148,13 +128,12 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	{
 		final var result = primeSrc.getPrimeRefForIdx(primeIdx);
 
-		return  result.isPresent() ? OptionalLong.of(result.get().getPrime() - getPrime()) : OptionalLong.empty();
+		return result.map(primeRefIntfc -> OptionalLong.of(primeRefIntfc.getPrime() - getPrime())).orElseGet(OptionalLong::empty);
 	}
 
 	/**
 	 * absolute value of difference with prev Prime
 	 * if the prev Prime is known/exists.
-	 *
 	 * empty optional if prev Prime is unknown/doesn't exist
 	 */
 	@Override
@@ -162,7 +141,7 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	{
 		final var result =  primeSrc.getPrimeRefForIdx(primeIdx);
 
-		return result.isPresent() ? OptionalLong.of(result.get().getPrime() - getPrime()) : OptionalLong.empty();
+		return result.map(primeRefIntfc -> OptionalLong.of(primeRefIntfc.getPrime() - getPrime())).orElseGet(OptionalLong::empty);
 	}
 
 
@@ -173,16 +152,16 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	}
 
 	@Override
-	public void addPrimeBases(@NonNull final BaseTypesIntfc baseType, @NonNull final long [] primeBase)
+	public void addPrimeBases(@NonNull final BaseTypesIntfc baseType, final long [] primeBase)
 	{
 		primeBases.get(baseType).computeIfAbsent(this.primeIdx, (k) -> primeBase);
 	}
 
 	@Override
-	public void addPrimeBases(@NonNull final BaseTypesIntfc baseType, @NonNull final PrimeRefIntfc [] primeBase)
+	public void addPrimeBases(@NonNull final BaseTypesIntfc baseType, final PrimeRefIntfc [] primeBase)
 	{
 		primeBases.get(baseType).computeIfAbsent(this.primeIdx, (k) ->
-			com.starcases.prime.kern.api.Arrays.longArrayToLongArray((Long[])Arrays.asList(primeBase).stream().map(bref -> bref.getPrime()).toArray()));
+			com.starcases.prime.kern.api.Arrays.longArrayToLongArray((Long[]) Arrays.stream(primeBase).map(PrimeRefIntfc::getPrime).toArray()));
 	}
 
 	@Override

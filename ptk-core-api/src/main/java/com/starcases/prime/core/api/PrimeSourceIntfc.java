@@ -96,7 +96,6 @@ public interface PrimeSourceIntfc
 	/**
 	 * Get highest prime ref less than or equal to specified value .
 	 *
-	 * @param longSupplier
 	 * @return
 	 */
 	Optional<PrimeRefIntfc> getPrimeRefCeiling(@NonNull final long value);

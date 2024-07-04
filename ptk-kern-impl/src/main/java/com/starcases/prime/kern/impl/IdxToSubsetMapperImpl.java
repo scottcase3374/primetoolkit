@@ -13,7 +13,6 @@ public class IdxToSubsetMapperImpl implements IdxToSubsetMapperIntfc
 	 * @param retSubset
 	 * @param retOffset
 	 */
-
 	@Override
 	public void convertIdxToSubsetAndOffset(final long idx, @NonNull final long [] retSubset, @NonNull final int [] retOffset)
 	{

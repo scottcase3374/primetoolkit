@@ -43,8 +43,8 @@ class CmdServer implements CmdServerIntfc
 	 * Constructor for the cmd server which provides access to a
 	 * SQL-like processor for the primes and data.
 	 *
-	 * @param primeSrc
-	 * @param port
+	 * @param primeSrc Prime source ref
+	 * @param port Port # to listen on
 	 */
 	public CmdServer(final PrimeSourceIntfc primeSrc, final int port)
 	{
@@ -55,7 +55,7 @@ class CmdServer implements CmdServerIntfc
 	/**
 	 * run the listener for the SQL-like processor.
 	 *
-	 * @throws InterruptedException
+	 * @throws InterruptedException Throws interrupted exception
 	 */
 	@Override
 	public void run() throws InterruptedException
@@ -95,7 +95,7 @@ class CmdServer implements CmdServerIntfc
 	 * interface is eventually found - not immediately clear why it isn't found when
 	 * directly using NioEventLoopGroup
 	 *
-	 * @return
+	 * @return event loop group
 	 */
 	private CmdEventLoopGroup createEventLoopGroup()
 	{
