@@ -156,17 +156,20 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 		final Predicate<? super PrimeRefIntfc> idxFilter =
 				 pRef -> primePredColl.stream().allMatch(primeFilt -> primeFilt.accept(pRef));
 
-		final LongPredicate baseFilter =
-				 baseLong ->
-					   primeBaseItemPredColl.stream().anyMatch((pred) -> pred.accept(baseLong)); // return partial tuples - only matching portion
-					// || primeBaseTuplePredColl.stream().allMatch((tupleFilt) -> tupleFilt.accept(baseLong));
+		// check partial tuples
+		final LongPredicate anyBasePred = baseLong -> primeBaseItemPredColl.stream().anyMatch((pred) -> pred.accept(baseLong)); 
+		
+		final Predicate<? super ImmutableLongCollection> entireBasePred =
+				 baseColl ->
+					   primeBaseItemPredColl.stream().anyMatch(baseColl::anySatisfy)
+					|| primeBaseTuplePredColl.stream().anyMatch(tupleFilt -> tupleFilt.accept(baseColl));
 		try
 		{
 			 new SvcLoader<OutputProviderIntfc, Class<OutputProviderIntfc>>(OutputProviderIntfc.class)
 			 	.provider( Lists.immutable.of(contentType.toUpperCase()))
 			 	.orElseThrow()
 			 	.create(primeSrc, result)
-			 	.output(baseType, greaterThanAttr, this.maxIndexCount, selUseParallel, idxFilter, baseFilter, fieldExclusionFields);
+			 	.output(baseType, greaterThanAttr, this.maxIndexCount, selUseParallel, idxFilter, anyBasePred, entireBasePred, fieldExclusionFields);
 		}
 		catch (final Exception e)
 		{

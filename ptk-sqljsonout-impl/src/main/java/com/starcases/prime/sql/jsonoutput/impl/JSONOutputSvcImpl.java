@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.function.Predicate;
 
 import org.eclipse.collections.api.block.predicate.primitive.LongPredicate;
+import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
+import org.eclipse.collections.api.factory.primitive.LongLists;
 import org.eclipse.collections.api.list.ImmutableList;
 //import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
 import org.eclipse.collections.impl.factory.Lists;
@@ -49,7 +51,8 @@ public class JSONOutputSvcImpl implements OutputServiceIntfc
 			,final long maxIndexes
 			,final boolean useParallel
 			,@NonNull final Predicate<? super PrimeRefIntfc> idxFilter
-			,@NonNull final LongPredicate baseFilter
+			,@NonNull final LongPredicate anyBasePred
+			,@NonNull final Predicate<? super ImmutableLongCollection> entireBasePred 
 			,@NonNull final ImmutableList<String> excludeFields
 			)
 	{
@@ -58,8 +61,8 @@ public class JSONOutputSvcImpl implements OutputServiceIntfc
 
 			final ExclFieldNameStrategy excludes = new ExclFieldNameStrategy();
 			excludeFields.forEach(excludes::addExcludedField);
-			System.out.printf("JSON Output - basetype[%s] startIdx[%d] ", baseType, startIdx);
-			System.out.printf("JSON output - first prime in stream [%d]", primeSrc.getPrimeRefStream(startIdx, useParallel).findFirst().get().getPrime());
+			System.out.printf("JSON Output - basetype[%s] startIdx[%d] \n", baseType, startIdx);
+			System.out.printf("JSON output - first prime in stream [%d]\n", primeSrc.getPrimeRefStream(startIdx, useParallel).findFirst().get().getPrime());
 			final Gson gson = new GsonBuilder().setExclusionStrategies(excludes).serializeNulls().create();
 			result.setResult(
 					gson.toJson(
@@ -80,7 +83,8 @@ public class JSONOutputSvcImpl implements OutputServiceIntfc
 								baseType != null
 									? Arrays.stream(pRef
 										.getPrimeBases(BASE_TYPES.select(base -> base.name().equals(baseType)).getOnly()))
-										.anyMatch(baseFilter)										
+										.anyMatch(anyBasePred) 
+										|| entireBasePred.test(LongLists.immutable.of(pRef.getPrimeBases(BASE_TYPES.select(base -> base.name().equals(baseType)).getOnly())))
 									: true))
 					
 						.filter(json -> baseType == null || json.isKeep())
