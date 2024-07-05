@@ -34,7 +34,7 @@ build/
 
 .attach*
 *.log
-
+.metadata/
 /index/
 /data/
 /.pmd
