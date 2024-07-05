@@ -47,7 +47,7 @@ import org.mapdb.BTreeMap;
  */
 public class PrimeSource implements PrimeSourceFactoryIntfc
 {
-	private final static  ExecutorService pool = Executors.newVirtualThreadPerTaskExecutor();
+	private static final ExecutorService pool = Executors.newVirtualThreadPerTaskExecutor();
 
 	private final  StatusHandlerIntfc statusHandler =
 			new SvcLoader<StatusHandlerProviderIntfc, Class<StatusHandlerProviderIntfc>>(StatusHandlerProviderIntfc.class)
