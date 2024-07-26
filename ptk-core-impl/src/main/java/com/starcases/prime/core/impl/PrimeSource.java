@@ -175,16 +175,19 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	 * the prime map creation.
 	 */
 	public void initIdxToPrime()
-	{
+	{		
 		if (primeMap.get(0L) != null)
 		{
-			for (long idx=0; idx <=50_000_000; idx++)
+			long idx=0;
+			Long val;
+			while ((val = primeMap.get(idx)) != null)
 			{
-				primeToIdxMap.putIfAbsent(primeMap.get(idx), idx);
+				primeToIdxMap.putIfAbsent(val, idx);
 				if (idx % 1_000_000 == 0)
 				{
-					statusHandler.dbgOutput(String.format("initIdxToPrime load: %d  prime %d", idx, primeToIdxMap.get(primeMap.get(idx))));
+					statusHandler.dbgOutput(String.format("initIdxToPrime load: %d", idx));
 				}
+				idx++;
 			}
 		}
 	}

@@ -1,6 +1,7 @@
 package com.starcases.prime.base.triples.impl;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.function.Function;
 
@@ -208,26 +209,27 @@ public class AllTriples implements Runnable
 			}
 		}
 
-		if (primeRef.getPrimeRefIdx() % 1_000 == 0)
+		if (found && primeRef.getPrimeRefIdx() % 1_000 == 0)
 		{
-			statusHandler.output(String.format("TRIPLE idxtoprime idx: %d inc-rounds: %d  dec-rounds: %d inc: %d  dec: %d",
+			statusHandler.output(String.format("TRIPLE idxtoprime idx: %d inc-rounds: %d  dec-rounds: %d inc: %d  dec: %d %s",
 					primeRef.getPrimeRefIdx(),
 					incRounds,
 					decRounds,
 					incFound.get(),
-					decFound.get()));
+					decFound.get(),
+					LocalDateTime.now()));
 		}
-
-		if (prime >= 11 && !found)
+		else if (!found && prime >= 11)
 		{
-			statusHandler.errorOutput(String.format("##TRIPLE not-found %b prime-idx %d prime %d inc-rounds: %d dec-rounds: %d decDone: %b incDone: %b",
+			statusHandler.errorOutput(String.format("##TRIPLE not-found %b prime-idx %d prime %d inc-rounds: %d dec-rounds: %d decDone: %b incDone: %b %s",
 					found,
 					primeRef.getPrimeRefIdx(),
 					primeRef.getPrime(),
 					incRounds,
 					decRounds,
 					decDone,
-					incDone));
+					incDone,
+					LocalDateTime.now()));
 		}
 	}
 }
