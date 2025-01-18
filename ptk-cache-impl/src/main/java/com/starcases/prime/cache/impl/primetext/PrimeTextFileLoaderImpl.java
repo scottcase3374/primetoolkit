@@ -8,7 +8,6 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.OptionalLong;
 import java.util.StringTokenizer;
-import java.util.logging.Logger;
 import java.util.stream.Stream;
 import java.util.zip.ZipFile;
 
@@ -33,8 +32,6 @@ import lombok.AccessLevel;
  */
 class PrimeTextFileLoaderImpl implements PrimeTextFileloaderIntfc
 {
-	Logger LOG = Logger.getLogger(PrimeTextFileLoaderImpl.class.getName());
-
 	private final  StatusHandlerIntfc statusHandler =
 			new SvcLoader<StatusHandlerProviderIntfc, Class<StatusHandlerProviderIntfc>>(StatusHandlerProviderIntfc.class)
 				.provider(Lists.immutable.of("STATUS_HANDLER")).orElseThrow().create();
@@ -120,8 +117,8 @@ class PrimeTextFileLoaderImpl implements PrimeTextFileloaderIntfc
 							{
 					 			stream
 					 				.filter(file -> !Files.isDirectory(file)) // filter out directories
-									.sorted( (a, b) -> Integer.valueOf(a.getFileName().toString().split("(s|\\.)")[1]).compareTo(   // sort by #; i.e. primes2.zip , primes23.zip, etc
-													   Integer.valueOf(b.getFileName().toString().split("(s|\\.)")[1]) ))
+									.sorted( (a, b) -> Integer.valueOf(a.getFileName().toString().split("[s.]")[1]).compareTo(   // sort by #; i.e. primes2.zip , primes23.zip, etc
+													   Integer.valueOf(b.getFileName().toString().split("[s.]")[1]) ))
 					 				.forEach( fileRef ->
 					 				{
 					 					statusHandler.dbgOutput("Raw text input file: %s", fileRef.toString());

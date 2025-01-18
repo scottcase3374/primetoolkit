@@ -10,7 +10,6 @@ import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
  * the default method signatures did not contain
  * needed items.
  */
-@SuppressWarnings("PMD.TooManyMethods")
 public interface CollectionTreeIteratorIntfc extends ListIterator<CollectionTreeNode>
 {
 	/**

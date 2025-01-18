@@ -19,7 +19,6 @@ import lombok.Setter;
  * factory providing defaults for some example usages.
  *
  */
-@SuppressWarnings({"PMD.SystemPrintln"})
 public final class PTKFactory
 {
 	/**

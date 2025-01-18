@@ -99,8 +99,7 @@ class CmdServer implements CmdServerIntfc
 	 */
 	private CmdEventLoopGroup createEventLoopGroup()
 	{
-		@SuppressWarnings({"PMD.LocalVariableNamingConventions"})
-		final String CLOSE_METHOD = "close";
+		final String close = "close";
 		final NioEventLoopGroup evtLoopGrp = new NioEventLoopGroup();
 
 	    return (CmdEventLoopGroup) Proxy.newProxyInstance(
@@ -108,7 +107,7 @@ class CmdServer implements CmdServerIntfc
 	    		{CmdEventLoopGroup.class },
 	    		(proxy, method, methodArgs) ->
 	    		{
-	    			if (CLOSE_METHOD.equals(method.getName()))
+	    			if (close.equals(method.getName()))
 	    			{
 	    				return evtLoopGrp.awaitTermination(2, TimeUnit.SECONDS);
 	    			}

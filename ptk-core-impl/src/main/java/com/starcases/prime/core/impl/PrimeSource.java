@@ -175,7 +175,7 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	 * the prime map creation.
 	 */
 	public void initIdxToPrime()
-	{		
+	{
 		if (primeMap.get(0L) != null)
 		{
 			long idx=0;
@@ -298,7 +298,7 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 	{
 		// Uses skipCount -1 since 'next' needs to handle returning the 0 index.
 		final Iterator<PrimeRefIntfc> iter = getPrimeRefIter(skipCount-1);
-		final Supplier<PrimeRefIntfc> supplier = () -> { return iter.hasNext() ? iter.next() : null; };
+		final Supplier<PrimeRefIntfc> supplier = () -> iter.hasNext() ? iter.next() : null;
 		return Stream.generate(supplier).takeWhile( Objects::nonNull);
 	}
 
@@ -326,9 +326,8 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 
 		final Iterator<PrimeRefFactoryIntfc> iter = getPrimeFactoryRefIter(skipCount);
 		int []remain = {maxIdx};
-		final Supplier<PrimeRefFactoryIntfc> supplier = () -> {
+		final Supplier<PrimeRefFactoryIntfc> supplier = () -> iter.hasNext() && (--remain[0] >= 0) ? iter.next() : null;
 
-            return iter.hasNext() && (--remain[0] >= 0) ? iter.next() : null; };
 		return Stream.generate(supplier).takeWhile( Objects::nonNull);
 	}
 

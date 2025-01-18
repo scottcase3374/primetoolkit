@@ -1,8 +1,7 @@
 package com.starcases.prime.base.triples.impl;
 
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 
 import org.eclipse.collections.api.factory.Lists;
 
@@ -24,11 +23,6 @@ import lombok.NonNull;
  */
 class LogBases3AllTriples  extends AbstractPrimeBaseLog
 {
-	/**
-	 * default logger
-	 */
-	private static final Logger LOG = Logger.getLogger(LogBases3AllTriples.class.getName());
-
 	private final  StatusHandlerIntfc statusHandler =
 			new SvcLoader<StatusHandlerProviderIntfc, Class<StatusHandlerProviderIntfc>>(StatusHandlerProviderIntfc.class)
 				.provider(Lists.immutable.of("STATUS_HANDLER")).orElseThrow().create();
@@ -47,10 +41,7 @@ class LogBases3AllTriples  extends AbstractPrimeBaseLog
 	@Override
 	public void outputLogs()
 	{
-		if (LOG.isLoggable(Level.INFO))
-		{
-			LOG.info(String.format("%nLogging triples%n"));
-		}
+		statusHandler.output(String.format("%nLogging triples%n"));
 
 		final var maxBasesInRow = 5;
 		final int [] idx = {5};

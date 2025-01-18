@@ -8,7 +8,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -30,8 +29,6 @@ import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.api.multimap.ImmutableMultimap;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.map.mutable.MutableMapFactoryImpl;
-import org.jgrapht.event.GraphListener;
-import org.jgrapht.graph.DefaultEdge;
 import org.mapdb.BTreeMap;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
@@ -44,7 +41,6 @@ import com.starcases.prime.base.api.LogPrimeDataProviderIntfc;
 import com.starcases.prime.base.impl.BaseTypes;
 import com.starcases.prime.cache.api.primetext.PrimeTextFileLoaderProviderIntfc;
 import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
-import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceFactoryIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
 import com.starcases.prime.core.impl.PrimeRef;
@@ -52,7 +48,6 @@ import com.starcases.prime.core.impl.PrimeSource;
 import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
 import com.starcases.prime.datamgmt.api.CollectionTrackerProviderIntfc;
 import com.starcases.prime.graph.export.api.ExportsProviderIntfc;
-import com.starcases.prime.graph.visualize.impl.ViewDefault;
 import com.starcases.prime.kern.api.BaseTypesIntfc;
 import com.starcases.prime.kern.api.OutputableIntfc;
 import com.starcases.prime.kern.api.PtkException;
@@ -207,8 +202,8 @@ public class DefaultInit implements Runnable
 	 */
 	private void graph(final PrimeSourceIntfc primeSrc, final BaseTypesIntfc baseType)
 	{
-		try
-		{
+//		try
+//		{
 //			final SvcLoader<VisualizationProviderIntfc, Class<VisualizationProviderIntfc>> visualizationProvider = new SvcLoader< >(VisualizationProviderIntfc.class);
 //
 //			final MutableList<VisualizationProviderIntfc> list = visualizationProvider
@@ -216,26 +211,27 @@ public class DefaultInit implements Runnable
 //				.collectIf(f -> f.countAttributesMatch( Lists.immutable.of("CIRCULAR_LAYOUT", "COMPACT_TREE_LAYOUT", "METADATA_TABLE")) > 0, p -> p)
 //				.toList()
 //				;
-
-			final var viewList = new ArrayList<GraphListener<PrimeRefIntfc, DefaultEdge>>();
-//			list.flatCollect(p -> p.create(null, null)).forEach( i ->
+//
+//			final var viewList = new ArrayList<GraphListener<PrimeRefIntfc, DefaultEdge>>();
+//			list.flatCollect(visualizerProvider -> visualizerProvider.create(null, null))
+//			.forEach( i ->
 //					{
 //						i.setSize(400, 320);
 //						i.setVisible(true);
 //						viewList.add(i);
 //					}
 //					);
-
-			final var viewDefault = new ViewDefault(primeSrc,  baseType, viewList);
-			viewDefault.viewDefault();
-		}
-		catch(IOException except)
-		{
-			if (LOG.isLoggable(Level.SEVERE))
-			{
-				LOG.severe("IOExcetion: " + except.toString());
-			}
-		}
+//
+//			final var viewDefault = new ViewDefault(primeSrc,  baseType, viewList);
+//			viewDefault.viewDefault();
+//		}
+//		catch(IOException except)
+//		{
+//			if (LOG.isLoggable(Level.SEVERE))
+//			{
+//				LOG.severe("IOExcetion: " + except.toString());
+//			}
+//		}
 	}
 
 	/**
@@ -449,9 +445,7 @@ public class DefaultInit implements Runnable
                         .provider(Lists.immutable.of("PRELOADER"))
 						.flatMap(p -> p.create(primeCache, Path.of(replaceTildeHome(inputFolderPath)), null))
 						.ifPresentOrElse(
-								 preloader -> 	{
-									 				LOG.fine("Raw source primes loaded.");
-								 				}
+								 preloader -> 	LOG.fine("Raw source primes loaded.")
 								, () -> LOG.warning("No Prime Raw Text preloader found."));
 			}
 			else
@@ -463,9 +457,6 @@ public class DefaultInit implements Runnable
 			}
 
 			primeSrc = getPrimeSource(primeCache, primeIdxCache, initOpts.getMaxIdx());
-
-			System.out.printf("***** Prime for index 0: [%d]%n", primeSrc.getPrimeForIdx(0L).orElse(-1));
-			System.out.printf("***** Prime for index 4: [%d]%n", primeSrc.getPrimeForIdx(4L).orElse(-1));
 		});
 	}
 
@@ -526,6 +517,8 @@ public class DefaultInit implements Runnable
 
 				final DB dbDisk = DBMaker
 					    .fileDB(dbPath.normalize().toString())
+					    .fileMmapEnable()            // Always enable mmap
+					    .fileMmapPreclearDisable()   // Make mmap file faster
 					    .allocateStartSize(5L * 1024 * 1024 * 1024) // 5 GB
 					    .allocateIncrement(1024L * 1024 * 1024) // 1 GB
 					    .checksumHeaderBypass()
@@ -540,11 +533,9 @@ public class DefaultInit implements Runnable
 
 				final HTreeMap onDisk = dbDisk.hashMap(dbPath.normalize().toString()).createOrOpen();
 
-				System.out.printf("basetype %s  idx: 5  bases: %s%n", baseType.name(), onDisk.get(5L));
-
 				baseDBS.put(baseType.name(), dbMem);
 
-				final HTreeMap baseSrc = dbMem
+				final HTreeMap<Long, long[]> baseSrc = dbMem
 						.hashMap(cacheNameForBaseType, Serializer.LONG, Serializer.LONG_ARRAY)
 						.expireMaxSize(50_000)
 						.expireOverflow(onDisk)
@@ -700,7 +691,7 @@ public class DefaultInit implements Runnable
 
 		if (graphOpts != null && graphOpts.getGraphType() != null)
 		{
-			System.out.println("**** Graphing enabled");
+			LOG.info("**** Graphing enabled");
 			actions.add(s -> graph(primeSrc, BASE_TYPES.select(p -> p.name().equals(graphOpts.getGraphType().name())).getOnly() ) );
 		}
 	}

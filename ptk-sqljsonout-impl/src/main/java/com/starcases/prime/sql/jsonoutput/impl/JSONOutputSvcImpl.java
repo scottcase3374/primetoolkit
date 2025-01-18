@@ -52,7 +52,7 @@ public class JSONOutputSvcImpl implements OutputServiceIntfc
 			,final boolean useParallel
 			,@NonNull final Predicate<? super PrimeRefIntfc> idxFilter
 			,@NonNull final LongPredicate anyBasePred
-			,@NonNull final Predicate<? super ImmutableLongCollection> entireBasePred 
+			,@NonNull final Predicate<? super ImmutableLongCollection> entireBasePred
 			,@NonNull final ImmutableList<String> excludeFields
 			)
 	{
@@ -61,33 +61,30 @@ public class JSONOutputSvcImpl implements OutputServiceIntfc
 
 			final ExclFieldNameStrategy excludes = new ExclFieldNameStrategy();
 			excludeFields.forEach(excludes::addExcludedField);
-			System.out.printf("JSON Output - basetype[%s] startIdx[%d] \n", baseType, startIdx);
-			System.out.printf("JSON output - first prime in stream [%d]\n", primeSrc.getPrimeRefStream(startIdx, useParallel).findFirst().get().getPrime());
+			System.out.printf("JSON Output - basetype[%s] startIdx[%d] %n", baseType, startIdx);
+			System.out.printf("JSON output - first prime in stream [%d]%n", primeSrc.getPrimeRefStream(startIdx, useParallel).findFirst().orElseThrow().getPrime());
 			final Gson gson = new GsonBuilder().setExclusionStrategies(excludes).serializeNulls().create();
+			final BaseTypesIntfc selectedBase = baseType != null ? BASE_TYPES.select(base -> base.name().equals(baseType)).getOnly() : null;
+
 			result.setResult(
 					gson.toJson(
 						primeSrc
 						.getPrimeRefStream(startIdx, useParallel)
 						.limit(maxIndexes)
 						.<JsonData>map(pRef -> new JsonData(
-								
+
 								pRef.getPrimeRefIdx(),
-								
 								pRef.getPrime(),
-								
-								baseType != null
-								? pRef
-									.getPrimeBases(BASE_TYPES.select(base -> base.name().equals(baseType)).getOnly())
-								: EMPTY_ARRAY,	
-								
-								baseType != null
-									? Arrays.stream(pRef
-										.getPrimeBases(BASE_TYPES.select(base -> base.name().equals(baseType)).getOnly()))
-										.anyMatch(anyBasePred) 
-										|| entireBasePred.test(LongLists.immutable.of(pRef.getPrimeBases(BASE_TYPES.select(base -> base.name().equals(baseType)).getOnly())))
-									: true))
-					
-						.filter(json -> baseType == null || json.isKeep())
+								selectedBase != null ?  pRef.getPrimeBases(selectedBase) : EMPTY_ARRAY,
+
+									Arrays.stream(selectedBase != null ?
+											pRef.getPrimeBases(selectedBase)
+											: EMPTY_ARRAY)
+												.anyMatch(anyBasePred)
+											|| entireBasePred.test(LongLists.immutable.of(selectedBase != null ?  pRef.getPrimeBases(selectedBase) : EMPTY_ARRAY))
+									))
+
+						.filter(json -> selectedBase == null || json.isKeep())
 						.toArray()));
 		}
 		catch(final Exception e)

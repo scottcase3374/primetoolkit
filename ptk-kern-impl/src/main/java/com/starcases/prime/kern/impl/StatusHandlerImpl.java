@@ -33,7 +33,6 @@ public class StatusHandlerImpl implements StatusHandlerIntfc
 	 * @param key Output key name
 	 * @param outputPath Path to associate with key
 	 */
-	@SuppressWarnings("PMD.LawOfDemeter")
 	public void setOutput(final String key, final Path outputPath)
 	{
 		if (LOG.isLoggable(Level.INFO))

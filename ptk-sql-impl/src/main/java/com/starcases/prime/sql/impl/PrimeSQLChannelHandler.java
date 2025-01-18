@@ -8,7 +8,6 @@ import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import com.starcases.prime.core.api.PrimeSourceIntfc;
-import com.starcases.prime.kern.api.OutputableIntfc;
 import com.starcases.prime.sql.antlrimpl.PrimeSqlLexer;
 import com.starcases.prime.sql.antlrimpl.PrimeSqlParser;
 
@@ -50,11 +49,6 @@ class PrimeSQLChannelHandler extends SimpleChannelInboundHandler<Object>
 
 	private HttpRequest httpRequest;
 	private String contentType;
-
-	private enum MetricType implements OutputableIntfc
-	{
-		SQLCOMMAND;
-	}
 
 	private static class PrimeSQLErrorListener extends BaseErrorListener
 	{

@@ -53,8 +53,8 @@ public class AllTriples implements Runnable
 			new SvcLoader<StatusHandlerProviderIntfc, Class<StatusHandlerProviderIntfc>>(StatusHandlerProviderIntfc.class)
 				.provider(Lists.immutable.of("STATUS_HANDLER")).orElseThrow().create();
 
-	public static AtomicInteger incFound = new AtomicInteger(0);
-	public static AtomicInteger decFound = new AtomicInteger(0);
+	public static final AtomicInteger incFound = new AtomicInteger(0);
+	public static final AtomicInteger decFound = new AtomicInteger(0);
 
 	private final PrimeRefFactoryIntfc primeRef;
 	private final BaseReduceTriple baseReduce;
@@ -93,27 +93,27 @@ public class AllTriples implements Runnable
 		if (indices[TripleMember.BOT.ordinal()].getPrimeRefIdx()-1 > 0)
 		{
 			// Adjust bottom
-			indices[TripleMember.BOT.ordinal()] = (PrimeRefFactoryIntfc)indices[TripleMember.BOT.ordinal()].getPrevPrimeRef().get();
+			indices[TripleMember.BOT.ordinal()] = (PrimeRefFactoryIntfc)indices[TripleMember.BOT.ordinal()].getPrevPrimeRef().orElseThrow();
 		}
 		else if (indices[TripleMember.MID.ordinal()].getPrimeRefIdx()-1 > 1)
 		{
 			// adjust mid
-			indices[TripleMember.MID.ordinal()] = (PrimeRefFactoryIntfc)indices[TripleMember.MID.ordinal()].getPrevPrimeRef().get();
+			indices[TripleMember.MID.ordinal()] = (PrimeRefFactoryIntfc)indices[TripleMember.MID.ordinal()].getPrevPrimeRef().orElseThrow();
 
 			// reset bottom to mid-1
-			indices[TripleMember.BOT.ordinal()] = (PrimeRefFactoryIntfc)indices[TripleMember.MID.ordinal()].getPrevPrimeRef().get();
+			indices[TripleMember.BOT.ordinal()] = (PrimeRefFactoryIntfc)indices[TripleMember.MID.ordinal()].getPrevPrimeRef().orElseThrow();
 
 		}
 		else if (indices[TripleMember.TOP.ordinal()].getPrimeRefIdx()-1 > 3)
 		{
 			// adjust top
-			indices[TripleMember.TOP.ordinal()] = (PrimeRefFactoryIntfc)indices[TripleMember.TOP.ordinal()].getPrevPrimeRef().get();
+			indices[TripleMember.TOP.ordinal()] = (PrimeRefFactoryIntfc)indices[TripleMember.TOP.ordinal()].getPrevPrimeRef().orElseThrow();
 
 			// adjust mid to top-1
-			indices[TripleMember.MID.ordinal()] = (PrimeRefFactoryIntfc)indices[TripleMember.TOP.ordinal()].getPrevPrimeRef().get();
+			indices[TripleMember.MID.ordinal()] = (PrimeRefFactoryIntfc)indices[TripleMember.TOP.ordinal()].getPrevPrimeRef().orElseThrow();
 
 			// adjust bot to mid-1
-			indices[TripleMember.BOT.ordinal()] = (PrimeRefFactoryIntfc)indices[TripleMember.MID.ordinal()].getPrevPrimeRef().get();
+			indices[TripleMember.BOT.ordinal()] = (PrimeRefFactoryIntfc)indices[TripleMember.MID.ordinal()].getPrevPrimeRef().orElseThrow();
 		}
 		else
 		{
@@ -128,18 +128,18 @@ public class AllTriples implements Runnable
 		boolean done = false;
 		if (indices[TripleMember.BOT.ordinal()].getPrimeRefIdx()+1 < indices[TripleMember.MID.ordinal()].getPrimeRefIdx())
 		{
-			indices[TripleMember.BOT.ordinal()] = (PrimeRefFactoryIntfc)indices[TripleMember.BOT.ordinal()].getNextPrimeRef().get();
+			indices[TripleMember.BOT.ordinal()] = (PrimeRefFactoryIntfc)indices[TripleMember.BOT.ordinal()].getNextPrimeRef().orElseThrow();
 		}
 		else if (indices[TripleMember.MID.ordinal()].getPrimeRefIdx()+1 < indices[TripleMember.TOP.ordinal()].getPrimeRefIdx())
 		{
-			indices[TripleMember.MID.ordinal()] = (PrimeRefFactoryIntfc)indices[TripleMember.MID.ordinal()].getNextPrimeRef().get();
-			indices[TripleMember.BOT.ordinal()] = (PrimeRefFactoryIntfc)primeSrc.getPrimeRefForIdx(0).get();
+			indices[TripleMember.MID.ordinal()] = (PrimeRefFactoryIntfc)indices[TripleMember.MID.ordinal()].getNextPrimeRef().orElseThrow();
+			indices[TripleMember.BOT.ordinal()] = (PrimeRefFactoryIntfc)primeSrc.getPrimeRefForIdx(0).orElseThrow();
 		}
 		else if (indices[TripleMember.TOP.ordinal()].getPrimeRefIdx()+1 < prime.getPrimeRefIdx())
 		{
-			indices[TripleMember.TOP.ordinal()] = (PrimeRefFactoryIntfc)indices[TripleMember.TOP.ordinal()].getNextPrimeRef().get();
-			indices[TripleMember.BOT.ordinal()] = (PrimeRefFactoryIntfc)primeSrc.getPrimeRefForIdx(0).get();
-			indices[TripleMember.MID.ordinal()] = (PrimeRefFactoryIntfc)indices[TripleMember.BOT.ordinal()].getNextPrimeRef().get();
+			indices[TripleMember.TOP.ordinal()] = (PrimeRefFactoryIntfc)indices[TripleMember.TOP.ordinal()].getNextPrimeRef().orElseThrow();
+			indices[TripleMember.BOT.ordinal()] = (PrimeRefFactoryIntfc)primeSrc.getPrimeRefForIdx(0).orElseThrow();
+			indices[TripleMember.MID.ordinal()] = (PrimeRefFactoryIntfc)indices[TripleMember.BOT.ordinal()].getNextPrimeRef().orElseThrow();
 		}
 		else
 		{
@@ -161,9 +161,9 @@ public class AllTriples implements Runnable
 		final long bottomPrimeInit = Math.max((int)Math.ceil(prime / 6.0), 1);
 		final long midPrimeInit = Math.max(topPrimeInit - bottomPrimeInit, 1);
 
-		final PrimeRefFactoryIntfc topPRefInit = (PrimeRefFactoryIntfc)primeSrc.getPrimeRefCeiling(topPrimeInit).get();
-		final PrimeRefFactoryIntfc midPRefInit = (PrimeRefFactoryIntfc)primeSrc.getPrimeRefCeiling(midPrimeInit).get();
-		final PrimeRefFactoryIntfc bottomPRefInit = (PrimeRefFactoryIntfc)primeSrc.getPrimeRefCeiling(bottomPrimeInit).get();
+		final PrimeRefFactoryIntfc topPRefInit = (PrimeRefFactoryIntfc)primeSrc.getPrimeRefCeiling(topPrimeInit).orElseThrow();
+		final PrimeRefFactoryIntfc midPRefInit = (PrimeRefFactoryIntfc)primeSrc.getPrimeRefCeiling(midPrimeInit).orElseThrow();
+		final PrimeRefFactoryIntfc bottomPRefInit = (PrimeRefFactoryIntfc)primeSrc.getPrimeRefCeiling(bottomPrimeInit).orElseThrow();
 
 		final PrimeRefFactoryIntfc [] incIndiceRefs = {
 							bottomPRefInit,

@@ -32,7 +32,6 @@ import javax.swing.JScrollPane;
  * and mostly uses those to calculate information that may be of interest.
  *
  */
-@SuppressWarnings({ "PMD.AvoidDuplicateLiterals"})
 public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc, DefaultEdge>, VisualizationProviderIntfc
 {
 	private static final ImmutableCollection<String> ATTRIBUTES = Lists.immutable.of("VISUALIZATION", "METADATA_TABLE");
@@ -168,7 +167,7 @@ public class MetaDataTable extends JFrame implements GraphListener<PrimeRefIntfc
 	 */
 	protected void handleHighPrimeBase(@NonNull final GraphVertexChangeEvent<PrimeRefIntfc> event)
 	{
-		if (highPrimeBase == null || event.getVertex().getPrimeBaseData().getPrimeBases().get(0).size() > highPrimeBase.getPrimeBaseData().getPrimeBases().get(0).size())
+		if (highPrimeBase == null || event.getVertex().getPrimeBases().length > highPrimeBase.getPrimeBases().length)
 		{
 			highPrimeBase = event.getVertex();
 		}

@@ -51,7 +51,7 @@ public class CSVOutputSvcImpl implements OutputServiceIntfc
 		this.result = result;
 		return this;
 	}
-	
+
 	@Override
 	public void output(	final String baseType,
 						final long startIdx,
@@ -59,7 +59,7 @@ public class CSVOutputSvcImpl implements OutputServiceIntfc
 						final boolean useParallel,
 						@NonNull final Predicate<? super PrimeRefIntfc> idxFilter,
 						@NonNull final LongPredicate baseFilter,
-						@NonNull final Predicate<? super ImmutableLongCollection> entireBasePred, 
+						@NonNull final Predicate<? super ImmutableLongCollection> entireBasePred,
 						final ImmutableList<String> excludeFields
 						)
 	{
@@ -86,8 +86,8 @@ public class CSVOutputSvcImpl implements OutputServiceIntfc
 				  primeSrc
 				  	.getPrimeRefStream(startIdx, useParallel)
 				  	.limit(maxIndexes)
-				  	.<CSVData>map(pRef -> new CSVData( 
-				  			pRef.getPrimeRefIdx(), 
+				  	.<CSVData>map(pRef -> new CSVData(
+				  			pRef.getPrimeRefIdx(),
 				  			pRef.getPrime(),
 				  			baseType != null ?
 				  					pRef
@@ -98,7 +98,7 @@ public class CSVOutputSvcImpl implements OutputServiceIntfc
 		  					Arrays.stream(pRef.getPrimeBases(BASE_TYPES.select(base -> base.name().equals(baseType)).getOnly())).anyMatch(baseFilter)
 		  					|| entireBasePred.test(LongLists.immutable.of(pRef.getPrimeBases(BASE_TYPES.select(base -> base.name().equals(baseType)).getOnly())))
 		  				: true))
-				  	
+
 				  				.forEach(p -> {
 				  							try
 				  							{
@@ -135,6 +135,4 @@ public class CSVOutputSvcImpl implements OutputServiceIntfc
 				result.setError(e.toString());
 		}
 	}
-
-
 }

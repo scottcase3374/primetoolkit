@@ -2,6 +2,7 @@ package com.starcases.prime.service.impl;
 
 import java.util.Optional;
 import java.util.ServiceLoader;
+import java.util.logging.Level;
 
 import org.eclipse.collections.api.collection.ImmutableCollection;
 import org.eclipse.collections.api.factory.Lists;
@@ -78,12 +79,15 @@ public class SvcLoader< T extends SvcProviderBaseIntfc, C extends Class<T>>
 
     	final Module classTModule = classT.getModule();
 
-    	SvcProviderBaseIntfc.LOG.warning(String.format("[NOT FOUND] svc-loader: %n\t can read mod: [%s] [%b] %n\t can use classT: [%s] [%b] %n\tProvider: [%s]",
-    			classTModule.getName(),
-    			module.canRead(classTModule),
-    			classT.getName(),
-    			module.canUse(classT),
-    			classT.getName()));
+    	if (SvcProviderBaseIntfc.LOG.isLoggable(Level.WARNING))
+    	{
+	    	SvcProviderBaseIntfc.LOG.warning(String.format("[NOT FOUND] svc-loader: %n\t can read mod: [%s] [%b] %n\t can use classT: [%s] [%b] %n\tProvider: [%s]",
+	    			classTModule.getName(),
+	    			module.canRead(classTModule),
+	    			classT.getName(),
+	    			module.canUse(classT),
+	    			classT.getName()));
+    	}
     }
 
     /**

@@ -93,7 +93,6 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 	private boolean selUseParallel;
 
 	private String baseType;
-	private String baseTypeMatching;
 
 	private long greaterThanAttr = -1;
 	private long maxIndexCount = 0;
@@ -157,8 +156,8 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 				 pRef -> primePredColl.stream().allMatch(primeFilt -> primeFilt.accept(pRef));
 
 		// check partial tuples
-		final LongPredicate anyBasePred = baseLong -> primeBaseItemPredColl.stream().anyMatch((pred) -> pred.accept(baseLong)); 
-		
+		final LongPredicate anyBasePred = baseLong -> primeBaseItemPredColl.stream().anyMatch(pred -> pred.accept(baseLong));
+
 		final Predicate<? super ImmutableLongCollection> entireBasePred =
 				 baseColl ->
 					   primeBaseItemPredColl.stream().anyMatch(baseColl::anySatisfy)
@@ -211,7 +210,6 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 				{
 					excludes.add(FIELD_INDEX);
 				}
-				this.baseType = ctx.base.getText();
 				break;
 
 			case PrimeSqlParser.SPLAT:
@@ -224,7 +222,6 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 				{
 					excludes.add(FIELD_EXCLUDE_NONE);
 				}
-				this.baseType = ctx.base.getText();
 				break;
 		}
 
@@ -305,7 +302,8 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 	{
 		this.visitChildren(ctx);
 
-		baseTypeMatching = ctx.getChild(1).getText();
+		baseType = ctx.getChild(1).getText();
+
 		return result;
 	}
 

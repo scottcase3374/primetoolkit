@@ -17,8 +17,6 @@ module com.starcases.prime.cache.impl
 	requires org.eclipse.collections.impl;
 	requires mapdb;
 
-	//provides javax.cache.CacheManager 													with com.starcases.prime.cache.impl.prime.PrimeCacheProvider;
-
 	provides com.starcases.prime.cache.api.persistload.PersistPrefixLoaderProviderIntfc with com.starcases.prime.cache.impl.prefixes.PersistedPrefixLoaderProvider;
 
 	provides com.starcases.prime.cache.api.CacheProviderIntfc 					  with com.starcases.prime.cache.impl.prime.PrimeCacheProvider;
@@ -28,7 +26,6 @@ module com.starcases.prime.cache.impl
 	provides com.starcases.prime.cache.api.subset.PrefixSubsetProviderIntfc with com.starcases.prime.cache.impl.subset.PrefixesSubsetProvider;
 	provides com.starcases.prime.cache.api.primetext.PrimeTextFileLoaderProviderIntfc with com.starcases.prime.cache.impl.primetext.PrimeTextFileLoaderProvider;
 	provides com.starcases.prime.cache.api.subset.PrimeSubsetProviderIntfc with com.starcases.prime.cache.impl.subset.PrimeSubsetProvider;
-	//provides com.starcases.prime.cache.api.CachePrefixProviderIntfc with com.starcases.prime.cache.impl.prefixes.PrefixCacheProvider;
 	uses com.starcases.prime.kern.api.StatusHandlerIntfc;
 }
 

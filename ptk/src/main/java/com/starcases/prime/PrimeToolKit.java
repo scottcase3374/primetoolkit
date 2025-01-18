@@ -17,7 +17,6 @@ import picocli.CommandLine.Model.CommandSpec;
  * CLI Driver
  *
  */
-@SuppressWarnings("PMD.AtLeastOneConstructor")
 @Getter
 @Setter
 @Command(name = "ptk", subcommands = { DefaultInit.class, CommandLine.HelpCommand.class }  , description="Prime Tool Kit")

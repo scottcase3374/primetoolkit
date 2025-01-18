@@ -112,9 +112,10 @@
 		<!-- <module>ptk-export-graph-impl</module>
 		<module>ptk-graph-export-api</module>
 		<module>ptk-graph-export-impl-gml</module>
+		-->
 		<module>ptk-graph-visualize-api</module>
 		<module>ptk-graph-visualize-impl</module>
-		-->
+		
 		<module>ptk-kern-api</module>
 		<module>ptk-kern-impl</module>
 		<module>ptk-logging</module>
