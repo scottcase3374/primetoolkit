@@ -3,6 +3,7 @@ package com.starcases.prime.core.impl;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import org.eclipse.collections.api.LongIterable;
@@ -35,8 +36,6 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 
 	private final long primeIdx;
 
-
-
 	/**
 	 * Handle simple Prime where the base is simply itself - i.e. 1, 2
 	 * Simplifies bootstrapping
@@ -55,6 +54,12 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	public long[] getPrimeBases()
 	{
 		return getPrimeBases(BaseTypes.DEFAULT);
+	}
+
+	@Override
+	public Set<BaseTypesIntfc> getBaseTypes()
+	{
+		return primeBases.keySet();
 	}
 
 	@Override
@@ -148,19 +153,19 @@ public class PrimeRef implements PrimeRefFactoryIntfc
 	@Override
 	public void addPrimeBases(@NonNull final BaseTypesIntfc baseType, @NonNull final LongIterable primeBase)
 	{
-		primeBases.get(baseType).computeIfAbsent(this.primeIdx, (k) -> primeBase.toArray());
+		primeBases.get(baseType).computeIfAbsent(this.primeIdx, k -> primeBase.toArray());
 	}
 
 	@Override
 	public void addPrimeBases(@NonNull final BaseTypesIntfc baseType, final long [] primeBase)
 	{
-		primeBases.get(baseType).computeIfAbsent(this.primeIdx, (k) -> primeBase);
+		primeBases.get(baseType).computeIfAbsent(this.primeIdx, k -> primeBase);
 	}
 
 	@Override
 	public void addPrimeBases(@NonNull final BaseTypesIntfc baseType, final PrimeRefIntfc [] primeBase)
 	{
-		primeBases.get(baseType).computeIfAbsent(this.primeIdx, (k) ->
+		primeBases.get(baseType).computeIfAbsent(this.primeIdx, k ->
 			com.starcases.prime.kern.api.Arrays.longArrayToLongArray((Long[]) Arrays.stream(primeBase).map(PrimeRefIntfc::getPrime).toArray()));
 	}
 

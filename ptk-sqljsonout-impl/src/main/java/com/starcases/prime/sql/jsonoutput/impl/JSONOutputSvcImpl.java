@@ -58,7 +58,6 @@ public class JSONOutputSvcImpl implements OutputServiceIntfc
 	{
 		try
 		{
-
 			final ExclFieldNameStrategy excludes = new ExclFieldNameStrategy();
 			excludeFields.forEach(excludes::addExcludedField);
 			System.out.printf("JSON Output - basetype[%s] startIdx[%d] %n", baseType, startIdx);
@@ -75,13 +74,11 @@ public class JSONOutputSvcImpl implements OutputServiceIntfc
 
 								pRef.getPrimeRefIdx(),
 								pRef.getPrime(),
-								selectedBase != null ?  pRef.getPrimeBases(selectedBase) : EMPTY_ARRAY,
+								getPrimeBases(selectedBase, pRef),
 
-									Arrays.stream(selectedBase != null ?
-											pRef.getPrimeBases(selectedBase)
-											: EMPTY_ARRAY)
+								Arrays.stream(getPrimeBases(selectedBase, pRef))
 												.anyMatch(anyBasePred)
-											|| entireBasePred.test(LongLists.immutable.of(selectedBase != null ?  pRef.getPrimeBases(selectedBase) : EMPTY_ARRAY))
+											|| entireBasePred.test(LongLists.immutable.of(getPrimeBases(selectedBase, pRef)))
 									))
 
 						.filter(json -> selectedBase == null || json.isKeep())
@@ -92,5 +89,15 @@ public class JSONOutputSvcImpl implements OutputServiceIntfc
 			System.out.println("*** Json output exception " + e.toString());
 			e.printStackTrace();
 		}
+	}
+
+	private long[] getPrimeBases(final BaseTypesIntfc baseType, final PrimeRefIntfc pRef)
+	{
+		long [] bases = baseType != null ?  pRef.getPrimeBases(baseType) : EMPTY_ARRAY;
+		if (null == bases)
+		{
+			bases = EMPTY_ARRAY;
+		}
+		return bases;
 	}
 }

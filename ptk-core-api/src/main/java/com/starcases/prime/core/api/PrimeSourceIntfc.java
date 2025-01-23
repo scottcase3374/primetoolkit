@@ -3,8 +3,11 @@ package com.starcases.prime.core.api;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.Set;
 import java.util.function.LongSupplier;
 import java.util.stream.Stream;
+
+import com.starcases.prime.kern.api.BaseTypesIntfc;
 
 import jakarta.validation.constraints.Min;
 import lombok.NonNull;
@@ -23,6 +26,12 @@ import lombok.NonNull;
  */
 public interface PrimeSourceIntfc
 {
+	/**
+	 * Get base types that are loaded.
+	 * @return
+	 */
+	Set<BaseTypesIntfc> getBaseTypes();
+
 	/**
 	 * Iterator to PrimeRefIntfc instances.
 	 *

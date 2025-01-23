@@ -5,6 +5,7 @@ import java.io.StringWriter;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.eclipse.collections.impl.block.factory.Predicates;
 import org.eclipse.collections.api.block.predicate.Predicate;
@@ -110,16 +111,6 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 		this.contentType = contentType;
 	}
 
-	/**
-	 * Class defining possible data values to return to caller of the SQL-like
-	 * processor. The specific fields returned are filtered based upon the query
-	 * received.
-	 *
-	 * @author scott
-	 *
-	 */
-
-
 	@Override
 	public PrimeSqlResult visitRoot(final PrimeSqlParser.RootContext ctx)
 	{
@@ -142,9 +133,10 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 	}
 
 	@Override
-	public PrimeSqlResult visitShow_plugins(final PrimeSqlParser.Show_pluginsContext ctx)
+	public PrimeSqlResult visitShow_bases(final PrimeSqlParser.Show_basesContext ctx)
 	{
 		visitChildren(ctx);
+		result.setResult("{ \"data\": [" + primeSrc.getBaseTypes().stream().map(b -> "\"" + b.name() + "\"" ).collect(Collectors.joining(",")) + "]}");
 		return result;
 	}
 

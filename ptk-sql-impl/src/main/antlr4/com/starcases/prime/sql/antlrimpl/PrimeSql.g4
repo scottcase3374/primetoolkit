@@ -48,6 +48,7 @@ PRIMES		: [pP][rR][iI][mM][eE][sS];
 RUN			: [rR][uU][nN];
 SELECT 		: [sS][eE][lL][eE][cC][tT];
 SHOW		: [sS][hH][oO][wW];
+TUPLES		: [tT][uU][pP][lL][eE][sS];
 USING		: [uU][sS][iI][nN][gG];
 WHERE		: [wW][hH][eE][rR][eE];
 WITH		: [wW][iI][tT][hH];
@@ -67,12 +68,12 @@ stmts :
 stmt :
 		select
 	|	insert
-	| 	show_plugins
+	| 	show_bases
 	|	run_algorithm
 	;
 
-show_plugins :
-		SHOW PLUGINS
+show_bases :
+		SHOW BASES
 	;
 
 run_algorithm :

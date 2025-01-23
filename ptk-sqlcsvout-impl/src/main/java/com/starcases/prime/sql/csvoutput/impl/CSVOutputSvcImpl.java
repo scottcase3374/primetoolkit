@@ -64,6 +64,7 @@ public class CSVOutputSvcImpl implements OutputServiceIntfc
 						)
 	{
 		final var sWriter = new StringWriter();
+		final BaseTypesIntfc selectedBase = baseType != null ? BASE_TYPES.select(base -> base.name().equals(baseType)).getOnly() : null;
 		try(CSVPrinter printer = new CSVPrinter(sWriter, CSVFormat.DEFAULT))
 		{
 			final Stream.Builder<String> strHrdBuilder = Stream.builder();
@@ -89,14 +90,12 @@ public class CSVOutputSvcImpl implements OutputServiceIntfc
 				  	.<CSVData>map(pRef -> new CSVData(
 				  			pRef.getPrimeRefIdx(),
 				  			pRef.getPrime(),
-				  			baseType != null ?
-				  					pRef
-				  					.getPrimeBases(BASE_TYPES.select(base -> base.name().equals(baseType)).getOnly())
-				  				: EMPTY_ARRAY,
 
-		  			baseType != null ?
-		  					Arrays.stream(pRef.getPrimeBases(BASE_TYPES.select(base -> base.name().equals(baseType)).getOnly())).anyMatch(baseFilter)
-		  					|| entireBasePred.test(LongLists.immutable.of(pRef.getPrimeBases(BASE_TYPES.select(base -> base.name().equals(baseType)).getOnly())))
+				  			getPrimeBases(selectedBase, pRef),
+
+		  			selectedBase != null ?
+		  					Arrays.stream(getPrimeBases(selectedBase, pRef)).anyMatch(baseFilter)
+		  					|| entireBasePred.test(LongLists.immutable.of(getPrimeBases(selectedBase, pRef)))
 		  				: true))
 
 				  				.forEach(p -> {
@@ -134,5 +133,15 @@ public class CSVOutputSvcImpl implements OutputServiceIntfc
 				result.setResult(e.toString());
 				result.setError(e.toString());
 		}
+	}
+
+	private long[] getPrimeBases(final BaseTypesIntfc baseType, final PrimeRefIntfc pRef)
+	{
+		long [] bases = baseType != null ?  pRef.getPrimeBases(baseType) : EMPTY_ARRAY;
+		if (null == bases)
+		{
+			bases = EMPTY_ARRAY;
+		}
+		return bases;
 	}
 }

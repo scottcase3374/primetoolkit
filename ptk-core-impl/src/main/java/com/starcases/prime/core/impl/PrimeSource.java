@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.LongSupplier;
@@ -23,6 +24,7 @@ import com.starcases.prime.core.api.PrimeSourceIntfc;
 import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
 import com.starcases.prime.datamgmt.impl.PrimeRefIterator;
 import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
+import com.starcases.prime.kern.api.BaseTypesIntfc;
 import com.starcases.prime.kern.api.StatusHandlerIntfc;
 import com.starcases.prime.service.impl.SvcLoader;
 
@@ -374,5 +376,11 @@ public class PrimeSource implements PrimeSourceFactoryIntfc
 		{
 			statusHandler.output("prime Idx %d", idx);
 		}
+	}
+
+	@Override
+	public Set<BaseTypesIntfc> getBaseTypes()
+	{
+		return ((PrimeRefFactoryIntfc)getPrimeRefForIdx(0).orElseThrow()).getBaseTypes();
 	}
 }
