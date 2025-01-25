@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.OptionalLong;
 import java.util.StringTokenizer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipFile;
 
@@ -101,7 +102,7 @@ class PrimeTextFileLoaderImpl implements PrimeTextFileloaderIntfc
 		}
 		else
 		{
-			statusHandler.dbgOutput("Raw text source folder: %s", sourceFolders);
+			statusHandler.dbgOutput("Raw text source folder: %s", Arrays.stream(sourceFolders).map(Object::toString).collect(Collectors.joining()));
 		}
 
 		final int [] index = {0};

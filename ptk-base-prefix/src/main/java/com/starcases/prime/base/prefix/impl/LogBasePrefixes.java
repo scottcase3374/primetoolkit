@@ -1,8 +1,10 @@
 package com.starcases.prime.base.prefix.impl;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import org.eclipse.collections.api.factory.Lists;
 
@@ -58,9 +60,15 @@ class LogBasePrefixes extends AbstractPrimeBaseLog
 											.ifPresent(bd1 ->{
 																outputStr.append(String.format("Prime [%d] Prefix: \t", primeRef.getPrime()));
 
-																//primeBases.appendString(outputStr, "[", ",", "]");
+																String bases = "";
+																try
+																{
+																	bases = Arrays.toString(Stream.of(bd1).toArray());
+																}
+																catch(Exception e)
+																{}
 
-																statusHandler.output(PrefixBaseType.PREFIX, "%s%n", outputStr);
+																statusHandler.output(PrefixBaseType.PREFIX, "%s%s%n", outputStr, bases);
 																outputStr.setLength(0);
 																itemIdx[0]++;
 												}));

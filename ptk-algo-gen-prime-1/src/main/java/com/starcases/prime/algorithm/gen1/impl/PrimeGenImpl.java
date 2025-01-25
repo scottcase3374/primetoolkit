@@ -193,7 +193,7 @@ public class PrimeGenImpl implements PrimeGenIntfc
 
 			// FIXME There is a problem with a few primes getting missed related to the comment
 			// that follows this related to "limits useless work". The permutation
-			// process based on a binary bitmask of primes to sum doesn't produce a stable sum
+			// process based on a binary bitmask of primes to sum doesn't produce a stable increasing sum
 			// by simply incrementing the binary bitmask value by 1 across all values.
 			//
 			//  The ">> 1" is trying to handle the boundary condition which is mentioned in the

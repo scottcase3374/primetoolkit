@@ -2,6 +2,7 @@ package com.starcases.prime.sql.jsonoutput.impl;
 
 import java.util.Arrays;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.eclipse.collections.api.block.predicate.primitive.LongPredicate;
 import org.eclipse.collections.api.collection.primitive.ImmutableLongCollection;
@@ -16,6 +17,8 @@ import com.starcases.prime.base.api.BaseTypesProviderIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
 import com.starcases.prime.kern.api.BaseTypesIntfc;
+import com.starcases.prime.kern.api.StatusHandlerIntfc;
+import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
 import com.starcases.prime.service.impl.SvcLoader;
 import com.starcases.prime.sql.api.OutputServiceIntfc;
 import com.starcases.prime.sql.api.PrimeResultIntfc;
@@ -24,6 +27,10 @@ import lombok.NonNull;
 
 public class JSONOutputSvcImpl implements OutputServiceIntfc
 {
+	private final  StatusHandlerIntfc statusHandler =
+			new SvcLoader<StatusHandlerProviderIntfc, Class<StatusHandlerProviderIntfc>>(StatusHandlerProviderIntfc.class)
+				.provider(Lists.immutable.of("STATUS_HANDLER")).orElseThrow().create();
+
 	private static final long[] EMPTY_ARRAY = {};
 	private static final ImmutableList<BaseTypesIntfc> BASE_TYPES =
 			new SvcLoader<BaseTypesProviderIntfc, Class<BaseTypesProviderIntfc>>(BaseTypesProviderIntfc.class)
@@ -60,8 +67,7 @@ public class JSONOutputSvcImpl implements OutputServiceIntfc
 		{
 			final ExclFieldNameStrategy excludes = new ExclFieldNameStrategy();
 			excludeFields.forEach(excludes::addExcludedField);
-			System.out.printf("JSON Output - basetype[%s] startIdx[%d] %n", baseType, startIdx);
-			System.out.printf("JSON output - first prime in stream [%d]%n", primeSrc.getPrimeRefStream(startIdx, useParallel).findFirst().orElseThrow().getPrime());
+			statusHandler.output("JSON Output - basetype[%s] startIdx[%d] %n", baseType, startIdx);
 			final Gson gson = new GsonBuilder().setExclusionStrategies(excludes).serializeNulls().create();
 			final BaseTypesIntfc selectedBase = baseType != null ? BASE_TYPES.select(base -> base.name().equals(baseType)).getOnly() : null;
 
@@ -86,8 +92,8 @@ public class JSONOutputSvcImpl implements OutputServiceIntfc
 		}
 		catch(final Exception e)
 		{
-			System.out.println("*** Json output exception " + e.toString());
-			e.printStackTrace();
+			result.setError(e.getMessage());
+			statusHandler.errorOutput("*** Json output exception: %s\n%s",  e.getMessage(), Arrays.stream(e.getStackTrace()).map(Object::toString).collect(Collectors.joining("\n")));
 		}
 	}
 

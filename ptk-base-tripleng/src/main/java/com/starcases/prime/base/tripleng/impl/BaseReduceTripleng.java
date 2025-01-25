@@ -3,12 +3,16 @@ package com.starcases.prime.base.tripleng.impl;
 import java.util.Optional;
 
 import org.eclipse.collections.api.list.primitive.ImmutableLongList;
+import org.eclipse.collections.impl.factory.Lists;
 import org.eclipse.collections.impl.list.immutable.primitive.ImmutableLongListFactoryImpl;
 
 import com.starcases.prime.base.impl.AbsPrimeBaseGen;
 import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
 import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.kern.api.BaseTypesIntfc;
+import com.starcases.prime.kern.api.StatusHandlerIntfc;
+import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
+import com.starcases.prime.service.impl.SvcLoader;
 
 import lombok.NonNull;
 
@@ -61,6 +65,9 @@ import lombok.NonNull;
  */
 class BaseReduceTripleng extends AbsPrimeBaseGen
 {
+	private final  StatusHandlerIntfc statusHandler =
+			new SvcLoader<StatusHandlerProviderIntfc, Class<StatusHandlerProviderIntfc>>(StatusHandlerProviderIntfc.class)
+				.provider(Lists.immutable.of("STATUS_HANDLER")).orElseThrow().create();
 	/**
 	 * Constructor
 	 *
@@ -131,7 +138,7 @@ class BaseReduceTripleng extends AbsPrimeBaseGen
 
 		if (!found && curPrime.getPrime() >= 11)
 		{
-			System.out.println(String.format("##TRIPLENG not-found %b prime-idx %d prime %d",
+			statusHandler.errorOutput(String.format("##TRIPLENG not-found %b prime-idx %d prime %d",
 					found,
 					curPrime.getPrimeRefIdx(),
 					curPrime.getPrime()
