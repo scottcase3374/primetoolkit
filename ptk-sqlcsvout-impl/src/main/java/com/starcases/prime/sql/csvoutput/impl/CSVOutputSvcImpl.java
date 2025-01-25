@@ -3,6 +3,7 @@ package com.starcases.prime.sql.csvoutput.impl;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.collections.api.list.ImmutableList;
@@ -67,37 +68,36 @@ public class CSVOutputSvcImpl implements OutputServiceIntfc
 		final BaseTypesIntfc selectedBase = baseType != null ? BASE_TYPES.select(base -> base.name().equals(baseType)).getOnly() : null;
 		try(CSVPrinter printer = new CSVPrinter(sWriter, CSVFormat.DEFAULT))
 		{
-			final Stream.Builder<String> strHrdBuilder = Stream.builder();
+			final Stream.Builder<String> strHdrBuilder = Stream.builder();
 			if (!excludeFields.contains(FIELD_INDEX))
 			{
-				strHrdBuilder.add(FIELD_INDEX);
+				strHdrBuilder.add(FIELD_INDEX);
 			}
 
 			if (!excludeFields.contains(FIELD_PRIME))
 			{
-				strHrdBuilder.add(FIELD_PRIME);
+				strHdrBuilder.add(FIELD_PRIME);
 			}
 
 			if (!excludeFields.contains(FIELD_BASE))
 			{
-				strHrdBuilder.add(FIELD_BASE);
+				strHdrBuilder.add(FIELD_BASE);
 			}
-			printer.printRecord(strHrdBuilder.build());
+			printer.printRecord(strHdrBuilder.build());
 
 				  primeSrc
 				  	.getPrimeRefStream(startIdx, useParallel)
 				  	.limit(maxIndexes)
+				  	.filter(pRef -> selectedBase != null ?
+		  					Arrays.stream(getPrimeBases(selectedBase, pRef)).anyMatch(baseFilter)
+		  					|| entireBasePred.test(LongLists.immutable.of(getPrimeBases(selectedBase, pRef)))
+		  				: true)
+
 				  	.<CSVData>map(pRef -> new CSVData(
 				  			pRef.getPrimeRefIdx(),
 				  			pRef.getPrime(),
-
 				  			getPrimeBases(selectedBase, pRef),
-
-		  			selectedBase != null ?
-		  					Arrays.stream(getPrimeBases(selectedBase, pRef)).anyMatch(baseFilter)
-		  					|| entireBasePred.test(LongLists.immutable.of(getPrimeBases(selectedBase, pRef)))
-		  				: true))
-
+				  			true))
 				  				.forEach(p -> {
 				  							try
 				  							{
@@ -115,7 +115,18 @@ public class CSVOutputSvcImpl implements OutputServiceIntfc
 
 				  								if (!excludeFields.contains(FIELD_BASE))
 				  								{
-				  									streamBuilder.add(null);
+				  									final StringBuilder bases = new StringBuilder();
+				  									Arrays.stream(p.base)
+				  											.forEach(l ->
+				  														{
+				  															if (!bases.isEmpty())
+				  															{
+				  																bases.append(":");
+				  															}
+				  															bases.append(Long.toString(l));
+				  														}
+				  											);
+				  									streamBuilder.add(bases.toString());
 				  								}
 
 				  								printer.printRecord(streamBuilder.build());
