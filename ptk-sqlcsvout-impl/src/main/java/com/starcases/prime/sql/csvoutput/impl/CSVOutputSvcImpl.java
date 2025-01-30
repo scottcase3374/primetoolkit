@@ -3,7 +3,6 @@ package com.starcases.prime.sql.csvoutput.impl;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.collections.api.list.ImmutableList;
@@ -88,10 +87,10 @@ public class CSVOutputSvcImpl implements OutputServiceIntfc
 				  primeSrc
 				  	.getPrimeRefStream(startIdx, useParallel)
 				  	.limit(maxIndexes)
-				  	.filter(pRef -> selectedBase != null ?
+				  	.filter(pRef -> selectedBase == null ||
 		  					Arrays.stream(getPrimeBases(selectedBase, pRef)).anyMatch(baseFilter)
 		  					|| entireBasePred.test(LongLists.immutable.of(getPrimeBases(selectedBase, pRef)))
-		  				: true)
+		  				)
 
 				  	.<CSVData>map(pRef -> new CSVData(
 				  			pRef.getPrimeRefIdx(),

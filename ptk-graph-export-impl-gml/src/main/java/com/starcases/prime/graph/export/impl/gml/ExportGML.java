@@ -2,6 +2,7 @@ package com.starcases.prime.graph.export.impl.gml;
 
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.Deque;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -198,7 +199,7 @@ class EdgeElement implements ElementIntfc
 	@Override
 	public void output()
 	{
-		pRef.getPrimeBaseData().getPrimeBases().get(0).forEach(s -> outputEdge(outputWriter, s, pRef.getPrime()));
+		Arrays.stream(pRef.getPrimeBases()).forEach(s -> outputEdge(outputWriter, s, pRef.getPrime()));
 	}
 
 	/**
