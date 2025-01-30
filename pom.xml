@@ -115,7 +115,7 @@
 		-->
 		<module>ptk-graph-visualize-api</module>
 		<module>ptk-graph-visualize-impl</module>
-		
+
 		<module>ptk-kern-api</module>
 		<module>ptk-kern-impl</module>
 		<module>ptk-logging</module>
@@ -138,7 +138,7 @@
 					<plugin>
 						<groupId>io.fabric8</groupId>
 						<artifactId>docker-maven-plugin</artifactId>
-						<version>0.43.0</version>
+						<version>0.45.1</version>
 
 						<configuration>
 							<images>
