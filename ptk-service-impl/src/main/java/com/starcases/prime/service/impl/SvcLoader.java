@@ -97,10 +97,16 @@ public class SvcLoader< T extends SvcProviderBaseIntfc, C extends Class<T>>
      */
     public Optional<T> provider(@NonNull final ImmutableCollection<String> attributes)
     {
-	  return
+	  final var ret =
 			 providers(attributes)
 			  .stream()
 			  .max((x,y) -> Integer.compare(x.countAttributesMatch(attributes), y.countAttributesMatch(attributes)) );
+
+	  if (ret.isEmpty())
+	  {
+		  System.out.println("ERROR: SvcLoader provider() - no matches for provided attributes: " + attributes.makeString());
+	  }
+	  return ret;
     }
 
     /**

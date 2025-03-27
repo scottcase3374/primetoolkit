@@ -1,6 +1,7 @@
 package com.starcases.prime.sql.impl;
 
 import com.starcases.prime.core.api.PrimeSourceIntfc;
+import com.starcases.prime.sql.api.CmdServerIntfc;
 
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
@@ -17,16 +18,18 @@ import io.netty.handler.codec.http.HttpServerExpectContinueHandler;
 class CmdChannelInit extends ChannelInitializer<SocketChannel>
 {
 	private final PrimeSourceIntfc primeSrc;
+	private final CmdServerIntfc cmdServer;
 
 	/**
 	 * Constructor
 	 *
 	 * @param primeSrc Prime source ref
 	 */
-	public CmdChannelInit(final PrimeSourceIntfc primeSrc)
+	public CmdChannelInit(final PrimeSourceIntfc primeSrc, final CmdServerIntfc cmdServer)
 	{
 		super();
 		this.primeSrc = primeSrc;
+		this.cmdServer = cmdServer;
 	}
 
 	/**
@@ -39,6 +42,6 @@ class CmdChannelInit extends ChannelInitializer<SocketChannel>
         	.pipeline()
         	.addLast(new HttpServerCodec())
         	.addLast(new HttpServerExpectContinueHandler())
-        	.addLast(new PrimeSQLChannelHandler(primeSrc));
+        	.addLast(new PrimeSQLChannelHandler(primeSrc, cmdServer));
     }
 }

@@ -2,6 +2,9 @@ package com.starcases.prime.graph.impl;
 
 
 import org.jgrapht.graph.DefaultEdge;
+
+import java.util.Arrays;
+
 import org.jgrapht.Graph;
 
 import com.starcases.prime.core.api.PrimeRefIntfc;
@@ -128,9 +131,7 @@ public class PrimeNodeGenerator
 	protected void addNodeRawBase()
 	{
 		// Link from Prime node to Prime bases (i.e. unique set of smaller primes that sums to this Prime).
-		primeRef
-			.getPrimeBases(baseType)
-			 .get(0)
+		Arrays.stream(primeRef.getPrimeBases(baseType))
 			.forEach(
 					base -> {
 							addVertex(primeRef);

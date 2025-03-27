@@ -14,4 +14,6 @@ module com.starcases.prime.graph.visualize.impl
 	requires transitive org.eclipse.collections.api;
 	requires org.jgrapht.core;
 	requires org.jgrapht.ext;
+
+	
 }

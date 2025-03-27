@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -16,19 +17,21 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import jakarta.validation.constraints.NotNull;
-import org.eclipse.collections.api.block.predicate.Predicate2;
 import org.eclipse.collections.api.collection.ImmutableCollection;
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.factory.Maps;
 import org.eclipse.collections.api.list.ImmutableList;
+import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.api.map.ImmutableMap;
 import org.eclipse.collections.api.map.MutableMap;
-import org.eclipse.collections.api.multimap.ImmutableMultimap;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.map.mutable.MutableMapFactoryImpl;
+import org.jgrapht.Graph;
+import org.jgrapht.event.GraphListener;
+import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
 import org.mapdb.BTreeMap;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
@@ -37,10 +40,9 @@ import org.mapdb.Serializer;
 
 import com.starcases.prime.base.api.BaseProviderIntfc;
 import com.starcases.prime.base.api.BaseTypesProviderIntfc;
-import com.starcases.prime.base.api.LogPrimeDataProviderIntfc;
-import com.starcases.prime.base.impl.BaseTypes;
 import com.starcases.prime.cache.api.primetext.PrimeTextFileLoaderProviderIntfc;
 import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
+import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceFactoryIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
 import com.starcases.prime.core.impl.PrimeRef;
@@ -48,13 +50,12 @@ import com.starcases.prime.core.impl.PrimeSource;
 import com.starcases.prime.datamgmt.api.CollectionTrackerIntfc;
 import com.starcases.prime.datamgmt.api.CollectionTrackerProviderIntfc;
 import com.starcases.prime.graph.export.api.ExportsProviderIntfc;
+import com.starcases.prime.graph.visualize.api.VisualizationProviderIntfc;
+import com.starcases.prime.graph.visualize.impl.ViewDefault;
 import com.starcases.prime.kern.api.BaseTypesIntfc;
-import com.starcases.prime.kern.api.OutputableIntfc;
 import com.starcases.prime.kern.api.PtkException;
 import com.starcases.prime.kern.api.StatusHandlerProviderIntfc;
 import com.starcases.prime.kern.api.StatusHandlerIntfc;
-import com.starcases.prime.logging.LogGraphStructure;
-import com.starcases.prime.logging.LogNodeStructure;
 import com.starcases.prime.service.impl.SvcLoader;
 import com.starcases.prime.sql.api.SqlProviderIntfc;
 
@@ -87,11 +88,6 @@ public class DefaultInit implements Runnable
 	 */
 	private static final Logger LOG = Logger.getLogger(DefaultInit.class.getName());
 
-	/**
-	 * for matching output type names to base-type names
-	 */
-	private static final Predicate2<BaseTypesIntfc, String> baseMatchPred = (base, outputType) -> base.name().equals(outputType);
-
 	private static DB ptkDB;
 	private static final MutableMap<String, DB> baseDBS = MutableMapFactoryImpl.INSTANCE.empty();
 
@@ -116,14 +112,6 @@ public class DefaultInit implements Runnable
 	@Setter
 	@ArgGroup(exclusive = false, validate = false)
 	private BaseOpts baseOpts;
-
-	/**
-	 * flags for which data to output.
-	 */
-	@Getter
-	@Setter
-	@ArgGroup(exclusive = false, validate = false)
-	private OutputOpts outputOpts = new OutputOpts();
 
 	/**
 	 * flags indicating a graph type to produce
@@ -183,8 +171,6 @@ public class DefaultInit implements Runnable
 
 		actionInitPrimeSourceData();
 
-		actionHandleOutputs();
-
 		actionHandleExports();
 
 		actionEnableCmdListener();
@@ -194,45 +180,7 @@ public class DefaultInit implements Runnable
 		executeActions();
 	}
 
-	/**
-	 * default graph setup
-	 *
-	 * @param primeSrc Prime source reference.
-	 * @param baseType Base type reference.
-	 */
-	private void graph(final PrimeSourceIntfc primeSrc, final BaseTypesIntfc baseType)
-	{
-//		try
-//		{
-//			final SvcLoader<VisualizationProviderIntfc, Class<VisualizationProviderIntfc>> visualizationProvider = new SvcLoader< >(VisualizationProviderIntfc.class);
-//
-//			final MutableList<VisualizationProviderIntfc> list = visualizationProvider
-//				.providers(Lists.immutable.of("VISUALIZATION"))
-//				.collectIf(f -> f.countAttributesMatch( Lists.immutable.of("CIRCULAR_LAYOUT", "COMPACT_TREE_LAYOUT", "METADATA_TABLE")) > 0, p -> p)
-//				.toList()
-//				;
-//
-//			final var viewList = new ArrayList<GraphListener<PrimeRefIntfc, DefaultEdge>>();
-//			list.flatCollect(visualizerProvider -> visualizerProvider.create(null, null))
-//			.forEach( i ->
-//					{
-//						i.setSize(400, 320);
-//						i.setVisible(true);
-//						viewList.add(i);
-//					}
-//					);
-//
-//			final var viewDefault = new ViewDefault(primeSrc,  baseType, viewList);
-//			viewDefault.viewDefault();
-//		}
-//		catch(IOException except)
-//		{
-//			if (LOG.isLoggable(Level.SEVERE))
-//			{
-//				LOG.severe("IOExcetion: " + except.toString());
-//			}
-//		}
-	}
+
 
 	/**
 	 * default export setup.
@@ -590,98 +538,6 @@ public class DefaultInit implements Runnable
 		}
 	}
 
-	private void actionHandleOutputs()
-	{
-		if (LOG.isLoggable(Level.INFO))
-		{
-			LOG.info("CLI - Check base logging enablement.");
-		}
-
-		if (outputOpts != null && outputOpts.getOutputOpers() != null && !outputOpts.getOutputOpers().isEmpty())
-		{
-			if (LOG.isLoggable(Level.INFO))
-			{
-
-				LOG.info(String.format("%s%s", "CLI - Prep logger outputs: ",
-						outputOpts
-							.getOutputOpers()
-							.stream()
-							.map(Object::toString)
-							.collect(Collectors.joining(","))));
-			}
-
-			final SvcLoader<LogPrimeDataProviderIntfc, Class<LogPrimeDataProviderIntfc>> logBaseDataProvider = new SvcLoader< >(LogPrimeDataProviderIntfc.class);
-
-			final ImmutableMultimap<Boolean, OutputableIntfc> baseNotBaseColl =
-					outputOpts
-					.getOutputOpers()
-					.groupBy(o -> BASE_TYPES.anySatisfyWith(baseMatchPred, o.toString()));
-
-			baseNotBaseColl.forEachKeyMultiValues((b, oVals) ->
-						{
-							if (b) // meaning individual bases specified
-							{
-								oVals.forEach(o ->
-									{
-										final ImmutableList<String> attributes = Lists.immutable.of(o.toString());
-
-										actions.add(s ->
-										logBaseDataProvider
-										.provider(attributes)
-										.ifPresentOrElse(p ->
-															p.create(primeSrc, null)
-															 .doPreferParallel(initOpts.isPreferParallel())
-															 .outputLogs()
-															,() -> statusHandler.errorOutput("ERROR: No %s provider", o.toString())
-														)
-												);
-									});
-							}
-							else // meaning either non-base specified or the value "bases" indicating each active base.
-							{
-								oVals.forEach(o ->
-											{
-												switch(o.toString())
-												{
-												case "BASES":
-
-													if (baseOpts != null)
-													{
-														baseOpts.getBases().forEach(base ->
-																{
-																	final ImmutableList<String> attributes = Lists.immutable.of(base.toString());
-
-																	actions.add(s ->
-																		logBaseDataProvider
-																		.provider(attributes)
-																		.ifPresentOrElse(p ->
-																				p.create(primeSrc, null)
-																				 .doPreferParallel(initOpts.isPreferParallel())
-																				 .outputLogs()
-																			   ,() -> statusHandler.dbgOutput("ERROR: No TripleLog provider")));
-																 }
-																);
-													}
-													break;
-
-												case "GRAPHSTRUCT":
-													actions.add(s -> new LogGraphStructure(primeSrc, BaseTypes.DEFAULT ).doPreferParallel(initOpts.isPreferParallel()).outputLogs() );
-													break;
-
-												case "NODESTRUCT":
-													actions.add(s -> new LogNodeStructure(primeSrc).doPreferParallel(initOpts.isPreferParallel()).outputLogs() );
-													break;
-
-												default:
-													break;
-												}
-											}
-										);
-							}
-					});
-			}
-		}
-
 	private void actionHandleGraphing()
 	{
 		if (LOG.isLoggable(Level.INFO))
@@ -693,6 +549,47 @@ public class DefaultInit implements Runnable
 		{
 			LOG.info("**** Graphing enabled");
 			actions.add(s -> graph(primeSrc, BASE_TYPES.select(p -> p.name().equals(graphOpts.getGraphType().name())).getOnly() ) );
+		}
+	}
+
+	/**
+	 * default graph setup
+	 *
+	 * @param primeSrc Prime source reference.
+	 * @param baseType Base type reference.
+	 */
+	private void graph(final PrimeSourceIntfc primeSrc, final BaseTypesIntfc baseType)
+	{
+		try
+		{
+			final SvcLoader<VisualizationProviderIntfc, Class<VisualizationProviderIntfc>> visualizationProvider = new SvcLoader< >(VisualizationProviderIntfc.class);
+
+			final MutableList<VisualizationProviderIntfc> list = visualizationProvider
+				.providers(Lists.immutable.of("VISUALIZATION"))
+				.collectIf(f -> f.countAttributesMatch( Lists.immutable.of("CIRCULAR_LAYOUT", "COMPACT_TREE_LAYOUT", "METADATA_TABLE")) > 0, p -> p)
+				.toList()
+				;
+
+			final Graph<PrimeRefIntfc, DefaultEdge> graph = new DefaultDirectedGraph<>(DefaultEdge.class);
+			final var viewList = new ArrayList<GraphListener<PrimeRefIntfc, DefaultEdge>>();
+			list.stream().map(visualizerProvider -> visualizerProvider.create(graph, null))
+			.forEach( i ->
+					{
+						i.setSize(400, 320);
+						i.setVisible(true);
+						viewList.add((GraphListener)i);
+					}
+					);
+
+			final var viewDefault = new ViewDefault(primeSrc,  baseType, viewList);
+			viewDefault.viewDefault();
+		}
+		catch(IOException except)
+		{
+			if (LOG.isLoggable(Level.SEVERE))
+			{
+				LOG.severe("IOExcetion: " + except.toString());
+			}
 		}
 	}
 

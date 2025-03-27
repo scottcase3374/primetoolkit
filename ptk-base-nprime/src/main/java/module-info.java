@@ -15,7 +15,6 @@ module com.starcases.prime.base.nprime.impl
 
 	provides com.starcases.prime.base.api.BaseTypesProviderIntfc with com.starcases.prime.base.nprime.impl.NPrimeBaseTypeProvider;
 	provides com.starcases.prime.base.api.BaseProviderIntfc with com.starcases.prime.base.nprime.impl.NPrimeProvider;
-	provides com.starcases.prime.base.api.LogPrimeDataProviderIntfc with com.starcases.prime.base.nprime.impl.LogNPrimeDataProvider;
 
 	uses com.starcases.prime.kern.api.StatusHandlerIntfc;
 }

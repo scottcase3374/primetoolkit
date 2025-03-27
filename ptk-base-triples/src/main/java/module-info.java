@@ -13,7 +13,6 @@ module com.starcases.prime.base.triples.impl
 
 	provides com.starcases.prime.base.api.BaseTypesProviderIntfc with com.starcases.prime.base.triples.impl.TripleBaseTypeProvider;
 	provides com.starcases.prime.base.api.BaseProviderIntfc with com.starcases.prime.base.triples.impl.TripleProvider;
-	provides com.starcases.prime.base.api.LogPrimeDataProviderIntfc with com.starcases.prime.base.triples.impl.LogTriplesDataProvider;
 
 	uses com.starcases.prime.kern.api.StatusHandlerIntfc;
 }

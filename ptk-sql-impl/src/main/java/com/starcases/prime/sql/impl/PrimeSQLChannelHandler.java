@@ -10,6 +10,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
 import com.starcases.prime.sql.antlrimpl.PrimeSqlLexer;
 import com.starcases.prime.sql.antlrimpl.PrimeSqlParser;
+import com.starcases.prime.sql.api.CmdServerIntfc;
 
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
@@ -46,6 +47,7 @@ class PrimeSQLChannelHandler extends SimpleChannelInboundHandler<Object>
 	private static final Logger LOG = Logger.getLogger(PrimeSQLChannelHandler.class.getName());
 
 	private final PrimeSourceIntfc primeSrc;
+	private final CmdServerIntfc cmdServer;
 
 	private HttpRequest httpRequest;
 	private String contentType;
@@ -74,10 +76,11 @@ class PrimeSQLChannelHandler extends SimpleChannelInboundHandler<Object>
 		}
 	}
 
-	public PrimeSQLChannelHandler(final PrimeSourceIntfc primeSrc)
+	public PrimeSQLChannelHandler(final PrimeSourceIntfc primeSrc, final CmdServerIntfc cmdServer)
 	{
 		super();
 		this.primeSrc = primeSrc;
+		this.cmdServer = cmdServer;
 	}
 
 	@Override
@@ -150,7 +153,7 @@ class PrimeSQLChannelHandler extends SimpleChannelInboundHandler<Object>
 
 		final PrimeSqlParser psp = new PrimeSqlParser(tokenStream);
 
-		final PrimeSqlVisitor visitor = new PrimeSqlVisitor(primeSrc, contentType);
+		final PrimeSqlVisitor visitor = new PrimeSqlVisitor(primeSrc, contentType, cmdServer);
 		psp.removeErrorListeners();
 		psp.addErrorListener(new PrimeSQLErrorListener(visitor));
 		final ParseTree parseTree = psp.stmts();

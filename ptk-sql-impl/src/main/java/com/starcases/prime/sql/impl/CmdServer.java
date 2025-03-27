@@ -31,6 +31,9 @@ class CmdServer implements CmdServerIntfc
 	private final int port;
 	private final PrimeSourceIntfc primeSrc;
 
+	CmdEventLoopGroup listenGroup;
+	CmdEventLoopGroup workerGroup;
+
 	/**
 	 * Need interface to use with proxy which provides access to both
 	 * the EventLoopGroup and Autocloseable interfaces.
@@ -52,6 +55,12 @@ class CmdServer implements CmdServerIntfc
 		this.port = port;
 	}
 
+	public void close()
+	{
+		listenGroup.shutdownGracefully();
+		workerGroup.shutdownGracefully();
+	}
+
 	/**
 	 * run the listener for the SQL-like processor.
 	 *
@@ -60,14 +69,15 @@ class CmdServer implements CmdServerIntfc
 	@Override
 	public void run() throws InterruptedException
 	{
-		try (CmdEventLoopGroup listenGroup = createEventLoopGroup();
-			 CmdEventLoopGroup workerGroup = createEventLoopGroup();)
+		listenGroup = createEventLoopGroup();
+		workerGroup = createEventLoopGroup();
+		try
 		{
 			final ServerBootstrap bootStrap = new ServerBootstrap();
 			bootStrap
 				.group(listenGroup, workerGroup)
 				.channel(NioServerSocketChannel.class)
-				.childHandler(new CmdChannelInit(primeSrc))
+				.childHandler(new CmdChannelInit(primeSrc, this))
 				;
 
 			final ChannelFuture future = bootStrap.bind(port).sync();
@@ -83,7 +93,7 @@ class CmdServer implements CmdServerIntfc
 		}
 		catch(Exception e)
 		{
-			// Catch plain exceptions and ignore
+			close();
 		}
 	}
 

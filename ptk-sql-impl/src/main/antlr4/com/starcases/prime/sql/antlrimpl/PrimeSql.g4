@@ -48,6 +48,7 @@ PRIMES		: [pP][rR][iI][mM][eE][sS];
 RUN			: [rR][uU][nN];
 SELECT 		: [sS][eE][lL][eE][cC][tT];
 SHOW		: [sS][hH][oO][wW];
+SHUTDOWN	: [sS][hH][uU][tT][dD][oO][wW][nN];
 TUPLES		: [tT][uU][pP][lL][eE][sS];
 USING		: [uU][sS][iI][nN][gG];
 WHERE		: [wW][hH][eE][rR][eE];
@@ -69,11 +70,16 @@ stmt :
 		select
 	|	insert
 	| 	show_bases
+	|   shutdown
 	|	run_algorithm
 	;
 
 show_bases :
 		SHOW BASES
+	;
+
+shutdown :
+		SHUTDOWN
 	;
 
 run_algorithm :
@@ -97,9 +103,9 @@ sel_opts :
 //   ALL means return ALL tuples where any of the tuples matched (if multiple exist)
 //   MATCHED means only return the matched tuples (if multiple exist)
 select_field :
-		sel=SPLAT 	all_or_matched? (idx_sel=NO INDEX)? (WITH BASE base=ID)?
+		sel=SPLAT 	all_or_matched? (idx_sel=NO INDEX)?
 	|	sel=PRIMES 	all_or_matched? (WITH idx_sel=INDEX)?
-	|	sel=BASES 	all_or_matched? (WITH idx_sel=INDEX)? (WITH BASE base=ID)?
+	|	sel=BASES 	all_or_matched? (WITH idx_sel=INDEX)?
 	;
 
 all_or_matched :

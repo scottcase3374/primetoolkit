@@ -34,6 +34,7 @@ import com.starcases.prime.sql.antlrimpl.PrimeSqlParser.Idx_boundsContext;
 import com.starcases.prime.sql.antlrimpl.PrimeSqlParser.InsertContext;
 import com.starcases.prime.sql.antlrimpl.PrimeSqlParser.Sel_optsContext;
 import com.starcases.prime.sql.antlrimpl.PrimeSqlParser.SubArrayContext;
+import com.starcases.prime.sql.api.CmdServerIntfc;
 import com.starcases.prime.sql.api.OutputProviderIntfc;
 
 import lombok.AccessLevel;
@@ -64,6 +65,8 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 	private final String contentType;
 
 	private final PrimeSourceIntfc primeSrc;
+
+	private final CmdServerIntfc cmdServer;
 
 	@Getter
 	private final PrimeSqlResult result = new PrimeSqlResult();
@@ -104,11 +107,12 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 	 *
 	 * @param primeSrc Prime Source reference
 	 */
-	public PrimeSqlVisitor(@NonNull final PrimeSourceIntfc primeSrc, @NonNull final String contentType)
+	public PrimeSqlVisitor(@NonNull final PrimeSourceIntfc primeSrc, @NonNull final String contentType, final CmdServerIntfc cmdServer)
 	{
 		super();
 		this.primeSrc = primeSrc;
 		this.contentType = contentType;
+		this.cmdServer = cmdServer;
 	}
 
 	@Override
@@ -137,6 +141,14 @@ class PrimeSqlVisitor extends PrimeSqlBaseVisitor<PrimeSqlResult>
 	{
 		visitChildren(ctx);
 		result.setResult("{ \"data\": [" + primeSrc.getBaseTypes().stream().map(b -> "\"" + b.name() + "\"" ).collect(Collectors.joining(",")) + "]}");
+		return result;
+	}
+
+	@Override
+	public PrimeSqlResult visitShutdown(final PrimeSqlParser.ShutdownContext ctx)
+	{
+		visitChildren(ctx);
+		this.cmdServer.close();
 		return result;
 	}
 
