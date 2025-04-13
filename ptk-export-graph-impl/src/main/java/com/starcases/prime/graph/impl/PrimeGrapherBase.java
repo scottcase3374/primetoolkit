@@ -1,14 +1,11 @@
 package com.starcases.prime.graph.impl;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.jgrapht.Graph;
-import org.jgrapht.event.GraphListener;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DefaultListenableGraph;
@@ -72,22 +69,11 @@ public class PrimeGrapherBase
 	protected final BaseTypesIntfc baseType;
 
 	/**
-	 * General constructor
-	 *
-	 */
-	protected PrimeGrapherBase(	@NonNull final PrimeSourceIntfc primeSrc,
-								@NonNull final BaseTypesIntfc baseType,
-								final int maxGraphIndex)
-	{
-		this(primeSrc, baseType, Collections.emptyList(), maxGraphIndex);
-	}
-
-	/**
 	 * Provide support for visual output related to graphs
 	 */
 	protected PrimeGrapherBase(	@NonNull final PrimeSourceIntfc primeSrc,
 								@NonNull final BaseTypesIntfc baseType,
-								@NonNull final List<GraphListener<PrimeRefIntfc, DefaultEdge>> graphs,
+								//@NonNull final List<GraphListener<PrimeRefIntfc, DefaultEdge>> graphs,
 								final int maxGraphIndex
 								)
 	{
@@ -99,7 +85,7 @@ public class PrimeGrapherBase
 		this.baseType = baseType;
 
 		final var lgraph = new DefaultListenableGraph<PrimeRefIntfc, DefaultEdge>(primeGraphBuilder.build(), true);
-		graphs.stream().forEach(lgraph::addGraphListener);
+		//graphs.stream().forEach(lgraph::addGraphListener);
 		this.graph = lgraph;
 
 		this.maxGraphIndex = maxGraphIndex;

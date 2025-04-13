@@ -1,17 +1,13 @@
 package com.starcases.prime.graph.visualize.impl;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.WindowConstants;
 
 import org.eclipse.collections.api.list.ImmutableList;
-import org.jgrapht.event.GraphListener;
-import org.jgrapht.graph.DefaultEdge;
 
-import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
 import com.starcases.prime.graph.impl.PrimeGrapherBase;
 import com.starcases.prime.graph.visualize.api.VisualizationProviderIntfc;
@@ -45,11 +41,10 @@ public class ViewDefault extends PrimeGrapherBase
 	 */
 	public ViewDefault(	@NonNull final PrimeSourceIntfc primeSrc,
 						@NonNull final BaseTypesIntfc baseType,
-						@NonNull final List<GraphListener<PrimeRefIntfc, DefaultEdge>> graphs,
 						ImmutableList<VisualizationProviderIntfc> providers,
 						final int maxGraphIndex)
 	{
-		super(primeSrc, baseType, graphs, maxGraphIndex);
+		super(primeSrc, baseType, maxGraphIndex);
 		this.providers = providers;
 	}
 

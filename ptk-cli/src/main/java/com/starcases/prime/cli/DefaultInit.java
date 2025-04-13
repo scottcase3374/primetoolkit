@@ -8,7 +8,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -564,7 +563,7 @@ public class DefaultInit implements Runnable
 				.toImmutable()
 				;
 
-			final var viewDefault = new ViewDefault(primeSrc,  baseType, Collections.emptyList(), providerList, maxGraphIndex);
+			final var viewDefault = new ViewDefault(primeSrc,  baseType, providerList, maxGraphIndex);
 			viewDefault.viewDefault();
 		}
 		catch(IOException except)
