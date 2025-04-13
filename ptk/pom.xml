@@ -116,6 +116,31 @@
 		  <artifactId>ptk-sqljsonout-impl</artifactId>
 		  <version>0.0.1-SNAPSHOT</version>
 	  </dependency>
+
+	  <dependency> <!-- Include explicitly -->
+		  <groupId>com.starcases.prime</groupId>
+		  <artifactId>ptk-graph-vis-cirlayout-impl</artifactId>
+		  <version>0.0.1-SNAPSHOT</version>
+	  </dependency>
+
+	  <dependency> <!-- Include explicitly -->
+		  <groupId>com.starcases.prime</groupId>
+		  <artifactId>ptk-graph-vis-treelayoutmd-impl</artifactId>
+		  <version>0.0.1-SNAPSHOT</version>
+	  </dependency>
+
+	  <dependency> <!-- Include explicitly -->
+		  <groupId>com.starcases.prime</groupId>
+		  <artifactId>ptk-graph-vis-treelayout-impl</artifactId>
+		  <version>0.0.1-SNAPSHOT</version>
+	  </dependency>
+
+	  <dependency> <!-- Include explicitly -->
+		  <groupId>com.starcases.prime</groupId>
+		  <artifactId>ptk-graph-vis-metadata-impl</artifactId>
+		  <version>0.0.1-SNAPSHOT</version>
+	  </dependency>
+
 		<dependency>
 			<groupId>info.picocli</groupId>
 			<artifactId>picocli-codegen</artifactId>

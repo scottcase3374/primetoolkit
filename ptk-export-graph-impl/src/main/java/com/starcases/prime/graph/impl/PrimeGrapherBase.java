@@ -46,6 +46,9 @@ public class PrimeGrapherBase
 	@NonNull
 	protected final PrimeSourceIntfc primeSrc;
 
+	@Getter(AccessLevel.PROTECTED)
+	protected final int maxGraphIndex;
+
 	/**
 	 * High-level Graph construction configuration - builder instance
 	 * produces the actual graph instance.
@@ -72,15 +75,21 @@ public class PrimeGrapherBase
 	 * General constructor
 	 *
 	 */
-	protected PrimeGrapherBase(@NonNull final PrimeSourceIntfc primeSrc, @NonNull final BaseTypesIntfc baseType)
+	protected PrimeGrapherBase(	@NonNull final PrimeSourceIntfc primeSrc,
+								@NonNull final BaseTypesIntfc baseType,
+								final int maxGraphIndex)
 	{
-		this(primeSrc, baseType, Collections.emptyList());
+		this(primeSrc, baseType, Collections.emptyList(), maxGraphIndex);
 	}
 
 	/**
 	 * Provide support for visual output related to graphs
 	 */
-	protected PrimeGrapherBase(@NonNull final PrimeSourceIntfc primeSrc, @NonNull final BaseTypesIntfc baseType, @NonNull final List<GraphListener<PrimeRefIntfc, DefaultEdge>> graphs)
+	protected PrimeGrapherBase(	@NonNull final PrimeSourceIntfc primeSrc,
+								@NonNull final BaseTypesIntfc baseType,
+								@NonNull final List<GraphListener<PrimeRefIntfc, DefaultEdge>> graphs,
+								final int maxGraphIndex
+								)
 	{
 		if (LOG.isLoggable(Level.INFO))
 		{
@@ -92,6 +101,8 @@ public class PrimeGrapherBase
 		final var lgraph = new DefaultListenableGraph<PrimeRefIntfc, DefaultEdge>(primeGraphBuilder.build(), true);
 		graphs.stream().forEach(lgraph::addGraphListener);
 		this.graph = lgraph;
+
+		this.maxGraphIndex = maxGraphIndex;
 	}
 
 	/**
@@ -117,7 +128,7 @@ public class PrimeGrapherBase
 	public void populateData()
 	{
 		// Start setting up the actual graph/data generations
-		final var primeNodeGenerator = new PrimeNodeGenerator(primeSrc, graph, baseType);
+		final var primeNodeGenerator = new PrimeNodeGenerator(primeSrc, graph, baseType, maxGraphIndex);
 		primeNodeGenerator.begin();
 
 		while(primeNodeGenerator.nextEvents());

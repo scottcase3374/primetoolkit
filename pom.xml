@@ -128,6 +128,10 @@
 		<module>ptk-sqlcsvout-impl</module>
 		<module>ptk-sqljsonout-impl</module>
 		<module>ptk-algo-gen-prime-1</module>
+		<module>ptk-graph-vis-cirlayout-impl</module>
+		<module>ptk-graph-vis-treelayoutmd-impl</module>
+		<module>ptk-graph-vis-treelayout-impl</module>
+		<module>ptk-graph-vis-metadata-impl</module>
 	</modules>
 
 	<profiles>

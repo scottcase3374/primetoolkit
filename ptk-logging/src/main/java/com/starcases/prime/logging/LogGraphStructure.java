@@ -36,9 +36,9 @@ public class LogGraphStructure extends PrimeGrapherBase implements LogPrimeDataI
 	 * @param primeSrc
 	 * @param baseType
 	 */
-	public LogGraphStructure(@NonNull final PrimeSourceIntfc primeSrc, @NonNull final BaseTypesIntfc baseType)
+	public LogGraphStructure(@NonNull final PrimeSourceIntfc primeSrc, @NonNull final BaseTypesIntfc baseType, final int maxGraphIndex)
 	{
-		super(primeSrc, baseType);
+		super(primeSrc, baseType, maxGraphIndex);
 	}
 
 	/**

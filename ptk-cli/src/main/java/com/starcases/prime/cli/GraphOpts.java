@@ -20,4 +20,12 @@ class GraphOpts
 	@Getter
 	@Option(names = {"-g", "--graph"}, arity="0..1", description = "Valid vals: ${COMPLETION-CANDIDATES}", converter = BaseTypesIntfcConverter.class )
 	private BaseTypesIntfc graphType;
+
+	/**
+	 * Max Graph index - picocli
+	 */
+	@Setter
+	@Getter
+	@Option(names = {"--max-graph-index"}, arity="0..1", defaultValue = "25", description = "Max index to graph" )
+	private int maxGraphIndex;
 }

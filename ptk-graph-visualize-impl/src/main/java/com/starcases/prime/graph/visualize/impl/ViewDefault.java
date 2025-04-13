@@ -7,8 +7,7 @@ import java.util.logging.Logger;
 
 import javax.swing.WindowConstants;
 
-import org.eclipse.collections.api.collection.ImmutableCollection;
-import org.eclipse.collections.api.factory.Lists;
+import org.eclipse.collections.api.list.ImmutableList;
 import org.jgrapht.event.GraphListener;
 import org.jgrapht.graph.DefaultEdge;
 
@@ -17,7 +16,6 @@ import com.starcases.prime.core.api.PrimeSourceIntfc;
 import com.starcases.prime.graph.impl.PrimeGrapherBase;
 import com.starcases.prime.graph.visualize.api.VisualizationProviderIntfc;
 import com.starcases.prime.kern.api.BaseTypesIntfc;
-import com.starcases.prime.service.impl.SvcLoader;
 
 import lombok.NonNull;
 
@@ -32,8 +30,7 @@ import lombok.NonNull;
  */
 public class ViewDefault extends PrimeGrapherBase
 {
-	private static final ImmutableCollection<String> PRIMARY_ATTRIBUTES = Lists.immutable.of("VISUALIZATION");
-	private static final ImmutableCollection<String> VISUALIZATION_NAMES = Lists.immutable.of("CIRCULAR_LAYOUT", "COMPACT_TREE_LAYOUT");
+	private final ImmutableList<VisualizationProviderIntfc> providers;
 
 	/**
 	 * Default logger
@@ -46,10 +43,14 @@ public class ViewDefault extends PrimeGrapherBase
 	 * @param baseType
 	 * @param graphs
 	 */
-	public ViewDefault(@NonNull final PrimeSourceIntfc primeSrc, @NonNull final BaseTypesIntfc baseType, @NonNull final List<GraphListener<PrimeRefIntfc, DefaultEdge>> graphs)
+	public ViewDefault(	@NonNull final PrimeSourceIntfc primeSrc,
+						@NonNull final BaseTypesIntfc baseType,
+						@NonNull final List<GraphListener<PrimeRefIntfc, DefaultEdge>> graphs,
+						ImmutableList<VisualizationProviderIntfc> providers,
+						final int maxGraphIndex)
 	{
-		super(primeSrc, baseType, graphs);
-
+		super(primeSrc, baseType, graphs, maxGraphIndex);
+		this.providers = providers;
 	}
 
 	/**
@@ -64,12 +65,8 @@ public class ViewDefault extends PrimeGrapherBase
 			LOG.info("*** Display default View");
 		}
 
-		final SvcLoader<VisualizationProviderIntfc, Class<VisualizationProviderIntfc>> visualizationProvider = new SvcLoader< >(VisualizationProviderIntfc.class);
-
-		visualizationProvider
-			.providers(PRIMARY_ATTRIBUTES)
-			.collectIf(f -> f.countAttributesMatch(VISUALIZATION_NAMES) > 0, p -> p)
-			.tap(p -> System.out.println(String.format("view default: vis prov attrs: %s ", p.getProviderAttributes().makeString())))
+		providers
+			.tap(p -> LOG.info(String.format("view default: vis prov attrs: %s ", p.getProviderAttributes().makeString())))
 			.forEach(p ->
 							{
 								final var jf = p.create(this.graph, null);

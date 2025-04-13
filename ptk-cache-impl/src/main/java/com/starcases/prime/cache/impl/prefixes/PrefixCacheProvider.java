@@ -2,6 +2,7 @@ package com.starcases.prime.cache.impl.prefixes;
 
 import java.net.URI;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.Properties;
 
 import javax.cache.Cache;
@@ -97,7 +98,7 @@ public class PrefixCacheProvider implements CachePrefixProviderIntfc
 	public Properties getProperties()
 	{
 
-		return null;
+		return new Properties();
 	}
 
 	@Override
@@ -182,7 +183,7 @@ public class PrefixCacheProvider implements CachePrefixProviderIntfc
 
 	@Override
 	public Properties getDefaultProperties() {
-		return null;
+		return new Properties();
 	}
 
 	@Override

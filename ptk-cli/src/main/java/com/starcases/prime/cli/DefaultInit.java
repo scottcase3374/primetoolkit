@@ -8,7 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -23,15 +23,10 @@ import org.eclipse.collections.api.collection.ImmutableCollection;
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.factory.Maps;
 import org.eclipse.collections.api.list.ImmutableList;
-import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.api.map.ImmutableMap;
 import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.map.mutable.MutableMapFactoryImpl;
-import org.jgrapht.Graph;
-import org.jgrapht.event.GraphListener;
-import org.jgrapht.graph.DefaultDirectedGraph;
-import org.jgrapht.graph.DefaultEdge;
 import org.mapdb.BTreeMap;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
@@ -42,7 +37,6 @@ import com.starcases.prime.base.api.BaseProviderIntfc;
 import com.starcases.prime.base.api.BaseTypesProviderIntfc;
 import com.starcases.prime.cache.api.primetext.PrimeTextFileLoaderProviderIntfc;
 import com.starcases.prime.core.api.PrimeRefFactoryIntfc;
-import com.starcases.prime.core.api.PrimeRefIntfc;
 import com.starcases.prime.core.api.PrimeSourceFactoryIntfc;
 import com.starcases.prime.core.api.PrimeSourceIntfc;
 import com.starcases.prime.core.impl.PrimeRef;
@@ -548,7 +542,7 @@ public class DefaultInit implements Runnable
 		if (graphOpts != null && graphOpts.getGraphType() != null)
 		{
 			LOG.info("**** Graphing enabled");
-			actions.add(s -> graph(primeSrc, BASE_TYPES.select(p -> p.name().equals(graphOpts.getGraphType().name())).getOnly() ) );
+			actions.add(s -> graph(primeSrc, BASE_TYPES.select(p -> p.name().equals(graphOpts.getGraphType().name())).getOnly(), graphOpts.getMaxGraphIndex() ) );
 		}
 	}
 
@@ -558,30 +552,19 @@ public class DefaultInit implements Runnable
 	 * @param primeSrc Prime source reference.
 	 * @param baseType Base type reference.
 	 */
-	private void graph(final PrimeSourceIntfc primeSrc, final BaseTypesIntfc baseType)
+	private void graph(final PrimeSourceIntfc primeSrc, final BaseTypesIntfc baseType, final int maxGraphIndex)
 	{
 		try
 		{
 			final SvcLoader<VisualizationProviderIntfc, Class<VisualizationProviderIntfc>> visualizationProvider = new SvcLoader< >(VisualizationProviderIntfc.class);
 
-			final MutableList<VisualizationProviderIntfc> list = visualizationProvider
+			final ImmutableList<VisualizationProviderIntfc> providerList = visualizationProvider
 				.providers(Lists.immutable.of("VISUALIZATION"))
-				.collectIf(f -> f.countAttributesMatch( Lists.immutable.of("CIRCULAR_LAYOUT", "COMPACT_TREE_LAYOUT", "METADATA_TABLE")) > 0, p -> p)
-				.toList()
+				.collectIf(f -> f.countAttributesMatch( Lists.immutable.of("CIRCULAR_LAYOUT", "COMPACT_TREE_LAYOUT")) > 0, p -> p)
+				.toImmutable()
 				;
 
-			final Graph<PrimeRefIntfc, DefaultEdge> graph = new DefaultDirectedGraph<>(DefaultEdge.class);
-			final var viewList = new ArrayList<GraphListener<PrimeRefIntfc, DefaultEdge>>();
-			list.stream().map(visualizerProvider -> visualizerProvider.create(graph, null))
-			.forEach( i ->
-					{
-						i.setSize(400, 320);
-						i.setVisible(true);
-						viewList.add((GraphListener)i);
-					}
-					);
-
-			final var viewDefault = new ViewDefault(primeSrc,  baseType, viewList);
+			final var viewDefault = new ViewDefault(primeSrc,  baseType, Collections.emptyList(), providerList, maxGraphIndex);
 			viewDefault.viewDefault();
 		}
 		catch(IOException except)

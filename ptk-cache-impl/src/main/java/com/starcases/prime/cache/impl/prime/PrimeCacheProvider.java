@@ -33,7 +33,7 @@ public class PrimeCacheProvider implements CacheProviderIntfc<Long,Long>
 	 */
 	private static final ImmutableList<String> ATTRIBUTES = Lists.immutable.of("PRIME_CACHE_PROVIDER");
 
-	private static final ConcurrentMutableMap<String, PersistedCacheIntfc> caches = new ConcurrentHashMap<>(10);
+	private static final ConcurrentMutableMap<String, PersistedCacheIntfc<Long,Long>> caches = new ConcurrentHashMap<>(10);
 
 	/**
 	 * create target service.
@@ -143,6 +143,7 @@ public class PrimeCacheProvider implements CacheProviderIntfc<Long,Long>
 	@Override
 	public void close()
 	{
+		/* nothing to do */
 	}
 
 	@Override

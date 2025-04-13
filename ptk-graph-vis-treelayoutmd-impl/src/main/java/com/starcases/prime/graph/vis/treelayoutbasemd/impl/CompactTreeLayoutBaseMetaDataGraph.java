@@ -1,4 +1,4 @@
-package com.starcases.prime.graph.visualize.impl;
+package com.starcases.prime.graph.vis.treelayoutbasemd.impl;
 
 import javax.swing.JFrame;
 

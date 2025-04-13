@@ -1,6 +1,6 @@
-module com.starcases.prime.graph.visualize.impl
+module com.starcases.prime.graph.vis.cirlayout.impl
 {
-	exports com.starcases.prime.graph.visualize.impl;
+	exports com.starcases.prime.graph.vis.cirlayout.impl;
 
 	requires transitive com.starcases.prime.core.api;
 	requires com.starcases.prime.graph.impl;
@@ -14,4 +14,6 @@ module com.starcases.prime.graph.visualize.impl
 	requires transitive org.eclipse.collections.api;
 	requires org.jgrapht.core;
 	requires org.jgrapht.ext;
+
+	provides com.starcases.prime.graph.visualize.api.VisualizationProviderIntfc with com.starcases.prime.graph.vis.cirlayout.impl.CircularLayoutPrimesGraph;
 }

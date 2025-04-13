@@ -32,7 +32,6 @@ import lombok.Setter;
  *
  *
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals"})
 public class PrimeNodeGenerator
 {
 	/**
@@ -71,16 +70,27 @@ public class PrimeNodeGenerator
 	protected final BaseTypesIntfc baseType;
 
 	/**
+	 * max index to graph
+	 */
+	@Getter(AccessLevel.PROTECTED)
+	protected final int maxGraphIndex;
+
+	/**
 	 * constructor for the node generator
 	 * @param primeSrc
 	 * @param graph
 	 * @param baseType
 	 */
-	public PrimeNodeGenerator(@NonNull final  PrimeSourceIntfc primeSrc, final Graph<PrimeRefIntfc, DefaultEdge> graph, @NonNull final BaseTypesIntfc baseType)
+	public PrimeNodeGenerator(	@NonNull final  PrimeSourceIntfc primeSrc,
+								final Graph<PrimeRefIntfc, DefaultEdge> graph,
+								@NonNull final BaseTypesIntfc baseType,
+								final int maxGraphIndex
+								)
 	{
 		this.primeSrc = primeSrc;
 		this.graph = graph;
 		this.baseType = baseType;
+		this.maxGraphIndex = maxGraphIndex;
 	}
 
 	/**
@@ -110,12 +120,15 @@ public class PrimeNodeGenerator
 		final boolean [] more = { false };
 		try
 		{
-			primeSrc.getPrimeRefForIdx(level).ifPresent(pRef ->
-				{
-					primeRef = pRef;
-					addNodeRawBase();
-					more[0] = true;
-				});
+			if (level <= maxGraphIndex)
+			{
+				primeSrc.getPrimeRefForIdx(level).ifPresent(pRef ->
+					{
+						primeRef = pRef;
+						addNodeRawBase();
+						more[0] = true;
+					});
+			}
 		}
 		catch(final NullPointerException e)
 		{
