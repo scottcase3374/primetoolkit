@@ -73,7 +73,6 @@ public class PrimeGrapherBase
 	 */
 	protected PrimeGrapherBase(	@NonNull final PrimeSourceIntfc primeSrc,
 								@NonNull final BaseTypesIntfc baseType,
-								//@NonNull final List<GraphListener<PrimeRefIntfc, DefaultEdge>> graphs,
 								final int maxGraphIndex
 								)
 	{
@@ -84,9 +83,7 @@ public class PrimeGrapherBase
 		this.primeSrc = primeSrc;
 		this.baseType = baseType;
 
-		final var lgraph = new DefaultListenableGraph<PrimeRefIntfc, DefaultEdge>(primeGraphBuilder.build(), true);
-		//graphs.stream().forEach(lgraph::addGraphListener);
-		this.graph = lgraph;
+		this.graph = new DefaultListenableGraph<PrimeRefIntfc, DefaultEdge>(primeGraphBuilder.build(), true);
 
 		this.maxGraphIndex = maxGraphIndex;
 	}
